@@ -1,5 +1,5 @@
 use crate::db::{
-    model::{AsDieselFilter, FetchById, Write},
+    model::{AsDieselFilter, Write},
     util::{AsIlike, BoxedDieselExpression, NewBoxedDieselExpression},
 };
 use diesel::{dsl::AssumeNotNull, prelude::*};
@@ -15,7 +15,6 @@ use scamplers_schema::{
         species as species_col,
     },
 };
-use uuid::Uuid;
 
 #[diesel::dsl::auto_type]
 #[must_use]
@@ -36,21 +35,6 @@ pub fn query_base() -> _ {
         .inner_join(person::table.on(submitter_join_condition))
         .left_join(returned_by.on(returner_join_condition))
         .inner_join(lab::table)
-}
-
-impl FetchById for SampleMetadata {
-    type Id = Uuid;
-
-    async fn fetch_by_id(
-        id: &Self::Id,
-        db_conn: &mut diesel_async::AsyncPgConnection,
-    ) -> crate::db::error::Result<Self> {
-        Ok(query_base()
-            .filter(id_col.eq(id))
-            .select(SampleMetadata::as_select())
-            .first(db_conn)
-            .await?)
-    }
 }
 
 #[diesel::dsl::auto_type]
@@ -78,7 +62,11 @@ impl Write for NewSampleMetadata {
             .execute(db_conn)
             .await?;
 
-        SampleMetadata::fetch_by_id(&id, db_conn).await
+        Ok(query_base()
+            .filter(id_col.eq(id))
+            .select(SampleMetadata::as_select())
+            .first(db_conn)
+            .await?)
     }
 }
 

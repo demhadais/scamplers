@@ -61,6 +61,14 @@ where
     }
 }
 
+#[cfg(feature = "backend")]
+#[derive(serde::Deserialize, Default)]
+#[serde(default)]
+pub struct Order<C> {
+    by: C,
+    descending: bool,
+}
+
 #[cfg(test)]
 mod tests {
     #[cfg(feature = "typescript")]
