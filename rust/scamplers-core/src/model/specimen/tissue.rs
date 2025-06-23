@@ -53,13 +53,16 @@ pub struct NewCryoPreservedTissue {
     pub cryopreserved: bool,
 }
 
-#[cfg_attr(feature = "backend", derive(serde::Deserialize, Debug))]
+#[cfg_attr(
+    feature = "backend",
+    derive(serde::Deserialize, Debug, valuable::Valuable, garde::Validate)
+)]
 #[cfg_attr(
     feature = "backend",
     serde(rename_all = "snake_case", tag = "preservation")
 )]
 pub enum NewTissue {
-    Cryopreserved(NewCryoPreservedTissue),
-    Fixed(NewFixedTissue),
-    Frozen(NewFrozenTissue),
+    Cryopreserved(#[cfg_attr(feature = "backend", garde(dive))] NewCryoPreservedTissue),
+    Fixed(#[cfg_attr(feature = "backend", garde(dive))] NewFixedTissue),
+    Frozen(#[cfg_attr(feature = "backend", garde(dive))] NewFrozenTissue),
 }

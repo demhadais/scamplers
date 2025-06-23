@@ -1,9 +1,6 @@
 use diesel::prelude::*;
 use diesel_async::RunQueryDsl;
-use scamplers_core::model::{
-    Pagination,
-    institution::{Institution, InstitutionQuery, NewInstitution},
-};
+use scamplers_core::model::institution::{Institution, InstitutionQuery, NewInstitution};
 use scamplers_schema::institution::dsl::{id as id_col, institution, name as name_col};
 use uuid::Uuid;
 

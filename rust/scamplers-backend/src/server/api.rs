@@ -8,6 +8,7 @@ use scamplers_core::{
         institution::{Institution, InstitutionQuery, NewInstitution},
         lab::{Lab, LabQuery, LabSummary, NewLab},
         person::{NewPerson, Person, PersonQuery, PersonSummary},
+        specimen::{NewSpecimen, Specimen, SpecimenQuery, SpecimenSummary},
     },
 };
 use scamplers_schema::lab::dsl::lab;
@@ -54,5 +55,14 @@ pub(super) fn router() -> Router<AppState> {
         .route(
             &format!("{}/members", Endpoint::<Uuid, Lab>::route()),
             get(relatives::<lab, PersonSummary>),
+        )
+        .route(
+            &Endpoint::<NewSpecimen, Specimen>::route(),
+            post(write::<NewSpecimen>),
+        )
+        .route(&Endpoint::<Uuid, Specimen>::route(), get(by_id::<Specimen>))
+        .route(
+            &Endpoint::<SpecimenQuery, SpecimenSummary>::route(),
+            post(by_query::<SpecimenSummary>),
         )
 }

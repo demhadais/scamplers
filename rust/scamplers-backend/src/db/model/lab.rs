@@ -8,7 +8,7 @@ use crate::{
 use diesel::{dsl::InnerJoin, prelude::*};
 use diesel_async::RunQueryDsl;
 use scamplers_core::model::{
-    IsUpdate, Pagination,
+    IsUpdate,
     lab::{Lab, LabCore, LabQuery, LabSummary, LabUpdate, NewLab},
     person::PersonSummary,
 };

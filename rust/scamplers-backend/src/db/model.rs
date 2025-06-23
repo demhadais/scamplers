@@ -1,7 +1,6 @@
 use super::error;
-use diesel_async::AsyncPgConnection;
-
 use crate::db::util::{BoxedDieselExpression, NewBoxedDieselExpression};
+use diesel_async::AsyncPgConnection;
 
 pub mod chromium;
 pub mod dataset_metadata;
@@ -90,6 +89,7 @@ pub trait FetchRelatives<R>: diesel::Table {
 macro_rules! fetch_by_query {
     ($query:ident, [$(($ordinal_col_enum_variant:ident, $corresponding_db_col:ident)),*], $db_conn:ident) => {{
         use super::AsDieselFilter;
+        use scamplers_core::model::Pagination;
 
         let Self::QueryParams {
             order_by,

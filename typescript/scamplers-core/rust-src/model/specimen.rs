@@ -67,11 +67,14 @@ pub struct NewSpecimenMeasurement {
     data: MeasurementData,
 }
 
-#[cfg_attr(feature = "backend", derive(serde::Deserialize, Debug))]
+#[cfg_attr(
+    feature = "backend",
+    derive(serde::Deserialize, Debug, valuable::Valuable, garde::Validate)
+)]
 #[cfg_attr(feature = "backend", serde(rename_all = "lowercase", tag = "type"))]
 pub enum NewSpecimen {
-    Block(NewBlock),
-    Tissue(NewTissue),
+    Block(#[cfg_attr(feature = "backend", garde(dive))] NewBlock),
+    Tissue(#[cfg_attr(feature = "backend", garde(dive))] NewTissue),
 }
 
 #[cfg(feature = "backend")]
@@ -203,8 +206,8 @@ pub enum Fixative {
 
 #[cfg_attr(feature = "backend", backend_ordering)]
 pub struct SpecimenOrdering {
-    column: SampleMetadataOrdinalColumn,
-    descending: bool,
+    pub column: SampleMetadataOrdinalColumn,
+    pub descending: bool,
 }
 
 #[cfg_attr(feature = "backend", backend_query_request)]

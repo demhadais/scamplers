@@ -13,7 +13,7 @@ use diesel::{
 };
 use diesel_async::{AsyncPgConnection, RunQueryDsl};
 use scamplers_core::model::{
-    IsUpdate, Pagination,
+    IsUpdate,
     person::{
         CreatedUser, NewPerson, Person, PersonCore, PersonQuery, PersonSummary, PersonUpdate,
         UserRole,

@@ -1,13 +1,20 @@
-use crate::db::{
-    self,
-    model::{AsDieselFilter, FetchById, FetchRelatives, Write, sample_metadata},
-    util::{AsIlike, BoxedDieselExpression, NewBoxedDieselExpression},
+use crate::{
+    db::{
+        self,
+        model::{
+            AsDieselFilter, AsDieselQueryBase, FetchById, FetchByQuery, FetchRelatives, Write,
+            sample_metadata,
+        },
+        util::{AsIlike, BoxedDieselExpression, NewBoxedDieselExpression},
+    },
+    fetch_by_query,
 };
 use diesel::{dsl::AssumeNotNull, prelude::*};
 use diesel_async::{AsyncPgConnection, RunQueryDsl};
 use scamplers_core::model::specimen::{
     BlockEmbeddingMatrix, Fixative, NewSpecimen, NewSpecimenMeasurement, Specimen, SpecimenCore,
-    SpecimenData, SpecimenMeasurement, SpecimenQuery, block::NewBlock, tissue::NewTissue,
+    SpecimenData, SpecimenMeasurement, SpecimenQuery, SpecimenSummary, block::NewBlock,
+    tissue::NewTissue,
 };
 use scamplers_schema::{
     person,
@@ -74,6 +81,7 @@ impl Write for Vec<NewSpecimenMeasurement> {
 
 impl Write for NewSpecimen {
     type Returns = Specimen;
+
     async fn write(
         mut self,
         db_conn: &mut diesel_async::AsyncPgConnection,
@@ -207,5 +215,38 @@ where
         }
 
         query.build()
+    }
+}
+
+#[diesel::dsl::auto_type]
+#[must_use]
+fn summary_query_base() -> _ {
+    specimen::table.inner_join(scamplers_schema::sample_metadata::table)
+}
+
+impl AsDieselQueryBase for SpecimenSummary {
+    type QueryBase = summary_query_base;
+
+    fn as_diesel_query_base() -> Self::QueryBase {
+        summary_query_base()
+    }
+}
+
+impl FetchByQuery for SpecimenSummary {
+    type QueryParams = SpecimenQuery;
+
+    async fn fetch_by_query(
+        query: &Self::QueryParams,
+        db_conn: &mut AsyncPgConnection,
+    ) -> db::error::Result<Vec<Self>> {
+        use scamplers_core::model::sample_metadata::SampleMetadataOrdinalColumn::{
+            Name, ReceivedAt,
+        };
+
+        fetch_by_query!(
+            query,
+            [(Name, name_col), (ReceivedAt, received_at_col)],
+            db_conn
+        )
     }
 }
