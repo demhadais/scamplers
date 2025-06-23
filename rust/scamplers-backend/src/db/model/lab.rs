@@ -96,18 +96,13 @@ where
         QuerySource: 'a,
     {
         let Self { ids, name, .. } = self;
+        let q1 = (!ids.is_empty()).then(|| id_col.eq_any(ids));
+        let q2 = name.as_ref().map(|name| name_col.ilike(name.as_ilike()));
 
-        let mut query = BoxedDieselExpression::new_expression();
-
-        if !ids.is_empty() {
-            query = query.and_condition(id_col.eq_any(ids));
-        }
-
-        if let Some(name) = name {
-            query = query.and_condition(name_col.ilike(name.as_ilike()));
-        }
-
-        query.build()
+        BoxedDieselExpression::new_expression()
+            .and_condition(q1)
+            .and_condition(q2)
+            .build()
     }
 }
 

@@ -167,29 +167,30 @@ where
             ..
         } = self;
 
-        let mut query = BoxedDieselExpression::new_expression();
+        let q1 = (!ids.is_empty()).then(|| id_col.eq_any(ids));
+        let q2 = metadata.as_diesel_filter();
+        let q3 = type_.map(|t| type_col.eq(t));
+        let q4 = storage_buffer
+            .as_ref()
+            .map(|buf| buffer_col.assume_not_null().ilike(buf.as_ilike()));
+        let q5 = frozen.map(|f| frozen_col.eq(f));
+        let q6 = cryopreserved.map(|c| cryopreserved_col.eq(c));
 
-        if !ids.is_empty() {
-            query = query.and_condition(id_col.eq_any(ids));
-        }
-
-        if let Some(metadata) = metadata {
-            if let Some(metadata_query) = metadata.as_diesel_filter() {
-                query = query.and_condition(metadata_query);
-            }
-        }
-
-        if let Some(type_) = type_ {
-            query = query.and_condition(type_col.eq(type_));
-        }
+        let mut query = BoxedDieselExpression::new_expression()
+            .and_condition(q1)
+            .and_condition(q2)
+            .and_condition(q3)
+            .and_condition(q4)
+            .and_condition(q5)
+            .and_condition(q6);
 
         if let Some(embedded_in) = embedded_in {
             match embedded_in {
                 BlockEmbeddingMatrix::Fixed(e) => {
-                    query = query.and_condition(embedding_col.assume_not_null().eq(e));
+                    query = query.and_condition(Some(embedding_col.assume_not_null().eq(e)));
                 }
                 BlockEmbeddingMatrix::Frozen(e) => {
-                    query = query.and_condition(embedding_col.assume_not_null().eq(e));
+                    query = query.and_condition(Some(embedding_col.assume_not_null().eq(e)));
                 }
             }
         }
@@ -197,28 +198,12 @@ where
         if let Some(fixative) = fixative {
             match fixative {
                 Fixative::Block(f) => {
-                    query = query.and_condition(fixative_col.assume_not_null().eq(f));
+                    query = query.and_condition(Some(fixative_col.assume_not_null().eq(f)));
                 }
                 Fixative::Tissue(f) => {
-                    query = query.and_condition(fixative_col.assume_not_null().eq(f));
+                    query = query.and_condition(Some(fixative_col.assume_not_null().eq(f)));
                 }
             }
-        }
-
-        if let Some(storage_buffer) = storage_buffer {
-            query = query.and_condition(
-                buffer_col
-                    .assume_not_null()
-                    .ilike(storage_buffer.as_ilike()),
-            );
-        }
-
-        if let Some(frozen) = frozen {
-            query = query.and_condition(frozen_col.eq(frozen));
-        }
-
-        if let Some(cryopreserved) = cryopreserved {
-            query = query.and_condition(cryopreserved_col.eq(cryopreserved));
         }
 
         query.build()

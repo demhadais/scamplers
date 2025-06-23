@@ -101,28 +101,24 @@ where
             notes,
         } = self;
 
-        let mut query = BoxedDieselExpression::new_expression();
+        let q1 = name.as_ref().map(|name| name_col.ilike(name.as_ilike()));
+        let q2 = received_before
+            .as_ref()
+            .map(|received_before| received_at_col.lt(received_before));
+        let q3 = received_after
+            .as_ref()
+            .map(|received_after| received_at_col.gt(received_after));
+        let q4 = (!species.is_empty()).then(|| species_col.overlaps_with(species));
+        let q5 = notes
+            .as_ref()
+            .map(|notes| notes_col.assume_not_null().ilike(notes.as_ilike()));
 
-        if let Some(name) = name {
-            query = query.and_condition(name_col.ilike(name.as_ilike()));
-        }
-
-        if let Some(received_before) = received_before {
-            query = query.and_condition(received_at_col.lt(received_before));
-        }
-
-        if let Some(received_after) = received_after {
-            query = query.and_condition(received_at_col.gt(received_after));
-        }
-
-        if !species.is_empty() {
-            query = query.and_condition(species_col.overlaps_with(species));
-        }
-
-        if let Some(notes) = notes {
-            query = query.and_condition(notes_col.assume_not_null().ilike(notes.as_ilike()));
-        }
-
-        query.build()
+        BoxedDieselExpression::new_expression()
+            .and_condition(q1)
+            .and_condition(q2)
+            .and_condition(q3)
+            .and_condition(q4)
+            .and_condition(q5)
+            .build()
     }
 }

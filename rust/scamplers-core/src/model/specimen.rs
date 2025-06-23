@@ -267,6 +267,7 @@ mod tests {
         frozen_block["preservation"] = Value::String("frozen".to_string());
         frozen_block["embedded_in"] = Value::String(frozen_embedding_matrix.to_string());
         frozen_block["fixative"] = Value::Null;
+        frozen_block["frozen"] = Value::Bool(true);
         let specimen = deserialize(frozen_block.clone()).unwrap();
         let NewSpecimen::Block(NewBlock::Frozen(_)) = specimen else {
             panic!("expected frozen block, got {specimen:?}");

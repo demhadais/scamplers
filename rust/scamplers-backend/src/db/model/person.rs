@@ -62,29 +62,25 @@ where
             ..
         } = self;
 
-        let mut query = BoxedDieselExpression::new_expression();
+        let q1 = (!ids.is_empty()).then(|| id_col.eq_any(ids));
+        let q2 = name.as_ref().map(|name| name_col.ilike(name.as_ilike()));
+        let q3 = email
+            .as_ref()
+            .map(|email| email_col.assume_not_null().ilike(email.as_ilike()));
+        let q4 = orcid
+            .as_ref()
+            .map(|orcid| orcid_col.assume_not_null().ilike(orcid.as_ilike()));
+        let q5 = ms_user_id
+            .as_ref()
+            .map(|id| ms_user_id_col.assume_not_null().eq(id));
 
-        if !ids.is_empty() {
-            query = query.and_condition(id_col.eq_any(ids));
-        }
-
-        if let Some(name) = name {
-            query = query.and_condition(name_col.ilike(name.as_ilike()));
-        }
-
-        if let Some(email) = email {
-            query = query.and_condition(email_col.assume_not_null().ilike(email.as_ilike()));
-        }
-
-        if let Some(orcid) = orcid {
-            query = query.and_condition(orcid_col.assume_not_null().ilike(orcid.as_ilike()));
-        }
-
-        if let Some(ms_user_id) = ms_user_id {
-            query = query.and_condition(ms_user_id_col.assume_not_null().eq(ms_user_id));
-        }
-
-        query.build()
+        BoxedDieselExpression::new_expression()
+            .and_condition(q1)
+            .and_condition(q2)
+            .and_condition(q3)
+            .and_condition(q4)
+            .and_condition(q5)
+            .build()
     }
 }
 

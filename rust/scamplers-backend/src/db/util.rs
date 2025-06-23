@@ -32,10 +32,14 @@ impl<'a, QuerySource: 'a> DieselExpressionBuilder<'a, QuerySource> {
         Self(Some(Box::new(query)))
     }
 
-    pub fn and_condition<Q>(self, other: Q) -> Self
+    pub fn and_condition<Q>(self, other: Option<Q>) -> Self
     where
         Q: BoxableExpression<QuerySource, Pg, SqlType = sql_types::Bool> + 'a,
     {
+        let Some(other) = other else {
+            return self;
+        };
+
         let Self(Some(query)) = self else {
             return Self::from_query(other);
         };
@@ -59,9 +63,7 @@ impl<'a, QuerySource: 'a> DieselExpressionBuilder<'a, QuerySource> {
     }
 
     pub fn build(self) -> Option<BoxedDieselExpression<'a, QuerySource>> {
-        let Self(inner) = self;
-
-        inner
+        self.0
     }
 }
 

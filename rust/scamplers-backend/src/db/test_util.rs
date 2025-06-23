@@ -1,5 +1,4 @@
-use std::fmt::Debug;
-
+use crate::db::model::Write;
 use crate::{
     db::model::FetchByQuery,
     server::{run_migrations, util::DevContainer},
@@ -20,10 +19,9 @@ use scamplers_core::model::{
     lab::NewLab,
     person::{NewPerson, Person},
 };
+use std::fmt::Debug;
 use tokio::sync::OnceCell;
 use uuid::Uuid;
-
-use crate::db::model::Write;
 
 pub const N_INSTITUTIONS: usize = 20;
 pub const N_PEOPLE: usize = 100;
