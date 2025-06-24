@@ -1,20 +1,30 @@
+use crate::db::seed_data::library_type_specification::LibraryTypeSpecification;
+
+use super::model::Write;
 use admin::NewAdmin;
 use anyhow::Context;
 use diesel_async::AsyncPgConnection;
 use garde::Validate;
 use index_set::IndexSetFileUrl;
-use scamplers_core::model::institution::NewInstitution;
+use scamplers_core::model::{chemistry::Chemistry, institution::NewInstitution};
 use serde::Deserialize;
 mod admin;
+mod chemistry;
 mod index_set;
+mod library_type_specification;
 
-use super::model::Write;
-
-#[derive(Deserialize, Clone)]
+#[derive(Deserialize, Clone, Validate)]
 pub struct SeedData {
+    #[garde(dive)]
     institution: NewInstitution,
+    #[garde(dive)]
     app_admin: NewAdmin,
+    #[garde(dive)]
     index_set_urls: Vec<IndexSetFileUrl>,
+    #[garde(skip)]
+    chemistries: Vec<Chemistry>,
+    #[garde(skip)]
+    library_type_specification: LibraryTypeSpecification,
 }
 
 impl SeedData {
@@ -24,10 +34,14 @@ impl SeedData {
         db_conn: &mut AsyncPgConnection,
         http_client: reqwest::Client,
     ) -> anyhow::Result<()> {
+        self.validate()?;
+
         let Self {
             institution,
             app_admin,
             index_set_urls,
+            chemistries,
+            library_type_specification,
         } = self;
 
         let institutions_result = institution.write(db_conn).await;
@@ -38,10 +52,9 @@ impl SeedData {
             institutions_result?;
         }
 
-        app_admin.validate()?;
         app_admin.write(db_conn).await?;
-
         download_and_insert_index_sets(db_conn, http_client, &index_set_urls).await?;
+        chemistries.write(db_conn).await?;
 
         Ok(())
     }

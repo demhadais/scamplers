@@ -32,13 +32,7 @@ fn is_10x_genomics_url(url: &Url, _: &()) -> garde::Result {
 // `anyhow::Result` is fine here because this isn't user-facing code
 impl IndexSetFileUrl {
     pub(super) async fn download(self, http_client: reqwest::Client) -> anyhow::Result<IndexSets> {
-        let Self(url) = self;
-
-        let index_set: IndexSets = http_client.get(url.clone()).send().await?.json().await?;
-
-        index_set.validate()?;
-
-        Ok(index_set)
+        Ok(http_client.get(self.0.clone()).send().await?.json().await?)
     }
 }
 

@@ -257,7 +257,7 @@ function __wbg_adapter_43(arg0, arg1, arg2) {
 }
 
 function __wbg_adapter_370(arg0, arg1, arg2, arg3) {
-    wasm.closure235_externref_shim(arg0, arg1, arg2, arg3);
+    wasm.closure222_externref_shim(arg0, arg1, arg2, arg3);
 }
 
 /**

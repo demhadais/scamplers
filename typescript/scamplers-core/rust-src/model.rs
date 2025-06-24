@@ -1,15 +1,17 @@
+#[cfg(feature = "typescript")]
+use wasm_bindgen::prelude::*;
+
+pub mod chemistry;
 pub mod chromium;
 pub mod dataset_metadata;
 pub mod index_sets;
 pub mod institution;
 pub mod lab;
+pub mod library_type_specification;
 pub mod person;
 pub mod sample_metadata;
 pub mod sequencing_run;
 pub mod specimen;
-
-#[cfg(feature = "typescript")]
-use wasm_bindgen::prelude::*;
 
 #[cfg_attr(
     feature = "typescript",
