@@ -6,10 +6,11 @@ pub mod index_sets;
 pub mod institution;
 pub mod lab;
 pub mod library_type_specification;
-pub mod multiplexed_suspension;
 pub mod person;
 pub mod sequencing_run;
 pub mod specimen;
+pub mod suspension;
+pub mod units;
 
 #[cfg_attr(
     feature = "typescript",

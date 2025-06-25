@@ -149,7 +149,7 @@ pub fn db_json(input: TokenStream) -> TokenStream {
 
     let output = quote! {
         #[derive(Debug, diesel::deserialize::FromSqlRow, diesel::expression::AsExpression, garde::Validate, serde::Deserialize, valuable::Valuable, serde::Serialize)]
-        #[diesel(sql_type = diesel::sql_types::Text)]
+        #[diesel(sql_type = diesel::sql_types::Jsonb)]
         #[garde(allow_unvalidated)]
         #struct_item
 

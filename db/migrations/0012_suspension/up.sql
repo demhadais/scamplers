@@ -9,7 +9,7 @@ create table suspension (
     id uuid primary key default uuidv7(),
     link text generated always as ('/suspensions/' || id) stored not null,
     readable_id text unique not null,
-    parent_specimen_id uuid references specimen on delete restrict on update restrict,
+    parent_specimen_id uuid references specimen on delete restrict on update restrict not null,
     biological_material text not null,
     created_at timestamptz,
     pooled_into_id uuid references multiplexed_suspension on delete restrict on update restrict,

@@ -306,7 +306,7 @@ diesel::table! {
         id -> Uuid,
         link -> Text,
         readable_id -> Text,
-        parent_specimen_id -> Nullable<Uuid>,
+        parent_specimen_id -> Uuid,
         biological_material -> Text,
         created_at -> Nullable<Timestamptz>,
         pooled_into_id -> Nullable<Uuid>,
