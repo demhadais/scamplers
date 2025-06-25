@@ -3,29 +3,24 @@ use crate::{
         self,
         model::{
             AsDieselFilter, AsDieselQueryBase, FetchById, FetchByQuery, FetchRelatives, Write,
-            sample_metadata,
         },
         util::{AsIlike, BoxedDieselExpression, NewBoxedDieselExpression},
     },
-    fetch_by_query,
+    fetch_by_query2,
 };
 use diesel::{dsl::AssumeNotNull, prelude::*};
 use diesel_async::{AsyncPgConnection, RunQueryDsl};
 use scamplers_core::model::specimen::{
     BlockEmbeddingMatrix, Fixative, NewSpecimen, NewSpecimenMeasurement, Specimen, SpecimenCore,
-    SpecimenData, SpecimenMeasurement, SpecimenQuery, SpecimenSummary, block::NewBlock,
-    tissue::NewTissue,
+    SpecimenMeasurement, SpecimenQuery, SpecimenSummary, block::NewBlock, tissue::NewTissue,
 };
 use scamplers_schema::{
-    person,
-    sample_metadata::{
-        name as name_col, notes as notes_col, received_at as received_at_col,
-        species as species_col,
-    },
+    lab, person,
     specimen::{
         self, cryopreserved as cryopreserved_col, embedded_in as embedding_col,
-        fixative as fixative_col, frozen as frozen_col, id as id_col, storage_buffer as buffer_col,
-        type_ as type_col,
+        fixative as fixative_col, frozen as frozen_col, id as id_col, name as name_col,
+        notes as notes_col, received_at as received_at_col, species as species_col,
+        storage_buffer as buffer_col, type_ as type_col,
     },
     specimen_measurement,
 };
@@ -35,7 +30,7 @@ macro_rules! write_specimen_variant {
     ($specimen_variant:ident, $db_conn:ident) => {{
         diesel::insert_into(specimen::table)
             .values($specimen_variant)
-            .returning(SpecimenData::as_select())
+            .returning(id_col)
             .get_result($db_conn)
             .await?
     }};
@@ -83,17 +78,15 @@ impl Write for NewSpecimen {
     type Returns = Specimen;
 
     async fn write(
-        mut self,
+        self,
         db_conn: &mut diesel_async::AsyncPgConnection,
     ) -> crate::db::error::Result<Self::Returns> {
-        let metadata = self.metadata().write(db_conn).await?;
-        self.set_metadata_id(*metadata.id());
-
-        let data = match &self {
+        let id = match &self {
             Self::Block(block) => match block {
                 NewBlock::Fixed(block) => write_specimen_variant!(block, db_conn),
                 NewBlock::Frozen(block) => write_specimen_variant!(block, db_conn),
             },
+            Self::Suspension(suspension) => write_specimen_variant!(suspension, db_conn),
             Self::Tissue(tissue) => match tissue {
                 NewTissue::Cryopreserved(tissue) => write_specimen_variant!(tissue, db_conn),
                 NewTissue::Fixed(tissue) => write_specimen_variant!(tissue, db_conn),
@@ -101,25 +94,26 @@ impl Write for NewSpecimen {
             },
         };
 
-        let new_measurements = self.measurements(*data.id());
-        let measurements = new_measurements.write(db_conn).await?;
+        let new_measurements = self.measurements(id);
+        new_measurements.write(db_conn).await?;
 
-        let specimen_core = SpecimenCore::builder()
-            .metadata(metadata)
-            .data(data)
-            .build();
-
-        Ok(Specimen::builder()
-            .core(specimen_core)
-            .measurements(measurements)
-            .build())
+        Specimen::fetch_by_id(&id, db_conn).await
     }
 }
 
+diesel::alias!(person as returned_by: ReturnedByAlias);
+
 #[diesel::dsl::auto_type]
 #[must_use]
-pub fn core_query_base() -> _ {
-    specimen::table.inner_join(sample_metadata::query_base())
+fn core_query_base() -> _ {
+    let submitter_join_condition = specimen::submitted_by.eq(person::id);
+    let returner_join_condition =
+        specimen::returned_by.eq(returned_by.field(person::id).nullable());
+
+    summary_query_base()
+        .inner_join(person::table.on(submitter_join_condition))
+        .left_join(returned_by.on(returner_join_condition))
+        .inner_join(lab::table)
 }
 
 impl FetchById for Specimen {
@@ -165,7 +159,11 @@ where
     {
         let Self {
             ids,
-            metadata,
+            name,
+            received_before,
+            received_after,
+            species,
+            notes,
             type_,
             embedded_in,
             fixative,
@@ -176,13 +174,23 @@ where
         } = self;
 
         let q1 = (!ids.is_empty()).then(|| id_col.eq_any(ids));
-        let q2 = metadata.as_diesel_filter();
-        let q3 = type_.map(|t| type_col.eq(t));
-        let q4 = storage_buffer
+        let q2 = name.as_ref().map(|name| name_col.ilike(name.as_ilike()));
+        let q3 = received_before
+            .as_ref()
+            .map(|received_before| received_at_col.lt(received_before));
+        let q4 = received_after
+            .as_ref()
+            .map(|received_after| received_at_col.gt(received_after));
+        let q5 = (!species.is_empty()).then(|| species_col.overlaps_with(species));
+        let q6 = notes
+            .as_ref()
+            .map(|notes| notes_col.assume_not_null().ilike(notes.as_ilike()));
+        let q7 = type_.map(|t| type_col.eq(t));
+        let q8 = storage_buffer
             .as_ref()
             .map(|buf| buffer_col.assume_not_null().ilike(buf.as_ilike()));
-        let q5 = frozen.map(|f| frozen_col.eq(f));
-        let q6 = cryopreserved.map(|c| cryopreserved_col.eq(c));
+        let q9 = frozen.map(|f| frozen_col.eq(f));
+        let q10 = cryopreserved.map(|c| cryopreserved_col.eq(c));
 
         let mut query = BoxedDieselExpression::new_expression()
             .and_condition(q1)
@@ -190,7 +198,11 @@ where
             .and_condition(q3)
             .and_condition(q4)
             .and_condition(q5)
-            .and_condition(q6);
+            .and_condition(q6)
+            .and_condition(q7)
+            .and_condition(q8)
+            .and_condition(q9)
+            .and_condition(q10);
 
         if let Some(embedded_in) = embedded_in {
             match embedded_in {
@@ -208,6 +220,9 @@ where
                 Fixative::Block(f) => {
                     query = query.and_condition(Some(fixative_col.assume_not_null().eq(f)));
                 }
+                Fixative::Suspension(f) => {
+                    query = query.and_condition(Some(fixative_col.assume_not_null().eq(f)));
+                }
                 Fixative::Tissue(f) => {
                     query = query.and_condition(Some(fixative_col.assume_not_null().eq(f)));
                 }
@@ -221,7 +236,7 @@ where
 #[diesel::dsl::auto_type]
 #[must_use]
 fn summary_query_base() -> _ {
-    specimen::table.inner_join(scamplers_schema::sample_metadata::table)
+    specimen::table
 }
 
 impl AsDieselQueryBase for SpecimenSummary {
@@ -239,14 +254,7 @@ impl FetchByQuery for SpecimenSummary {
         query: &Self::QueryParams,
         db_conn: &mut AsyncPgConnection,
     ) -> db::error::Result<Vec<Self>> {
-        use scamplers_core::model::sample_metadata::SampleMetadataOrdinalColumn::{
-            Name, ReceivedAt,
-        };
-
-        fetch_by_query!(
-            query,
-            [(Name, name_col), (ReceivedAt, received_at_col)],
-            db_conn
-        )
+        use scamplers_core::model::specimen::SpecimenOrdinalColumn::{Name, ReceivedAt};
+        fetch_by_query2!(query, [Name, ReceivedAt], db_conn)
     }
 }

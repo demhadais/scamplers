@@ -1,23 +1,25 @@
-use crate::model::specimen::common::NewSpecimenCommon;
-#[cfg(feature = "typescript")]
-use scamplers_macros::frontend_enum;
+#[cfg(feature = "backend")]
+use time::OffsetDateTime;
+#[cfg(feature = "backend")]
+use uuid::Uuid;
+
+#[cfg(feature = "backend")]
+use crate::{
+    model::specimen::{
+        NewSpecimenMeasurement,
+        common::{NewCommitteeApproval, Species},
+    },
+    string::NonEmptyString,
+};
+
+use super::common::NewSpecimenCommon;
 #[cfg(feature = "backend")]
 use {
-    crate::{
-        model::{
-            sample_metadata::{NewCommitteeApproval, Species},
-            specimen::{NewSpecimenMeasurement, common::is_true},
-        },
-        string::NonEmptyString,
-    },
     scamplers_macros::{backend_db_enum, backend_insertion},
     scamplers_schema::specimen,
-    time::OffsetDateTime,
-    uuid::Uuid,
 };
 
 #[cfg_attr(feature = "backend", backend_db_enum)]
-#[cfg_attr(feature = "typescript", frontend_enum)]
 #[derive(Default)]
 pub enum BlockType {
     #[default]
@@ -61,23 +63,18 @@ impl NewFixedBlock {
         returned_by: Option<Uuid>,
         #[builder(default)] measurements: Vec<NewSpecimenMeasurement>,
     ) -> Self {
-        use crate::model::sample_metadata::NewSampleMetadata;
-
         Self {
             common: NewSpecimenCommon {
-                metadata: NewSampleMetadata {
-                    readable_id,
-                    name,
-                    submitted_by,
-                    lab_id,
-                    received_at,
-                    species,
-                    committee_approvals,
-                    notes,
-                    returned_at,
-                    returned_by,
-                },
-                metadata_id: Default::default(),
+                readable_id,
+                name,
+                submitted_by,
+                lab_id,
+                received_at,
+                species,
+                committee_approvals,
+                notes,
+                returned_at,
+                returned_by,
                 measurements,
             },
             type_: BlockType::Block,
@@ -88,7 +85,6 @@ impl NewFixedBlock {
 }
 
 #[cfg_attr(feature = "backend", backend_db_enum)]
-#[cfg_attr(feature = "typescript", frontend_enum)]
 pub enum FrozenBlockEmbeddingMatrix {
     CarboxymethylCellulose,
     OptimalCuttingTemperatureCompound,
@@ -102,7 +98,7 @@ pub struct NewFrozenBlock {
     type_: BlockType,
     embedded_in: FrozenBlockEmbeddingMatrix,
     fixative: Option<BlockFixative>,
-    #[cfg_attr(feature = "backend", garde(custom(is_true)))]
+    #[cfg_attr(feature = "backend", garde(custom(super::common::is_true)))]
     frozen: bool,
 }
 
@@ -125,23 +121,18 @@ impl NewFrozenBlock {
         embedded_in: FrozenBlockEmbeddingMatrix,
         fixative: Option<BlockFixative>,
     ) -> Self {
-        use crate::model::sample_metadata::NewSampleMetadata;
-
         Self {
             common: NewSpecimenCommon {
-                metadata: NewSampleMetadata {
-                    readable_id,
-                    name,
-                    submitted_by,
-                    lab_id,
-                    received_at,
-                    species,
-                    committee_approvals,
-                    notes,
-                    returned_at,
-                    returned_by,
-                },
-                metadata_id: Default::default(),
+                readable_id,
+                name,
+                submitted_by,
+                lab_id,
+                received_at,
+                species,
+                committee_approvals,
+                notes,
+                returned_at,
+                returned_by,
                 measurements,
             },
             type_: BlockType::Block,

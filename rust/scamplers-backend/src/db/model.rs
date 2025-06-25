@@ -2,16 +2,11 @@ use super::error;
 use crate::db::util::{BoxedDieselExpression, NewBoxedDieselExpression};
 use diesel_async::AsyncPgConnection;
 
-pub mod chromium;
-pub mod dataset_metadata;
 pub mod institution;
 pub mod lab;
-pub mod measurements;
 pub mod person;
-pub mod sample_metadata;
 pub mod sequencing_run;
 pub mod specimen;
-pub mod units;
 
 trait AsDieselFilter<QuerySource = ()> {
     fn as_diesel_filter<'a>(&'a self) -> Option<BoxedDieselExpression<'a, QuerySource>>
@@ -83,6 +78,43 @@ pub trait FetchRelatives<R>: diesel::Table {
         id: &Self::Id,
         db_conn: &mut AsyncPgConnection,
     ) -> impl Future<Output = error::Result<Vec<R>>> + Send;
+}
+
+#[macro_export]
+macro_rules! fetch_by_query2 {
+    ($query:ident, [$($ordinal_column:path),*], $db_conn:ident) => {{
+        use super::AsDieselFilter;
+        use scamplers_core::model::Pagination;
+
+        let Self::QueryParams {
+            order_by,
+            pagination: Pagination { limit, offset },
+            ..
+        } = $query;
+
+        let query = $query.as_diesel_filter();
+
+        let mut statement = Self::as_diesel_query_base()
+            .select(Self::as_select())
+            .limit(*limit)
+            .offset(*offset)
+            .into_boxed();
+
+        if let Some(query) = query {
+            statement = statement.filter(query);
+        }
+
+        for ordering in order_by {
+            statement = match (&ordering.by, ordering.descending) {
+                $(
+                    ($ordinal_column(col), false) => statement.then_order_by(col.asc()),
+                    ($ordinal_column(col), true) => statement.then_order_by(col.desc()),
+                )+
+            };
+        }
+
+        Ok(statement.load($db_conn).await?)
+    }};
 }
 
 #[macro_export]

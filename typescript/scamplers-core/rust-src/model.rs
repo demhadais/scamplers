@@ -2,14 +2,11 @@
 use wasm_bindgen::prelude::*;
 
 pub mod chemistry;
-pub mod chromium;
-pub mod dataset_metadata;
 pub mod index_sets;
 pub mod institution;
 pub mod lab;
 pub mod library_type_specification;
 pub mod person;
-pub mod sample_metadata;
 pub mod sequencing_run;
 pub mod specimen;
 
@@ -64,11 +61,22 @@ where
 }
 
 #[cfg(feature = "backend")]
-#[derive(serde::Deserialize, Default)]
+#[derive(serde::Deserialize, Default, Debug, valuable::Valuable)]
+#[serde(default)]
+pub struct Order<C>
+where
+    C: valuable::Valuable,
+{
+    pub by: C,
+    pub descending: bool,
+}
+
+#[cfg(not(feature = "backend"))]
+#[derive(serde::Deserialize, Default, Debug)]
 #[serde(default)]
 pub struct Order<C> {
-    by: C,
-    descending: bool,
+    pub by: C,
+    pub descending: bool,
 }
 
 #[cfg(test)]

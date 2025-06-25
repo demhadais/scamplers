@@ -1,12 +1,13 @@
-use crate::db::seed_data::library_type_specification::LibraryTypeSpecification;
-
 use super::model::Write;
 use admin::NewAdmin;
 use anyhow::Context;
 use diesel_async::AsyncPgConnection;
 use garde::Validate;
 use index_set::IndexSetFileUrl;
-use scamplers_core::model::{chemistry::Chemistry, institution::NewInstitution};
+use scamplers_core::model::{
+    chemistry::Chemistry, institution::NewInstitution,
+    library_type_specification::NewLibraryTypeSpecification,
+};
 use serde::Deserialize;
 mod admin;
 mod chemistry;
@@ -23,8 +24,8 @@ pub struct SeedData {
     index_set_urls: Vec<IndexSetFileUrl>,
     #[garde(skip)]
     chemistries: Vec<Chemistry>,
-    #[garde(skip)]
-    library_type_specification: LibraryTypeSpecification,
+    #[garde(dive)]
+    library_type_specifications: Vec<NewLibraryTypeSpecification>,
 }
 
 impl SeedData {
@@ -41,7 +42,7 @@ impl SeedData {
             app_admin,
             index_set_urls,
             chemistries,
-            library_type_specification,
+            library_type_specifications,
         } = self;
 
         let institutions_result = institution.write(db_conn).await;
@@ -55,6 +56,7 @@ impl SeedData {
         app_admin.write(db_conn).await?;
         download_and_insert_index_sets(db_conn, http_client, &index_set_urls).await?;
         chemistries.write(db_conn).await?;
+        library_type_specifications.write(db_conn).await?;
 
         Ok(())
     }

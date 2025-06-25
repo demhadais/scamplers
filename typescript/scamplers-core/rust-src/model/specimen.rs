@@ -1,71 +1,29 @@
 #[cfg(feature = "backend")]
-use crate::model::{sample_metadata::NewSampleMetadata, specimen::common::NewSpecimenCommon};
-use crate::{
-    model::{
-        Pagination,
-        sample_metadata::{SampleMetadataOrdinalColumn, SampleMetadataQuery},
-        specimen::{
-            block::{
-                BlockFixative, BlockType, FixedBlockEmbeddingMatrix, FrozenBlockEmbeddingMatrix,
-                NewBlock,
-            },
-            tissue::{NewTissue, TissueFixative, TissueType},
+use crate::model::Order;
+use crate::model::{
+    Pagination,
+    specimen::{
+        block::{
+            BlockFixative, BlockType, FixedBlockEmbeddingMatrix, FrozenBlockEmbeddingMatrix,
+            NewBlock,
         },
+        common::Species,
+        suspension::{NewVirtualSuspensionSpecimen, SuspensionFixative, SuspensionType},
+        tissue::{NewTissue, TissueFixative, TissueType},
     },
-    string::NonEmptyString,
 };
-use time::OffsetDateTime;
+pub use common::NewSpecimenMeasurement;
 use uuid::Uuid;
 #[cfg(feature = "backend")]
 use {
-    scamplers_macros::{
-        backend_db_enum, backend_db_json, backend_insertion, backend_ordering,
-        backend_query_request, backend_with_getters,
-    },
-    scamplers_schema::specimen_measurement,
+    scamplers_macros::{backend_db_enum, backend_query_request, backend_with_getters},
+    scamplers_schema::specimen,
 };
 
 pub mod block;
 mod common;
+pub mod suspension;
 pub mod tissue;
-
-#[cfg_attr(feature = "backend", backend_db_json, serde(rename_all = "UPPERCASE"))]
-pub enum MeasurementData {
-    Rin {
-        #[cfg_attr(feature = "backend", valuable(skip))]
-        measured_at: OffsetDateTime,
-        #[cfg_attr(feature = "backend", garde(dive))]
-        instrument_name: NonEmptyString, // This should be an enum
-        #[cfg_attr(feature = "backend", garde(range(min = 1.0, max = 10.0)))]
-        value: f32,
-    },
-    Dv200 {
-        #[cfg_attr(feature = "backend", valuable(skip))]
-        measured_at: OffsetDateTime,
-        #[cfg_attr(feature = "backend", garde(dive))]
-        instrument_name: NonEmptyString, // This should be a different enum
-        #[cfg_attr(feature = "backend", garde(range(min = 0.0, max = 1.0)))]
-        value: f32,
-    },
-}
-
-#[cfg_attr(
-    feature = "backend",
-    backend_insertion(specimen_measurement),
-    derive(bon::Builder)
-)]
-pub struct NewSpecimenMeasurement {
-    #[cfg_attr(feature = "backend", serde(default))]
-    specimen_id: Uuid,
-    measured_by: Uuid,
-    #[cfg_attr(
-        feature = "backend",
-        garde(dive),
-        diesel(skip_insertion),
-        serde(flatten)
-    )]
-    data: MeasurementData,
-}
 
 #[cfg_attr(
     feature = "backend",
@@ -75,40 +33,31 @@ pub struct NewSpecimenMeasurement {
 pub enum NewSpecimen {
     Block(#[cfg_attr(feature = "backend", garde(dive))] NewBlock),
     Tissue(#[cfg_attr(feature = "backend", garde(dive))] NewTissue),
+    Suspension(#[cfg_attr(feature = "backend", garde(dive))] NewVirtualSuspensionSpecimen),
 }
 
 #[cfg(feature = "backend")]
 impl NewSpecimen {
-    fn common(&mut self) -> &mut NewSpecimenCommon {
-        match self {
+    #[must_use]
+    pub fn measurements(self, specimen_id: Uuid) -> Vec<NewSpecimenMeasurement> {
+        let mut inner = match self {
             Self::Block(b) => match b {
-                NewBlock::Fixed(b) => &mut b.common,
-                NewBlock::Frozen(b) => &mut b.common,
+                NewBlock::Fixed(b) => b.common,
+                NewBlock::Frozen(b) => b.common,
             },
+
+            Self::Suspension(s) => s.common,
 
             Self::Tissue(t) => match t {
-                NewTissue::Cryopreserved(t) => &mut t.common,
-                NewTissue::Fixed(t) => &mut t.common,
-                NewTissue::Frozen(t) => &mut t.common,
+                NewTissue::Cryopreserved(t) => t.common,
+                NewTissue::Fixed(t) => t.common,
+                NewTissue::Frozen(t) => t.common,
             },
-        }
-    }
-
-    pub fn metadata(&mut self) -> NewSampleMetadata {
-        self.common().metadata.clone()
-    }
-
-    pub fn set_metadata_id(&mut self, metadata_id: Uuid) {
-        let current = &mut self.common().metadata_id;
-        *current = metadata_id;
-    }
-
-    #[must_use]
-    pub fn measurements(mut self, id: Uuid) -> Vec<NewSpecimenMeasurement> {
-        let mut measurements = self.common().measurements.drain(..);
+        };
+        let mut measurements = inner.measurements.drain(..);
 
         for mut m in &mut measurements {
-            m.specimen_id = id;
+            m.specimen_id = specimen_id;
         }
 
         measurements.collect()
@@ -117,10 +66,12 @@ impl NewSpecimen {
 
 #[cfg_attr(feature = "backend", backend_with_getters)]
 mod with_getters {
-    use crate::model::sample_metadata::SampleMetadata;
     use crate::model::{
-        person::PersonHandle, sample_metadata::SampleMetadataSummary, specimen::MeasurementData,
+        lab::LabSummary,
+        person::{PersonHandle, PersonSummary},
+        specimen::common::{MeasurementData, Species},
     };
+    use time::OffsetDateTime;
     use uuid::Uuid;
     #[cfg(feature = "backend")]
     use {
@@ -135,23 +86,23 @@ mod with_getters {
     }
 
     #[cfg_attr(feature = "backend", backend_selection(specimen))]
-    pub struct SpecimenData {
+    pub struct SpecimenSummary {
         #[cfg_attr(feature = "backend", diesel(embed), serde(flatten))]
         handle: SpecimenHandle,
+        readable_id: String,
+        name: String,
+        #[cfg_attr(feature = "backend", valuable(skip))]
+        received_at: OffsetDateTime,
+        species: Vec<Option<Species>>,
+        notes: Option<String>,
+        #[cfg_attr(feature = "backend", valuable(skip))]
+        returned_at: Option<OffsetDateTime>,
         type_: String,
         embedded_in: Option<String>,
         fixative: Option<String>,
         frozen: bool,
         cryopreserved: bool,
         storage_buffer: Option<String>,
-    }
-
-    #[cfg_attr(feature = "backend", backend_selection(specimen))]
-    pub struct SpecimenSummary {
-        #[cfg_attr(feature = "backend", diesel(embed), serde(flatten))]
-        metadata: SampleMetadataSummary,
-        #[cfg_attr(feature = "backend", diesel(embed), serde(flatten))]
-        data: SpecimenData,
     }
 
     #[cfg_attr(feature = "backend", backend_selection(specimen_measurement))]
@@ -164,9 +115,13 @@ mod with_getters {
     #[cfg_attr(feature = "backend", backend_selection(specimen), derive(bon::Builder))]
     pub struct SpecimenCore {
         #[cfg_attr(feature = "backend", diesel(embed), serde(flatten))]
-        metadata: SampleMetadata,
-        #[cfg_attr(feature = "backend", diesel(embed), serde(flatten))]
-        data: SpecimenData,
+        summary: SpecimenSummary,
+        #[cfg_attr(feature = "backend", diesel(embed))]
+        lab: LabSummary,
+        #[cfg_attr(feature = "backend", diesel(embed))]
+        submitted_by: PersonSummary,
+        #[cfg_attr(feature = "backend", diesel(embed))]
+        returned_by: PersonSummary,
     }
 
     #[cfg_attr(feature = "backend", derive(serde::Serialize, bon::Builder))]
@@ -175,6 +130,7 @@ mod with_getters {
         measurements: Vec<SpecimenMeasurement>,
     }
 }
+use time::OffsetDateTime;
 pub use with_getters::*;
 
 #[cfg_attr(feature = "backend", backend_db_enum)]
@@ -182,6 +138,7 @@ pub use with_getters::*;
 pub enum SpecimenType {
     Block(BlockType),
     Tissue(TissueType),
+    Suspension(SuspensionType),
 }
 
 #[cfg_attr(
@@ -202,19 +159,38 @@ pub enum BlockEmbeddingMatrix {
 pub enum Fixative {
     Block(BlockFixative),
     Tissue(TissueFixative),
+    Suspension(SuspensionFixative),
 }
 
-#[cfg_attr(feature = "backend", backend_ordering)]
-pub struct SpecimenOrdering {
-    pub column: SampleMetadataOrdinalColumn,
-    pub descending: bool,
+#[cfg(feature = "backend")]
+#[derive(serde::Deserialize, valuable::Valuable, Debug)]
+pub enum SpecimenOrdinalColumn {
+    Name(
+        #[cfg_attr(feature = "backend", serde(skip), valuable(skip))]
+        scamplers_schema::specimen::name,
+    ),
+    ReceivedAt(
+        #[cfg_attr(feature = "backend", serde(skip), valuable(skip))]
+        scamplers_schema::specimen::received_at,
+    ),
+}
+#[cfg(feature = "backend")]
+impl Default for SpecimenOrdinalColumn {
+    fn default() -> Self {
+        Self::Name(specimen::name)
+    }
 }
 
 #[cfg_attr(feature = "backend", backend_query_request)]
 pub struct SpecimenQuery {
     pub ids: Vec<Uuid>,
-    #[cfg_attr(feature = "backend", serde(flatten))]
-    pub metadata: Option<SampleMetadataQuery>,
+    pub name: Option<String>,
+    #[cfg_attr(feature = "backend", valuable(skip))]
+    pub received_before: Option<OffsetDateTime>,
+    #[cfg_attr(feature = "backend", valuable(skip))]
+    pub received_after: Option<OffsetDateTime>,
+    pub species: Vec<Species>,
+    pub notes: Option<String>,
     #[cfg_attr(feature = "backend", serde(alias = "type"))]
     pub type_: Option<SpecimenType>,
     pub embedded_in: Option<BlockEmbeddingMatrix>,
@@ -222,7 +198,8 @@ pub struct SpecimenQuery {
     pub storage_buffer: Option<String>,
     pub frozen: Option<bool>,
     pub cryopreserved: Option<bool>,
-    pub order_by: Vec<SpecimenOrdering>,
+    #[cfg(feature = "backend")]
+    pub order_by: Vec<Order<SpecimenOrdinalColumn>>,
     pub pagination: Pagination,
 }
 

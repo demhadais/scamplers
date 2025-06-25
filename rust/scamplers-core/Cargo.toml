@@ -34,12 +34,12 @@ pretty_assertions = { workspace = true }
 [features]
 backend = [
     "diesel",
+    "scamplers-schema",
     "valuable",
     "strum",
     "scraper",
     "garde",
     "uuid/backend",
-    "scamplers-schema",
     "serde_json",
     "bon",
 ]

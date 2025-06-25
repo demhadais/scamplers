@@ -1,17 +1,5 @@
 /* tslint:disable */
 /* eslint-disable */
-export enum BlockType {
-  Block = 0,
-}
-export enum ComplianceCommitteeType {
-  Ibc = 0,
-  Irb = 1,
-  Iacuc = 2,
-}
-export enum FrozenBlockEmbeddingMatrix {
-  CarboxymethylCellulose = 0,
-  OptimalCuttingTemperatureCompound = 1,
-}
 export enum InstitutionOrdinalColumn {
   Name = 0,
 }
@@ -21,16 +9,6 @@ export enum LabOrdinalColumn {
 export enum PersonOrdinalColumn {
   Name = 0,
   Email = 1,
-}
-export enum Species {
-  AmbystomaMexicanum = 0,
-  CanisFamiliaris = 1,
-  DrosophilaMelanogaster = 2,
-  GasterosteusAculeatus = 3,
-  HomoSapiens = 4,
-  MusMusculus = 5,
-  RattusNorvegicus = 6,
-  SminthopsisCrassicaudata = 7,
 }
 export enum TissueType {
   Tissue = 0,
@@ -47,13 +25,6 @@ export class Client {
   send_new_lab(data: NewLab, api_key?: string | null): Promise<Lab>;
   constructor(backend_url: string, token: string);
   send_new_ms_login(data: NewPerson): Promise<CreatedUser>;
-}
-export class CommitteeApproval {
-  private constructor();
-  free(): void;
-  institution(): InstitutionHandle;
-  committee_type(): ComplianceCommitteeType;
-  compliance_identifier(): string;
 }
 export class CreatedUser {
   private constructor();
@@ -256,35 +227,6 @@ export class LabUpdateCoreError {
   error(): string;
 }
 export class LabUpdateError {
-  private constructor();
-  free(): void;
-  error(): string;
-}
-export class NewCommitteeApproval {
-  private constructor();
-  free(): void;
-  static new(): NewCommitteeApprovalBuilder;
-}
-/**
- * Builder for [`NewCommitteeApproval`](struct.NewCommitteeApproval.html).
- */
-export class NewCommitteeApprovalBuilder {
-  private constructor();
-  free(): void;
-  sample_id(value?: string | null): NewCommitteeApprovalBuilder;
-  institution_id(value: string): NewCommitteeApprovalBuilder;
-  committee_type(value: ComplianceCommitteeType): NewCommitteeApprovalBuilder;
-  compliance_identifier(value: NonEmptyString): NewCommitteeApprovalBuilder;
-  /**
-   * Builds a new `NewCommitteeApproval`.
-   *
-   * # Errors
-   *
-   * If a required field has not been initialized.
-   */
-  build(): NewCommitteeApproval;
-}
-export class NewCommitteeApprovalError {
   private constructor();
   free(): void;
   error(): string;

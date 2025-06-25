@@ -1,4 +1,4 @@
-create table chromium_library (
+create table library (
     id uuid primary key default uuidv7(),
     link text generated always as ('/libraries/' || id) stored not null,
     readable_id text unique not null,
@@ -12,21 +12,21 @@ create table chromium_library (
     constraint has_index check ((single_index_set_name is null) != (dual_index_set_name is null))
 );
 
-create table chromium_library_measurement (
+create table library_measurement (
     id uuid primary key default uuidv7(),
-    library_id uuid references chromium_library on delete restrict on update restrict not null,
+    library_id uuid references library on delete restrict on update restrict not null,
     measured_by uuid references person on delete restrict on update restrict not null,
     data jsonb not null
 );
 
-create table chromium_library_preparers (
-    library_id uuid references chromium_library on delete restrict on update restrict not null,
+create table library_preparers (
+    library_id uuid references library on delete restrict on update restrict not null,
     prepared_by uuid references person on delete restrict on update restrict not null,
     primary key (library_id, prepared_by)
 );
 
-create table chromium_sequencing_submissions (
-    library_id uuid references chromium_library on delete restrict on update restrict not null,
+create table sequencing_submissions (
+    library_id uuid references library on delete restrict on update restrict not null,
     sequencing_run_id uuid references sequencing_run on delete restrict on update restrict not null,
     fastq_paths text [],
     submitted_at timestamptz not null,
