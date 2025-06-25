@@ -230,7 +230,7 @@ pub enum PersonOrdinalColumn {
 #[cfg_attr(feature = "backend", backend_ordering)]
 #[cfg_attr(feature = "typescript", frontend_ordering)]
 pub struct PersonOrdering {
-    pub column: PersonOrdinalColumn,
+    pub by: PersonOrdinalColumn,
     pub descending: bool,
 }
 

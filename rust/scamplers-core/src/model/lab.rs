@@ -179,7 +179,7 @@ pub enum LabOrdinalColumn {
 #[cfg_attr(feature = "backend", backend_ordering)]
 #[cfg_attr(feature = "typescript", frontend_ordering)]
 pub struct LabOrdering {
-    pub column: LabOrdinalColumn,
+    pub by: LabOrdinalColumn,
     pub descending: bool,
 }
 

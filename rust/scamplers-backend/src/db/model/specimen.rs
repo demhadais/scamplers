@@ -6,7 +6,7 @@ use crate::{
         },
         util::{AsIlike, BoxedDieselExpression, NewBoxedDieselExpression},
     },
-    fetch_by_query2,
+    fetch_by_query,
 };
 use diesel::{dsl::AssumeNotNull, prelude::*};
 use diesel_async::{AsyncPgConnection, RunQueryDsl};
@@ -255,6 +255,10 @@ impl FetchByQuery for SpecimenSummary {
         db_conn: &mut AsyncPgConnection,
     ) -> db::error::Result<Vec<Self>> {
         use scamplers_core::model::specimen::SpecimenOrdinalColumn::{Name, ReceivedAt};
-        fetch_by_query2!(query, [Name, ReceivedAt], db_conn)
+        fetch_by_query!(
+            query,
+            [(Name, name_col), (ReceivedAt, received_at_col)],
+            db_conn
+        )
     }
 }

@@ -15,7 +15,7 @@ serde = { workspace = true }
 serde_json = { workspace = true, optional = true }
 diesel = { workspace = true, optional = true }
 time = { workspace = true }
-valuable = { workspace = true, optional = true }
+valuable = { workspace = true }
 strum = { workspace = true, optional = true }
 scraper = { workspace = true, optional = true }
 wasm-bindgen = { workspace = true, optional = true }
@@ -35,7 +35,6 @@ pretty_assertions = { workspace = true }
 backend = [
     "diesel",
     "scamplers-schema",
-    "valuable",
     "strum",
     "scraper",
     "garde",

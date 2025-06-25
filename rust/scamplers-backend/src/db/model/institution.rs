@@ -119,7 +119,7 @@ mod tests {
         let query = InstitutionQuery {
             name: Some("institution1".to_string()),
             order_by: vec![InstitutionOrdering {
-                column: InstitutionOrdinalColumn::Name,
+                by: InstitutionOrdinalColumn::Name,
                 descending: true,
             }],
             ..Default::default()

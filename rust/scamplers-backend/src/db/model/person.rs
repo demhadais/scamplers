@@ -304,7 +304,7 @@ mod tests {
         let query = PersonQuery {
             name: Some("person1".to_string()),
             order_by: vec![PersonOrdering {
-                column: PersonOrdinalColumn::Name,
+                by: PersonOrdinalColumn::Name,
                 descending: true,
             }],
             ..Default::default()

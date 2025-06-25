@@ -64,7 +64,7 @@ pub enum InstitutionOrdinalColumn {
 #[cfg_attr(feature = "backend", backend_ordering)]
 #[cfg_attr(feature = "typescript", frontend_ordering)]
 pub struct InstitutionOrdering {
-    pub column: InstitutionOrdinalColumn,
+    pub by: InstitutionOrdinalColumn,
     pub descending: bool,
 }
 

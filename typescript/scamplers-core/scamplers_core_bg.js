@@ -626,15 +626,15 @@ export class InstitutionOrdering {
     /**
      * @returns {InstitutionOrdinalColumn}
      */
-    get column() {
-        const ret = wasm.__wbg_get_institutionordering_column(this.__wbg_ptr);
+    get by() {
+        const ret = wasm.__wbg_get_institutionordering_by(this.__wbg_ptr);
         return ret;
     }
     /**
      * @param {InstitutionOrdinalColumn} arg0
      */
-    set column(arg0) {
-        wasm.__wbg_set_institutionordering_column(this.__wbg_ptr, arg0);
+    set by(arg0) {
+        wasm.__wbg_set_institutionordering_by(this.__wbg_ptr, arg0);
     }
     /**
      * @returns {boolean}
@@ -689,9 +689,9 @@ export class InstitutionOrderingBuilder {
      * @param {InstitutionOrdinalColumn} value
      * @returns {InstitutionOrderingBuilder}
      */
-    column(value) {
+    by(value) {
         const ptr = this.__destroy_into_raw();
-        const ret = wasm.institutionorderingbuilder_column(ptr, value);
+        const ret = wasm.institutionorderingbuilder_by(ptr, value);
         return InstitutionOrderingBuilder.__wrap(ret);
     }
     /**
@@ -1053,15 +1053,15 @@ export class LabOrdering {
     /**
      * @returns {LabOrdinalColumn}
      */
-    get column() {
-        const ret = wasm.__wbg_get_labordering_column(this.__wbg_ptr);
+    get by() {
+        const ret = wasm.__wbg_get_labordering_by(this.__wbg_ptr);
         return ret;
     }
     /**
      * @param {LabOrdinalColumn} arg0
      */
-    set column(arg0) {
-        wasm.__wbg_set_labordering_column(this.__wbg_ptr, arg0);
+    set by(arg0) {
+        wasm.__wbg_set_labordering_by(this.__wbg_ptr, arg0);
     }
     /**
      * @returns {boolean}
@@ -1116,9 +1116,9 @@ export class LabOrderingBuilder {
      * @param {LabOrdinalColumn} value
      * @returns {LabOrderingBuilder}
      */
-    column(value) {
+    by(value) {
         const ptr = this.__destroy_into_raw();
-        const ret = wasm.laborderingbuilder_column(ptr, value);
+        const ret = wasm.laborderingbuilder_by(ptr, value);
         return LabOrderingBuilder.__wrap(ret);
     }
     /**
@@ -2625,15 +2625,15 @@ export class PersonOrdering {
     /**
      * @returns {PersonOrdinalColumn}
      */
-    get column() {
-        const ret = wasm.__wbg_get_personordering_column(this.__wbg_ptr);
+    get by() {
+        const ret = wasm.__wbg_get_personordering_by(this.__wbg_ptr);
         return ret;
     }
     /**
      * @param {PersonOrdinalColumn} arg0
      */
-    set column(arg0) {
-        wasm.__wbg_set_personordering_column(this.__wbg_ptr, arg0);
+    set by(arg0) {
+        wasm.__wbg_set_personordering_by(this.__wbg_ptr, arg0);
     }
     /**
      * @returns {boolean}
@@ -2688,9 +2688,9 @@ export class PersonOrderingBuilder {
      * @param {PersonOrdinalColumn} value
      * @returns {PersonOrderingBuilder}
      */
-    column(value) {
+    by(value) {
         const ptr = this.__destroy_into_raw();
-        const ret = wasm.personorderingbuilder_column(ptr, value);
+        const ret = wasm.personorderingbuilder_by(ptr, value);
         return PersonOrderingBuilder.__wrap(ret);
     }
     /**

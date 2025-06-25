@@ -142,7 +142,7 @@ macro_rules! fetch_by_query {
         }
 
         for ordering in order_by {
-            statement = match (ordering.column, ordering.descending) {
+            statement = match (&ordering.by, ordering.descending) {
                 $(
                     ($ordinal_col_enum_variant, false) => statement.then_order_by($corresponding_db_col.asc()),
                     ($ordinal_col_enum_variant, true) => statement.then_order_by($corresponding_db_col.desc()),

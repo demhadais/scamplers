@@ -59,7 +59,7 @@ export class InstitutionOrdering {
   private constructor();
   free(): void;
   static new(): InstitutionOrderingBuilder;
-  column: InstitutionOrdinalColumn;
+  by: InstitutionOrdinalColumn;
   descending: boolean;
 }
 /**
@@ -68,7 +68,7 @@ export class InstitutionOrdering {
 export class InstitutionOrderingBuilder {
   private constructor();
   free(): void;
-  column(value: InstitutionOrdinalColumn): InstitutionOrderingBuilder;
+  by(value: InstitutionOrdinalColumn): InstitutionOrderingBuilder;
   descending(value: boolean): InstitutionOrderingBuilder;
   /**
    * Builds a new `InstitutionOrdering`.
@@ -122,7 +122,7 @@ export class LabOrdering {
   private constructor();
   free(): void;
   static new(): LabOrderingBuilder;
-  column: LabOrdinalColumn;
+  by: LabOrdinalColumn;
   descending: boolean;
 }
 /**
@@ -131,7 +131,7 @@ export class LabOrdering {
 export class LabOrderingBuilder {
   private constructor();
   free(): void;
-  column(value: LabOrdinalColumn): LabOrderingBuilder;
+  by(value: LabOrdinalColumn): LabOrderingBuilder;
   descending(value: boolean): LabOrderingBuilder;
   /**
    * Builds a new `LabOrdering`.
@@ -367,7 +367,7 @@ export class PersonOrdering {
   private constructor();
   free(): void;
   static new(): PersonOrderingBuilder;
-  column: PersonOrdinalColumn;
+  by: PersonOrdinalColumn;
   descending: boolean;
 }
 /**
@@ -376,7 +376,7 @@ export class PersonOrdering {
 export class PersonOrderingBuilder {
   private constructor();
   free(): void;
-  column(value: PersonOrdinalColumn): PersonOrderingBuilder;
+  by(value: PersonOrdinalColumn): PersonOrderingBuilder;
   descending(value: boolean): PersonOrderingBuilder;
   /**
    * Builds a new `PersonOrdering`.

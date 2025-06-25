@@ -6,6 +6,7 @@ pub mod index_sets;
 pub mod institution;
 pub mod lab;
 pub mod library_type_specification;
+pub mod multiplexed_suspension;
 pub mod person;
 pub mod sequencing_run;
 pub mod specimen;
@@ -60,21 +61,12 @@ where
     }
 }
 
-#[cfg(feature = "backend")]
 #[derive(serde::Deserialize, Default, Debug, valuable::Valuable)]
 #[serde(default)]
 pub struct Order<C>
 where
     C: valuable::Valuable,
 {
-    pub by: C,
-    pub descending: bool,
-}
-
-#[cfg(not(feature = "backend"))]
-#[derive(serde::Deserialize, Default, Debug)]
-#[serde(default)]
-pub struct Order<C> {
     pub by: C,
     pub descending: bool,
 }

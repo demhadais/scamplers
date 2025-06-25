@@ -1,4 +1,3 @@
-#[cfg(feature = "backend")]
 use crate::model::Order;
 use crate::model::{
     Pagination,
@@ -13,12 +12,9 @@ use crate::model::{
     },
 };
 pub use common::NewSpecimenMeasurement;
-use uuid::Uuid;
 #[cfg(feature = "backend")]
-use {
-    scamplers_macros::{backend_db_enum, backend_query_request, backend_with_getters},
-    scamplers_schema::specimen,
-};
+use scamplers_macros::{backend_db_enum, backend_query_request, backend_with_getters};
+use uuid::Uuid;
 
 pub mod block;
 mod common;
@@ -162,23 +158,11 @@ pub enum Fixative {
     Suspension(SuspensionFixative),
 }
 
-#[cfg(feature = "backend")]
-#[derive(serde::Deserialize, valuable::Valuable, Debug)]
+#[derive(Default, valuable::Valuable, Debug, serde::Deserialize, serde::Serialize)]
 pub enum SpecimenOrdinalColumn {
-    Name(
-        #[cfg_attr(feature = "backend", serde(skip), valuable(skip))]
-        scamplers_schema::specimen::name,
-    ),
-    ReceivedAt(
-        #[cfg_attr(feature = "backend", serde(skip), valuable(skip))]
-        scamplers_schema::specimen::received_at,
-    ),
-}
-#[cfg(feature = "backend")]
-impl Default for SpecimenOrdinalColumn {
-    fn default() -> Self {
-        Self::Name(specimen::name)
-    }
+    #[default]
+    Name,
+    ReceivedAt,
 }
 
 #[cfg_attr(feature = "backend", backend_query_request)]
@@ -198,7 +182,6 @@ pub struct SpecimenQuery {
     pub storage_buffer: Option<String>,
     pub frozen: Option<bool>,
     pub cryopreserved: Option<bool>,
-    #[cfg(feature = "backend")]
     pub order_by: Vec<Order<SpecimenOrdinalColumn>>,
     pub pagination: Pagination,
 }
