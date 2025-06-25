@@ -7,7 +7,7 @@ use regex::Regex;
 use serde::{Deserialize, Serialize};
 use url::Url;
 
-use super::Write;
+use super::WriteToDb;
 use scamplers_schema::{dual_index_set, index_kit, single_index_set};
 
 #[derive(Deserialize, Validate, Clone, Serialize, Debug)]
@@ -43,7 +43,7 @@ pub(super) enum IndexSets {
     Dual(#[garde(dive)] HashMap<IndexSetName, NewDualIndexSet>),
 }
 
-impl Write for IndexSets {
+impl WriteToDb for IndexSets {
     type Returns = ();
 
     async fn write(
@@ -118,7 +118,7 @@ pub struct NewSingleIndexSet(#[garde(dive)] IndexSetName, #[garde(dive)] [DnaSeq
 
 // It's expected that one sample index set is a Vec<NewSampleIndex>, so we can
 // bake in some validation and do a bunch of things at once
-impl Write for Vec<NewSingleIndexSet> {
+impl WriteToDb for Vec<NewSingleIndexSet> {
     type Returns = ();
 
     // We should technically validate the fact that this whole set has the same kit,
@@ -215,7 +215,7 @@ where
 }
 
 #[allow(clippy::implicit_hasher)]
-impl Write for HashMap<IndexSetName, NewDualIndexSet> {
+impl WriteToDb for HashMap<IndexSetName, NewDualIndexSet> {
     type Returns = ();
 
     async fn write(

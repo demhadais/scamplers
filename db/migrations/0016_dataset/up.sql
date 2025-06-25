@@ -6,6 +6,6 @@ create table dataset (
     data_path text not null,
     delivered_at timestamptz not null,
     gems_id uuid references gems on delete restrict on update restrict,
-    metrics jsonb [] not null,
+    metrics jsonb [],
     web_summary text
 );

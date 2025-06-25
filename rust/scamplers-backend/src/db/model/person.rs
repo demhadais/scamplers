@@ -143,7 +143,7 @@ impl model::FetchById for Person {
     }
 }
 
-impl model::Write for NewPerson {
+impl model::WriteToDb for NewPerson {
     type Returns = Person;
     async fn write(self, db_conn: &mut AsyncPgConnection) -> Result<Self::Returns> {
         let id = diesel::insert_into(person::table)
@@ -156,7 +156,7 @@ impl model::Write for NewPerson {
     }
 }
 
-impl model::Write for PersonUpdate {
+impl model::WriteToDb for PersonUpdate {
     type Returns = Person;
     async fn write(self, db_conn: &mut AsyncPgConnection) -> Result<Self::Returns> {
         let (core, grant_roles, revoke_roles) =
@@ -273,7 +273,7 @@ mod tests {
         db::{
             DbTransaction,
             error::Error,
-            model::{FetchByQuery, Write, person::WriteLogin},
+            model::{FetchByQuery, WriteToDb, person::WriteLogin},
             test_util::{DbConnection, N_PEOPLE, db_conn, test_query},
         },
     };

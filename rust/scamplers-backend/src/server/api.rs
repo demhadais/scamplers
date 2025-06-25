@@ -8,7 +8,9 @@ use scamplers_core::{
         institution::{Institution, InstitutionQuery, NewInstitution},
         lab::{Lab, LabQuery, LabSummary, NewLab},
         person::{NewPerson, Person, PersonQuery, PersonSummary},
+        sequencing_run::NewSequencingRun,
         specimen::{NewSpecimen, Specimen, SpecimenQuery, SpecimenSummary},
+        suspension::{NewSuspension, Suspension},
     },
 };
 use scamplers_schema::lab::dsl::lab;
@@ -64,5 +66,13 @@ pub(super) fn router() -> Router<AppState> {
         .route(
             &Endpoint::<SpecimenQuery, SpecimenSummary>::route(),
             post(by_query::<SpecimenSummary>),
+        )
+        .route(
+            &Endpoint::<NewSequencingRun, ()>::route(),
+            post(write::<NewSequencingRun>),
+        )
+        .route(
+            &Endpoint::<NewSuspension, Suspension>::route(),
+            post(write::<NewSuspension>),
         )
 }

@@ -96,7 +96,7 @@ pub async fn write<Data>(
     ValidJson(data): ValidJson<Data>,
 ) -> super::error::Result<Json<Data::Returns>>
 where
-    Data: model::Write + Send + valuable::Valuable,
+    Data: model::WriteToDb + Send + valuable::Valuable,
     Data::Returns: Send,
 {
     tracing::info!(deserialized_data = data.as_value());

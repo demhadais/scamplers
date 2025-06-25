@@ -19,7 +19,7 @@ use scamplers_schema::{
 };
 use uuid::Uuid;
 
-impl model::Write for LabUpdate {
+impl model::WriteToDb for LabUpdate {
     type Returns = Lab;
 
     async fn write(
@@ -62,7 +62,7 @@ impl model::Write for LabUpdate {
     }
 }
 
-impl model::Write for NewLab {
+impl model::WriteToDb for NewLab {
     type Returns = Lab;
 
     async fn write(
@@ -194,7 +194,7 @@ mod tests {
     use scamplers_schema::lab;
 
     use crate::db::{
-        model::{FetchByQuery, FetchRelatives, Write},
+        model::{FetchByQuery, FetchRelatives, WriteToDb},
         test_util::{DbConnection, N_LAB_MEMBERS, N_LABS, db_conn, test_query},
     };
 

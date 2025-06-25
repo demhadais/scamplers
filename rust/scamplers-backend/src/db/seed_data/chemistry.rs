@@ -1,9 +1,9 @@
-use crate::db::{self, model::Write};
+use crate::db::{self, model::WriteToDb};
 use diesel_async::{AsyncPgConnection, RunQueryDsl};
 use scamplers_core::model::chemistry::Chemistry;
 use scamplers_schema::chemistry;
 
-impl Write for Vec<Chemistry> {
+impl WriteToDb for Vec<Chemistry> {
     type Returns = ();
 
     async fn write(self, db_conn: &mut AsyncPgConnection) -> db::error::Result<Self::Returns> {

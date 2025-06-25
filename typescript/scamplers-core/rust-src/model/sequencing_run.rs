@@ -6,7 +6,7 @@ use {
 };
 
 #[cfg_attr(feature = "backend", backend_insertion(sequencing_submissions))]
-struct NewSequencingSubmission {
+pub struct NewSequencingSubmission {
     #[cfg_attr(feature = "backend", serde(default))]
     sequencing_run_id: Uuid,
     library_id: Uuid,
@@ -27,6 +27,15 @@ pub struct NewSequencingRun {
     notes: Option<NonEmptyString>,
     #[cfg_attr(feature = "backend", garde(dive), diesel(skip_insertion))]
     libraries: Vec<NewSequencingSubmission>,
+}
+impl NewSequencingRun {
+    pub fn libraries(&mut self, sequencing_run_id: Uuid) -> &[NewSequencingSubmission] {
+        for submission in &mut self.libraries {
+            submission.sequencing_run_id = sequencing_run_id;
+        }
+
+        &self.libraries
+    }
 }
 
 #[cfg_attr(feature = "backend", backend_with_getters)]

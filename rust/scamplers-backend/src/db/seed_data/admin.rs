@@ -7,7 +7,7 @@ use serde::Deserialize;
 
 use crate::db::model::person::{WriteLogin, grant_roles_to_user};
 
-use super::Write;
+use super::WriteToDb;
 
 #[derive(Deserialize, Validate, Insertable, Clone)]
 #[diesel(table_name = person, check_for_backend(Pg))]
@@ -19,7 +19,7 @@ pub(super) struct NewAdmin {
     person: NewPerson,
 }
 
-impl Write for NewAdmin {
+impl WriteToDb for NewAdmin {
     type Returns = ();
 
     async fn write(

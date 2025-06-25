@@ -1,4 +1,4 @@
-use crate::db::model::Write;
+use crate::db::model::WriteToDb;
 use crate::{
     db::model::FetchByQuery,
     server::{run_migrations, util::DevContainer},

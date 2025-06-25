@@ -6,7 +6,9 @@ use crate::model::{
     institution::{Institution, InstitutionQuery, NewInstitution},
     lab::{Lab, LabQuery, LabSummary, NewLab},
     person::{NewPerson, Person, PersonQuery, PersonSummary},
+    sequencing_run::NewSequencingRun,
     specimen::{NewSpecimen, Specimen, SpecimenQuery, SpecimenSummary},
+    suspension::{NewSuspension, Suspension},
 };
 
 pub struct Endpoint<Req, Resp>(PhantomData<Req>, PhantomData<Resp>);
@@ -98,5 +100,21 @@ impl Endpoint<SpecimenQuery, SpecimenSummary> {
     #[must_use]
     pub fn route() -> String {
         format!("{SPECIMENS}/{SEARCH_SUFFIX}")
+    }
+}
+
+const SEQUENCING_RUNS: &str = "/sequencing_runs";
+impl Endpoint<NewSequencingRun, ()> {
+    #[must_use]
+    pub fn route() -> String {
+        SEQUENCING_RUNS.to_string()
+    }
+}
+
+const SUSPENSIONS: &str = "/suspensions";
+impl Endpoint<NewSuspension, Suspension> {
+    #[must_use]
+    pub fn route() -> String {
+        SUSPENSIONS.to_string()
     }
 }

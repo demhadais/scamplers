@@ -87,7 +87,7 @@ diesel::table! {
         data_path -> Text,
         delivered_at -> Timestamptz,
         gems_id -> Nullable<Uuid>,
-        metrics -> Array<Nullable<Jsonb>>,
+        metrics -> Nullable<Array<Nullable<Jsonb>>>,
         web_summary -> Nullable<Text>,
     }
 }
@@ -311,7 +311,7 @@ diesel::table! {
         created_at -> Nullable<Timestamptz>,
         pooled_into_id -> Nullable<Uuid>,
         multiplexing_tag_id -> Nullable<Uuid>,
-        lysis_duration_min -> Nullable<Float4>,
+        lysis_duration_minutes -> Nullable<Float4>,
         target_cell_recovery -> Float4,
         target_reads_per_cell -> Int4,
         notes -> Nullable<Text>,

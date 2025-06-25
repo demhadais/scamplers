@@ -7,6 +7,7 @@ pub mod lab;
 pub mod person;
 pub mod sequencing_run;
 pub mod specimen;
+pub mod suspension;
 
 trait AsDieselFilter<QuerySource = ()> {
     fn as_diesel_filter<'a>(&'a self) -> Option<BoxedDieselExpression<'a, QuerySource>>
@@ -44,13 +45,19 @@ trait AsDieselQueryBase {
     fn as_diesel_query_base() -> Self::QueryBase;
 }
 
-pub trait Write {
+pub trait WriteToDb {
     type Returns;
 
     fn write(
         self,
         db_conn: &mut AsyncPgConnection,
     ) -> impl Future<Output = error::Result<Self::Returns>> + Send;
+}
+
+trait WriteToDbInternal {
+    type Returns;
+
+    async fn write(self, db_conn: &mut AsyncPgConnection) -> error::Result<Self::Returns>;
 }
 
 pub trait FetchById: Sized {

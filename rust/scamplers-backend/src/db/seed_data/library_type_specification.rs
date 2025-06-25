@@ -1,10 +1,10 @@
-use crate::db::{self, model::Write};
+use crate::db::{self, model::WriteToDb};
 use diesel::prelude::*;
 use diesel_async::RunQueryDsl;
 use scamplers_core::model::library_type_specification::NewLibraryTypeSpecification;
 use scamplers_schema::library_type_specification;
 
-impl Write for Vec<NewLibraryTypeSpecification> {
+impl WriteToDb for Vec<NewLibraryTypeSpecification> {
     type Returns = ();
     async fn write(
         self,

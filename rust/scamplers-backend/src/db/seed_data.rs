@@ -1,4 +1,4 @@
-use super::model::Write;
+use super::model::WriteToDb;
 use admin::NewAdmin;
 use anyhow::Context;
 use diesel_async::AsyncPgConnection;

@@ -2,7 +2,7 @@ use crate::{
     db::{
         self,
         model::{
-            AsDieselFilter, AsDieselQueryBase, FetchById, FetchByQuery, FetchRelatives, Write,
+            AsDieselFilter, AsDieselQueryBase, FetchById, FetchByQuery, FetchRelatives, WriteToDb,
         },
         util::{AsIlike, BoxedDieselExpression, NewBoxedDieselExpression},
     },
@@ -56,7 +56,7 @@ impl FetchRelatives<SpecimenMeasurement> for specimen::table {
     }
 }
 
-impl Write for Vec<NewSpecimenMeasurement> {
+impl WriteToDb for Vec<NewSpecimenMeasurement> {
     type Returns = Vec<SpecimenMeasurement>;
 
     async fn write(self, db_conn: &mut AsyncPgConnection) -> db::error::Result<Self::Returns> {
@@ -74,7 +74,7 @@ impl Write for Vec<NewSpecimenMeasurement> {
     }
 }
 
-impl Write for NewSpecimen {
+impl WriteToDb for NewSpecimen {
     type Returns = Specimen;
 
     async fn write(

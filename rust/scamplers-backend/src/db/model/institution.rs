@@ -12,7 +12,7 @@ use crate::{
     fetch_by_query,
 };
 
-impl model::Write for NewInstitution {
+impl model::WriteToDb for NewInstitution {
     type Returns = Institution;
     async fn write(
         self,
