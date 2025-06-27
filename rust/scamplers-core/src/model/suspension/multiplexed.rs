@@ -87,3 +87,7 @@ impl NewMultiplexedSuspension {
         &self.measurements
     }
 }
+
+pub struct MultiplexedSuspensionHandle {
+    id: Uuid,
+}

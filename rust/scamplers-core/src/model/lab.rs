@@ -1,193 +1,109 @@
-use crate::{model::Pagination, string::NonEmptyString};
-#[cfg(feature = "typescript")]
+use crate::{
+    model::{IsUpdate, Pagination, SortByGroup, person::PersonSummary},
+    string::NonEmptyString,
+};
 use scamplers_macros::{
-    frontend_insertion, frontend_ordering, frontend_ordinal_columns_enum, frontend_query_request,
-    frontend_with_getters,
+    base_api_model, base_api_model_with_default, db_insertion, db_query, db_selection, db_update,
 };
-use uuid::Uuid;
 #[cfg(feature = "backend")]
-use {
-    scamplers_macros::{
-        backend_insertion, backend_ordering, backend_ordinal_columns_enum, backend_query_request,
-        backend_with_getters,
-    },
-    scamplers_schema::lab,
-};
+use scamplers_schema::lab;
+use uuid::Uuid;
 
-#[cfg_attr(feature = "backend", backend_insertion(lab), derive(bon::Builder))]
-#[cfg_attr(feature = "backend", builder(on(NonEmptyString, into)))]
-#[cfg_attr(feature = "typescript", frontend_insertion)]
+#[db_insertion]
+#[cfg_attr(feature = "backend", diesel(table_name = lab))]
 pub struct NewLab {
-    #[cfg_attr(feature = "backend", garde(dive))]
+    #[garde(dive)]
     name: NonEmptyString,
     pi_id: Uuid,
-    #[cfg_attr(feature = "backend", garde(dive))]
+    #[garde(dive)]
     delivery_dir: NonEmptyString,
-    #[cfg_attr(feature = "backend", diesel(skip_insertion), builder(default))]
-    #[cfg_attr(feature = "typescript", builder(default))]
+    #[builder(default)]
+    #[cfg_attr(feature = "backend", diesel(skip_insertion))]
     member_ids: Vec<Uuid>,
 }
-impl NewLab {
-    #[must_use]
-    pub fn member_ids(&self) -> &[Uuid] {
-        &self.member_ids
-    }
+
+#[db_selection]
+#[cfg_attr(feature = "backend", diesel(table_name = lab))]
+pub struct LabHandle {
+    id: Uuid,
+    link: String,
 }
 
-#[cfg_attr(feature = "backend", backend_with_getters)]
-#[cfg_attr(feature = "typescript", frontend_with_getters)]
-mod with_getters {
-    use crate::{
-        model::{IsUpdate, person::PersonSummary},
-        string::NonEmptyString,
-    };
-    #[cfg(feature = "typescript")]
-    use scamplers_macros::{frontend_response, frontend_update};
-    use uuid::Uuid;
-    #[cfg(feature = "backend")]
-    use {
-        scamplers_macros::{backend_selection, backend_update},
-        scamplers_schema::lab,
-    };
+#[db_selection]
+#[cfg_attr(feature = "backend", diesel(table_name = lab))]
+pub struct LabSummary {
+    #[serde(flatten)]
+    #[getset(skip)]
+    #[cfg_attr(feature = "backend", diesel(embed))]
+    handle: LabHandle,
+    name: String,
+    delivery_dir: String,
+}
 
-    #[cfg_attr(feature = "backend", backend_selection(lab))]
-    #[cfg_attr(feature = "typescript", frontend_response)]
-    pub struct LabHandle {
-        id: Uuid,
-        link: String,
-    }
+#[db_selection]
+#[cfg_attr(feature = "backend", diesel(table_name = lab))]
+pub struct LabCore {
+    #[serde(flatten)]
+    #[getset(skip)]
+    #[cfg_attr(feature = "backend", diesel(embed))]
+    summary: LabSummary,
+    #[cfg_attr(feature = "backend", diesel(embed))]
+    pi: PersonSummary,
+}
 
-    #[cfg_attr(feature = "backend", backend_selection(lab))]
-    #[cfg_attr(feature = "typescript", frontend_response)]
-    pub struct LabSummary {
-        #[serde(flatten)]
-        #[cfg_attr(feature = "backend", diesel(embed))]
-        handle: LabHandle,
-        name: String,
-        delivery_dir: String,
-    }
+#[base_api_model]
+#[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
+pub struct Lab {
+    #[serde(flatten)]
+    #[getset(skip)]
+    core: LabCore,
+    members: Vec<PersonSummary>,
+}
 
-    #[cfg_attr(feature = "backend", backend_selection(lab))]
-    #[cfg_attr(feature = "typescript", frontend_response)]
-    pub struct LabCore {
-        #[serde(flatten)]
-        #[cfg_attr(feature = "backend", diesel(embed))]
-        summary: LabSummary,
-        #[cfg_attr(feature = "backend", diesel(embed))]
-        pi: PersonSummary,
-    }
-
-    #[cfg_attr(feature = "backend", derive(serde::Serialize, bon::Builder))]
-    #[cfg_attr(feature = "typescript", frontend_response)]
-    pub struct Lab {
-        #[serde(flatten)]
-        core: LabCore,
-        members: Vec<PersonSummary>,
-    }
-
-    #[cfg_attr(feature = "backend", backend_update(lab))]
-    #[cfg_attr(feature = "typescript", frontend_update)]
-    pub struct LabUpdateCore {
-        id: Uuid,
-        #[cfg_attr(feature = "backend", garde(dive))]
-        name: Option<NonEmptyString>,
-        pi_id: Option<Uuid>,
-        #[cfg_attr(feature = "backend", garde(dive))]
-        delivery_dir: Option<NonEmptyString>,
-    }
-    impl IsUpdate for LabUpdateCore {
-        fn is_update(&self) -> bool {
-            !matches!(
-                self,
-                Self {
-                    name: None,
-                    pi_id: None,
-                    delivery_dir: None,
-                    ..
-                },
-            )
-        }
-    }
-
-    #[cfg_attr(
-        feature = "backend",
-        derive(serde::Deserialize, Default, garde::Validate),
-        serde(default)
-    )]
-    #[cfg_attr(feature = "backend", garde(allow_unvalidated))]
-    #[cfg_attr(feature = "typescript", frontend_update)]
-    pub struct LabUpdate {
-        #[serde(flatten)]
-        #[cfg_attr(feature = "backend", garde(dive))]
-        core: LabUpdateCore,
-        add_members: Vec<Uuid>,
-        remove_members: Vec<Uuid>,
-    }
-    impl LabUpdate {
-        #[must_use]
-        pub fn core(&self) -> &LabUpdateCore {
-            &self.core
-        }
-    }
-
-    #[cfg(feature = "backend")]
-    #[bon::bon]
-    impl LabUpdate {
-        #[builder(on(NonEmptyString, into))]
-        pub fn new(
-            #[builder(field)] add_members: Vec<Uuid>,
-            #[builder(field)] remove_members: Vec<Uuid>,
-            id: Uuid,
-            name: Option<NonEmptyString>,
-            pi_id: Option<Uuid>,
-            delivery_dir: Option<NonEmptyString>,
-        ) -> Self {
+#[db_update]
+#[cfg_attr(feature = "backend", diesel(table_name = lab))]
+pub struct LabUpdateCore {
+    id: Uuid,
+    #[garde(dive)]
+    name: Option<NonEmptyString>,
+    pi_id: Option<Uuid>,
+    #[garde(dive)]
+    delivery_dir: Option<NonEmptyString>,
+}
+impl IsUpdate for LabUpdateCore {
+    fn is_update(&self) -> bool {
+        matches!(
+            self,
             Self {
-                core: LabUpdateCore {
-                    id,
-                    name,
-                    pi_id,
-                    delivery_dir,
-                },
-                add_members,
-                remove_members,
-            }
-        }
-    }
-
-    #[cfg(feature = "backend")]
-    impl<S: lab_update_builder::State> LabUpdateBuilder<S> {
-        pub fn add_member(mut self, member_id: Uuid) -> Self {
-            self.add_members.push(member_id);
-            self
-        }
-        pub fn remove_member(mut self, member_id: Uuid) -> Self {
-            self.remove_members.push(member_id);
-            self
-        }
+                name: Some(_),
+                pi_id: Some(_),
+                delivery_dir: Some(_),
+                ..
+            },
+        )
     }
 }
-pub use with_getters::*;
 
-#[cfg_attr(feature = "backend", backend_ordinal_columns_enum)]
-#[cfg_attr(feature = "typescript", frontend_ordinal_columns_enum)]
+#[base_api_model_with_default]
+pub struct LabUpdate {
+    #[serde(flatten)]
+    #[garde(dive)]
+    core: LabUpdateCore,
+    add_members: Vec<Uuid>,
+    remove_members: Vec<Uuid>,
+}
+
+#[base_api_model_with_default]
 pub enum LabOrdinalColumn {
     #[default]
     Name,
 }
 
-#[cfg_attr(feature = "backend", backend_ordering)]
-#[cfg_attr(feature = "typescript", frontend_ordering)]
-pub struct LabOrdering {
-    pub by: LabOrdinalColumn,
-    pub descending: bool,
-}
-
-#[cfg_attr(feature = "backend", backend_query_request)]
-#[cfg_attr(feature = "typescript", frontend_query_request)]
+#[db_query]
 pub struct LabQuery {
-    pub ids: Vec<Uuid>,
-    pub name: Option<String>,
-    pub order_by: Vec<LabOrdering>,
-    pub pagination: Pagination,
+    ids: Vec<Uuid>,
+    name: Option<String>,
+    #[builder(setter(custom))]
+    order_by: SortByGroup<LabOrdinalColumn>,
+    pagination: Pagination,
 }

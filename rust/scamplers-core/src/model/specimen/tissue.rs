@@ -1,68 +1,89 @@
-use crate::{model::specimen::common::NewSpecimenCommon, string::NonEmptyString};
-#[cfg(feature = "typescript")]
-use scamplers_macros::frontend_enum;
+use getset::MutGetters;
+use scamplers_macros::{base_api_model, db_enum, db_insertion};
 #[cfg(feature = "backend")]
-use {
-    super::common::is_true,
-    scamplers_macros::{backend_db_enum, backend_insertion},
-    scamplers_schema::specimen,
+use scamplers_schema::specimen;
+use uuid::Uuid;
+
+use crate::{
+    model::specimen::common::{NewSpecimenCommon, NewSpecimenMeasurement},
+    string::NonEmptyString,
 };
 
-#[cfg_attr(feature = "backend", backend_db_enum)]
-#[cfg_attr(feature = "typescript", frontend_enum)]
+#[db_enum]
 #[derive(Default)]
 pub enum TissueType {
     #[default]
     Tissue,
 }
 
-#[cfg_attr(feature = "backend", backend_db_enum)]
+#[db_enum]
 pub enum TissueFixative {
     DithiobisSuccinimidylropionate,
 }
 
-#[cfg_attr(feature = "backend", backend_insertion(specimen))]
+#[db_insertion]
+#[derive(MutGetters)]
+#[cfg_attr(feature = "backend", diesel(table_name = specimen))]
 pub struct NewFixedTissue {
-    #[cfg_attr(feature = "backend", diesel(embed), serde(flatten), garde(dive))]
-    pub(super) common: NewSpecimenCommon,
-    #[cfg_attr(feature = "backend", serde(skip))]
+    #[serde(flatten)]
+    #[garde(dive)]
+    #[getset(get_mut)]
+    #[cfg_attr(feature = "backend", diesel(embed))]
+    inner: NewSpecimenCommon,
+    #[serde(skip)]
     type_: TissueType,
+    #[garde(dive)]
     storage_buffer: Option<NonEmptyString>,
     fixative: TissueFixative,
 }
 
-#[cfg_attr(feature = "backend", backend_insertion(specimen))]
+#[db_insertion]
+#[derive(MutGetters)]
+#[cfg_attr(feature = "backend", diesel(table_name = specimen))]
 pub struct NewFrozenTissue {
-    #[cfg_attr(feature = "backend", diesel(embed), serde(flatten), garde(dive))]
-    pub(super) common: NewSpecimenCommon,
-    #[cfg_attr(feature = "backend", serde(skip))]
+    #[serde(flatten)]
+    #[garde(dive)]
+    #[getset(get_mut)]
+    #[cfg_attr(feature = "backend", diesel(embed))]
+    inner: NewSpecimenCommon,
+    #[serde(skip)]
     type_: TissueType,
+    #[garde(dive)]
     storage_buffer: Option<NonEmptyString>,
-    #[cfg_attr(feature = "backend", garde(custom(is_true)))]
-    pub frozen: bool,
+    #[garde(custom(super::common::is_true))]
+    frozen: bool,
 }
 
-#[cfg_attr(feature = "backend", backend_insertion(specimen))]
+#[db_insertion]
+#[derive(MutGetters)]
+#[cfg_attr(feature = "backend", diesel(table_name = specimen))]
 pub struct NewCryoPreservedTissue {
-    #[cfg_attr(feature = "backend", diesel(embed), serde(flatten), garde(dive))]
-    pub(super) common: NewSpecimenCommon,
-    #[cfg_attr(feature = "backend", serde(skip))]
+    #[serde(flatten)]
+    #[garde(dive)]
+    #[getset(get_mut)]
+    #[cfg_attr(feature = "backend", diesel(embed))]
+    inner: NewSpecimenCommon,
+    #[serde(skip)]
     type_: TissueType,
+    #[garde(dive)]
     storage_buffer: Option<NonEmptyString>,
-    #[cfg_attr(feature = "backend", garde(custom(is_true)))]
-    pub cryopreserved: bool,
+    #[garde(custom(super::common::is_true))]
+    cryopreserved: bool,
 }
 
-#[cfg_attr(
-    feature = "backend",
-    derive(serde::Deserialize, Debug, valuable::Valuable, garde::Validate)
-)]
-#[cfg_attr(
-    feature = "backend",
-    serde(rename_all = "snake_case", tag = "preservation")
-)]
+#[base_api_model]
+#[serde(tag = "preservation")]
 pub enum NewTissue {
-    Cryopreserved(#[cfg_attr(feature = "backend", garde(dive))] NewCryoPreservedTissue),
-    Fixed(#[cfg_attr(feature = "backend", garde(dive))] NewFixedTissue),
-    Frozen(#[cfg_attr(feature = "backend", garde(dive))] NewFrozenTissue),
+    Cryopreserved(#[garde(dive)] NewCryoPreservedTissue),
+    Fixed(#[garde(dive)] NewFixedTissue),
+    Frozen(#[garde(dive)] NewFrozenTissue),
+}
+impl NewTissue {
+    pub(super) fn inner_mut(&mut self) -> &mut NewSpecimenCommon {
+        match self {
+            Self::Cryopreserved(t) => t.inner_mut(),
+            Self::Fixed(t) => t.inner_mut(),
+            Self::Frozen(t) => t.inner_mut(),
+        }
+    }
 }

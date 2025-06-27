@@ -4,28 +4,25 @@ use anyhow::Context;
 use diesel_async::AsyncPgConnection;
 use garde::Validate;
 use index_set::IndexSetFileUrl;
-use scamplers_core::model::{
-    chemistry::Chemistry, institution::NewInstitution,
-    library_type_specification::NewLibraryTypeSpecification,
-};
+use scamplers_core::model::institution::NewInstitution;
 use serde::Deserialize;
-mod admin;
-mod chemistry;
-mod index_set;
-mod library_type_specification;
+// mod admin;
+// mod chemistry;
+// mod index_set;
+// mod library_type_specification;
 
 #[derive(Deserialize, Clone, Validate)]
 pub struct SeedData {
     #[garde(dive)]
     institution: NewInstitution,
-    #[garde(dive)]
-    app_admin: NewAdmin,
-    #[garde(dive)]
-    index_set_urls: Vec<IndexSetFileUrl>,
-    #[garde(skip)]
-    chemistries: Vec<Chemistry>,
-    #[garde(dive)]
-    library_type_specifications: Vec<NewLibraryTypeSpecification>,
+    // #[garde(dive)]
+    // app_admin: NewAdmin,
+    // #[garde(dive)]
+    // index_set_urls: Vec<IndexSetFileUrl>,
+    // #[garde(skip)]
+    // chemistries: Vec<Chemistry>,
+    // #[garde(dive)]
+    // library_type_specifications: Vec<NewLibraryTypeSpecification>,
 }
 
 impl SeedData {
@@ -39,10 +36,10 @@ impl SeedData {
 
         let Self {
             institution,
-            app_admin,
-            index_set_urls,
-            chemistries,
-            library_type_specifications,
+            // app_admin,
+            // index_set_urls,
+            // chemistries,
+            // library_type_specifications,
         } = self;
 
         let institutions_result = institution.write(db_conn).await;
@@ -53,10 +50,10 @@ impl SeedData {
             institutions_result?;
         }
 
-        app_admin.write(db_conn).await?;
-        download_and_insert_index_sets(db_conn, http_client, &index_set_urls).await?;
-        chemistries.write(db_conn).await?;
-        library_type_specifications.write(db_conn).await?;
+        // app_admin.write(db_conn).await?;
+        // download_and_insert_index_sets(db_conn, http_client, &index_set_urls).await?;
+        // chemistries.write(db_conn).await?;
+        // library_type_specifications.write(db_conn).await?;
 
         Ok(())
     }

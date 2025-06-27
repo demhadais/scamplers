@@ -1,5 +1,13 @@
 #[cfg(feature = "backend")]
 use diesel::{deserialize::FromSqlRow, expression::AsExpression, sql_types};
+use wasm_bindgen::{
+    JsValue,
+    convert::{
+        FromWasmAbi, IntoWasmAbi, OptionFromWasmAbi, OptionIntoWasmAbi, TryFromJsValue,
+        VectorFromWasmAbi, VectorIntoWasmAbi, js_value_vector_from_abi, js_value_vector_into_abi,
+    },
+    describe::{WasmDescribe, WasmDescribeVector},
+};
 use {
     _uuid::Bytes,
     serde::{Deserialize, Serialize},
@@ -11,6 +19,7 @@ use {
 #[derive(
     Clone, Copy, Eq, Ord, PartialEq, PartialOrd, Debug, Hash, Default, Deserialize, Serialize,
 )]
+#[serde(transparent)]
 pub struct Uuid(_uuid::Uuid);
 
 impl Display for Uuid {
@@ -35,94 +44,89 @@ impl Uuid {
         inner.as_bytes()
     }
 
-    #[cfg(feature = "backend")]
     #[must_use]
     pub fn now_v7() -> Self {
         Self(_uuid::Uuid::now_v7())
     }
 }
 
-#[cfg(feature = "typescript")]
-mod typescript {
-    use std::str::FromStr;
-    use wasm_bindgen::{
-        JsValue,
-        convert::{
-            FromWasmAbi, IntoWasmAbi, OptionFromWasmAbi, OptionIntoWasmAbi, TryFromJsValue,
-            VectorFromWasmAbi, VectorIntoWasmAbi, js_value_vector_from_abi,
-            js_value_vector_into_abi,
-        },
-        describe::{WasmDescribe, WasmDescribeVector},
-    };
+impl WasmDescribe for Uuid {
+    fn describe() {
+        String::describe();
+    }
+}
 
-    impl WasmDescribe for super::Uuid {
-        fn describe() {
-            String::describe();
-        }
+impl From<Uuid> for JsValue {
+    fn from(val: Uuid) -> Self {
+        val.to_string().into()
+    }
+}
+
+impl TryFromJsValue for Uuid {
+    type Error = _uuid::Error;
+
+    fn try_from_js_value(value: JsValue) -> Result<Self, Self::Error> {
+        Self::from_str(&String::try_from_js_value(value).unwrap())
+    }
+}
+
+impl IntoWasmAbi for Uuid {
+    type Abi = <String as IntoWasmAbi>::Abi;
+
+    fn into_abi(self) -> Self::Abi {
+        self.to_string().into_abi()
+    }
+}
+
+impl FromWasmAbi for Uuid {
+    type Abi = <Self as IntoWasmAbi>::Abi;
+
+    unsafe fn from_abi(js: Self::Abi) -> Self {
+        Self(unsafe { String::from_abi(js).parse().unwrap() })
+    }
+}
+
+impl OptionIntoWasmAbi for Uuid {
+    fn none() -> Self::Abi {
+        <String as OptionIntoWasmAbi>::none()
+    }
+}
+
+impl OptionFromWasmAbi for Uuid {
+    fn is_none(abi: &Self::Abi) -> bool {
+        <String as OptionFromWasmAbi>::is_none(abi)
+    }
+}
+
+impl WasmDescribeVector for Uuid {
+    fn describe_vector() {
+        Vec::<String>::describe();
+    }
+}
+
+impl VectorIntoWasmAbi for Uuid {
+    type Abi = <String as VectorIntoWasmAbi>::Abi;
+
+    fn vector_into_abi(vector: Box<[Self]>) -> Self::Abi {
+        js_value_vector_into_abi(vector)
+    }
+}
+
+impl VectorFromWasmAbi for Uuid {
+    type Abi = <String as VectorFromWasmAbi>::Abi;
+
+    unsafe fn vector_from_abi(js: Self::Abi) -> Box<[Self]> {
+        unsafe { js_value_vector_from_abi(js) }
+    }
+}
+
+impl valuable::Valuable for Uuid {
+    fn as_value(&self) -> valuable::Value<'_> {
+        self.as_bytes().as_value()
     }
 
-    impl From<super::Uuid> for JsValue {
-        fn from(val: super::Uuid) -> Self {
-            val.to_string().into()
-        }
-    }
-
-    impl TryFromJsValue for super::Uuid {
-        type Error = _uuid::Error;
-
-        fn try_from_js_value(value: JsValue) -> Result<Self, Self::Error> {
-            Self::from_str(&String::try_from_js_value(value).unwrap())
-        }
-    }
-
-    impl IntoWasmAbi for super::Uuid {
-        type Abi = <String as IntoWasmAbi>::Abi;
-
-        fn into_abi(self) -> Self::Abi {
-            self.to_string().into_abi()
-        }
-    }
-
-    impl FromWasmAbi for super::Uuid {
-        type Abi = <Self as IntoWasmAbi>::Abi;
-
-        unsafe fn from_abi(js: Self::Abi) -> Self {
-            Self(unsafe { String::from_abi(js).parse().unwrap() })
-        }
-    }
-
-    impl OptionIntoWasmAbi for super::Uuid {
-        fn none() -> Self::Abi {
-            <String as OptionIntoWasmAbi>::none()
-        }
-    }
-
-    impl OptionFromWasmAbi for super::Uuid {
-        fn is_none(abi: &Self::Abi) -> bool {
-            <String as OptionFromWasmAbi>::is_none(abi)
-        }
-    }
-
-    impl WasmDescribeVector for super::Uuid {
-        fn describe_vector() {
-            Vec::<String>::describe();
-        }
-    }
-
-    impl VectorIntoWasmAbi for super::Uuid {
-        type Abi = <String as VectorIntoWasmAbi>::Abi;
-
-        fn vector_into_abi(vector: Box<[Self]>) -> Self::Abi {
-            js_value_vector_into_abi(vector)
-        }
-    }
-
-    impl VectorFromWasmAbi for super::Uuid {
-        type Abi = <String as VectorFromWasmAbi>::Abi;
-
-        unsafe fn vector_from_abi(js: Self::Abi) -> Box<[Self]> {
-            unsafe { js_value_vector_from_abi(js) }
-        }
+    fn visit(&self, visit: &mut dyn valuable::Visit) {
+        self.as_bytes().visit(visit);
     }
 }
 
@@ -137,18 +141,7 @@ mod backend {
             serialize::{Output, ToSql},
             sql_types,
         },
-        valuable::{Valuable, Value},
     };
-
-    impl Valuable for Uuid {
-        fn as_value(&self) -> Value<'_> {
-            self.as_bytes().as_value()
-        }
-
-        fn visit(&self, visit: &mut dyn valuable::Visit) {
-            self.as_bytes().visit(visit);
-        }
-    }
 
     impl FromSql<sql_types::Uuid, Pg> for Uuid {
         fn from_sql(bytes: <Pg as Backend>::RawValue<'_>) -> diesel::deserialize::Result<Self> {

@@ -1,44 +1,39 @@
-#[cfg(feature = "backend")]
-use {
-    diesel::{
-        backend::Backend,
-        deserialize::{FromSql, FromSqlRow},
-        expression::AsExpression,
-        pg::Pg,
-        serialize::{Output, ToSql},
-        sql_types,
-    },
-    garde::rules::AsStr,
-    std::{fmt::Display, str},
-};
+use std::fmt::Display;
 
-#[cfg(feature = "typescript")]
+#[cfg(feature = "backend")]
+use diesel::{
+    backend::Backend,
+    deserialize::{FromSql, FromSqlRow},
+    expression::AsExpression,
+    pg::Pg,
+    serialize::{Output, ToSql},
+    sql_types,
+};
+use scamplers_macros::base_api_model;
 use wasm_bindgen::prelude::*;
 
-#[cfg_attr(
-    feature = "backend",
-    derive(
-        serde::Deserialize,
-        serde::Serialize,
-        garde::Validate,
-        valuable::Valuable,
-        FromSqlRow,
-        AsExpression,
-        Debug
-    ),
-    garde(transparent),
-    valuable(transparent)
-)]
-#[cfg_attr(feature = "backend", diesel(sql_type = sql_types::Text))]
-#[cfg_attr(feature = "typescript", wasm_bindgen, derive(serde::Serialize))]
+#[base_api_model]
+#[wasm_bindgen]
 #[derive(Clone)]
+#[valuable(transparent)]
+#[garde(transparent)]
 #[serde(transparent)]
-pub struct NonEmptyString(#[cfg_attr(feature = "backend", garde(length(min = 1)))] String);
+#[cfg_attr(feature = "backend", derive(FromSqlRow, AsExpression))]
+#[cfg_attr(feature = "backend", diesel(sql_type = sql_types::Text))]
+pub struct NonEmptyString(#[garde(length(min = 1))] String);
 
+#[wasm_bindgen]
 #[derive(Debug, thiserror::Error)]
 #[error("cannot construct `NonEmptyString` from empty string")]
-#[cfg_attr(feature = "typescript", wasm_bindgen)]
 pub struct EmptyStringError;
+
+#[wasm_bindgen]
+impl NonEmptyString {
+    #[wasm_bindgen(constructor)]
+    pub fn new(s: &str) -> Result<Self, EmptyStringError> {
+        s.to_non_empty_string()
+    }
+}
 
 trait ToNonEmptyString {
     fn to_non_empty_string(&self) -> std::result::Result<NonEmptyString, EmptyStringError>;
@@ -54,21 +49,18 @@ impl ToNonEmptyString for str {
     }
 }
 
-#[cfg(feature = "backend")]
 impl AsRef<str> for NonEmptyString {
     fn as_ref(&self) -> &str {
         &self.0
     }
 }
 
-#[cfg(feature = "backend")]
 impl PartialEq<String> for NonEmptyString {
     fn eq(&self, other: &String) -> bool {
         self.0.eq(other)
     }
 }
 
-#[cfg(feature = "backend")]
 impl Display for NonEmptyString {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         self.0.fmt(f)
@@ -99,21 +91,5 @@ impl ToSql<sql_types::Text, Pg> for NonEmptyString {
     fn to_sql<'b>(&'b self, out: &mut Output<'b, '_, Pg>) -> diesel::serialize::Result {
         let Self(inner) = self;
         <String as ToSql<sql_types::Text, Pg>>::to_sql(inner, out)
-    }
-}
-
-#[cfg(feature = "backend")]
-impl AsStr for NonEmptyString {
-    fn as_str(&self) -> &str {
-        &self.0
-    }
-}
-
-#[cfg(feature = "typescript")]
-#[wasm_bindgen]
-impl NonEmptyString {
-    #[wasm_bindgen(constructor)]
-    pub fn new(s: &str) -> std::result::Result<Self, EmptyStringError> {
-        s.to_non_empty_string()
     }
 }

@@ -1,30 +1,42 @@
-#[cfg(feature = "typescript")]
-use wasm_bindgen::prelude::*;
+use derive_builder::UninitializedFieldError;
+use scamplers_macros::{base_api_model, base_api_model_with_default};
+use std::ops::Deref;
 
-pub mod chemistry;
-pub mod index_sets;
-pub mod institution;
-pub mod lab;
-pub mod library_type_specification;
-pub mod person;
-pub mod sequencing_run;
-pub mod specimen;
-pub mod suspension;
-pub mod units;
+pub use institution::{Institution, InstitutionQuery, NewInstitution};
 
-#[cfg_attr(
-    feature = "typescript",
-    derive(Clone, serde::Serialize),
-    wasm_bindgen(setter)
-)]
-#[cfg_attr(
-    feature = "backend",
-    derive(serde::Deserialize, valuable::Valuable, Debug),
-    serde(default)
-)]
+mod institution;
+mod lab;
+mod person;
+mod specimen;
+// pub mod chemistry;
+// pub mod index_sets;
+// pub mod institution;
+// pub mod library_type_specification;
+// pub mod person;
+// pub mod sequencing_run;
+// pub mod suspension;
+// pub mod units;
+
+#[cfg_attr(target_arch = "wasm32", ::wasm_bindgen::prelude::wasm_bindgen)]
+#[derive(Debug)]
+pub struct BuilderError {
+    message: String,
+}
+
+impl From<UninitializedFieldError> for BuilderError {
+    fn from(value: UninitializedFieldError) -> Self {
+        Self {
+            message: value.to_string(),
+        }
+    }
+}
+
+#[base_api_model]
+#[cfg_attr(target_arch = "wasm32", ::wasm_bindgen::prelude::wasm_bindgen)]
 pub struct Pagination {
-    pub limit: i64,
-    pub offset: i64,
+    limit: i64,
+    #[garde(range(min = 1))]
+    offset: i64,
 }
 
 impl Default for Pagination {
@@ -36,92 +48,119 @@ impl Default for Pagination {
     }
 }
 
-#[cfg(feature = "typescript")]
-#[wasm_bindgen]
-impl Pagination {
-    #[wasm_bindgen(constructor)]
-    #[must_use]
-    pub fn new(limit: i64, offset: i64) -> Self {
-        Self { limit, offset }
-    }
-}
-
 pub trait IsUpdate {
     fn is_update(&self) -> bool;
 }
 
-trait DefaultOrdering {
-    fn default() -> Self;
-}
-impl<T> DefaultOrdering for Vec<T>
+#[base_api_model_with_default]
+#[derive(PartialEq)]
+pub struct SortBy<C>
 where
-    T: Default,
+    C: valuable::Valuable + Default,
+{
+    by: C,
+    descending: bool,
+}
+
+#[base_api_model]
+#[serde(transparent)]
+#[valuable(transparent)]
+#[derive(PartialEq)]
+pub struct SortByGroup<C>(Vec<SortBy<C>>)
+where
+    C: valuable::Valuable + Default;
+
+impl<C> Default for SortByGroup<C>
+where
+    C: valuable::Valuable + Default,
 {
     fn default() -> Self {
-        vec![T::default()]
+        Self(vec![SortBy::<C>::default()])
     }
 }
 
-#[derive(serde::Deserialize, Default, Debug, valuable::Valuable)]
-#[serde(default)]
-pub struct Order<C>
+impl<C> Deref for SortByGroup<C>
 where
-    C: valuable::Valuable,
+    C: valuable::Valuable + Default,
 {
-    pub by: C,
-    pub descending: bool,
+    type Target = [SortBy<C>];
+
+    fn deref(&self) -> &Self::Target {
+        self.0.as_slice()
+    }
 }
 
 #[cfg(test)]
 mod tests {
-    #[cfg(feature = "typescript")]
+    use crate::model::SortBy;
+
+    use super::SortByGroup;
+    use scamplers_macros::{base_api_model_with_default, db_insertion, db_query};
+
     #[test]
     fn write_request_builder() {
-        use scamplers_macros::frontend_insertion;
+        // This is just to get rid of IDE errors
+        #[cfg(feature = "backend")]
+        diesel::table! {
+            write_structs(field) {
+                field -> Text,
+                optional_field -> Nullable<Text>
+            }
+        }
 
-        #[frontend_insertion]
-        #[derive(Debug, PartialEq)]
+        #[db_insertion]
+        #[derive(PartialEq)]
         struct WriteStruct {
             field: String,
             #[builder(default)]
             optional_field: Option<String>,
         }
 
-        let functional = WriteStruct::new()
-            .field(String::new())
+        let built_struct = WriteStructBuilder::default()
+            .field("field")
             .build()
             .expect("failed to build struct without setting optional field");
 
         assert_eq!(
-            functional,
+            built_struct,
             WriteStruct {
-                field: String::new(),
+                field: "field".to_string(),
                 optional_field: None
             }
         );
 
-        WriteStruct::new().build().unwrap_err();
+        WriteStructBuilder::default().build().unwrap_err();
     }
 
-    #[cfg(feature = "typescript")]
     #[test]
     fn default_query_request() {
-        use scamplers_macros::frontend_query_request;
-
-        #[frontend_query_request]
-        #[derive(Debug, PartialEq)]
-        struct QueryStruct {
-            optional_field: Option<String>,
-            order_by: Vec<String>,
+        #[base_api_model_with_default]
+        #[derive(PartialEq)]
+        pub enum OrdinalColumn {
+            #[default]
+            Column,
         }
 
-        let default_query = QueryStruct::default();
+        #[db_query]
+        #[derive(PartialEq)]
+        struct QueryStruct {
+            optional_field: Option<String>,
+            #[builder(setter(custom))]
+            order_by: SortByGroup<OrdinalColumn>,
+        }
+
+        let built_struct = QueryStructBuilder::default()
+            .build()
+            .expect("failed to build default `QueryStruct`");
 
         assert_eq!(
-            default_query,
+            built_struct,
             QueryStruct {
                 optional_field: None,
-                order_by: vec![String::new()]
+                order_by: SortByGroup(vec![SortBy {
+                    by: OrdinalColumn::Column,
+                    descending: false
+                }])
             }
         );
     }

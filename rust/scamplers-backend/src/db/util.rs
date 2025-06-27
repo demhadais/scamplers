@@ -1,5 +1,6 @@
 use diesel::{pg::Pg, prelude::*, sql_types};
 use diesel_async::{AsyncPgConnection, RunQueryDsl, pooled_connection::deadpool::Object};
+use scamplers_core::model::Order;
 
 pub(super) type BoxedDieselExpression<'a, QuerySource> =
     Box<dyn BoxableExpression<QuerySource, Pg, SqlType = sql_types::Bool> + 'a>;
@@ -61,6 +62,10 @@ impl<'a, QuerySource: 'a> DieselExpressionBuilder<'a, QuerySource> {
 
         Self::from_query(query.or(other))
     }
+
+    // pub fn order_by<C>(self, by: &[Order<C>]) -> Self where C: {
+
+    // }
 
     pub fn build(self) -> Option<BoxedDieselExpression<'a, QuerySource>> {
         self.0

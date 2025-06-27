@@ -20,9 +20,6 @@ use scamplers_schema::{
 };
 use uuid::Uuid;
 
-mod multiplexed;
-mod singleplexed;
-
 #[diesel::dsl::auto_type]
 fn suspension_measurement_from_clause() -> _ {
     suspension_measurement::table.inner_join(person::table)

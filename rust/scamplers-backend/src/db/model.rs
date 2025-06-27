@@ -3,11 +3,12 @@ use crate::db::util::{BoxedDieselExpression, NewBoxedDieselExpression};
 use diesel_async::AsyncPgConnection;
 
 pub mod institution;
-pub mod lab;
-pub mod person;
-pub mod sequencing_run;
-pub mod specimen;
-pub mod suspension;
+// pub mod lab;
+// pub mod multiplexed_suspension;
+// pub mod person;
+// pub mod sequencing_run;
+// pub mod specimen;
+// pub mod suspension;
 
 trait AsDieselFilter<QuerySource = ()> {
     fn as_diesel_filter<'a>(&'a self) -> Option<BoxedDieselExpression<'a, QuerySource>>
@@ -130,11 +131,7 @@ macro_rules! fetch_by_query {
         use super::AsDieselFilter;
         use scamplers_core::model::Pagination;
 
-        let Self::QueryParams {
-            order_by,
-            pagination: Pagination { limit, offset },
-            ..
-        } = $query;
+        let (order_by, limit, offset) = ($query.order_by(), $query.pagination().limit() $query.pagination().offset());
 
         let query = $query.as_diesel_filter();
 
@@ -149,7 +146,7 @@ macro_rules! fetch_by_query {
         }
 
         for ordering in order_by {
-            statement = match (&ordering.by, ordering.descending) {
+            statement = match (ordering.by(), ordering.descending()) {
                 $(
                     ($ordinal_col_enum_variant, false) => statement.then_order_by($corresponding_db_col.asc()),
                     ($ordinal_col_enum_variant, true) => statement.then_order_by($corresponding_db_col.desc()),

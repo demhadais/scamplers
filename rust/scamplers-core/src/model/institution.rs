@@ -1,78 +1,59 @@
-use crate::{model::Pagination, string::NonEmptyString};
-#[cfg(feature = "typescript")]
+use crate::{
+    model::{Pagination, SortByGroup},
+    string::NonEmptyString,
+};
 use scamplers_macros::{
-    frontend_insertion, frontend_ordering, frontend_ordinal_columns_enum, frontend_query_request,
-    frontend_with_getters,
+    base_api_model_with_default, db_insertion_with_wasm, db_query, db_selection,
 };
-use uuid::Uuid;
 #[cfg(feature = "backend")]
-use {
-    scamplers_macros::{
-        backend_insertion, backend_ordering, backend_ordinal_columns_enum, backend_query_request,
-        backend_with_getters,
-    },
-    scamplers_schema::institution,
-};
+use scamplers_schema::institution;
+use uuid::Uuid;
 
-#[cfg_attr(
-    feature = "backend",
-    backend_insertion(institution),
-    derive(Clone, bon::Builder)
-)]
-#[cfg_attr(feature = "backend", builder(on(NonEmptyString, into)))]
-#[cfg_attr(feature = "typescript", frontend_insertion)]
+#[db_insertion_with_wasm]
+#[cfg_attr(feature = "backend", diesel(table_name = institution))]
 pub struct NewInstitution {
     id: Uuid,
-    #[cfg_attr(feature = "backend", garde(dive))]
+    #[garde(dive)]
     name: NonEmptyString,
 }
 
-#[cfg_attr(feature = "backend", backend_with_getters)]
-#[cfg_attr(feature = "typescript", frontend_with_getters)]
-mod read {
-    #[cfg(feature = "typescript")]
-    use scamplers_macros::frontend_response;
-    use uuid::Uuid;
-    #[cfg(feature = "backend")]
-    use {scamplers_macros::backend_selection, scamplers_schema::institution};
+#[db_selection]
+#[cfg_attr(feature = "backend", diesel(table_name = institution))]
+pub struct InstitutionHandle {
+    id: Uuid,
+    link: String,
+}
 
-    #[cfg_attr(feature = "backend", backend_selection(institution))]
-    #[cfg_attr(feature = "typescript", frontend_response)]
-    pub struct InstitutionHandle {
-        id: Uuid,
-        link: String,
+#[db_selection]
+#[cfg_attr(feature = "backend", diesel(table_name = institution))]
+pub struct Institution {
+    #[serde(flatten)]
+    #[getset(skip)]
+    #[cfg_attr(feature = "backend", diesel(embed))]
+    handle: InstitutionHandle,
+    name: String,
+}
+impl Institution {
+    pub fn id(&self) -> &Uuid {
+        self.handle.id()
     }
 
-    #[cfg_attr(feature = "backend", backend_selection(institution))]
-    #[cfg_attr(feature = "typescript", frontend_response)]
-    pub struct Institution {
-        #[serde(flatten)]
-        #[cfg_attr(feature = "backend", diesel(embed))]
-        handle: InstitutionHandle,
-        name: String,
+    pub fn link(&self) -> &str {
+        self.handle.link()
     }
 }
-pub use read::*;
 
-#[cfg_attr(feature = "backend", backend_ordinal_columns_enum)]
-#[cfg_attr(feature = "typescript", frontend_ordinal_columns_enum)]
+#[base_api_model_with_default]
 pub enum InstitutionOrdinalColumn {
     #[default]
     Name,
 }
 
-#[cfg_attr(feature = "backend", backend_ordering)]
-#[cfg_attr(feature = "typescript", frontend_ordering)]
-pub struct InstitutionOrdering {
-    pub by: InstitutionOrdinalColumn,
-    pub descending: bool,
-}
-
-#[cfg_attr(feature = "backend", backend_query_request)]
-#[cfg_attr(feature = "typescript", frontend_query_request)]
+#[db_query]
 pub struct InstitutionQuery {
-    pub ids: Vec<Uuid>,
-    pub name: Option<String>,
-    pub order_by: Vec<InstitutionOrdering>,
-    pub pagination: Pagination,
+    ids: Vec<Uuid>,
+    name: Option<String>,
+    #[builder(setter(custom))]
+    order_by: SortByGroup<InstitutionOrdinalColumn>,
+    pagination: Pagination,
 }
