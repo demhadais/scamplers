@@ -1,3 +1,8 @@
+use scamplers_macros::{db_enum, db_insertion, db_json, db_selection};
+#[cfg(feature = "backend")]
+use scamplers_schema::{
+    multiplexing_tag, suspension, suspension_measurement, suspension_preparers,
+};
 use {
     crate::{
         model::{
@@ -10,14 +15,8 @@ use {
     time::OffsetDateTime,
     uuid::Uuid,
 };
-#[cfg(feature = "backend")]
-use {
-    scamplers_macros::{backend_db_enum, backend_db_json, backend_insertion, backend_selection},
-    scamplers_schema::multiplexing_tag,
-    scamplers_schema::{suspension, suspension_measurement, suspension_preparers},
-};
 
-#[cfg_attr(feature = "backend", backend_db_enum)]
+#[db_enum]
 pub enum MultiplexingTagType {
     FlexBarcode,
     OnChipMultiplexing,
@@ -29,63 +28,63 @@ pub enum MultiplexingTagType {
     TotalSeqC,
 }
 
-#[cfg_attr(feature = "backend", backend_insertion(multiplexing_tag))]
+#[db_insertion]
+#[cfg_attr(feature = "backend", diesel(table_name = multiplexing_tag))]
 pub struct NewMultiplexingTag {
     tag_id: String,
     type_: MultiplexingTagType,
 }
 
-#[cfg_attr(feature = "backend", backend_db_json)]
+#[db_json]
 pub struct SuspensionMeasurementData {
-    #[cfg_attr(feature = "backend", serde(flatten), garde(dive))]
+    #[serde(flatten)]
+    #[garde(dive)]
     core: MeasurementDataCore,
     is_post_hybridization: bool,
 }
 
-#[cfg_attr(feature = "backend", backend_insertion(suspension_measurement))]
+#[db_insertion]
+#[cfg_attr(feature = "backend", diesel(table_name = suspension_measurement))]
 pub struct NewSuspensionMeasurement {
-    #[cfg_attr(feature = "backend", serde(default))]
+    #[serde(default)]
     suspension_id: Uuid,
     measured_by: Uuid,
-    #[cfg_attr(feature = "backend", garde(dive), serde(flatten))]
+    #[serde(flatten)]
+    #[garde(dive)]
     data: SuspensionMeasurementData,
 }
-impl NewSuspensionMeasurement {
-    #[must_use]
-    pub fn suspension_id(&self) -> &Uuid {
-        &self.suspension_id
-    }
-}
 
-#[cfg_attr(feature = "backend", backend_insertion(suspension))]
+#[db_insertion]
+#[derive(getset::Setters)]
+#[cfg_attr(feature = "backend", diesel(table_name = suspension))]
 pub struct NewSuspension {
     readable_id: NonEmptyString,
     parent_specimen_id: Uuid,
     biological_material: BiologicalMaterial,
-    #[cfg_attr(feature = "backend", valuable(skip))]
     created_at: Option<OffsetDateTime>,
-    pub(super) pooled_into_id: Option<Uuid>,
+    #[getset(set = "pub(super)")]
+    pooled_into_id: Option<Uuid>,
     multiplexing_tag_id: Option<Uuid>,
-    #[cfg_attr(feature = "backend", garde(range(min = 0.0)))]
+    #[garde(range(min = 0.0))]
     lysis_duration_minutes: Option<f32>,
-    #[cfg_attr(feature = "backend", garde(range(min = 0.0)))]
+    #[garde(range(min = 0.0))]
     target_cell_recovery: f32,
-    #[cfg_attr(feature = "backend", garde(range(min = 0)))]
+    #[garde(range(min = 0))]
     target_reads_per_cell: i32,
-    #[cfg_attr(feature = "backend", garde(dive))]
+    #[garde(dive)]
     notes: Option<NonEmptyString>,
+    #[getset(skip)]
     #[cfg_attr(feature = "backend", diesel(skip_insertion))]
     preparer_ids: Vec<Uuid>,
-    #[cfg_attr(
-        feature = "backend",
-        diesel(skip_insertion),
-        garde(dive),
-        serde(default)
-    )]
+    #[garde(dive)]
+    #[serde(default)]
+    #[getset(skip)]
+    #[cfg_attr(feature = "backend", diesel(skip_insertion))]
     measurements: Vec<NewSuspensionMeasurement>,
 }
 
-#[cfg_attr(feature = "backend", backend_insertion(suspension_preparers))]
+#[db_insertion]
+#[cfg_attr(feature = "backend", diesel(table_name = suspension_preparers))]
 pub struct SingleplexedSuspensionPreparer {
     suspension_id: Uuid,
     prepared_by: Uuid,
@@ -93,38 +92,40 @@ pub struct SingleplexedSuspensionPreparer {
 
 impl NewSuspension {
     #[must_use]
-    pub fn preparers(&self, suspension_id: Uuid) -> Vec<SingleplexedSuspensionPreparer> {
+    pub fn preparers(&self, self_id: Uuid) -> Vec<SingleplexedSuspensionPreparer> {
         self.preparer_ids
             .iter()
             .map(|p| SingleplexedSuspensionPreparer {
                 prepared_by: *p,
-                suspension_id,
+                suspension_id: self_id,
             })
             .collect()
     }
 
-    pub fn measurements(&mut self, suspension_id: Uuid) -> &[NewSuspensionMeasurement] {
+    pub fn measurements(&mut self, self_id: Uuid) -> &[NewSuspensionMeasurement] {
         for measurement in &mut self.measurements {
-            measurement.suspension_id = suspension_id;
+            measurement.suspension_id = self_id;
         }
 
         &self.measurements
     }
 }
 
-#[cfg_attr(feature = "backend", backend_selection(suspension))]
+#[db_selection]
+#[cfg_attr(feature = "backend", diesel(table_name = suspension))]
 pub struct SuspensionHandle {
     id: Uuid,
     link: String,
 }
 
-#[cfg_attr(feature = "backend", backend_selection(suspension))]
+#[db_selection]
+#[cfg_attr(feature = "backend", diesel(table_name = suspension))]
 pub struct SuspensionSummary {
-    #[cfg_attr(feature = "backend", diesel(embed), serde(flatten))]
+    #[serde(flatten)]
+    #[cfg_attr(feature = "backend", diesel(embed))]
     handle: SuspensionHandle,
     readable_id: String,
     biological_material: String,
-    #[cfg_attr(feature = "backend", valuable(skip))]
     created_at: Option<OffsetDateTime>,
     lysis_duration_minutes: Option<f32>,
     target_cell_recovery: f32,
@@ -132,16 +133,19 @@ pub struct SuspensionSummary {
     notes: Option<String>,
 }
 
-#[cfg_attr(feature = "backend", backend_selection(multiplexing_tag))]
+#[db_selection]
+#[cfg_attr(feature = "backend", diesel(table_name = multiplexing_tag))]
 pub struct MultiplexingTag {
     id: Uuid,
     tag_id: String,
     type_: String,
 }
 
-#[cfg_attr(feature = "backend", backend_selection(suspension))]
+#[db_selection]
+#[cfg_attr(feature = "backend", diesel(table_name = suspension))]
 pub struct SuspensionCore {
-    #[cfg_attr(feature = "backend", diesel(embed), serde(flatten))]
+    #[serde(flatten)]
+    #[cfg_attr(feature = "backend", diesel(embed))]
     summary: SuspensionSummary,
     #[cfg_attr(feature = "backend", diesel(embed))]
     parent_specimen: SpecimenSummary,
@@ -149,17 +153,18 @@ pub struct SuspensionCore {
     multiplexing_tag: MultiplexingTag,
 }
 
-#[cfg_attr(feature = "backend", backend_selection(suspension_measurement))]
+#[db_selection]
+#[cfg_attr(feature = "backend", diesel(table_name = suspension_measurement))]
 pub struct SuspensionMeasurement {
     #[cfg_attr(feature = "backend", diesel(embed))]
     measured_by: PersonHandle,
-    #[cfg_attr(feature = "backend", serde(flatten))]
+    #[serde(flatten)]
     data: SuspensionMeasurementData,
 }
 
-#[cfg_attr(feature = "backend", derive(serde::Serialize, bon::Builder))]
+#[derive(serde::Serialize)]
 pub struct Suspension {
-    #[cfg_attr(feature = "backend", serde(flatten))]
+    #[serde(flatten)]
     core: SuspensionCore,
     preparers: Vec<PersonHandle>,
     measurements: Vec<SuspensionMeasurement>,

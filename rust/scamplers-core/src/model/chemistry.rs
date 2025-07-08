@@ -1,17 +1,20 @@
 use crate::string::NonEmptyString;
-use serde_json::Value;
+use scamplers_macros::db_insertion;
 #[cfg(feature = "backend")]
-use {scamplers_macros::backend_insertion, scamplers_schema::chemistry};
+use scamplers_schema::chemistry;
+use serde_json::Value;
 
-#[cfg_attr(feature = "backend", backend_insertion(chemistry))]
-#[cfg_attr(feature = "backend", derive(Clone))]
+#[db_insertion]
+#[derive(Clone)]
+#[cfg_attr(feature = "backend", diesel(table_name = chemistry))]
 pub struct Chemistry {
-    #[cfg_attr(feature = "backend", garde(dive))]
+    #[garde(dive)]
     name: NonEmptyString,
-    #[cfg_attr(feature = "backend", garde(dive))]
+    #[garde(dive)]
     description: NonEmptyString,
-    #[cfg_attr(feature = "backend", serde(flatten), valuable(skip))]
+    #[serde(flatten)]
+    #[valuable(skip)]
     definition: Value,
-    #[cfg_attr(feature = "backend", garde(dive))]
+    #[garde(dive)]
     cmdline: NonEmptyString,
 }

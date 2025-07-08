@@ -2352,6 +2352,7 @@ dependencies = [
  "axum-extra",
  "camino",
  "clap",
+ "derive_builder",
  "diesel",
  "diesel-async",
  "diesel_migrations",

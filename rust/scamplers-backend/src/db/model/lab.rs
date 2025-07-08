@@ -9,7 +9,10 @@ use diesel::{dsl::InnerJoin, prelude::*};
 use diesel_async::RunQueryDsl;
 use scamplers_core::model::{
     IsUpdate,
-    lab::{Lab, LabCore, LabQuery, LabSummary, LabUpdate, NewLab},
+    lab::{
+        Lab, LabBuilder, LabCore, LabQuery, LabSummary, LabUpdate, LabUpdateBuilder,
+        LabUpdateCoreBuilder, NewLab,
+    },
     person::PersonSummary,
 };
 use scamplers_schema::{
@@ -75,14 +78,14 @@ impl model::WriteToDb for NewLab {
             .get_result(db_conn)
             .await?;
 
-        let mut update = LabUpdate::builder().id(id);
+        let update_core = LabUpdateCoreBuilder::default().id(id).build().unwrap();
+        let update = LabUpdateBuilder::default()
+            .core(update_core)
+            .add_members(self.member_ids().clone())
+            .build()
+            .unwrap();
 
-        update = update.add_member(pi_id);
-        for member_id in self.member_ids() {
-            update = update.add_member(*member_id);
-        }
-
-        update.build().write(db_conn).await
+        update.write(db_conn).await
     }
 }
 
@@ -95,7 +98,7 @@ where
     where
         QuerySource: 'a,
     {
-        let Self { ids, name, .. } = self;
+        let (ids, name) = (self.ids(), self.name());
         let q1 = (!ids.is_empty()).then(|| id_col.eq_any(ids));
         let q2 = name.as_ref().map(|name| name_col.ilike(name.as_ilike()));
 
@@ -176,7 +179,7 @@ impl model::FetchById for Lab {
         let core = LabCore::fetch_by_id(id, db_conn).await?;
         let members = lab::table::fetch_relatives(id, db_conn).await?;
 
-        Ok(Self::builder().core(core).members(members).build())
+        Ok(LabBuilder::default().core(core).members(members).build()?)
     }
 }
 

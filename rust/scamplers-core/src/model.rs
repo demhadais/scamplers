@@ -1,21 +1,17 @@
 use derive_builder::UninitializedFieldError;
 use scamplers_macros::{base_api_model, base_api_model_with_default};
-use std::ops::Deref;
+use std::{ops::Deref, vec::IntoIter};
 
-pub use institution::{Institution, InstitutionQuery, NewInstitution};
-
-mod institution;
-mod lab;
-mod person;
-mod specimen;
-// pub mod chemistry;
-// pub mod index_sets;
-// pub mod institution;
-// pub mod library_type_specification;
-// pub mod person;
-// pub mod sequencing_run;
-// pub mod suspension;
-// pub mod units;
+pub mod chemistry;
+pub mod index_sets;
+pub mod institution;
+pub mod lab;
+pub mod library_type_specification;
+pub mod person;
+pub mod sequencing_run;
+pub mod specimen;
+pub mod suspension;
+pub mod units;
 
 #[cfg_attr(target_arch = "wasm32", ::wasm_bindgen::prelude::wasm_bindgen)]
 #[derive(Debug)]
@@ -78,15 +74,21 @@ where
         Self(vec![SortBy::<C>::default()])
     }
 }
-
-impl<C> Deref for SortByGroup<C>
+impl<C> SortByGroup<C>
 where
     C: valuable::Valuable + Default,
 {
-    type Target = [SortBy<C>];
-
-    fn deref(&self) -> &Self::Target {
+    pub fn as_slice(&self) -> &[SortBy<C>] {
         self.0.as_slice()
+    }
+}
+
+impl<C> SortByGroup<C>
+where
+    C: valuable::Valuable + Default,
+{
+    pub fn push(&mut self, value: SortBy<C>) {
+        self.0.push(value);
     }
 }
 

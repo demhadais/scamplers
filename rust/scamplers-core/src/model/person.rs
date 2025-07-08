@@ -1,15 +1,14 @@
 use crate::{
-    model::{IsUpdate, Pagination, SortBy, SortByGroup, institution::Institution},
+    model::{IsUpdate, Pagination, SortByGroup, institution::Institution},
     string::NonEmptyString,
 };
 use scamplers_macros::{
-    base_api_model, base_api_model_with_default, db_enum, db_insertion, db_query, db_selection,
-    db_update,
+    base_api_model, base_api_model_with_default, db_enum, db_insertion_with_wasm, db_query,
+    db_selection, db_update,
 };
 #[cfg(feature = "backend")]
 use scamplers_schema::person;
 use uuid::Uuid;
-use wasm_bindgen::prelude::wasm_bindgen;
 
 #[db_enum]
 #[derive(PartialEq)]
@@ -19,7 +18,8 @@ pub enum UserRole {
     BiologyStaff,
 }
 
-#[db_insertion]
+#[db_insertion_with_wasm]
+#[derive(Clone)]
 #[cfg_attr(feature = "backend", diesel(table_name = person))]
 pub struct NewPerson {
     #[garde(dive)]

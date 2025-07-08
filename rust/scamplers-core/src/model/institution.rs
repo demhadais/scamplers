@@ -1,5 +1,5 @@
 use crate::{
-    model::{Pagination, SortByGroup},
+    model::{Pagination, SortBy, SortByGroup},
     string::NonEmptyString,
 };
 use scamplers_macros::{
@@ -31,6 +31,7 @@ pub struct Institution {
     #[getset(skip)]
     #[cfg_attr(feature = "backend", diesel(embed))]
     handle: InstitutionHandle,
+    #[getset(get = "pub")]
     name: String,
 }
 impl Institution {
@@ -56,4 +57,17 @@ pub struct InstitutionQuery {
     #[builder(setter(custom))]
     order_by: SortByGroup<InstitutionOrdinalColumn>,
     pagination: Pagination,
+}
+impl InstitutionQueryBuilder {
+    pub fn order_by(mut self, by: InstitutionOrdinalColumn, descending: bool) -> Self {
+        let sort_by = SortBy { by, descending };
+
+        if let Some(ref mut ordering) = self.order_by {
+            ordering.push(sort_by);
+        } else {
+            self.order_by = Some(SortByGroup(vec![sort_by]));
+        }
+
+        self
+    }
 }

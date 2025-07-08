@@ -61,7 +61,7 @@ where
     where
         QuerySource: 'a,
     {
-        let Self { ids, name, .. } = self;
+        let (ids, name) = (self.ids(), self.name());
         let q1 = (!ids.is_empty()).then(|| id_col.eq_any(ids));
         let q2 = name.as_ref().map(|name| name_col.ilike(name.as_ilike()));
 
@@ -116,14 +116,12 @@ mod tests {
     #[awt]
     #[tokio::test]
     async fn specific_institution_query(#[future] db_conn: DbConnection) {
-        let query = InstitutionQuery {
-            name: Some("institution1".to_string()),
-            order_by: vec![InstitutionOrdering {
-                by: InstitutionOrdinalColumn::Name,
-                descending: true,
-            }],
-            ..Default::default()
-        };
+        let query = InstitutionQueryBuilder::default()
+            .name("institution1")
+            .order_by(InstitutionOrdinalColumn::Name, true)
+            .build()
+            .unwrap();
+
         let expected = [(0, "institution19"), (10, "institution1")];
 
         test_query(query, db_conn, 11, comparison_fn, &expected).await;

@@ -2,10 +2,9 @@ use getset::MutGetters;
 use scamplers_macros::{base_api_model, db_enum, db_insertion};
 #[cfg(feature = "backend")]
 use scamplers_schema::specimen;
-use uuid::Uuid;
 
 use crate::{
-    model::specimen::common::{NewSpecimenCommon, NewSpecimenMeasurement},
+    model::specimen::common::{NewCommitteeApproval, NewSpecimenCommon},
     string::NonEmptyString,
 };
 
@@ -85,5 +84,9 @@ impl NewTissue {
             Self::Fixed(t) => t.inner_mut(),
             Self::Frozen(t) => t.inner_mut(),
         }
+    }
+
+    pub(super) fn committee_approvals_mut(&mut self) -> &mut [NewCommitteeApproval] {
+        self.inner_mut().committee_approvals_mut()
     }
 }

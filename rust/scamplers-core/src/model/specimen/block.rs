@@ -1,8 +1,8 @@
-use crate::model::specimen::common::NewSpecimenMeasurement;
+use crate::model::specimen::common::NewCommitteeApproval;
 
 use super::common::NewSpecimenCommon;
 use getset::MutGetters;
-use scamplers_macros::{base_api_model, base_api_model_with_default, db_enum, db_insertion};
+use scamplers_macros::{base_api_model, db_enum, db_insertion};
 #[cfg(feature = "backend")]
 use scamplers_schema::specimen;
 
@@ -73,5 +73,9 @@ impl NewBlock {
             Self::Fixed(b) => b.inner_mut(),
             Self::Frozen(b) => b.inner_mut(),
         }
+    }
+
+    pub(super) fn committee_approvals_mut(&mut self) -> &mut [NewCommitteeApproval] {
+        self.inner_mut().committee_approvals_mut()
     }
 }

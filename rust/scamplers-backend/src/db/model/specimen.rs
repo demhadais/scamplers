@@ -3,6 +3,7 @@ use crate::{
         self,
         model::{
             AsDieselFilter, AsDieselQueryBase, FetchById, FetchByQuery, FetchRelatives, WriteToDb,
+            WriteToDbInternal,
         },
         util::{AsIlike, BoxedDieselExpression, NewBoxedDieselExpression},
     },
@@ -11,8 +12,8 @@ use crate::{
 use diesel::{dsl::AssumeNotNull, prelude::*};
 use diesel_async::{AsyncPgConnection, RunQueryDsl};
 use scamplers_core::model::specimen::{
-    BlockEmbeddingMatrix, Fixative, NewSpecimen, NewSpecimenMeasurement, Specimen, SpecimenCore,
-    SpecimenMeasurement, SpecimenQuery, SpecimenSummary, block::NewBlock, tissue::NewTissue,
+    BlockEmbeddingMatrix, Fixative, NewSpecimen, Specimen, SpecimenCore, SpecimenMeasurement,
+    SpecimenQuery, SpecimenSummary,
 };
 use scamplers_schema::{
     lab, person,
@@ -56,7 +57,7 @@ impl FetchRelatives<SpecimenMeasurement> for specimen::table {
     }
 }
 
-impl WriteToDb for Vec<NewSpecimenMeasurement> {
+impl WriteToDb for &[NewSpecimenMeasurement] {
     type Returns = Vec<SpecimenMeasurement>;
 
     async fn write(self, db_conn: &mut AsyncPgConnection) -> db::error::Result<Self::Returns> {
@@ -122,7 +123,7 @@ impl FetchById for Specimen {
         id: &Self::Id,
         db_conn: &mut AsyncPgConnection,
     ) -> db::error::Result<Self> {
-        let specimen_core = core_query_base()
+        let specimen_core: SpecimenCore = core_query_base()
             .select(SpecimenCore::as_select())
             .filter(id_col.eq(id))
             .first(db_conn)
@@ -130,10 +131,10 @@ impl FetchById for Specimen {
 
         let measurements = specimen::table::fetch_relatives(specimen_core.id(), db_conn).await?;
 
-        Ok(Specimen::builder()
+        Ok(SpecimenBuilder::default()
             .core(specimen_core)
             .measurements(measurements)
-            .build())
+            .build()?)
     }
 }
 

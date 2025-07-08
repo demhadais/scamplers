@@ -1,7 +1,6 @@
-#[cfg(feature = "backend")]
-use scamplers_macros::backend_db_enum;
+use scamplers_macros::db_enum;
 
-#[cfg_attr(feature = "backend", backend_db_enum)]
+#[db_enum]
 pub enum MassUnit {
     #[cfg_attr(feature = "backend", serde(rename = "ng"))]
     Nanogram,
@@ -9,7 +8,7 @@ pub enum MassUnit {
     Picogram,
 }
 
-#[cfg_attr(feature = "backend", backend_db_enum)]
+#[db_enum]
 pub enum VolumeUnit {
     #[cfg_attr(feature = "backend", serde(rename = "µl"))]
     Microliter,
@@ -17,7 +16,7 @@ pub enum VolumeUnit {
     Millliter,
 }
 
-#[cfg_attr(feature = "backend", backend_db_enum)]
+#[db_enum]
 pub enum LengthUnit {
     #[cfg_attr(feature = "backend", serde(rename = "µm"))]
     Micrometer,

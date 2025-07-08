@@ -52,6 +52,8 @@ pub struct LabCore {
 }
 
 #[base_api_model]
+#[derive(::derive_builder::Builder)]
+#[builder(pattern = "owned", build_fn(error = crate::model::BuilderError))]
 #[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
 pub struct Lab {
     #[serde(flatten)]
@@ -85,6 +87,8 @@ impl IsUpdate for LabUpdateCore {
 }
 
 #[base_api_model_with_default]
+#[derive(derive_builder::Builder)]
+#[builder(pattern = "owned")]
 pub struct LabUpdate {
     #[serde(flatten)]
     #[garde(dive)]

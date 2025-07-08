@@ -1,5 +1,5 @@
 use crate::{model::institution::InstitutionHandle, string::NonEmptyString};
-use getset::{MutGetters, Setters};
+use getset::Setters;
 use scamplers_macros::{db_enum, db_insertion, db_json, db_selection};
 #[cfg(feature = "backend")]
 use scamplers_schema::{committee_approval, specimen, specimen_measurement};
@@ -26,9 +26,11 @@ pub enum ComplianceCommitteeType {
 }
 
 #[db_insertion]
+#[derive(Setters)]
 #[cfg_attr(feature = "backend", diesel(table_name = committee_approval))]
 pub struct NewCommitteeApproval {
     #[serde(default)]
+    #[getset(set = "pub(super)")]
     specimen_id: Uuid,
     institution_id: Uuid,
     committee_type: ComplianceCommitteeType,
@@ -38,7 +40,7 @@ pub struct NewCommitteeApproval {
 
 #[db_selection]
 #[cfg_attr(feature = "backend", diesel(table_name = committee_approval))]
-pub(super) struct CommitteeApproval {
+pub struct CommitteeApproval {
     #[cfg_attr(feature = "backend", diesel(embed))]
     institution: InstitutionHandle,
     committee_type: ComplianceCommitteeType,
@@ -46,7 +48,7 @@ pub(super) struct CommitteeApproval {
 }
 
 #[db_json]
-pub(super) enum MeasurementData {
+pub enum MeasurementData {
     Rin {
         measured_at: OffsetDateTime,
         #[garde(dive)]
@@ -80,7 +82,7 @@ pub struct NewSpecimenMeasurement {
 #[db_insertion]
 #[derive(getset::MutGetters)]
 #[cfg_attr(feature = "backend", diesel(table_name = specimen))]
-pub(super) struct NewSpecimenCommon {
+pub struct NewSpecimenCommon {
     #[garde(dive)]
     readable_id: NonEmptyString,
     #[garde(dive)]
@@ -91,6 +93,8 @@ pub(super) struct NewSpecimenCommon {
     #[garde(length(min = 1))]
     species: Vec<Species>,
     #[serde(default)]
+    #[garde(dive)]
+    #[getset(get_mut = "pub(super)")]
     #[cfg_attr(feature = "backend", diesel(skip_insertion))]
     committee_approvals: Vec<NewCommitteeApproval>,
     #[garde(dive)]

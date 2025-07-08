@@ -72,6 +72,11 @@ impl From<diesel::ConnectionError> for Error {
         Self::from_other_error(err)
     }
 }
+impl From<scamplers_core::model::BuilderError> for Error {
+    fn from(err: scamplers_core::model::BuilderError) -> Self {
+        Self::from_other_error(err)
+    }
+}
 
 impl
     From<(

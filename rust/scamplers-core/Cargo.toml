@@ -32,7 +32,7 @@ derive_builder = { workspace = true }
 pretty_assertions = { workspace = true }
 
 [features]
-backend = ["diesel", "scamplers-schema", "uuid/backend"]
+backend = ["diesel", "scamplers-schema", "uuid/backend", "time/backend"]
 
 [lints]
 workspace = true

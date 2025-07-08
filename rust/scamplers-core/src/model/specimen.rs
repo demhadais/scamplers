@@ -1,7 +1,7 @@
 use crate::model::{
     Pagination, SortByGroup,
     person::PersonHandle,
-    specimen::common::{NewSpecimenCommon, NewSpecimenMeasurement},
+    specimen::common::{NewCommitteeApproval, NewSpecimenCommon, NewSpecimenMeasurement},
 };
 
 use super::{lab::LabSummary, person::PersonSummary};
@@ -29,10 +29,7 @@ pub enum NewSpecimen {
 }
 
 impl NewSpecimen {
-    pub fn measurements_with_specimen_id(
-        &mut self,
-        specimen_id: Uuid,
-    ) -> &[NewSpecimenMeasurement] {
+    pub fn measurements(&mut self, self_id: Uuid) -> &[NewSpecimenMeasurement] {
         let inner = match self {
             Self::Block(b) => b.inner_mut(),
             Self::Suspension(s) => s.inner_mut(),
@@ -41,10 +38,24 @@ impl NewSpecimen {
 
         let measurements = inner.measurements_mut();
         for m in &mut *measurements {
-            m.set_specimen_id(specimen_id);
+            m.set_specimen_id(self_id);
         }
 
         measurements
+    }
+
+    pub fn committe_approvals(&mut self, self_id: Uuid) -> &[NewCommitteeApproval] {
+        let approvals = match self {
+            Self::Block(b) => b.committee_approvals_mut(),
+            Self::Suspension(s) => s.committee_approvals_mut(),
+            Self::Tissue(t) => t.committee_approvals_mut(),
+        };
+
+        for a in &mut *approvals {
+            a.set_specimen_id(self_id);
+        }
+
+        approvals
     }
 }
 
@@ -74,6 +85,11 @@ pub struct SpecimenSummary {
     cryopreserved: bool,
     storage_buffer: Option<String>,
 }
+impl SpecimenSummary {
+    pub fn id(&self) -> &Uuid {
+        self.handle().id()
+    }
+}
 
 #[db_selection]
 #[cfg_attr(feature = "backend", diesel(table_name = specimen_measurement))]
@@ -97,8 +113,15 @@ pub struct SpecimenCore {
     #[cfg_attr(feature = "backend", diesel(embed))]
     returned_by: PersonSummary,
 }
+impl SpecimenCore {
+    pub fn id(&self) -> &Uuid {
+        self.summary().id()
+    }
+}
 
 #[base_api_model]
+#[derive(::derive_builder::Builder)]
+#[builder(pattern = "owned", build_fn(error = crate::model::BuilderError))]
 #[cfg_attr(target_arch = "wasm32", ::wasm_bindgen::prelude::wasm_bindgen)]
 pub struct Specimen {
     core: SpecimenCore,
@@ -145,14 +168,12 @@ pub struct SpecimenQuery {
     labs: Vec<Uuid>,
     received_before: Option<OffsetDateTime>,
     received_after: Option<OffsetDateTime>,
+    #[builder(setter(custom))]
     species: Vec<Species>,
     notes: Option<String>,
     #[serde(alias = "type")]
-    #[builder(setter(custom))]
     type_: Option<SpecimenType>,
-    #[builder(setter(custom))]
     embedded_in: Option<BlockEmbeddingMatrix>,
-    #[builder(setter(custom))]
     fixative: Option<Fixative>,
     storage_buffer: Option<String>,
     frozen: Option<bool>,
@@ -163,7 +184,21 @@ pub struct SpecimenQuery {
 }
 
 impl SpecimenQueryBuilder {
-    pub fn submitter(mut self, submitter_id: Uuid) {}
+    pub fn submitter(mut self, submitter_id: Uuid) {
+        if let Some(ref mut submitters) = self.submitters {
+            submitters.push(submitter_id);
+        } else {
+            self.submitters = Some(vec![submitter_id]);
+        }
+    }
+
+    pub fn species(mut self, species: Species) {
+        if let Some(ref mut species_list) = self.species {
+            species_list.push(species);
+        } else {
+            self.species = Some(vec![species]);
+        }
+    }
 }
 
 #[cfg(test)]

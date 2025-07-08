@@ -18,7 +18,7 @@ fn base_api_model_derives(input: TokenStream) -> proc_macro2::TokenStream {
         Item::Struct(_) => quote! {
             #first_lines
             #[derive(::getset::Getters)]
-            #[get("pub")]
+            #[getset(get = "pub")]
         },
         _ => panic!("expected enum or struct"),
     }

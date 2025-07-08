@@ -15,8 +15,8 @@ use diesel_async::{AsyncPgConnection, RunQueryDsl};
 use scamplers_core::model::{
     IsUpdate,
     person::{
-        CreatedUser, NewPerson, Person, PersonCore, PersonQuery, PersonSummary, PersonUpdate,
-        UserRole,
+        CreatedUser, NewPerson, Person, PersonBuilder, PersonCore, PersonQuery, PersonSummary,
+        PersonUpdate, UserRole,
     },
 };
 use scamplers_schema::{
@@ -53,14 +53,13 @@ where
     where
         QuerySource: 'a,
     {
-        let Self {
-            ids,
-            name,
-            email,
-            orcid,
-            ms_user_id,
-            ..
-        } = self;
+        let (ids, name, email, orcid, ms_user_id) = (
+            self.ids(),
+            self.name(),
+            self.email(),
+            self.orcid(),
+            self.ms_user_id(),
+        );
 
         let q1 = (!ids.is_empty()).then(|| id_col.eq_any(ids));
         let q2 = name.as_ref().map(|name| name_col.ilike(name.as_ilike()));
@@ -135,11 +134,11 @@ impl model::FetchById for Person {
             .get_result(db_conn)
             .await?;
 
-        let roles = diesel::select(get_user_roles(core.id().to_string()))
+        let roles: Vec<UserRole> = diesel::select(get_user_roles(core.id().to_string()))
             .get_result(db_conn)
             .await?;
 
-        Ok(Person::builder().core(core).roles(roles).build())
+        Ok(PersonBuilder::default().core(core).roles(roles).build()?)
     }
 }
 

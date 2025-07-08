@@ -4,6 +4,7 @@ version = "0.1.0"
 edition.workspace = true
 
 [dependencies]
+derive_builder = { workspace = true }
 axum = { workspace = true }
 scamplers-core = { path = "../scamplers-core", features = ["backend"] }
 scamplers-schema = { path = "../scamplers-schema" }

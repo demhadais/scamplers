@@ -1,24 +1,19 @@
-#[cfg(feature = "typescript")]
 use {
     crate::model::{
         institution::{Institution, NewInstitution},
         lab::{Lab, NewLab},
         person::{CreatedUser, NewPerson, Person},
     },
-    scamplers_macros::scamplers_client,
     serde::{Serialize, de::DeserializeOwned},
     wasm_bindgen::prelude::*,
 };
 
-#[cfg(feature = "typescript")]
 #[wasm_bindgen]
-#[scamplers_client([(NewInstitution, Institution), (NewPerson, Person), (NewLab, Lab)])]
 struct Client {
     backend_url: String,
     client: reqwest::Client,
 }
 
-#[cfg(feature = "typescript")]
 #[wasm_bindgen]
 impl Client {
     #[wasm_bindgen(constructor)]
@@ -86,12 +81,9 @@ impl Client {
     #[wasm_bindgen]
     pub async fn send_new_ms_login(
         &self,
-        data: &NewPerson,
+        data: NewPerson,
     ) -> Result<CreatedUser, wasm_bindgen::JsValue> {
-        #[derive(Serialize)]
-        struct NewMsLogin<'a>(&'a NewPerson);
-
-        self.send_request(&NewMsLogin(data), &NewPerson::new_user_route(), None)
+        self.send_request(&data, &NewPerson::new_user_route(), None)
             .await
     }
 }
