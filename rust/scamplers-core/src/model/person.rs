@@ -4,8 +4,8 @@ use crate::{
 };
 use pyo3::{pyclass, pymethods};
 use scamplers_macros::{
-    base_api_model, base_api_model_with_default, db_enum, db_insertion, db_insertion_with_wasm,
-    db_query, db_selection, db_update,
+    base_api_model, base_api_model_with_default, db_enum, db_insertion, db_query, db_selection,
+    db_update,
 };
 #[cfg(feature = "backend")]
 use scamplers_schema::person;
@@ -41,6 +41,98 @@ impl NewPerson {
     #[must_use]
     pub fn new_user_route() -> String {
         "/users".to_string()
+    }
+}
+
+#[wasm_bindgen]
+impl NewPerson {
+    #[wasm_bindgen]
+    pub fn new() -> NewPersonEmpty {
+        NewPersonEmpty
+    }
+}
+
+#[wasm_bindgen]
+struct NewPersonEmpty;
+#[wasm_bindgen]
+impl NewPersonEmpty {
+    #[wasm_bindgen]
+    pub fn name(self, name: String) -> NewPersonName {
+        NewPersonName { name }
+    }
+}
+#[wasm_bindgen]
+struct NewPersonName {
+    name: String,
+}
+#[wasm_bindgen]
+impl NewPersonName {
+    #[wasm_bindgen]
+    pub fn email(self, email: String) -> NewPersonEmail {
+        NewPersonEmail { inner: self, email }
+    }
+}
+#[wasm_bindgen]
+struct NewPersonEmail {
+    inner: NewPersonName,
+    email: String,
+}
+#[wasm_bindgen]
+impl NewPersonEmail {
+    #[wasm_bindgen]
+    pub fn ms_user_id(self, ms_user_id: Uuid) -> NewPersonMsUserId {
+        NewPersonMsUserId {
+            inner: self,
+            ms_user_id,
+        }
+    }
+}
+#[wasm_bindgen]
+struct NewPersonMsUserId {
+    inner: NewPersonEmail,
+    ms_user_id: Uuid,
+}
+#[wasm_bindgen]
+impl NewPersonMsUserId {
+    #[wasm_bindgen]
+    pub fn institution_id(self, institution_id: Uuid) -> NewPersonInstitutionId {
+        NewPersonInstitutionId {
+            inner: self,
+            institution_id,
+        }
+    }
+}
+
+#[wasm_bindgen]
+struct NewPersonInstitutionId {
+    inner: NewPersonMsUserId,
+    institution_id: Uuid,
+}
+#[wasm_bindgen]
+impl NewPersonInstitutionId {
+    #[wasm_bindgen]
+    pub fn build(self) -> NewPerson {
+        let Self {
+            inner:
+                NewPersonMsUserId {
+                    inner:
+                        NewPersonEmail {
+                            inner: NewPersonName { name },
+                            email,
+                        },
+                    ms_user_id,
+                },
+            institution_id,
+        } = self;
+
+        NewPerson {
+            name: NonEmptyString::new(&name).unwrap(),
+            email,
+            orcid: None,
+            institution_id,
+            ms_user_id: Some(ms_user_id),
+            roles: vec![],
+        }
     }
 }
 
