@@ -90,12 +90,12 @@ pub fn db_query(_attr: TokenStream, input: TokenStream) -> TokenStream {
 
     let output = quote! {
         #[::pyo3::pyclass]
-        #[::wasm_bindgen::prelude::wasm_bindgen(getter_with_clone)]
+        #[cfg_attr(target_arch = "wasm32", ::wasm_bindgen::prelude::wasm_bindgen(getter_with_clone))]
         #struct_item
 
-        #[::wasm_bindgen::prelude::wasm_bindgen]
+        #[cfg_attr(target_arch = "wasm32", ::wasm_bindgen::prelude::wasm_bindgen(getter_with_clone))]
         impl #struct_name {
-            #[::wasm_bindgen::prelude::wasm_bindgen(constructor)]
+            #[cfg_attr(target_arch = "wasm32", ::wasm_bindgen::prelude::wasm_bindgen(getter_with_clone))]
             pub fn new() -> Self {
                 Self::default()
             }
@@ -111,7 +111,7 @@ pub fn db_selection(_attr: TokenStream, input: TokenStream) -> TokenStream {
     let struct_item = parse_macro_input!(input as ItemStruct);
 
     let output = quote! {
-        #[::wasm_bindgen::prelude::wasm_bindgen(getter_with_clone)]
+        #[cfg_attr(target_arch = "wasm32", ::wasm_bindgen::prelude::wasm_bindgen(getter_with_clone))]
         #[cfg_attr(feature = "backend", derive(::diesel::Selectable, ::diesel::Queryable), diesel(check_for_backend(::diesel::pg::Pg)))]
         #struct_item
     };

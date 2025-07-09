@@ -47,10 +47,6 @@ mod frontend {
         },
         describe::{WasmDescribe, WasmDescribeVector},
     };
-    use {
-        serde::{Deserialize, Serialize},
-        std::fmt::Display,
-    };
 
     impl WasmDescribe for OffsetDateTime {
         fn describe() {

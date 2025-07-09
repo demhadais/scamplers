@@ -28,42 +28,42 @@ pub enum NewSpecimen {
     Tissue(#[garde(dive)] NewTissue),
 }
 
-impl NewSpecimen {
-    pub fn measurements(&mut self, self_id: Uuid) -> &[NewSpecimenMeasurement] {
-        let inner = match self {
-            Self::Block(b) => b.inner_mut(),
-            Self::Suspension(s) => s.inner_mut(),
-            Self::Tissue(t) => t.inner_mut(),
-        };
+// impl NewSpecimen {
+//     pub fn measurements(&mut self, self_id: Uuid) -> &[NewSpecimenMeasurement] {
+//         let inner = match self {
+//             Self::Block(b) => b.inner_mut(),
+//             Self::Suspension(s) => s.inner_mut(),
+//             Self::Tissue(t) => t.inner_mut(),
+//         };
 
-        let measurements = inner.measurements_mut();
-        for m in &mut *measurements {
-            m.set_specimen_id(self_id);
-        }
+//         let measurements = inner.measurements_mut();
+//         for m in &mut *measurements {
+//             m.set_specimen_id(self_id);
+//         }
 
-        measurements
-    }
+//         measurements
+//     }
 
-    pub fn committe_approvals(&mut self, self_id: Uuid) -> &[NewCommitteeApproval] {
-        let approvals = match self {
-            Self::Block(b) => b.committee_approvals_mut(),
-            Self::Suspension(s) => s.committee_approvals_mut(),
-            Self::Tissue(t) => t.committee_approvals_mut(),
-        };
+//     pub fn committe_approvals(&mut self, self_id: Uuid) -> &[NewCommitteeApproval] {
+//         let approvals = match self {
+//             Self::Block(b) => b.committee_approvals_mut(),
+//             Self::Suspension(s) => s.committee_approvals_mut(),
+//             Self::Tissue(t) => t.committee_approvals_mut(),
+//         };
 
-        for a in &mut *approvals {
-            a.set_specimen_id(self_id);
-        }
+//         for a in &mut *approvals {
+//             a.set_specimen_id(self_id);
+//         }
 
-        approvals
-    }
-}
+//         approvals
+//     }
+// }
 
 #[db_selection]
 #[cfg_attr(feature = "backend", diesel(table_name = specimen))]
 pub struct SpecimenHandle {
-    id: Uuid,
-    link: String,
+    pub id: Uuid,
+    pub link: String,
 }
 
 #[db_selection]
@@ -71,33 +71,29 @@ pub struct SpecimenHandle {
 pub struct SpecimenSummary {
     #[serde(flatten)]
     #[cfg_attr(feature = "backend", diesel(embed))]
-    handle: SpecimenHandle,
-    readable_id: String,
-    name: String,
-    received_at: OffsetDateTime,
-    species: Vec<Option<Species>>,
-    notes: Option<String>,
-    returned_at: Option<OffsetDateTime>,
-    type_: String,
-    embedded_in: Option<String>,
-    fixative: Option<String>,
-    frozen: bool,
-    cryopreserved: bool,
-    storage_buffer: Option<String>,
-}
-impl SpecimenSummary {
-    pub fn id(&self) -> &Uuid {
-        self.handle().id()
-    }
+    pub handle: SpecimenHandle,
+    pub readable_id: String,
+    pub name: String,
+    pub received_at: OffsetDateTime,
+    pub species: Vec<Option<Species>>,
+    pub notes: Option<String>,
+    pub returned_at: Option<OffsetDateTime>,
+    pub type_: String,
+    pub embedded_in: Option<String>,
+    pub fixative: Option<String>,
+    pub frozen: bool,
+    pub cryopreserved: bool,
+    pub storage_buffer: Option<String>,
 }
 
 #[db_selection]
 #[cfg_attr(feature = "backend", diesel(table_name = specimen_measurement))]
 pub struct SpecimenMeasurement {
     #[cfg_attr(feature = "backend", diesel(embed))]
-    measured_by: PersonHandle,
+    pub measured_by: PersonHandle,
     #[serde(flatten)]
-    data: MeasurementData,
+    #[wasm_bindgen(skip)]
+    pub data: MeasurementData,
 }
 
 #[db_selection]

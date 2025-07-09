@@ -12,7 +12,7 @@ use scamplers_schema::person;
 use uuid::Uuid;
 use wasm_bindgen::prelude::wasm_bindgen;
 
-#[wasm_bindgen]
+#[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
 #[db_enum]
 #[derive(PartialEq)]
 pub enum UserRole {
@@ -21,7 +21,7 @@ pub enum UserRole {
     BiologyStaff,
 }
 
-#[wasm_bindgen(getter_with_clone)]
+#[cfg_attr(target_arch = "wasm32", wasm_bindgen(getter_with_clone))]
 #[db_insertion]
 #[cfg_attr(feature = "backend", diesel(table_name = person))]
 pub struct NewPerson {
@@ -44,42 +44,42 @@ impl NewPerson {
     }
 }
 
-#[wasm_bindgen]
+#[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
 impl NewPerson {
-    #[wasm_bindgen]
+    #[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
     pub fn new() -> NewPersonEmpty {
         NewPersonEmpty
     }
 }
 
-#[wasm_bindgen]
+#[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
 struct NewPersonEmpty;
-#[wasm_bindgen]
+#[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
 impl NewPersonEmpty {
-    #[wasm_bindgen]
+    #[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
     pub fn name(self, name: String) -> NewPersonName {
         NewPersonName { name }
     }
 }
-#[wasm_bindgen]
+#[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
 struct NewPersonName {
     name: String,
 }
-#[wasm_bindgen]
+#[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
 impl NewPersonName {
-    #[wasm_bindgen]
+    #[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
     pub fn email(self, email: String) -> NewPersonEmail {
         NewPersonEmail { inner: self, email }
     }
 }
-#[wasm_bindgen]
+#[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
 struct NewPersonEmail {
     inner: NewPersonName,
     email: String,
 }
-#[wasm_bindgen]
+#[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
 impl NewPersonEmail {
-    #[wasm_bindgen]
+    #[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
     pub fn ms_user_id(self, ms_user_id: Uuid) -> NewPersonMsUserId {
         NewPersonMsUserId {
             inner: self,
@@ -87,14 +87,14 @@ impl NewPersonEmail {
         }
     }
 }
-#[wasm_bindgen]
+#[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
 struct NewPersonMsUserId {
     inner: NewPersonEmail,
     ms_user_id: Uuid,
 }
-#[wasm_bindgen]
+#[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
 impl NewPersonMsUserId {
-    #[wasm_bindgen]
+    #[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
     pub fn institution_id(self, institution_id: Uuid) -> NewPersonInstitutionId {
         NewPersonInstitutionId {
             inner: self,
@@ -103,14 +103,14 @@ impl NewPersonMsUserId {
     }
 }
 
-#[wasm_bindgen]
+#[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
 struct NewPersonInstitutionId {
     inner: NewPersonMsUserId,
     institution_id: Uuid,
 }
-#[wasm_bindgen]
+#[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
 impl NewPersonInstitutionId {
-    #[wasm_bindgen]
+    #[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
     pub fn build(self) -> NewPerson {
         let Self {
             inner:
@@ -158,16 +158,16 @@ pub struct PersonSummary {
     pub orcid: Option<String>,
 }
 
-#[wasm_bindgen]
+#[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
 #[pymethods]
 impl PersonSummary {
-    #[wasm_bindgen(getter)]
+    #[cfg_attr(target_arch = "wasm32", wasm_bindgen(getter))]
     #[getter]
     pub fn id(&self) -> Uuid {
         self.handle.id
     }
 
-    #[wasm_bindgen(getter)]
+    #[cfg_attr(target_arch = "wasm32", wasm_bindgen(getter))]
     #[getter]
     pub fn link(&self) -> String {
         self.handle.link.to_string()
@@ -186,41 +186,41 @@ pub struct PersonCore {
     institution: Institution,
 }
 
-#[wasm_bindgen]
+#[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
 #[pymethods]
 impl PersonCore {
-    #[wasm_bindgen(getter)]
+    #[cfg_attr(target_arch = "wasm32", wasm_bindgen(getter))]
     #[getter]
     pub fn id(&self) -> Uuid {
         self.summary.id()
     }
 
-    #[wasm_bindgen(getter)]
+    #[cfg_attr(target_arch = "wasm32", wasm_bindgen(getter))]
     #[getter]
     pub fn link(&self) -> String {
         self.summary.link()
     }
 
-    #[wasm_bindgen(getter)]
+    #[cfg_attr(target_arch = "wasm32", wasm_bindgen(getter))]
     #[getter]
     pub fn name(&self) -> String {
         self.summary.name.to_string()
     }
 
-    #[wasm_bindgen(getter)]
+    #[cfg_attr(target_arch = "wasm32", wasm_bindgen(getter))]
     #[getter]
     pub fn email(&self) -> Option<String> {
         self.summary.email.to_owned()
     }
 
-    #[wasm_bindgen(getter)]
+    #[cfg_attr(target_arch = "wasm32", wasm_bindgen(getter))]
     #[getter]
     pub fn orcid(&self) -> Option<String> {
         self.summary.orcid.to_owned()
     }
 }
 
-#[wasm_bindgen(getter_with_clone)]
+#[cfg_attr(target_arch = "wasm32", wasm_bindgen(getter_with_clone))]
 #[pyclass]
 #[base_api_model]
 pub struct Person {
@@ -230,47 +230,47 @@ pub struct Person {
     pub roles: Vec<UserRole>,
 }
 
-#[wasm_bindgen]
+#[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
 #[pymethods]
 impl Person {
-    #[wasm_bindgen(getter)]
+    #[cfg_attr(target_arch = "wasm32", wasm_bindgen(getter))]
     #[getter]
     pub fn id(&self) -> Uuid {
         self.core.id()
     }
 
-    #[wasm_bindgen(getter)]
+    #[cfg_attr(target_arch = "wasm32", wasm_bindgen(getter))]
     #[getter]
     pub fn link(&self) -> String {
         self.core.link()
     }
 
-    #[wasm_bindgen(getter)]
+    #[cfg_attr(target_arch = "wasm32", wasm_bindgen(getter))]
     #[getter]
     pub fn name(&self) -> String {
         self.core.name()
     }
 
-    #[wasm_bindgen(getter)]
+    #[cfg_attr(target_arch = "wasm32", wasm_bindgen(getter))]
     #[getter]
     pub fn email(&self) -> Option<String> {
         self.core.email()
     }
 
-    #[wasm_bindgen(getter)]
+    #[cfg_attr(target_arch = "wasm32", wasm_bindgen(getter))]
     #[getter]
     pub fn orcid(&self) -> Option<String> {
         self.core.orcid()
     }
 
-    #[wasm_bindgen(getter)]
+    #[cfg_attr(target_arch = "wasm32", wasm_bindgen(getter))]
     #[getter]
     pub fn institution(&self) -> Institution {
         self.core.institution.clone()
     }
 }
 
-#[wasm_bindgen(getter_with_clone)]
+#[cfg_attr(target_arch = "wasm32", wasm_bindgen(getter_with_clone))]
 #[pyclass]
 #[base_api_model]
 pub struct CreatedUser {
@@ -279,46 +279,46 @@ pub struct CreatedUser {
     pub api_key: String,
 }
 
-#[wasm_bindgen]
+#[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
 #[pymethods]
 impl CreatedUser {
-    #[wasm_bindgen(getter)]
+    #[cfg_attr(target_arch = "wasm32", wasm_bindgen(getter))]
     #[getter]
     pub fn id(&self) -> Uuid {
         self.person.id()
     }
 
-    #[wasm_bindgen(getter)]
+    #[cfg_attr(target_arch = "wasm32", wasm_bindgen(getter))]
     #[getter]
     pub fn link(&self) -> String {
         self.person.link()
     }
 
-    #[wasm_bindgen(getter)]
+    #[cfg_attr(target_arch = "wasm32", wasm_bindgen(getter))]
     #[getter]
     pub fn name(&self) -> String {
         self.person.name()
     }
 
-    #[wasm_bindgen(getter)]
+    #[cfg_attr(target_arch = "wasm32", wasm_bindgen(getter))]
     #[getter]
     pub fn email(&self) -> Option<String> {
         self.person.email()
     }
 
-    #[wasm_bindgen(getter)]
+    #[cfg_attr(target_arch = "wasm32", wasm_bindgen(getter))]
     #[getter]
     pub fn orcid(&self) -> Option<String> {
         self.person.orcid()
     }
 
-    #[wasm_bindgen(getter)]
+    #[cfg_attr(target_arch = "wasm32", wasm_bindgen(getter))]
     #[getter]
     pub fn roles(&self) -> Vec<UserRole> {
         self.person.roles.clone()
     }
 
-    #[wasm_bindgen(getter)]
+    #[cfg_attr(target_arch = "wasm32", wasm_bindgen(getter))]
     #[getter]
     pub fn institution(&self) -> Institution {
         self.person.institution()
@@ -378,7 +378,7 @@ pub struct PersonQuery {
     pub email: Option<String>,
     pub orcid: Option<String>,
     pub ms_user_id: Option<Uuid>,
-    #[wasm_bindgen(skip)]
+    #[cfg_attr(target_arch = "wasm32", wasm_bindgen(skip))]
     pub order_by: SortByGroup<PersonOrdinalColumn>,
     pub pagination: Pagination,
 }

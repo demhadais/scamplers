@@ -35,16 +35,16 @@ pub struct Institution {
     pub name: String,
 }
 
-#[wasm_bindgen]
+#[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
 #[pymethods]
 impl Institution {
-    #[wasm_bindgen(getter)]
+    #[cfg_attr(target_arch = "wasm32", wasm_bindgen(getter))]
     #[getter]
     pub fn id(&self) -> Uuid {
         self.handle.id
     }
 
-    #[wasm_bindgen(getter)]
+    #[cfg_attr(target_arch = "wasm32", wasm_bindgen(getter))]
     #[getter]
     pub fn link(&self) -> String {
         self.handle.link.to_string()
@@ -63,7 +63,7 @@ pub struct InstitutionQuery {
     pub ids: Vec<Uuid>,
     #[pyo3(get, set)]
     pub name: Option<String>,
-    #[wasm_bindgen(skip)]
+    #[cfg_attr(target_arch = "wasm32", wasm_bindgen(skip))]
     pub order_by: SortByGroup<InstitutionOrdinalColumn>,
     #[pyo3(get, set)]
     pub pagination: Pagination,
