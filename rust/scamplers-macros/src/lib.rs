@@ -1,12 +1,15 @@
 use proc_macro::TokenStream;
-use quote::quote;
-use syn::{Item, ItemEnum, ItemStruct, parse, parse_macro_input};
+use quote::{format_ident, quote};
+use syn::{
+    ImplItem, ImplItemFn, Item, ItemEnum, ItemImpl, ItemStruct, ReturnType, Type, TypeReference,
+    parse, parse_macro_input,
+};
 
 fn base_api_model_derives(input: TokenStream) -> proc_macro2::TokenStream {
     let item: Item = parse(input).unwrap();
 
     let first_lines = quote! {
-        #[derive(Debug, ::serde::Deserialize, ::serde::Serialize, ::valuable::Valuable, ::garde::Validate)]
+        #[derive(Debug, ::serde::Deserialize, ::serde::Serialize, ::valuable::Valuable, ::garde::Validate, Clone)]
         #[garde(allow_unvalidated)]
     };
 
@@ -17,8 +20,6 @@ fn base_api_model_derives(input: TokenStream) -> proc_macro2::TokenStream {
         },
         Item::Struct(_) => quote! {
             #first_lines
-            #[derive(::getset::Getters)]
-            #[getset(get = "pub")]
         },
         _ => panic!("expected enum or struct"),
     }
@@ -62,51 +63,13 @@ pub fn base_api_model_with_default(_attr: TokenStream, input: TokenStream) -> To
     .into()
 }
 
-fn builder_derive() -> TokenStream {
-    let output = quote! {
-        #[derive(::derive_builder::Builder)]
-        #[builder(pattern = "owned", build_fn(error = crate::model::BuilderError))]
-        #[cfg_attr(target_arch = "wasm32", builder_struct_attr(::wasm_bindgen::prelude::wasm_bindgen))]
-        #[cfg_attr(target_arch = "wasm32", builder_impl_attr(::wasm_bindgen::prelude::wasm_bindgen))]
-        #[cfg_attr(target_arch = "wasm32", builder_field_attr(::wasm_bindgen::prelude::wasm_bindgen))]
-        #[cfg_attr(not(target_arch = "wasm32"), builder(setter(strip_option, into)))]
-    };
-
-    output.into()
-}
-
 #[proc_macro_attribute]
 pub fn db_insertion(_attr: TokenStream, input: TokenStream) -> TokenStream {
     let input = base_api_model(_attr, input);
     let struct_item = parse_macro_input!(input as ItemStruct);
 
-    let builder_attributes = builder_derive();
-    let builder_attributes = parse_macro_input!(builder_attributes as proc_macro2::TokenStream);
-
     let output = quote! {
-        #builder_attributes
-        #[cfg_attr(
-            feature = "backend",
-            derive(::diesel::Insertable),
-            diesel(check_for_backend(::diesel::pg::Pg))
-        )]
-        #struct_item
-    };
-
-    output.into()
-}
-
-#[proc_macro_attribute]
-pub fn db_insertion_with_wasm(_attr: TokenStream, input: TokenStream) -> TokenStream {
-    let input = base_api_model(_attr, input);
-    let struct_item = parse_macro_input!(input as ItemStruct);
-
-    let builder_attributes = builder_derive();
-    let builder_attributes = parse_macro_input!(builder_attributes as proc_macro2::TokenStream);
-
-    let output = quote! {
-        #[cfg_attr(target_arch = "wasm32", ::wasm_bindgen::prelude::wasm_bindgen)]
-        #builder_attributes
+        #[::pyo3::pyclass(get_all, set_all)]
         #[cfg_attr(
             feature = "backend",
             derive(::diesel::Insertable),
@@ -123,14 +86,20 @@ pub fn db_query(_attr: TokenStream, input: TokenStream) -> TokenStream {
     let input = base_api_model_with_default(_attr, input);
     let struct_item = parse_macro_input!(input as ItemStruct);
 
-    let builder_attributes = builder_derive();
-    let builder_attributes = parse_macro_input!(builder_attributes as proc_macro2::TokenStream);
+    let struct_name = &struct_item.ident;
 
     let output = quote! {
-        #[cfg_attr(target_arch = "wasm32", ::wasm_bindgen::prelude::wasm_bindgen)]
-        #builder_attributes
-        #[builder(default)]
+        #[::pyo3::pyclass]
+        #[::wasm_bindgen::prelude::wasm_bindgen(getter_with_clone)]
         #struct_item
+
+        #[::wasm_bindgen::prelude::wasm_bindgen]
+        impl #struct_name {
+            #[::wasm_bindgen::prelude::wasm_bindgen(constructor)]
+            pub fn new() -> Self {
+                Self::default()
+            }
+        }
     };
 
     output.into()
@@ -142,7 +111,7 @@ pub fn db_selection(_attr: TokenStream, input: TokenStream) -> TokenStream {
     let struct_item = parse_macro_input!(input as ItemStruct);
 
     let output = quote! {
-        #[cfg_attr(target_arch = "wasm32", ::wasm_bindgen::prelude::wasm_bindgen)]
+        #[::wasm_bindgen::prelude::wasm_bindgen(getter_with_clone)]
         #[cfg_attr(feature = "backend", derive(::diesel::Selectable, ::diesel::Queryable), diesel(check_for_backend(::diesel::pg::Pg)))]
         #struct_item
     };
@@ -155,29 +124,8 @@ pub fn db_update(_attr: TokenStream, input: TokenStream) -> TokenStream {
     let input = base_api_model_with_default(_attr, input);
     let struct_item = parse_macro_input!(input as ItemStruct);
 
-    let builder_attributes = builder_derive();
-    let builder_attributes = parse_macro_input!(builder_attributes as proc_macro2::TokenStream);
-
     let output = quote! {
-        #builder_attributes
-        #[cfg_attr(feature = "backend", derive(::diesel::AsChangeset, ::diesel::Identifiable), diesel(check_for_backend(::diesel::pg::Pg)))]
-        #struct_item
-    };
-
-    output.into()
-}
-
-#[proc_macro_attribute]
-pub fn db_update_with_wasm(_attr: TokenStream, input: TokenStream) -> TokenStream {
-    let input = base_api_model(_attr, input);
-    let struct_item = parse_macro_input!(input as ItemStruct);
-
-    let builder_attributes = builder_derive();
-    let builder_attributes = parse_macro_input!(builder_attributes as proc_macro2::TokenStream);
-
-    let output = quote! {
-        #[cfg_attr(target_arch = "wasm32", ::wasm_bindgen::prelude::wasm_bindgen)]
-        #builder_attributes
+        #[::pyo3::pyclass(get_all, set_all)]
         #[cfg_attr(feature = "backend", derive(::diesel::AsChangeset, ::diesel::Identifiable), diesel(check_for_backend(::diesel::pg::Pg)))]
         #struct_item
     };
@@ -193,6 +141,7 @@ pub fn db_enum(_attr: TokenStream, input: TokenStream) -> TokenStream {
     let ItemEnum { ident, .. } = &enum_item;
 
     let output = quote! {
+        #[::pyo3::pyclass]
         #[derive(::strum::EnumString, ::strum::IntoStaticStr)]
         #[strum(serialize_all = "snake_case")]
         #[cfg_attr(target_arch = "wasm32", ::wasm_bindgen::prelude::wasm_bindgen)]
@@ -239,6 +188,7 @@ pub fn db_json(_attr: TokenStream, input: TokenStream) -> TokenStream {
     };
 
     let output = quote! {
+        #[::pyo3::pyclass(get_all, set_all)]
         #[cfg_attr(feature = "backend", derive(::diesel::deserialize::FromSqlRow, ::diesel::expression::AsExpression))]
         #[cfg_attr(feature = "backend", diesel(sql_type = ::diesel::sql_types::Jsonb))]
         #item

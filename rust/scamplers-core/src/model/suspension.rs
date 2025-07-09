@@ -1,3 +1,4 @@
+pub use common::MeasurementDataCore;
 pub use multiplexed::NewMultiplexedSuspension;
 pub use singleplexed::{
     NewSuspension, NewSuspensionMeasurement, Suspension, SuspensionCore, SuspensionMeasurement,

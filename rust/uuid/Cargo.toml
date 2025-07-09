@@ -13,6 +13,7 @@ diesel = { workspace = true, optional = true }
 diesel-async = { workspace = true, optional = true }
 valuable = { workspace = true }
 wasm-bindgen = { workspace = true }
+pyo3 = { workspace = true }
 
 [lints]
 workspace = true

@@ -9,12 +9,13 @@ use diesel::{
     serialize::{Output, ToSql},
     sql_types,
 };
+use pyo3::prelude::*;
 use scamplers_macros::base_api_model;
 use wasm_bindgen::prelude::*;
 
 #[base_api_model]
 #[wasm_bindgen]
-#[derive(Clone)]
+#[pyclass]
 #[valuable(transparent)]
 #[garde(transparent)]
 #[serde(transparent)]

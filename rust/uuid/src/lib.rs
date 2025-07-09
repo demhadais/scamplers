@@ -1,5 +1,6 @@
 #[cfg(feature = "backend")]
 use diesel::{deserialize::FromSqlRow, expression::AsExpression, sql_types};
+use pyo3::{IntoPyObjectRef, pyclass};
 use wasm_bindgen::{
     JsValue,
     convert::{
@@ -17,9 +18,21 @@ use {
 #[cfg_attr(feature = "backend", derive(FromSqlRow, AsExpression))]
 #[cfg_attr(feature = "backend", diesel(sql_type = sql_types::Uuid))]
 #[derive(
-    Clone, Copy, Eq, Ord, PartialEq, PartialOrd, Debug, Hash, Default, Deserialize, Serialize,
+    Clone,
+    Copy,
+    Eq,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Debug,
+    Hash,
+    Default,
+    Deserialize,
+    Serialize,
+    IntoPyObjectRef,
 )]
 #[serde(transparent)]
+#[pyclass]
 pub struct Uuid(_uuid::Uuid);
 
 impl Display for Uuid {

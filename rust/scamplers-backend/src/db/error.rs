@@ -1,3 +1,5 @@
+use std::fmt::Display;
+
 use diesel::result::DatabaseErrorInformation;
 use diesel_async::pooled_connection::deadpool;
 use regex::Regex;
@@ -26,9 +28,9 @@ pub enum Error {
 }
 
 impl Error {
-    fn from_other_error(err: impl std::error::Error) -> Self {
+    fn from_other_error(err: impl Display) -> Self {
         Self::Other {
-            message: format!("{err:?}"),
+            message: format!("{err}"),
         }
     }
 }
@@ -74,7 +76,7 @@ impl From<diesel::ConnectionError> for Error {
 }
 impl From<scamplers_core::model::BuilderError> for Error {
     fn from(err: scamplers_core::model::BuilderError) -> Self {
-        Self::from_other_error(err)
+        Self::from_other_error(err.message)
     }
 }
 

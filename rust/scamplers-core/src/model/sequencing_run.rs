@@ -8,11 +8,10 @@ use {
 #[db_insertion]
 #[cfg_attr(feature = "backend", diesel(table_name = sequencing_submissions))]
 pub struct NewSequencingSubmission {
-    #[cfg_attr(feature = "backend", serde(default))]
+    #[serde(default)]
     sequencing_run_id: Uuid,
     library_id: Uuid,
     fastq_paths: Vec<NonEmptyString>,
-    #[cfg_attr(feature = "backend", valuable(skip))]
     submitted_at: OffsetDateTime,
 }
 

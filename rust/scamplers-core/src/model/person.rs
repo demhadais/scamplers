@@ -2,14 +2,17 @@ use crate::{
     model::{IsUpdate, Pagination, SortByGroup, institution::Institution},
     string::NonEmptyString,
 };
+use pyo3::{pyclass, pymethods};
 use scamplers_macros::{
-    base_api_model, base_api_model_with_default, db_enum, db_insertion_with_wasm, db_query,
-    db_selection, db_update,
+    base_api_model, base_api_model_with_default, db_enum, db_insertion, db_insertion_with_wasm,
+    db_query, db_selection, db_update,
 };
 #[cfg(feature = "backend")]
 use scamplers_schema::person;
 use uuid::Uuid;
+use wasm_bindgen::prelude::wasm_bindgen;
 
+#[wasm_bindgen]
 #[db_enum]
 #[derive(PartialEq)]
 pub enum UserRole {
@@ -18,24 +21,21 @@ pub enum UserRole {
     BiologyStaff,
 }
 
-#[db_insertion_with_wasm]
-#[derive(Clone)]
+#[wasm_bindgen(getter_with_clone)]
+#[db_insertion]
 #[cfg_attr(feature = "backend", diesel(table_name = person))]
 pub struct NewPerson {
     #[garde(dive)]
-    name: NonEmptyString,
+    pub name: NonEmptyString,
     #[garde(email)]
-    email: String,
+    pub email: String,
     #[garde(dive)]
-    #[builder(default)]
-    orcid: Option<NonEmptyString>,
-    institution_id: Uuid,
-    #[builder(default)]
-    ms_user_id: Option<Uuid>,
+    pub orcid: Option<NonEmptyString>,
+    pub institution_id: Uuid,
+    pub ms_user_id: Option<Uuid>,
     #[serde(default)]
-    #[builder(default)]
     #[cfg_attr(feature = "backend", diesel(skip_insertion))]
-    roles: Vec<UserRole>,
+    pub roles: Vec<UserRole>,
 }
 impl NewPerson {
     #[must_use]
@@ -47,148 +47,204 @@ impl NewPerson {
 #[db_selection]
 #[cfg_attr(feature = "backend", diesel(table_name = person))]
 pub struct PersonHandle {
-    id: Uuid,
-    link: String,
+    pub id: Uuid,
+    pub link: String,
 }
 
 #[db_selection]
+#[pyclass]
 #[cfg_attr(feature = "backend", diesel(table_name = person))]
 pub struct PersonSummary {
     #[serde(flatten)]
-    #[getset(skip)]
     #[cfg_attr(feature = "backend", diesel(embed))]
-    handle: PersonHandle,
-    name: String,
-    email: Option<String>,
-    orcid: Option<String>,
+    pub handle: PersonHandle,
+    #[pyo3(get)]
+    pub name: String,
+    #[pyo3(get)]
+    pub email: Option<String>,
+    #[pyo3(get)]
+    pub orcid: Option<String>,
 }
+
+#[wasm_bindgen]
+#[pymethods]
 impl PersonSummary {
-    pub fn id(&self) -> &Uuid {
-        self.handle.id()
+    #[wasm_bindgen(getter)]
+    #[getter]
+    pub fn id(&self) -> Uuid {
+        self.handle.id
     }
-    pub fn link(&self) -> &str {
-        self.handle.link()
+
+    #[wasm_bindgen(getter)]
+    #[getter]
+    pub fn link(&self) -> String {
+        self.handle.link.to_string()
     }
 }
 
 #[db_selection]
+#[pyclass]
 #[cfg_attr(feature = "backend", diesel(table_name = person))]
 pub struct PersonCore {
     #[serde(flatten)]
-    #[getset(skip)]
     #[cfg_attr(feature = "backend", diesel(embed))]
     summary: PersonSummary,
     #[cfg_attr(feature = "backend", diesel(embed))]
+    #[pyo3(get)]
     institution: Institution,
 }
+
+#[wasm_bindgen]
+#[pymethods]
 impl PersonCore {
-    pub fn id(&self) -> &Uuid {
+    #[wasm_bindgen(getter)]
+    #[getter]
+    pub fn id(&self) -> Uuid {
         self.summary.id()
     }
-    pub fn link(&self) -> &str {
+
+    #[wasm_bindgen(getter)]
+    #[getter]
+    pub fn link(&self) -> String {
         self.summary.link()
     }
-    pub fn name(&self) -> &str {
-        self.summary.name()
+
+    #[wasm_bindgen(getter)]
+    #[getter]
+    pub fn name(&self) -> String {
+        self.summary.name.to_string()
     }
-    pub fn email(&self) -> &Option<String> {
-        self.summary.email()
+
+    #[wasm_bindgen(getter)]
+    #[getter]
+    pub fn email(&self) -> Option<String> {
+        self.summary.email.to_owned()
     }
-    pub fn orcid(&self) -> &Option<String> {
-        self.summary.orcid()
+
+    #[wasm_bindgen(getter)]
+    #[getter]
+    pub fn orcid(&self) -> Option<String> {
+        self.summary.orcid.to_owned()
     }
 }
 
+#[wasm_bindgen(getter_with_clone)]
+#[pyclass]
 #[base_api_model]
-#[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
-#[derive(::derive_builder::Builder)]
-#[builder(pattern = "owned", build_fn(error = crate::model::BuilderError), setter(into, strip_option))]
 pub struct Person {
     #[serde(flatten)]
-    #[getset(skip)]
-    core: PersonCore,
-    #[builder(default)]
-    roles: Vec<UserRole>,
+    pub core: PersonCore,
+    #[pyo3(get)]
+    pub roles: Vec<UserRole>,
 }
+
+#[wasm_bindgen]
+#[pymethods]
 impl Person {
-    pub fn id(&self) -> &Uuid {
+    #[wasm_bindgen(getter)]
+    #[getter]
+    pub fn id(&self) -> Uuid {
         self.core.id()
     }
-    pub fn link(&self) -> &str {
+
+    #[wasm_bindgen(getter)]
+    #[getter]
+    pub fn link(&self) -> String {
         self.core.link()
     }
-    pub fn name(&self) -> &str {
+
+    #[wasm_bindgen(getter)]
+    #[getter]
+    pub fn name(&self) -> String {
         self.core.name()
     }
-    pub fn email(&self) -> &Option<String> {
+
+    #[wasm_bindgen(getter)]
+    #[getter]
+    pub fn email(&self) -> Option<String> {
         self.core.email()
     }
-    pub fn orcid(&self) -> &Option<String> {
+
+    #[wasm_bindgen(getter)]
+    #[getter]
+    pub fn orcid(&self) -> Option<String> {
         self.core.orcid()
     }
-    pub fn institution(&self) -> &Institution {
-        self.core.institution()
+
+    #[wasm_bindgen(getter)]
+    #[getter]
+    pub fn institution(&self) -> Institution {
+        self.core.institution.clone()
     }
 }
 
+#[wasm_bindgen(getter_with_clone)]
+#[pyclass]
 #[base_api_model]
-#[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
-#[derive(::derive_builder::Builder)]
-#[builder(pattern = "owned", build_fn(error = crate::model::BuilderError), setter(into, strip_option))]
 pub struct CreatedUser {
     #[serde(flatten)]
-    #[getset(skip)]
-    person: Person,
-    api_key: String,
-}
-impl CreatedUser {
-    pub fn id(&self) -> &Uuid {
-        self.person.id()
-    }
-    pub fn link(&self) -> &str {
-        self.person.link()
-    }
-    pub fn name(&self) -> &str {
-        self.person.name()
-    }
-    pub fn email(&self) -> &Option<String> {
-        self.person.email()
-    }
-    pub fn orcid(&self) -> &Option<String> {
-        self.person.orcid()
-    }
-    pub fn roles(&self) -> &[UserRole] {
-        &self.person.roles()
-    }
-    pub fn institution(&self) -> &Institution {
-        &self.person.institution()
-    }
+    pub person: Person,
+    pub api_key: String,
 }
 
-#[cfg_attr(target_arch = "wasm32", ::wasm_bindgen::prelude::wasm_bindgen)]
+#[wasm_bindgen]
+#[pymethods]
 impl CreatedUser {
-    #[cfg_attr(target_arch = "wasm32", wasm_bindgen(getter, js_name = id))]
-    pub fn id_owned(&self) -> Uuid {
-        self.id().to_owned()
+    #[wasm_bindgen(getter)]
+    #[getter]
+    pub fn id(&self) -> Uuid {
+        self.person.id()
     }
-    #[cfg_attr(target_arch = "wasm32", wasm_bindgen(getter, js_name = apiKey))]
-    pub fn api_key_owned(&self) -> String {
-        self.api_key().to_owned()
+
+    #[wasm_bindgen(getter)]
+    #[getter]
+    pub fn link(&self) -> String {
+        self.person.link()
+    }
+
+    #[wasm_bindgen(getter)]
+    #[getter]
+    pub fn name(&self) -> String {
+        self.person.name()
+    }
+
+    #[wasm_bindgen(getter)]
+    #[getter]
+    pub fn email(&self) -> Option<String> {
+        self.person.email()
+    }
+
+    #[wasm_bindgen(getter)]
+    #[getter]
+    pub fn orcid(&self) -> Option<String> {
+        self.person.orcid()
+    }
+
+    #[wasm_bindgen(getter)]
+    #[getter]
+    pub fn roles(&self) -> Vec<UserRole> {
+        self.person.roles.clone()
+    }
+
+    #[wasm_bindgen(getter)]
+    #[getter]
+    pub fn institution(&self) -> Institution {
+        self.person.institution()
     }
 }
 
 #[db_update]
 #[cfg_attr(feature = "backend", diesel(table_name = person))]
 pub struct PersonUpdateCore {
-    id: Uuid,
+    pub id: Uuid,
     #[garde(dive)]
-    name: Option<NonEmptyString>,
+    pub name: Option<NonEmptyString>,
     #[garde(email)]
-    email: Option<String>,
-    ms_user_id: Option<Uuid>,
+    pub email: Option<String>,
+    pub ms_user_id: Option<Uuid>,
     #[garde(dive)]
-    orcid: Option<NonEmptyString>,
-    institution_id: Option<Uuid>,
+    pub orcid: Option<NonEmptyString>,
+    pub institution_id: Option<Uuid>,
 }
 
 impl IsUpdate for PersonUpdateCore {
@@ -209,11 +265,11 @@ impl IsUpdate for PersonUpdateCore {
 
 #[base_api_model_with_default]
 pub struct PersonUpdate {
-    grant_roles: Vec<UserRole>,
-    revoke_roles: Vec<UserRole>,
+    pub grant_roles: Vec<UserRole>,
+    pub revoke_roles: Vec<UserRole>,
     #[serde(flatten)]
     #[garde(dive)]
-    core: PersonUpdateCore,
+    pub core: PersonUpdateCore,
 }
 
 #[base_api_model_with_default]
@@ -225,12 +281,12 @@ pub enum PersonOrdinalColumn {
 
 #[db_query]
 pub struct PersonQuery {
-    ids: Vec<Uuid>,
-    name: Option<String>,
-    email: Option<String>,
-    orcid: Option<String>,
-    ms_user_id: Option<Uuid>,
-    #[builder(setter(custom))]
-    order_by: SortByGroup<PersonOrdinalColumn>,
-    pagination: Pagination,
+    pub ids: Vec<Uuid>,
+    pub name: Option<String>,
+    pub email: Option<String>,
+    pub orcid: Option<String>,
+    pub ms_user_id: Option<Uuid>,
+    #[wasm_bindgen(skip)]
+    pub order_by: SortByGroup<PersonOrdinalColumn>,
+    pub pagination: Pagination,
 }

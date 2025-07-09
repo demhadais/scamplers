@@ -36,16 +36,17 @@ pub struct NewMultiplexedSuspension {
     readable_id: NonEmptyString,
     pooled_at: OffsetDateTime,
     notes: Option<NonEmptyString>,
-    #[diesel(skip_insertion)]
     #[garde(dive)]
     #[getset(skip)]
+    #[cfg_attr(feature = "backend", diesel(skip_insertion))]
     suspensions: Vec<NewSuspension>,
-    #[diesel(skip_insertion)]
+    #[getset(skip)]
+    #[cfg_attr(feature = "backend", diesel(skip_insertion))]
     preparer_ids: Vec<Uuid>,
-    #[diesel(skip_insertion)]
     #[garde(dive)]
     #[serde(default)]
     #[getset(skip)]
+    #[cfg_attr(feature = "backend", diesel(skip_insertion))]
     measurements: Vec<NewMultiplexedSuspensionMeasurement>,
 }
 
@@ -82,8 +83,4 @@ impl NewMultiplexedSuspension {
 
         &self.measurements
     }
-}
-
-pub struct MultiplexedSuspensionHandle {
-    id: Uuid,
 }
