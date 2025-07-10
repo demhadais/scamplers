@@ -1,31 +1,30 @@
-use crate::{
-    model::{Pagination, SortByGroup},
-    string::NonEmptyString,
+use crate::model::{Pagination, SortByGroup};
+use scamplers_macros::{
+    base_api_model_with_default, db_insertion, db_query, db_selection, getter_method, getters_impl,
 };
-use pyo3::{pyclass, pymethods};
-use scamplers_macros::{base_api_model_with_default, db_insertion, db_query, db_selection};
 #[cfg(feature = "backend")]
 use scamplers_schema::institution;
 use uuid::Uuid;
-use wasm_bindgen::prelude::wasm_bindgen;
+use valid_string::ValidString;
 
 #[db_insertion]
 #[cfg_attr(feature = "backend", diesel(table_name = institution))]
 pub struct NewInstitution {
     pub id: Uuid,
     #[garde(dive)]
-    pub name: NonEmptyString,
+    pub name: ValidString,
 }
 
 #[db_selection]
 #[cfg_attr(feature = "backend", diesel(table_name = institution))]
 pub struct InstitutionHandle {
+    #[pyo3(get)]
     pub id: Uuid,
+    #[pyo3(get)]
     pub link: String,
 }
 
 #[db_selection]
-#[pyclass]
 #[cfg_attr(feature = "backend", diesel(table_name = institution))]
 pub struct Institution {
     #[serde(flatten)]
@@ -35,17 +34,14 @@ pub struct Institution {
     pub name: String,
 }
 
-#[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
-#[pymethods]
+#[getters_impl]
 impl Institution {
-    #[cfg_attr(target_arch = "wasm32", wasm_bindgen(getter))]
-    #[getter]
+    #[getter_method]
     pub fn id(&self) -> Uuid {
         self.handle.id
     }
 
-    #[cfg_attr(target_arch = "wasm32", wasm_bindgen(getter))]
-    #[getter]
+    #[getter_method]
     pub fn link(&self) -> String {
         self.handle.link.to_string()
     }

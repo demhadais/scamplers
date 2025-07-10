@@ -33,69 +33,69 @@ use wasm_bindgen::prelude::*;
 #[cfg_attr(feature = "typescript", wasm_bindgen, derive(serde::Serialize))]
 #[derive(Clone)]
 #[serde(transparent)]
-pub struct NonEmptyString(#[cfg_attr(feature = "backend", garde(length(min = 1)))] String);
+pub struct ValidString(#[cfg_attr(feature = "backend", garde(length(min = 1)))] String);
 
 #[derive(Debug, thiserror::Error)]
-#[error("cannot construct `NonEmptyString` from empty string")]
+#[error("cannot construct `ValidString` from empty string")]
 #[cfg_attr(feature = "typescript", wasm_bindgen)]
 pub struct EmptyStringError;
 
-trait ToNonEmptyString {
-    fn to_non_empty_string(&self) -> std::result::Result<NonEmptyString, EmptyStringError>;
+trait ToValidString {
+    fn to_non_empty_string(&self) -> std::result::Result<ValidString, EmptyStringError>;
 }
 
-impl ToNonEmptyString for str {
-    fn to_non_empty_string(&self) -> std::result::Result<NonEmptyString, EmptyStringError> {
+impl ToValidString for str {
+    fn to_non_empty_string(&self) -> std::result::Result<ValidString, EmptyStringError> {
         if self.is_empty() {
             return Err(EmptyStringError);
         }
 
-        Ok(NonEmptyString(self.to_string()))
+        Ok(ValidString(self.to_string()))
     }
 }
 
 #[cfg(feature = "backend")]
-impl AsRef<str> for NonEmptyString {
+impl AsRef<str> for ValidString {
     fn as_ref(&self) -> &str {
         &self.0
     }
 }
 
 #[cfg(feature = "backend")]
-impl PartialEq<String> for NonEmptyString {
+impl PartialEq<String> for ValidString {
     fn eq(&self, other: &String) -> bool {
         self.0.eq(other)
     }
 }
 
 #[cfg(feature = "backend")]
-impl Display for NonEmptyString {
+impl Display for ValidString {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         self.0.fmt(f)
     }
 }
 
-impl From<&str> for NonEmptyString {
+impl From<&str> for ValidString {
     fn from(value: &str) -> Self {
         value.to_non_empty_string().unwrap()
     }
 }
 
-impl From<String> for NonEmptyString {
+impl From<String> for ValidString {
     fn from(value: String) -> Self {
         Self::from(value.as_str())
     }
 }
 
 #[cfg(feature = "backend")]
-impl FromSql<sql_types::Text, Pg> for NonEmptyString {
+impl FromSql<sql_types::Text, Pg> for ValidString {
     fn from_sql(bytes: <Pg as Backend>::RawValue<'_>) -> diesel::deserialize::Result<Self> {
         <String as FromSql<sql_types::Text, Pg>>::from_sql(bytes).map(Self)
     }
 }
 
 #[cfg(feature = "backend")]
-impl ToSql<sql_types::Text, Pg> for NonEmptyString {
+impl ToSql<sql_types::Text, Pg> for ValidString {
     fn to_sql<'b>(&'b self, out: &mut Output<'b, '_, Pg>) -> diesel::serialize::Result {
         let Self(inner) = self;
         <String as ToSql<sql_types::Text, Pg>>::to_sql(inner, out)
@@ -103,7 +103,7 @@ impl ToSql<sql_types::Text, Pg> for NonEmptyString {
 }
 
 #[cfg(feature = "backend")]
-impl AsStr for NonEmptyString {
+impl AsStr for ValidString {
     fn as_str(&self) -> &str {
         &self.0
     }
@@ -111,7 +111,7 @@ impl AsStr for NonEmptyString {
 
 #[cfg(feature = "typescript")]
 #[wasm_bindgen]
-impl NonEmptyString {
+impl ValidString {
     #[wasm_bindgen(constructor)]
     pub fn new(s: &str) -> std::result::Result<Self, EmptyStringError> {
         s.to_non_empty_string()

@@ -1,4 +1,4 @@
-use crate::{model::specimen::common::NewSpecimenCommon, string::NonEmptyString};
+use crate::{model::specimen::common::NewSpecimenCommon, string::ValidString};
 #[cfg(feature = "typescript")]
 use scamplers_macros::frontend_enum;
 #[cfg(feature = "backend")]
@@ -27,7 +27,7 @@ pub struct NewFixedTissue {
     pub(super) common: NewSpecimenCommon,
     #[cfg_attr(feature = "backend", serde(skip))]
     type_: TissueType,
-    storage_buffer: Option<NonEmptyString>,
+    storage_buffer: Option<ValidString>,
     fixative: TissueFixative,
 }
 
@@ -37,7 +37,7 @@ pub struct NewFrozenTissue {
     pub(super) common: NewSpecimenCommon,
     #[cfg_attr(feature = "backend", serde(skip))]
     type_: TissueType,
-    storage_buffer: Option<NonEmptyString>,
+    storage_buffer: Option<ValidString>,
     #[cfg_attr(feature = "backend", garde(custom(is_true)))]
     pub frozen: bool,
 }
@@ -48,7 +48,7 @@ pub struct NewCryoPreservedTissue {
     pub(super) common: NewSpecimenCommon,
     #[cfg_attr(feature = "backend", serde(skip))]
     type_: TissueType,
-    storage_buffer: Option<NonEmptyString>,
+    storage_buffer: Option<ValidString>,
     #[cfg_attr(feature = "backend", garde(custom(is_true)))]
     pub cryopreserved: bool,
 }

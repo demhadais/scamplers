@@ -1,64 +1,46 @@
+use crate::model::suspension::MeasurementDataCore;
 use scamplers_macros::{base_api_model, db_enum, db_insertion};
 use scamplers_schema::{chip_loading, chromium_run, gems};
 use time::OffsetDateTime;
 use uuid::Uuid;
+use valid_string::ValidString;
 
-use crate::model::suspension::MeasurementDataCore;
-
-const MAX_SUSPENSIONS_OCM: usize = 4;
+mod common;
+mod mutiplex;
+mod ocm;
+mod singleplex;
 
 #[db_insertion]
 #[cfg_attr(feature = "backend", diesel(table_name = gems))]
-struct NewGemsCore {
-    readable_id: String,
-    #[serde(skip)]
-    n_samples: i32,
-    chemistry: String,
-    #[serde(skip)]
-    chromium_run_id: Uuid,
-}
-
-#[db_insertion]
-#[cfg_attr(feature = "backend", diesel(table_name = chip_loading))]
-struct ChipLoadingCore {
-    #[serde(default)]
-    gems_id: Uuid,
-    #[garde(dive)]
-    suspension_volume_loaded: MeasurementDataCore,
-    #[garde(dive)]
-    buffer_volume_loaded: MeasurementDataCore,
-    notes: Option<String>,
-}
-
-#[db_insertion]
-#[cfg_attr(feature = "backend", diesel(table_name = chip_loading))]
-struct SingleplexedSuspensionChipLoading {
-    suspension_id: Uuid,
+pub struct NewSingleplexGems {
     #[serde(flatten)]
     #[garde(dive)]
     #[cfg_attr(feature = "backend", diesel(embed))]
-    inner: ChipLoadingCore,
+    pub inner: NewGemsCore,
+    #[cfg_attr(feature = "backend", diesel(skip_insertion))]
+    pub loading: NewSingleplexSuspensionChipLoading,
 }
 
 #[db_insertion]
 #[cfg_attr(feature = "backend", diesel(table_name = chip_loading))]
-struct MultiplexedSuspensionChipLoading {
-    multiplexed_suspension_id: Uuid,
+pub struct MultiplexedSuspensionChipLoading {
+    pub multiplexed_suspension_id: Uuid,
     #[serde(flatten)]
     #[garde(dive)]
     #[cfg_attr(feature = "backend", diesel(embed))]
-    inner: ChipLoadingCore,
+    pub inner: ChipLoadingCore,
 }
 
 #[base_api_model]
+#[cfg_attr(not(target_arch = "wasm32"), pyo3::pyclass)]
 #[serde(tag = "plexy")]
-enum NewGems {
+pub enum NewGems {
     Singleplexed {
         #[serde(flatten)]
         #[garde(dive)]
         inner: NewGemsCore,
         #[garde(dive, length(min = 1, max = MAX_SUSPENSIONS_OCM))]
-        loading: Vec<SingleplexedSuspensionChipLoading>,
+        loading: Vec<NewSingleplexSuspensionChipLoading>,
     },
     Multiplexed {
         #[serde(flatten)]
@@ -70,7 +52,46 @@ enum NewGems {
 }
 
 #[db_enum]
-enum ChromiumChip {
+enum SingleplexChromiumChip {
+    J,
+    H,
+    Q,
+    GemxFx,
+    #[serde(rename = "gemx_3p")]
+    #[strum(serialize = "gemx_3p")]
+    Gemx3p,
+    #[serde(rename = "gemx_ocm_5p")]
+    #[strum(serialize = "gemx_ocm_5p")]
+    Gemx5p,
+}
+
+#[db_enum]
+enum MultiplexChromiumChip {
+    #[serde(rename = "gemx_ocm_5p")]
+    #[strum(serialize = "gemx_ocm_5p")]
+    Gemx5p,
+}
+
+#[db_enum]
+enum OcmChromiumChip {
+    #[serde(rename = "gemx_ocm_3p")]
+    #[strum(serialize = "gemx_ocm_3p")]
+    GemxOcm3p,
+}
+
+#[db_insertion]
+#[cfg_attr(feature = "backend", diesel(table_name = chromium_run))]
+struct NewChromiumRunCore {
+    #[garde(dive)]
+    pub readable_id: ValidString,
+    pub run_at: OffsetDateTime,
+    pub succeeded: bool,
+    pub notes: Option<ValidString>,
+    pub run_by: Uuid,
+}
+
+#[db_enum]
+pub enum ChromiumChip {
     J,
     H,
     Q,
@@ -89,13 +110,14 @@ enum ChromiumChip {
 #[db_insertion]
 #[cfg_attr(feature = "backend", diesel(table_name = chromium_run))]
 struct NewChromiumRun {
-    readable_id: String,
-    chip: ChromiumChip,
-    run_at: OffsetDateTime,
-    succeeded: bool,
-    notes: Option<String>,
-    run_by: Uuid,
+    #[garde(dive)]
+    pub readable_id: ValidString,
+    pub chip: ChromiumChip,
+    pub run_at: OffsetDateTime,
+    pub succeeded: bool,
+    pub notes: Option<ValidString>,
+    pub run_by: Uuid,
     #[cfg_attr(feature = "backend", diesel(skip_insertion))]
     #[garde(dive, length(min = 1, max = 8))]
-    gems: Vec<NewGems>,
+    pub gems: Vec<NewGems>,
 }

@@ -12,14 +12,16 @@ serde = { workspace = true }
 diesel = { workspace = true, optional = true }
 diesel-async = { workspace = true, optional = true }
 valuable = { workspace = true }
-wasm-bindgen = { workspace = true }
-pyo3 = { workspace = true }
 
 [lints]
 workspace = true
 
 [target.'cfg(target_arch = "wasm32")'.dependencies]
 _uuid = { workspace = true, features = ["js"] }
+wasm-bindgen = { workspace = true }
+
+[target.'cfg(not(target_arch = "wasm32"))'.dependencies]
+pyo3 = { workspace = true }
 
 [features]
 backend = ["diesel", "diesel-async"]

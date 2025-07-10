@@ -3,7 +3,6 @@ use scamplers_macros::{db_enum, db_insertion};
 use scamplers_schema::library_type_specification;
 
 #[db_enum]
-#[derive(Clone)]
 pub enum LibraryType {
     #[serde(rename = "Antibody Capture")]
     #[strum(serialize = "Antibody Capture")]
@@ -49,16 +48,15 @@ pub enum LibraryType {
 }
 
 #[db_insertion]
-#[derive(Clone)]
 #[cfg_attr(feature = "backend", diesel(table_name = library_type_specification))]
 pub struct NewLibraryTypeSpecification {
-    chemistry: String,
-    library_type: LibraryType,
-    index_kit: String,
+    pub chemistry: String,
+    pub library_type: LibraryType,
+    pub index_kit: String,
     #[garde(range(min = 0.0))]
     #[cfg_attr(feature = "backend", diesel(column_name = cdna_volume_l))]
-    cdna_volume_µl: f32,
+    pub cdna_volume_µl: f32,
     #[garde(range(min = 0.0))]
     #[cfg_attr(feature = "backend", diesel(column_name = library_volume_l))]
-    library_volume_µl: f32,
+    pub library_volume_µl: f32,
 }

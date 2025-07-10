@@ -1,4 +1,4 @@
-use crate::string::NonEmptyString;
+use crate::string::ValidString;
 use time::OffsetDateTime;
 use uuid::Uuid;
 #[cfg(feature = "backend")]
@@ -31,14 +31,14 @@ pub enum ComplianceCommitteeType {
     backend_insertion(committee_approval),
     derive(bon::Builder, Clone)
 )]
-#[cfg_attr(feature = "backend", builder(on(NonEmptyString, into)))]
+#[cfg_attr(feature = "backend", builder(on(ValidString, into)))]
 pub struct NewCommitteeApproval {
     #[cfg_attr(feature = "backend", serde(default))]
     specimen_id: Uuid,
     institution_id: Uuid,
     committee_type: ComplianceCommitteeType,
     #[cfg_attr(feature = "backend", garde(dive))]
-    compliance_identifier: NonEmptyString,
+    compliance_identifier: ValidString,
 }
 
 #[cfg_attr(feature = "backend", backend_with_getters)]
@@ -63,7 +63,7 @@ pub enum MeasurementData {
         #[cfg_attr(feature = "backend", valuable(skip))]
         measured_at: OffsetDateTime,
         #[cfg_attr(feature = "backend", garde(dive))]
-        instrument_name: NonEmptyString, // This should be an enum
+        instrument_name: ValidString, // This should be an enum
         #[cfg_attr(feature = "backend", garde(range(min = 1.0, max = 10.0)))]
         value: f32,
     },
@@ -71,7 +71,7 @@ pub enum MeasurementData {
         #[cfg_attr(feature = "backend", valuable(skip))]
         measured_at: OffsetDateTime,
         #[cfg_attr(feature = "backend", garde(dive))]
-        instrument_name: NonEmptyString, // This should be a different enum
+        instrument_name: ValidString, // This should be a different enum
         #[cfg_attr(feature = "backend", garde(range(min = 0.0, max = 1.0)))]
         value: f32,
     },
@@ -103,9 +103,9 @@ pub(super) fn is_true(value: &bool, _: &()) -> garde::Result {
 #[cfg_attr(feature = "backend", backend_insertion(specimen))]
 pub struct NewSpecimenCommon {
     #[cfg_attr(feature = "backend", garde(dive))]
-    pub(crate) readable_id: NonEmptyString,
+    pub(crate) readable_id: ValidString,
     #[cfg_attr(feature = "backend", garde(dive))]
-    pub(crate) name: NonEmptyString,
+    pub(crate) name: ValidString,
     pub(crate) submitted_by: Uuid,
     pub(crate) lab_id: Uuid,
     #[cfg_attr(feature = "backend", valuable(skip))]
@@ -115,7 +115,7 @@ pub struct NewSpecimenCommon {
     #[cfg_attr(feature = "backend", diesel(skip_insertion), serde(default))]
     pub(crate) committee_approvals: Vec<NewCommitteeApproval>,
     #[cfg_attr(feature = "backend", garde(dive))]
-    pub(crate) notes: Option<NonEmptyString>,
+    pub(crate) notes: Option<ValidString>,
     #[cfg_attr(feature = "backend", valuable(skip))]
     pub(crate) returned_at: Option<OffsetDateTime>,
     pub(crate) returned_by: Option<Uuid>,

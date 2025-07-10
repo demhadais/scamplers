@@ -1,49 +1,38 @@
 use scamplers_macros::db_selection;
 #[cfg(feature = "backend")]
 use scamplers_schema::{sequencing_run, sequencing_submissions};
-use {
-    crate::string::NonEmptyString, scamplers_macros::db_insertion, time::OffsetDateTime, uuid::Uuid,
-};
+use valid_string::ValidString;
+use {scamplers_macros::db_insertion, time::OffsetDateTime, uuid::Uuid};
 
 #[db_insertion]
 #[cfg_attr(feature = "backend", diesel(table_name = sequencing_submissions))]
 pub struct NewSequencingSubmission {
     #[serde(default)]
-    sequencing_run_id: Uuid,
-    library_id: Uuid,
-    fastq_paths: Vec<NonEmptyString>,
-    submitted_at: OffsetDateTime,
+    pub sequencing_run_id: Uuid,
+    pub library_id: Uuid,
+    pub fastq_paths: Vec<ValidString>,
+    pub submitted_at: OffsetDateTime,
 }
 
 #[db_insertion]
 #[cfg_attr(feature = "backend", diesel(table_name = sequencing_run))]
 pub struct NewSequencingRun {
     #[garde(dive)]
-    readable_id: NonEmptyString,
-    begun_at: OffsetDateTime,
-    finished_at: Option<OffsetDateTime>,
+    pub readable_id: ValidString,
+    pub begun_at: OffsetDateTime,
+    pub finished_at: Option<OffsetDateTime>,
     #[garde(dive)]
-    notes: Option<NonEmptyString>,
+    pub notes: Option<ValidString>,
     #[garde(dive)]
-    #[getset(skip)]
     #[cfg_attr(feature = "backend", diesel(skip_insertion))]
-    libraries: Vec<NewSequencingSubmission>,
-}
-impl NewSequencingRun {
-    pub fn libraries(&mut self, self_id: Uuid) -> &[NewSequencingSubmission] {
-        for submission in &mut self.libraries {
-            submission.sequencing_run_id = self_id;
-        }
-
-        &self.libraries
-    }
+    pub libraries: Vec<NewSequencingSubmission>,
 }
 
 #[db_selection]
 #[cfg_attr(feature = "backend", diesel(table_name = sequencing_run))]
 pub struct SequencingRunHandle {
-    id: Uuid,
-    link: String,
+    pub id: Uuid,
+    pub link: String,
 }
 
 #[db_selection]
@@ -51,9 +40,9 @@ pub struct SequencingRunHandle {
 pub struct SequencingRunSummary {
     #[serde(flatten)]
     #[cfg_attr(feature = "backend", diesel(embed))]
-    handle: SequencingRunHandle,
-    readable_id: String,
-    begun_at: OffsetDateTime,
-    finished_at: OffsetDateTime,
-    notes: Option<String>,
+    pub handle: SequencingRunHandle,
+    pub readable_id: String,
+    pub begun_at: OffsetDateTime,
+    pub finished_at: OffsetDateTime,
+    pub notes: Option<String>,
 }

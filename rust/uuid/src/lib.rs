@@ -1,6 +1,8 @@
 #[cfg(feature = "backend")]
 use diesel::{deserialize::FromSqlRow, expression::AsExpression, sql_types};
-use pyo3::{IntoPyObjectRef, pyclass};
+#[cfg(not(target_arch = "wasm32"))]
+use pyo3::prelude::*;
+#[cfg(target_arch = "wasm32")]
 use wasm_bindgen::{
     JsValue,
     convert::{
@@ -15,24 +17,14 @@ use {
     std::{fmt::Display, str::FromStr},
 };
 
-#[cfg_attr(feature = "backend", derive(FromSqlRow, AsExpression))]
-#[cfg_attr(feature = "backend", diesel(sql_type = sql_types::Uuid))]
 #[derive(
-    Clone,
-    Copy,
-    Eq,
-    Ord,
-    PartialEq,
-    PartialOrd,
-    Debug,
-    Hash,
-    Default,
-    Deserialize,
-    Serialize,
-    IntoPyObjectRef,
+    Clone, Copy, Eq, Ord, PartialEq, PartialOrd, Debug, Hash, Default, Deserialize, Serialize,
 )]
+#[cfg_attr(not(target_arch = "wasm32"), derive(IntoPyObject, FromPyObject))]
+#[cfg_attr(feature = "backend", derive(FromSqlRow, AsExpression))]
+#[cfg_attr(not(target_arch = "wasm32"), pyo3(transparent))]
+#[cfg_attr(feature = "backend", diesel(sql_type = sql_types::Uuid))]
 #[serde(transparent)]
-#[pyclass]
 pub struct Uuid(_uuid::Uuid);
 
 impl Display for Uuid {
@@ -63,76 +55,6 @@ impl Uuid {
     }
 }
 
-impl WasmDescribe for Uuid {
-    fn describe() {
-        String::describe();
-    }
-}
-
-impl From<Uuid> for JsValue {
-    fn from(val: Uuid) -> Self {
-        val.to_string().into()
-    }
-}
-
-impl TryFromJsValue for Uuid {
-    type Error = _uuid::Error;
-
-    fn try_from_js_value(value: JsValue) -> Result<Self, Self::Error> {
-        Self::from_str(&String::try_from_js_value(value).unwrap())
-    }
-}
-
-impl IntoWasmAbi for Uuid {
-    type Abi = <String as IntoWasmAbi>::Abi;
-
-    fn into_abi(self) -> Self::Abi {
-        self.to_string().into_abi()
-    }
-}
-
-impl FromWasmAbi for Uuid {
-    type Abi = <Self as IntoWasmAbi>::Abi;
-
-    unsafe fn from_abi(js: Self::Abi) -> Self {
-        Self(unsafe { String::from_abi(js).parse().unwrap() })
-    }
-}
-
-impl OptionIntoWasmAbi for Uuid {
-    fn none() -> Self::Abi {
-        <String as OptionIntoWasmAbi>::none()
-    }
-}
-
-impl OptionFromWasmAbi for Uuid {
-    fn is_none(abi: &Self::Abi) -> bool {
-        <String as OptionFromWasmAbi>::is_none(abi)
-    }
-}
-
-impl WasmDescribeVector for Uuid {
-    fn describe_vector() {
-        Vec::<String>::describe();
-    }
-}
-
-impl VectorIntoWasmAbi for Uuid {
-    type Abi = <String as VectorIntoWasmAbi>::Abi;
-
-    fn vector_into_abi(vector: Box<[Self]>) -> Self::Abi {
-        js_value_vector_into_abi(vector)
-    }
-}
-
-impl VectorFromWasmAbi for Uuid {
-    type Abi = <String as VectorFromWasmAbi>::Abi;
-
-    unsafe fn vector_from_abi(js: Self::Abi) -> Box<[Self]> {
-        unsafe { js_value_vector_from_abi(js) }
-    }
-}
-
 impl valuable::Valuable for Uuid {
     fn as_value(&self) -> valuable::Value<'_> {
         self.as_bytes().as_value()
@@ -140,6 +62,89 @@ impl valuable::Valuable for Uuid {
 
     fn visit(&self, visit: &mut dyn valuable::Visit) {
         self.as_bytes().visit(visit);
+    }
+}
+
+#[cfg(target_arch = "wasm32")]
+mod wasm32 {
+    use wasm_bindgen::{
+        JsValue,
+        convert::{
+            FromWasmAbi, IntoWasmAbi, OptionFromWasmAbi, OptionIntoWasmAbi, TryFromJsValue,
+            VectorFromWasmAbi, VectorIntoWasmAbi, js_value_vector_from_abi,
+            js_value_vector_into_abi,
+        },
+        describe::{WasmDescribe, WasmDescribeVector},
+    };
+
+    impl WasmDescribe for Uuid {
+        fn describe() {
+            String::describe();
+        }
+    }
+
+    impl From<Uuid> for JsValue {
+        fn from(val: Uuid) -> Self {
+            val.to_string().into()
+        }
+    }
+
+    impl TryFromJsValue for Uuid {
+        type Error = _uuid::Error;
+
+        fn try_from_js_value(value: JsValue) -> Result<Self, Self::Error> {
+            Self::from_str(&String::try_from_js_value(value).unwrap())
+        }
+    }
+
+    impl IntoWasmAbi for Uuid {
+        type Abi = <String as IntoWasmAbi>::Abi;
+
+        fn into_abi(self) -> Self::Abi {
+            self.to_string().into_abi()
+        }
+    }
+
+    impl FromWasmAbi for Uuid {
+        type Abi = <Self as IntoWasmAbi>::Abi;
+
+        unsafe fn from_abi(js: Self::Abi) -> Self {
+            Self(unsafe { String::from_abi(js).parse().unwrap() })
+        }
+    }
+
+    impl OptionIntoWasmAbi for Uuid {
+        fn none() -> Self::Abi {
+            <String as OptionIntoWasmAbi>::none()
+        }
+    }
+
+    impl OptionFromWasmAbi for Uuid {
+        fn is_none(abi: &Self::Abi) -> bool {
+            <String as OptionFromWasmAbi>::is_none(abi)
+        }
+    }
+
+    impl WasmDescribeVector for Uuid {
+        fn describe_vector() {
+            Vec::<String>::describe();
+        }
+    }
+
+    impl VectorIntoWasmAbi for Uuid {
+        type Abi = <String as VectorIntoWasmAbi>::Abi;
+
+        fn vector_into_abi(vector: Box<[Self]>) -> Self::Abi {
+            js_value_vector_into_abi(vector)
+        }
+    }
+
+    impl VectorFromWasmAbi for Uuid {
+        type Abi = <String as VectorFromWasmAbi>::Abi;
+
+        unsafe fn vector_from_abi(js: Self::Abi) -> Box<[Self]> {
+            unsafe { js_value_vector_from_abi(js) }
+        }
     }
 }
 

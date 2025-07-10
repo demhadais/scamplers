@@ -1,4 +1,4 @@
-use crate::{model::Pagination, string::NonEmptyString};
+use crate::{model::Pagination, string::ValidString};
 #[cfg(feature = "typescript")]
 use scamplers_macros::{
     frontend_insertion, frontend_ordering, frontend_ordinal_columns_enum, frontend_query_request,
@@ -15,14 +15,14 @@ use {
 };
 
 #[cfg_attr(feature = "backend", backend_insertion(lab), derive(bon::Builder))]
-#[cfg_attr(feature = "backend", builder(on(NonEmptyString, into)))]
+#[cfg_attr(feature = "backend", builder(on(ValidString, into)))]
 #[cfg_attr(feature = "typescript", frontend_insertion)]
 pub struct NewLab {
     #[cfg_attr(feature = "backend", garde(dive))]
-    name: NonEmptyString,
+    name: ValidString,
     pi_id: Uuid,
     #[cfg_attr(feature = "backend", garde(dive))]
-    delivery_dir: NonEmptyString,
+    delivery_dir: ValidString,
     #[cfg_attr(feature = "backend", diesel(skip_insertion), builder(default))]
     #[cfg_attr(feature = "typescript", builder(default))]
     member_ids: Vec<Uuid>,
@@ -38,8 +38,8 @@ impl NewLab {
 #[cfg_attr(feature = "typescript", frontend_with_getters)]
 mod with_getters {
     use crate::{
-        model::{IsUpdate, person::PersonSummary},
-        string::NonEmptyString,
+        model::{person::PersonSummary, IsUpdate},
+        string::ValidString,
     };
     #[cfg(feature = "typescript")]
     use scamplers_macros::{frontend_response, frontend_update};
@@ -90,10 +90,10 @@ mod with_getters {
     pub struct LabUpdateCore {
         id: Uuid,
         #[cfg_attr(feature = "backend", garde(dive))]
-        name: Option<NonEmptyString>,
+        name: Option<ValidString>,
         pi_id: Option<Uuid>,
         #[cfg_attr(feature = "backend", garde(dive))]
-        delivery_dir: Option<NonEmptyString>,
+        delivery_dir: Option<ValidString>,
     }
     impl IsUpdate for LabUpdateCore {
         fn is_update(&self) -> bool {
@@ -133,14 +133,14 @@ mod with_getters {
     #[cfg(feature = "backend")]
     #[bon::bon]
     impl LabUpdate {
-        #[builder(on(NonEmptyString, into))]
+        #[builder(on(ValidString, into))]
         pub fn new(
             #[builder(field)] add_members: Vec<Uuid>,
             #[builder(field)] remove_members: Vec<Uuid>,
             id: Uuid,
-            name: Option<NonEmptyString>,
+            name: Option<ValidString>,
             pi_id: Option<Uuid>,
-            delivery_dir: Option<NonEmptyString>,
+            delivery_dir: Option<ValidString>,
         ) -> Self {
             Self {
                 core: LabUpdateCore {

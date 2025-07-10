@@ -20,7 +20,10 @@ export enum UserRole {
 }
 export class Client {
   free(): void;
-  send_new_institution(data: NewInstitution, api_key?: string | null): Promise<Institution>;
+  send_new_institution(
+    data: NewInstitution,
+    api_key?: string | null,
+  ): Promise<Institution>;
   send_new_person(data: NewPerson, api_key?: string | null): Promise<Person>;
   send_new_lab(data: NewLab, api_key?: string | null): Promise<Lab>;
   constructor(backend_url: string, token: string);
@@ -168,9 +171,9 @@ export class LabUpdate {
   private constructor();
   free(): void;
   id(): string;
-  name(): NonEmptyString | undefined;
+  name(): ValidString | undefined;
   pi_id(): string;
-  delivery_dir(): NonEmptyString | undefined;
+  delivery_dir(): ValidString | undefined;
   add_members(): string[];
   remove_members(): string[];
   static new(): LabUpdateBuilder;
@@ -197,9 +200,9 @@ export class LabUpdateCore {
   private constructor();
   free(): void;
   id(): string;
-  name(): NonEmptyString | undefined;
+  name(): ValidString | undefined;
   pi_id(): string;
-  delivery_dir(): NonEmptyString | undefined;
+  delivery_dir(): ValidString | undefined;
   static new(): LabUpdateCoreBuilder;
 }
 /**
@@ -209,9 +212,9 @@ export class LabUpdateCoreBuilder {
   private constructor();
   free(): void;
   id(value: string): LabUpdateCoreBuilder;
-  name(value?: NonEmptyString | null): LabUpdateCoreBuilder;
+  name(value?: ValidString | null): LabUpdateCoreBuilder;
   pi_id(value?: string | null): LabUpdateCoreBuilder;
-  delivery_dir(value?: NonEmptyString | null): LabUpdateCoreBuilder;
+  delivery_dir(value?: ValidString | null): LabUpdateCoreBuilder;
   /**
    * Builds a new `LabUpdateCore`.
    *
@@ -243,7 +246,7 @@ export class NewInstitutionBuilder {
   private constructor();
   free(): void;
   id(value: string): NewInstitutionBuilder;
-  name(value: NonEmptyString): NewInstitutionBuilder;
+  name(value: ValidString): NewInstitutionBuilder;
   /**
    * Builds a new `NewInstitution`.
    *
@@ -269,9 +272,9 @@ export class NewLab {
 export class NewLabBuilder {
   private constructor();
   free(): void;
-  name(value: NonEmptyString): NewLabBuilder;
+  name(value: ValidString): NewLabBuilder;
   pi_id(value: string): NewLabBuilder;
-  delivery_dir(value: NonEmptyString): NewLabBuilder;
+  delivery_dir(value: ValidString): NewLabBuilder;
   member_ids(value: string[]): NewLabBuilder;
   /**
    * Builds a new `NewLab`.
@@ -291,10 +294,10 @@ export class NewPerson {
   private constructor();
   free(): void;
   static new(): NewPersonBuilder;
-  name: NonEmptyString;
+  name: ValidString;
   email: string;
-  get orcid(): NonEmptyString | undefined;
-  set orcid(value: NonEmptyString | null | undefined);
+  get orcid(): ValidString | undefined;
+  set orcid(value: ValidString | null | undefined);
   institution_id: string;
   get ms_user_id(): string;
   set ms_user_id(value: string | null | undefined);
@@ -306,9 +309,9 @@ export class NewPerson {
 export class NewPersonBuilder {
   private constructor();
   free(): void;
-  name(value: NonEmptyString): NewPersonBuilder;
+  name(value: ValidString): NewPersonBuilder;
   email(value: string): NewPersonBuilder;
-  orcid(value?: NonEmptyString | null): NewPersonBuilder;
+  orcid(value?: ValidString | null): NewPersonBuilder;
   institution_id(value: string): NewPersonBuilder;
   ms_user_id(value?: string | null): NewPersonBuilder;
   roles(value: any[]): NewPersonBuilder;
@@ -326,7 +329,7 @@ export class NewPersonError {
   free(): void;
   error(): string;
 }
-export class NonEmptyString {
+export class ValidString {
   free(): void;
   constructor(s: string);
 }
@@ -422,10 +425,10 @@ export class PersonUpdate {
   grant_roles(): any[];
   revoke_roles(): any[];
   id(): string;
-  name(): NonEmptyString | undefined;
+  name(): ValidString | undefined;
   email(): string;
   ms_user_id(): string;
-  orcid(): NonEmptyString | undefined;
+  orcid(): ValidString | undefined;
   institution_id(): string;
   static new(): PersonUpdateBuilder;
 }
@@ -451,10 +454,10 @@ export class PersonUpdateCore {
   private constructor();
   free(): void;
   id(): string;
-  name(): NonEmptyString | undefined;
+  name(): ValidString | undefined;
   email(): string;
   ms_user_id(): string;
-  orcid(): NonEmptyString | undefined;
+  orcid(): ValidString | undefined;
   institution_id(): string;
   static new(): PersonUpdateCoreBuilder;
 }
@@ -465,10 +468,10 @@ export class PersonUpdateCoreBuilder {
   private constructor();
   free(): void;
   id(value: string): PersonUpdateCoreBuilder;
-  name(value?: NonEmptyString | null): PersonUpdateCoreBuilder;
+  name(value?: ValidString | null): PersonUpdateCoreBuilder;
   email(value?: string | null): PersonUpdateCoreBuilder;
   ms_user_id(value?: string | null): PersonUpdateCoreBuilder;
-  orcid(value?: NonEmptyString | null): PersonUpdateCoreBuilder;
+  orcid(value?: ValidString | null): PersonUpdateCoreBuilder;
   institution_id(value?: string | null): PersonUpdateCoreBuilder;
   /**
    * Builds a new `PersonUpdateCore`.

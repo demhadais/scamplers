@@ -5,7 +5,7 @@ use {
             specimen::SpecimenSummary,
             suspension::common::{BiologicalMaterial, MeasurementDataCore},
         },
-        string::NonEmptyString,
+        string::ValidString,
     },
     time::OffsetDateTime,
     uuid::Uuid,
@@ -59,7 +59,7 @@ impl NewSuspensionMeasurement {
 
 #[cfg_attr(feature = "backend", backend_insertion(suspension))]
 pub struct NewSuspension {
-    readable_id: NonEmptyString,
+    readable_id: ValidString,
     parent_specimen_id: Uuid,
     biological_material: BiologicalMaterial,
     #[cfg_attr(feature = "backend", valuable(skip))]
@@ -73,7 +73,7 @@ pub struct NewSuspension {
     #[cfg_attr(feature = "backend", garde(range(min = 0)))]
     target_reads_per_cell: i32,
     #[cfg_attr(feature = "backend", garde(dive))]
-    notes: Option<NonEmptyString>,
+    notes: Option<ValidString>,
     #[cfg_attr(feature = "backend", diesel(skip_insertion))]
     preparer_ids: Vec<Uuid>,
     #[cfg_attr(

@@ -1,9 +1,8 @@
-use getset::MutGetters;
 use scamplers_macros::{db_enum, db_insertion};
 #[cfg(feature = "backend")]
 use scamplers_schema::specimen;
 
-use crate::model::specimen::{NewSpecimenCommon, common::NewCommitteeApproval};
+use crate::model::specimen::NewSpecimenCommon;
 
 #[db_enum]
 #[derive(Default)]
@@ -18,20 +17,13 @@ pub enum SuspensionFixative {
 }
 
 #[db_insertion]
-#[derive(MutGetters)]
 #[cfg_attr(feature = "backend", diesel(table_name = specimen))]
 pub struct NewVirtualSpecimen {
     #[serde(flatten)]
     #[garde(dive)]
-    #[getset(get_mut = "pub(super)")]
     #[cfg_attr(feature = "backend", diesel(embed))]
-    inner: NewSpecimenCommon,
+    pub inner: NewSpecimenCommon,
     #[serde(skip)]
-    type_: SuspensionType,
-    fixative: SuspensionFixative,
-}
-impl NewVirtualSpecimen {
-    pub(super) fn committee_approvals_mut(&mut self) -> &mut [NewCommitteeApproval] {
-        self.inner_mut().committee_approvals_mut()
-    }
+    pub type_: SuspensionType,
+    pub fixative: SuspensionFixative,
 }

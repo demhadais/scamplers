@@ -1,15 +1,18 @@
-use std::fmt::Display;
-
 #[cfg(feature = "backend")]
 use diesel::{deserialize::FromSqlRow, expression::AsExpression, sql_types};
+#[cfg(not(target_arch = "wasm32"))]
+use pyo3::prelude::*;
+use std::fmt::Display;
 
-const OFFSET_DATETIME_VALUE: &str = "OffsetDateTime";
+const OFFSET_DATETIME_AS_VALUE: &str = "OffsetDateTime";
 
-#[cfg_attr(feature = "backend", derive(FromSqlRow, AsExpression))]
-#[cfg_attr(feature = "backend", diesel(sql_type = sql_types::Timestamptz))]
 #[derive(
     Clone, Copy, Eq, Ord, PartialEq, PartialOrd, Debug, Hash, serde::Deserialize, serde::Serialize,
 )]
+#[cfg_attr(not(target_arch = "wasm32"), derive(IntoPyObject, FromPyObject))]
+#[cfg_attr(feature = "backend", derive(FromSqlRow, AsExpression))]
+#[cfg_attr(not(target_arch = "wasm32"), pyo3(transparent))]
+#[cfg_attr(feature = "backend", diesel(sql_type = sql_types::Timestamptz))]
 #[serde(transparent)]
 pub struct OffsetDateTime(_time::OffsetDateTime);
 impl OffsetDateTime {
@@ -27,16 +30,16 @@ impl Display for OffsetDateTime {
 
 impl valuable::Valuable for OffsetDateTime {
     fn as_value(&self) -> valuable::Value<'_> {
-        OFFSET_DATETIME_VALUE.as_value()
+        OFFSET_DATETIME_AS_VALUE.as_value()
     }
 
     fn visit(&self, visit: &mut dyn valuable::Visit) {
-        OFFSET_DATETIME_VALUE.visit(visit);
+        OFFSET_DATETIME_AS_VALUE.visit(visit);
     }
 }
 
 #[cfg(target_arch = "wasm32")]
-mod frontend {
+mod wasm32 {
     use super::OffsetDateTime;
     use wasm_bindgen::{
         JsValue,

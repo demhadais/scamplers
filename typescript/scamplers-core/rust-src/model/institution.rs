@@ -1,4 +1,4 @@
-use crate::{model::Pagination, string::NonEmptyString};
+use crate::{model::Pagination, string::ValidString};
 #[cfg(feature = "typescript")]
 use scamplers_macros::{
     frontend_insertion, frontend_ordering, frontend_ordinal_columns_enum, frontend_query_request,
@@ -19,12 +19,12 @@ use {
     backend_insertion(institution),
     derive(Clone, bon::Builder)
 )]
-#[cfg_attr(feature = "backend", builder(on(NonEmptyString, into)))]
+#[cfg_attr(feature = "backend", builder(on(ValidString, into)))]
 #[cfg_attr(feature = "typescript", frontend_insertion)]
 pub struct NewInstitution {
     id: Uuid,
     #[cfg_attr(feature = "backend", garde(dive))]
-    name: NonEmptyString,
+    name: ValidString,
 }
 
 #[cfg_attr(feature = "backend", backend_with_getters)]

@@ -1,4 +1,4 @@
-use crate::string::NonEmptyString;
+use crate::string::ValidString;
 
 use super::Pagination;
 #[cfg(feature = "typescript")]
@@ -30,19 +30,16 @@ pub enum UserRole {
     backend_insertion(person),
     derive(Clone, bon::Builder)
 )]
-#[cfg_attr(
-    feature = "backend",
-    builder(on(NonEmptyString, into), on(String, into))
-)]
+#[cfg_attr(feature = "backend", builder(on(ValidString, into), on(String, into)))]
 #[cfg_attr(feature = "typescript", frontend_insertion)]
 pub struct NewPerson {
     #[cfg_attr(feature = "backend", garde(dive))]
-    pub name: NonEmptyString,
+    pub name: ValidString,
     #[cfg_attr(feature = "backend", garde(email))]
     pub email: String,
     #[cfg_attr(feature = "backend", garde(dive))]
     #[cfg_attr(feature = "typescript", builder(default))]
-    pub orcid: Option<NonEmptyString>,
+    pub orcid: Option<ValidString>,
     pub institution_id: Uuid,
     #[cfg_attr(feature = "typescript", builder(default))]
     pub ms_user_id: Option<Uuid>,
@@ -69,7 +66,7 @@ mod with_getters {
     use crate::model::IsUpdate;
     use crate::{
         model::{institution::Institution, person::UserRole},
-        string::NonEmptyString,
+        string::ValidString,
     };
     #[cfg(feature = "typescript")]
     use scamplers_macros::{frontend_response, frontend_update};
@@ -129,12 +126,12 @@ mod with_getters {
     pub struct PersonUpdateCore {
         id: Uuid,
         #[cfg_attr(feature = "backend", garde(dive))]
-        name: Option<NonEmptyString>,
+        name: Option<ValidString>,
         #[cfg_attr(feature = "backend", garde(email))]
         email: Option<String>,
         ms_user_id: Option<Uuid>,
         #[cfg_attr(feature = "backend", garde(dive))]
-        orcid: Option<NonEmptyString>,
+        orcid: Option<ValidString>,
         institution_id: Option<Uuid>,
     }
 
@@ -178,15 +175,15 @@ mod with_getters {
     #[cfg(feature = "backend")]
     #[bon::bon]
     impl PersonUpdate {
-        #[builder(on(String, into), on(NonEmptyString, into))]
+        #[builder(on(String, into), on(ValidString, into))]
         pub fn new(
             #[builder(field)] grant_roles: Vec<UserRole>,
             #[builder(field)] revoke_roles: Vec<UserRole>,
             id: Uuid,
-            name: Option<NonEmptyString>,
+            name: Option<ValidString>,
             email: Option<String>,
             ms_user_id: Option<Uuid>,
-            orcid: Option<NonEmptyString>,
+            orcid: Option<ValidString>,
             institution_id: Option<Uuid>,
         ) -> Self {
             let core = PersonUpdateCore {

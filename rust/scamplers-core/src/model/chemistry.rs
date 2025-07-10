@@ -1,20 +1,22 @@
-use crate::string::NonEmptyString;
-use scamplers_macros::db_insertion;
 #[cfg(feature = "backend")]
 use scamplers_schema::chemistry;
 use serde_json::Value;
+use valid_string::ValidString;
 
-#[db_insertion]
-#[derive(Clone)]
-#[cfg_attr(feature = "backend", diesel(table_name = chemistry))]
+#[derive(
+    Debug, ::serde::Deserialize, ::serde::Serialize, Clone, ::garde::Validate, ::valuable::Valuable,
+)]
+#[garde(allow_unvalidated)]
+#[cfg_attr(feature = "backend", derive(::diesel::Insertable))]
+#[cfg_attr(feature = "backend", diesel(check_for_backend(diesel::pg::Pg), table_name = chemistry))]
 pub struct Chemistry {
     #[garde(dive)]
-    name: NonEmptyString,
+    pub name: ValidString,
     #[garde(dive)]
-    description: NonEmptyString,
+    pub description: ValidString,
     #[serde(flatten)]
     #[valuable(skip)]
-    definition: Value,
+    pub definition: Value,
     #[garde(dive)]
-    cmdline: NonEmptyString,
+    pub cmdline: ValidString,
 }

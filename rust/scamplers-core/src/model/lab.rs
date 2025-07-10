@@ -1,23 +1,20 @@
-use crate::{
-    model::{IsUpdate, Pagination, SortByGroup, person::PersonSummary},
-    string::NonEmptyString,
-};
+use crate::model::{Pagination, SortByGroup, person::PersonSummary};
 use scamplers_macros::{
     base_api_model, base_api_model_with_default, db_insertion, db_query, db_selection, db_update,
 };
 #[cfg(feature = "backend")]
 use scamplers_schema::lab;
 use uuid::Uuid;
-use wasm_bindgen::prelude::wasm_bindgen;
+use valid_string::ValidString;
 
 #[db_insertion]
 #[cfg_attr(feature = "backend", diesel(table_name = lab))]
 pub struct NewLab {
     #[garde(dive)]
-    pub name: NonEmptyString,
+    pub name: ValidString,
     pub pi_id: Uuid,
     #[garde(dive)]
-    pub delivery_dir: NonEmptyString,
+    pub delivery_dir: ValidString,
     #[cfg_attr(feature = "backend", diesel(skip_insertion))]
     pub member_ids: Vec<Uuid>,
 }
@@ -49,8 +46,11 @@ pub struct LabCore {
     pub pi: PersonSummary,
 }
 
+#[cfg_attr(
+    target_arch = "wasm32",
+    wasm_bindgen::prelude::wasm_bindgen(getter_with_clone)
+)]
 #[base_api_model]
-#[wasm_bindgen(getter_with_clone)]
 pub struct Lab {
     #[serde(flatten)]
     pub core: LabCore,
@@ -62,23 +62,10 @@ pub struct Lab {
 pub struct LabUpdateCore {
     pub id: Uuid,
     #[garde(dive)]
-    pub name: Option<NonEmptyString>,
+    pub name: Option<ValidString>,
     pub pi_id: Option<Uuid>,
     #[garde(dive)]
-    pub delivery_dir: Option<NonEmptyString>,
-}
-impl IsUpdate for LabUpdateCore {
-    fn is_update(&self) -> bool {
-        matches!(
-            self,
-            Self {
-                name: Some(_),
-                pi_id: Some(_),
-                delivery_dir: Some(_),
-                ..
-            },
-        )
-    }
+    pub delivery_dir: Option<ValidString>,
 }
 
 #[base_api_model_with_default]
@@ -100,7 +87,7 @@ pub enum LabOrdinalColumn {
 pub struct LabQuery {
     pub ids: Vec<Uuid>,
     pub name: Option<String>,
-    #[wasm_bindgen(skip)]
+    #[cfg_attr(target_arch = "wasm32", wasm_bindgen(skip))]
     pub order_by: SortByGroup<LabOrdinalColumn>,
     pub pagination: Pagination,
 }

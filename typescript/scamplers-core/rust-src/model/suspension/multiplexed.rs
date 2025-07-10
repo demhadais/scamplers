@@ -3,7 +3,7 @@ use uuid::Uuid;
 
 use crate::{
     model::suspension::{common::MeasurementDataCore, singleplexed::NewSuspension},
-    string::NonEmptyString,
+    string::ValidString,
 };
 #[cfg(feature = "backend")]
 use {
@@ -33,10 +33,10 @@ pub struct NewMultiplexedSuspensionMeasurement {
 
 #[cfg_attr(feature = "backend", backend_insertion(multiplexed_suspension))]
 pub struct NewMultiplexedSuspension {
-    readable_id: NonEmptyString,
+    readable_id: ValidString,
     #[cfg_attr(feature = "backend", valuable(skip))]
     pooled_at: OffsetDateTime,
-    notes: Option<NonEmptyString>,
+    notes: Option<ValidString>,
     #[cfg_attr(feature = "backend", diesel(skip_insertion), garde(dive))]
     suspensions: Vec<NewSuspension>,
     #[cfg_attr(feature = "backend", diesel(skip_insertion))]

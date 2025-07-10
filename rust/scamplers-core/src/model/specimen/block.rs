@@ -1,7 +1,4 @@
-use crate::model::specimen::common::NewCommitteeApproval;
-
 use super::common::NewSpecimenCommon;
-use getset::MutGetters;
 use scamplers_macros::{base_api_model, db_enum, db_insertion};
 #[cfg(feature = "backend")]
 use scamplers_schema::specimen;
@@ -24,18 +21,16 @@ pub enum BlockFixative {
 }
 
 #[db_insertion]
-#[derive(MutGetters)]
 #[cfg_attr(feature = "backend", diesel(table_name = specimen))]
 pub struct NewFixedBlock {
     #[serde(flatten)]
     #[garde(dive)]
-    #[getset(get_mut)]
     #[cfg_attr(feature = "backend", diesel(embed))]
-    inner: NewSpecimenCommon,
+    pub inner: NewSpecimenCommon,
     #[serde(skip)]
-    type_: BlockType,
-    embedded_in: FixedBlockEmbeddingMatrix,
-    fixative: BlockFixative,
+    pub type_: BlockType,
+    pub embedded_in: FixedBlockEmbeddingMatrix,
+    pub fixative: BlockFixative,
 }
 
 #[db_enum]
@@ -45,20 +40,18 @@ pub enum FrozenBlockEmbeddingMatrix {
 }
 
 #[db_insertion]
-#[derive(MutGetters)]
 #[cfg_attr(feature = "backend", diesel(table_name = specimen))]
 pub struct NewFrozenBlock {
     #[serde(flatten)]
     #[garde(dive)]
-    #[getset(get_mut)]
     #[cfg_attr(feature = "backend", diesel(embed))]
-    inner: NewSpecimenCommon,
+    pub inner: NewSpecimenCommon,
     #[serde(skip)]
-    type_: BlockType,
-    embedded_in: FrozenBlockEmbeddingMatrix,
-    fixative: Option<BlockFixative>,
+    pub type_: BlockType,
+    pub embedded_in: FrozenBlockEmbeddingMatrix,
+    pub fixative: Option<BlockFixative>,
     #[garde(custom(super::common::is_true))]
-    frozen: bool,
+    pub frozen: bool,
 }
 
 #[base_api_model]
@@ -66,16 +59,4 @@ pub struct NewFrozenBlock {
 pub enum NewBlock {
     Fixed(#[garde(dive)] NewFixedBlock),
     Frozen(#[garde(dive)] NewFrozenBlock),
-}
-impl NewBlock {
-    pub(super) fn inner_mut(&mut self) -> &mut NewSpecimenCommon {
-        match self {
-            Self::Fixed(b) => b.inner_mut(),
-            Self::Frozen(b) => b.inner_mut(),
-        }
-    }
-
-    pub(super) fn committee_approvals_mut(&mut self) -> &mut [NewCommitteeApproval] {
-        self.inner_mut().committee_approvals_mut()
-    }
 }

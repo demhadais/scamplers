@@ -1,7 +1,5 @@
 use crate::model::{
-    Pagination, SortByGroup,
-    person::PersonHandle,
-    specimen::common::{NewCommitteeApproval, NewSpecimenCommon, NewSpecimenMeasurement},
+    Pagination, SortByGroup, person::PersonHandle, specimen::common::NewSpecimenCommon,
 };
 
 use super::{lab::LabSummary, person::PersonSummary};
@@ -27,37 +25,6 @@ pub enum NewSpecimen {
     Suspension(#[garde(dive)] NewVirtualSpecimen),
     Tissue(#[garde(dive)] NewTissue),
 }
-
-// impl NewSpecimen {
-//     pub fn measurements(&mut self, self_id: Uuid) -> &[NewSpecimenMeasurement] {
-//         let inner = match self {
-//             Self::Block(b) => b.inner_mut(),
-//             Self::Suspension(s) => s.inner_mut(),
-//             Self::Tissue(t) => t.inner_mut(),
-//         };
-
-//         let measurements = inner.measurements_mut();
-//         for m in &mut *measurements {
-//             m.set_specimen_id(self_id);
-//         }
-
-//         measurements
-//     }
-
-//     pub fn committe_approvals(&mut self, self_id: Uuid) -> &[NewCommitteeApproval] {
-//         let approvals = match self {
-//             Self::Block(b) => b.committee_approvals_mut(),
-//             Self::Suspension(s) => s.committee_approvals_mut(),
-//             Self::Tissue(t) => t.committee_approvals_mut(),
-//         };
-
-//         for a in &mut *approvals {
-//             a.set_specimen_id(self_id);
-//         }
-
-//         approvals
-//     }
-// }
 
 #[db_selection]
 #[cfg_attr(feature = "backend", diesel(table_name = specimen))]
@@ -92,7 +59,7 @@ pub struct SpecimenMeasurement {
     #[cfg_attr(feature = "backend", diesel(embed))]
     pub measured_by: PersonHandle,
     #[serde(flatten)]
-    #[wasm_bindgen(skip)]
+    #[cfg_attr(target_arch = "wasm32", wasm_bindgen(skip))]
     pub data: MeasurementData,
 }
 
@@ -101,27 +68,20 @@ pub struct SpecimenMeasurement {
 pub struct SpecimenCore {
     #[serde(flatten)]
     #[cfg_attr(feature = "backend", diesel(embed))]
-    summary: SpecimenSummary,
+    pub summary: SpecimenSummary,
     #[cfg_attr(feature = "backend", diesel(embed))]
-    lab: LabSummary,
+    pub lab: LabSummary,
     #[cfg_attr(feature = "backend", diesel(embed))]
-    submitted_by: PersonSummary,
+    pub submitted_by: PersonSummary,
     #[cfg_attr(feature = "backend", diesel(embed))]
-    returned_by: PersonSummary,
-}
-impl SpecimenCore {
-    pub fn id(&self) -> &Uuid {
-        self.summary().id()
-    }
+    pub returned_by: PersonSummary,
 }
 
 #[base_api_model]
-#[derive(::derive_builder::Builder)]
-#[builder(pattern = "owned", build_fn(error = crate::model::BuilderError))]
 #[cfg_attr(target_arch = "wasm32", ::wasm_bindgen::prelude::wasm_bindgen)]
 pub struct Specimen {
-    core: SpecimenCore,
-    measurements: Vec<SpecimenMeasurement>,
+    pub core: SpecimenCore,
+    pub measurements: Vec<SpecimenMeasurement>,
 }
 
 #[base_api_model]
@@ -156,45 +116,23 @@ pub enum SpecimenOrdinalColumn {
 
 #[db_query]
 pub struct SpecimenQuery {
-    ids: Vec<Uuid>,
-    name: Option<String>,
-    #[builder(setter(custom))]
-    submitters: Vec<Uuid>,
-    #[builder(setter(custom))]
-    labs: Vec<Uuid>,
-    received_before: Option<OffsetDateTime>,
-    received_after: Option<OffsetDateTime>,
-    #[builder(setter(custom))]
-    species: Vec<Species>,
-    notes: Option<String>,
+    pub ids: Vec<Uuid>,
+    pub name: Option<String>,
+    pub submitters: Vec<Uuid>,
+    pub labs: Vec<Uuid>,
+    pub received_before: Option<OffsetDateTime>,
+    pub received_after: Option<OffsetDateTime>,
+    pub species: Vec<Species>,
+    pub notes: Option<String>,
     #[serde(alias = "type")]
-    type_: Option<SpecimenType>,
-    embedded_in: Option<BlockEmbeddingMatrix>,
-    fixative: Option<Fixative>,
-    storage_buffer: Option<String>,
-    frozen: Option<bool>,
-    cryopreserved: Option<bool>,
-    #[builder(setter(custom))]
-    order_by: SortByGroup<SpecimenOrdinalColumn>,
-    pagination: Pagination,
-}
-
-impl SpecimenQueryBuilder {
-    pub fn submitter(mut self, submitter_id: Uuid) {
-        if let Some(ref mut submitters) = self.submitters {
-            submitters.push(submitter_id);
-        } else {
-            self.submitters = Some(vec![submitter_id]);
-        }
-    }
-
-    pub fn species(mut self, species: Species) {
-        if let Some(ref mut species_list) = self.species {
-            species_list.push(species);
-        } else {
-            self.species = Some(vec![species]);
-        }
-    }
+    pub type_: Option<SpecimenType>,
+    pub embedded_in: Option<BlockEmbeddingMatrix>,
+    pub fixative: Option<Fixative>,
+    pub storage_buffer: Option<String>,
+    pub frozen: Option<bool>,
+    pub cryopreserved: Option<bool>,
+    pub order_by: SortByGroup<SpecimenOrdinalColumn>,
+    pub pagination: Pagination,
 }
 
 #[cfg(test)]

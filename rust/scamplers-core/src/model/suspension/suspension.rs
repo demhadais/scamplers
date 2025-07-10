@@ -3,14 +3,12 @@ use scamplers_macros::{db_enum, db_insertion, db_json, db_selection};
 use scamplers_schema::{
     multiplexing_tag, suspension, suspension_measurement, suspension_preparers,
 };
+use valid_string::ValidString;
 use {
-    crate::{
-        model::{
-            person::PersonHandle,
-            specimen::SpecimenSummary,
-            suspension::common::{BiologicalMaterial, MeasurementDataCore},
-        },
-        string::NonEmptyString,
+    crate::model::{
+        person::PersonHandle,
+        specimen::SpecimenSummary,
+        suspension::common::{BiologicalMaterial, MeasurementDataCore},
     },
     time::OffsetDateTime,
     uuid::Uuid,
@@ -31,91 +29,66 @@ pub enum MultiplexingTagType {
 #[db_insertion]
 #[cfg_attr(feature = "backend", diesel(table_name = multiplexing_tag))]
 pub struct NewMultiplexingTag {
-    tag_id: String,
-    type_: MultiplexingTagType,
+    pub tag_id: String,
+    pub type_: MultiplexingTagType,
 }
 
 #[db_json]
 pub struct SuspensionMeasurementData {
     #[serde(flatten)]
     #[garde(dive)]
-    core: MeasurementDataCore,
-    is_post_hybridization: bool,
+    pub core: MeasurementDataCore,
+    pub is_post_hybridization: bool,
 }
 
 #[db_insertion]
 #[cfg_attr(feature = "backend", diesel(table_name = suspension_measurement))]
 pub struct NewSuspensionMeasurement {
     #[serde(default)]
-    suspension_id: Uuid,
-    measured_by: Uuid,
+    pub suspension_id: Uuid,
+    pub measured_by: Uuid,
     #[serde(flatten)]
     #[garde(dive)]
-    data: SuspensionMeasurementData,
+    pub data: SuspensionMeasurementData,
 }
 
 #[db_insertion]
-#[derive(getset::Setters)]
 #[cfg_attr(feature = "backend", diesel(table_name = suspension))]
 pub struct NewSuspension {
-    readable_id: NonEmptyString,
-    parent_specimen_id: Uuid,
-    biological_material: BiologicalMaterial,
-    created_at: Option<OffsetDateTime>,
-    #[getset(set = "pub(super)")]
-    pooled_into_id: Option<Uuid>,
-    multiplexing_tag_id: Option<Uuid>,
+    pub readable_id: ValidString,
+    pub parent_specimen_id: Uuid,
+    pub biological_material: BiologicalMaterial,
+    pub created_at: Option<OffsetDateTime>,
+    pub pooled_into_id: Option<Uuid>,
+    pub multiplexing_tag_id: Option<Uuid>,
     #[garde(range(min = 0.0))]
-    lysis_duration_minutes: Option<f32>,
+    pub lysis_duration_minutes: Option<f32>,
     #[garde(range(min = 0.0))]
-    target_cell_recovery: f32,
+    pub target_cell_recovery: f32,
     #[garde(range(min = 0))]
-    target_reads_per_cell: i32,
+    pub target_reads_per_cell: i32,
     #[garde(dive)]
-    notes: Option<NonEmptyString>,
-    #[getset(skip)]
+    pub notes: Option<ValidString>,
     #[cfg_attr(feature = "backend", diesel(skip_insertion))]
-    preparer_ids: Vec<Uuid>,
+    pub preparer_ids: Vec<Uuid>,
     #[garde(dive)]
     #[serde(default)]
-    #[getset(skip)]
     #[cfg_attr(feature = "backend", diesel(skip_insertion))]
-    measurements: Vec<NewSuspensionMeasurement>,
+    pub measurements: Vec<NewSuspensionMeasurement>,
 }
 
 #[db_insertion]
 #[cfg_attr(feature = "backend", diesel(table_name = suspension_preparers))]
-pub struct SingleplexedSuspensionPreparer {
-    suspension_id: Uuid,
-    prepared_by: Uuid,
-}
-
-impl NewSuspension {
-    #[must_use]
-    pub fn preparers(&self, self_id: Uuid) -> Vec<SingleplexedSuspensionPreparer> {
-        self.preparer_ids
-            .iter()
-            .map(|p| SingleplexedSuspensionPreparer {
-                prepared_by: *p,
-                suspension_id: self_id,
-            })
-            .collect()
-    }
-
-    pub fn measurements(&mut self, self_id: Uuid) -> &[NewSuspensionMeasurement] {
-        for measurement in &mut self.measurements {
-            measurement.suspension_id = self_id;
-        }
-
-        &self.measurements
-    }
+pub struct SuspensionPreparer {
+    pub suspension_id: Uuid,
+    pub prepared_by: Uuid,
 }
 
 #[db_selection]
 #[cfg_attr(feature = "backend", diesel(table_name = suspension))]
 pub struct SuspensionHandle {
-    id: Uuid,
-    link: String,
+    pub id: Uuid,
+    pub link: String,
 }
 
 #[db_selection]
@@ -123,22 +96,22 @@ pub struct SuspensionHandle {
 pub struct SuspensionSummary {
     #[serde(flatten)]
     #[cfg_attr(feature = "backend", diesel(embed))]
-    handle: SuspensionHandle,
-    readable_id: String,
-    biological_material: String,
-    created_at: Option<OffsetDateTime>,
-    lysis_duration_minutes: Option<f32>,
-    target_cell_recovery: f32,
-    target_reads_per_cell: i32,
-    notes: Option<String>,
+    pub handle: SuspensionHandle,
+    pub readable_id: String,
+    pub biological_material: String,
+    pub created_at: Option<OffsetDateTime>,
+    pub lysis_duration_minutes: Option<f32>,
+    pub target_cell_recovery: f32,
+    pub target_reads_per_cell: i32,
+    pub notes: Option<String>,
 }
 
 #[db_selection]
 #[cfg_attr(feature = "backend", diesel(table_name = multiplexing_tag))]
 pub struct MultiplexingTag {
-    id: Uuid,
-    tag_id: String,
-    type_: String,
+    pub id: Uuid,
+    pub tag_id: String,
+    pub type_: String,
 }
 
 #[db_selection]
@@ -146,26 +119,26 @@ pub struct MultiplexingTag {
 pub struct SuspensionCore {
     #[serde(flatten)]
     #[cfg_attr(feature = "backend", diesel(embed))]
-    summary: SuspensionSummary,
+    pub summary: SuspensionSummary,
     #[cfg_attr(feature = "backend", diesel(embed))]
-    parent_specimen: SpecimenSummary,
+    pub parent_specimen: SpecimenSummary,
     #[cfg_attr(feature = "backend", diesel(embed))]
-    multiplexing_tag: MultiplexingTag,
+    pub multiplexing_tag: MultiplexingTag,
 }
 
 #[db_selection]
 #[cfg_attr(feature = "backend", diesel(table_name = suspension_measurement))]
 pub struct SuspensionMeasurement {
     #[cfg_attr(feature = "backend", diesel(embed))]
-    measured_by: PersonHandle,
+    pub measured_by: PersonHandle,
     #[serde(flatten)]
-    data: SuspensionMeasurementData,
+    pub data: SuspensionMeasurementData,
 }
 
 #[derive(serde::Serialize)]
 pub struct Suspension {
     #[serde(flatten)]
-    core: SuspensionCore,
-    preparers: Vec<PersonHandle>,
-    measurements: Vec<SuspensionMeasurement>,
+    pub core: SuspensionCore,
+    pub preparers: Vec<PersonHandle>,
+    pub measurements: Vec<SuspensionMeasurement>,
 }

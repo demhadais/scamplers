@@ -1,15 +1,15 @@
-use crate::{
-    model::{IsUpdate, Pagination, SortByGroup, institution::Institution},
-    string::NonEmptyString,
-};
-use pyo3::{pyclass, pymethods};
+use crate::model::{Pagination, SortByGroup, institution::Institution};
+#[cfg(not(target_arch = "wasm32"))]
+use pyo3::prelude::*;
 use scamplers_macros::{
     base_api_model, base_api_model_with_default, db_enum, db_insertion, db_query, db_selection,
-    db_update,
+    db_update, getter_method, getters_impl,
 };
 #[cfg(feature = "backend")]
 use scamplers_schema::person;
 use uuid::Uuid;
+use valid_string::ValidString;
+#[cfg(target_arch = "wasm32")]
 use wasm_bindgen::prelude::wasm_bindgen;
 
 #[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
@@ -21,16 +21,16 @@ pub enum UserRole {
     BiologyStaff,
 }
 
-#[cfg_attr(target_arch = "wasm32", wasm_bindgen(getter_with_clone))]
 #[db_insertion]
+#[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
 #[cfg_attr(feature = "backend", diesel(table_name = person))]
 pub struct NewPerson {
     #[garde(dive)]
-    pub name: NonEmptyString,
+    pub name: ValidString,
     #[garde(email)]
     pub email: String,
     #[garde(dive)]
-    pub orcid: Option<NonEmptyString>,
+    pub orcid: Option<ValidString>,
     pub institution_id: Uuid,
     pub ms_user_id: Option<Uuid>,
     #[serde(default)]
@@ -44,42 +44,53 @@ impl NewPerson {
     }
 }
 
-#[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
+#[cfg(target_arch = "wasm32")]
+#[wasm_bindgen]
 impl NewPerson {
-    #[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
+    #[wasm_bindgen]
     pub fn new() -> NewPersonEmpty {
         NewPersonEmpty
     }
 }
 
-#[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
+#[cfg(target_arch = "wasm32")]
+#[wasm_bindgen]
 struct NewPersonEmpty;
-#[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
+
+#[cfg(target_arch = "wasm32")]
+#[wasm_bindgen]
 impl NewPersonEmpty {
-    #[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
+    #[wasm_bindgen]
     pub fn name(self, name: String) -> NewPersonName {
         NewPersonName { name }
     }
 }
-#[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
+
+#[cfg(target_arch = "wasm32")]
+#[wasm_bindgen]
 struct NewPersonName {
     name: String,
 }
-#[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
+
+#[cfg(target_arch = "wasm32")]
+#[wasm_bindgen]
 impl NewPersonName {
-    #[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
+    #[wasm_bindgen]
     pub fn email(self, email: String) -> NewPersonEmail {
         NewPersonEmail { inner: self, email }
     }
 }
-#[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
+
+#[cfg(target_arch = "wasm32")]
+#[wasm_bindgen]
 struct NewPersonEmail {
     inner: NewPersonName,
     email: String,
 }
-#[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
+#[cfg(target_arch = "wasm32")]
+#[wasm_bindgen]
 impl NewPersonEmail {
-    #[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
+    #[wasm_bindgen]
     pub fn ms_user_id(self, ms_user_id: Uuid) -> NewPersonMsUserId {
         NewPersonMsUserId {
             inner: self,
@@ -87,14 +98,17 @@ impl NewPersonEmail {
         }
     }
 }
-#[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
+
+#[cfg(target_arch = "wasm32")]
+#[wasm_bindgen]
 struct NewPersonMsUserId {
     inner: NewPersonEmail,
     ms_user_id: Uuid,
 }
-#[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
+#[cfg(target_arch = "wasm32")]
+#[wasm_bindgen]
 impl NewPersonMsUserId {
-    #[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
+    #[wasm_bindgen]
     pub fn institution_id(self, institution_id: Uuid) -> NewPersonInstitutionId {
         NewPersonInstitutionId {
             inner: self,
@@ -103,14 +117,16 @@ impl NewPersonMsUserId {
     }
 }
 
-#[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
+#[cfg(target_arch = "wasm32")]
+#[wasm_bindgen]
 struct NewPersonInstitutionId {
     inner: NewPersonMsUserId,
     institution_id: Uuid,
 }
-#[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
+#[cfg(target_arch = "wasm32")]
+#[wasm_bindgen]
 impl NewPersonInstitutionId {
-    #[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
+    #[wasm_bindgen]
     pub fn build(self) -> NewPerson {
         let Self {
             inner:
@@ -126,7 +142,7 @@ impl NewPersonInstitutionId {
         } = self;
 
         NewPerson {
-            name: NonEmptyString::new(&name).unwrap(),
+            name: ValidString::from_str(&name),
             email,
             orcid: None,
             institution_id,
@@ -139,12 +155,13 @@ impl NewPersonInstitutionId {
 #[db_selection]
 #[cfg_attr(feature = "backend", diesel(table_name = person))]
 pub struct PersonHandle {
+    #[pyo3(get)]
     pub id: Uuid,
+    #[pyo3(get)]
     pub link: String,
 }
 
 #[db_selection]
-#[pyclass]
 #[cfg_attr(feature = "backend", diesel(table_name = person))]
 pub struct PersonSummary {
     #[serde(flatten)]
@@ -158,24 +175,20 @@ pub struct PersonSummary {
     pub orcid: Option<String>,
 }
 
-#[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
-#[pymethods]
+#[getters_impl]
 impl PersonSummary {
-    #[cfg_attr(target_arch = "wasm32", wasm_bindgen(getter))]
-    #[getter]
+    #[getter_method]
     pub fn id(&self) -> Uuid {
         self.handle.id
     }
 
-    #[cfg_attr(target_arch = "wasm32", wasm_bindgen(getter))]
-    #[getter]
+    #[getter_method]
     pub fn link(&self) -> String {
         self.handle.link.to_string()
     }
 }
 
 #[db_selection]
-#[pyclass]
 #[cfg_attr(feature = "backend", diesel(table_name = person))]
 pub struct PersonCore {
     #[serde(flatten)]
@@ -186,92 +199,77 @@ pub struct PersonCore {
     institution: Institution,
 }
 
-#[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
-#[pymethods]
+#[getters_impl]
 impl PersonCore {
-    #[cfg_attr(target_arch = "wasm32", wasm_bindgen(getter))]
-    #[getter]
+    #[getter_method]
     pub fn id(&self) -> Uuid {
         self.summary.id()
     }
 
-    #[cfg_attr(target_arch = "wasm32", wasm_bindgen(getter))]
-    #[getter]
+    #[getter_method]
     pub fn link(&self) -> String {
         self.summary.link()
     }
 
-    #[cfg_attr(target_arch = "wasm32", wasm_bindgen(getter))]
-    #[getter]
+    #[getter_method]
     pub fn name(&self) -> String {
         self.summary.name.to_string()
     }
 
-    #[cfg_attr(target_arch = "wasm32", wasm_bindgen(getter))]
-    #[getter]
+    #[getter_method]
     pub fn email(&self) -> Option<String> {
         self.summary.email.to_owned()
     }
 
-    #[cfg_attr(target_arch = "wasm32", wasm_bindgen(getter))]
-    #[getter]
+    #[getter_method]
     pub fn orcid(&self) -> Option<String> {
         self.summary.orcid.to_owned()
     }
 }
 
 #[cfg_attr(target_arch = "wasm32", wasm_bindgen(getter_with_clone))]
-#[pyclass]
+#[cfg_attr(not(target_arch = "wasm32"), pyclass)]
 #[base_api_model]
 pub struct Person {
     #[serde(flatten)]
     pub core: PersonCore,
-    #[pyo3(get)]
     pub roles: Vec<UserRole>,
 }
 
-#[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
-#[pymethods]
+#[getters_impl]
 impl Person {
-    #[cfg_attr(target_arch = "wasm32", wasm_bindgen(getter))]
-    #[getter]
+    #[getter_method]
     pub fn id(&self) -> Uuid {
         self.core.id()
     }
 
-    #[cfg_attr(target_arch = "wasm32", wasm_bindgen(getter))]
-    #[getter]
+    #[getter_method]
     pub fn link(&self) -> String {
         self.core.link()
     }
 
-    #[cfg_attr(target_arch = "wasm32", wasm_bindgen(getter))]
-    #[getter]
+    #[getter_method]
     pub fn name(&self) -> String {
         self.core.name()
     }
 
-    #[cfg_attr(target_arch = "wasm32", wasm_bindgen(getter))]
-    #[getter]
+    #[getter_method]
     pub fn email(&self) -> Option<String> {
         self.core.email()
     }
 
-    #[cfg_attr(target_arch = "wasm32", wasm_bindgen(getter))]
-    #[getter]
+    #[getter_method]
     pub fn orcid(&self) -> Option<String> {
         self.core.orcid()
     }
 
-    #[cfg_attr(target_arch = "wasm32", wasm_bindgen(getter))]
-    #[getter]
+    #[getter_method]
     pub fn institution(&self) -> Institution {
         self.core.institution.clone()
     }
 }
 
 #[cfg_attr(target_arch = "wasm32", wasm_bindgen(getter_with_clone))]
-#[pyclass]
 #[base_api_model]
 pub struct CreatedUser {
     #[serde(flatten)]
@@ -280,46 +278,38 @@ pub struct CreatedUser {
 }
 
 #[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
-#[pymethods]
 impl CreatedUser {
     #[cfg_attr(target_arch = "wasm32", wasm_bindgen(getter))]
-    #[getter]
     pub fn id(&self) -> Uuid {
         self.person.id()
     }
 
     #[cfg_attr(target_arch = "wasm32", wasm_bindgen(getter))]
-    #[getter]
     pub fn link(&self) -> String {
         self.person.link()
     }
 
     #[cfg_attr(target_arch = "wasm32", wasm_bindgen(getter))]
-    #[getter]
     pub fn name(&self) -> String {
         self.person.name()
     }
 
     #[cfg_attr(target_arch = "wasm32", wasm_bindgen(getter))]
-    #[getter]
     pub fn email(&self) -> Option<String> {
         self.person.email()
     }
 
     #[cfg_attr(target_arch = "wasm32", wasm_bindgen(getter))]
-    #[getter]
     pub fn orcid(&self) -> Option<String> {
         self.person.orcid()
     }
 
     #[cfg_attr(target_arch = "wasm32", wasm_bindgen(getter))]
-    #[getter]
     pub fn roles(&self) -> Vec<UserRole> {
         self.person.roles.clone()
     }
 
     #[cfg_attr(target_arch = "wasm32", wasm_bindgen(getter))]
-    #[getter]
     pub fn institution(&self) -> Institution {
         self.person.institution()
     }
@@ -330,29 +320,13 @@ impl CreatedUser {
 pub struct PersonUpdateCore {
     pub id: Uuid,
     #[garde(dive)]
-    pub name: Option<NonEmptyString>,
+    pub name: Option<ValidString>,
     #[garde(email)]
     pub email: Option<String>,
     pub ms_user_id: Option<Uuid>,
     #[garde(dive)]
-    pub orcid: Option<NonEmptyString>,
+    pub orcid: Option<ValidString>,
     pub institution_id: Option<Uuid>,
-}
-
-impl IsUpdate for PersonUpdateCore {
-    fn is_update(&self) -> bool {
-        matches!(
-            self,
-            Self {
-                name: Some(_),
-                email: Some(_),
-                orcid: Some(_),
-                institution_id: Some(_),
-                ms_user_id: Some(_),
-                ..
-            }
-        )
-    }
 }
 
 #[base_api_model_with_default]

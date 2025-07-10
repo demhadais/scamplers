@@ -6,10 +6,10 @@ use uuid::Uuid;
 #[cfg(feature = "backend")]
 use crate::{
     model::specimen::{
-        NewSpecimenMeasurement,
         common::{NewCommitteeApproval, Species},
+        NewSpecimenMeasurement,
     },
-    string::NonEmptyString,
+    string::ValidString,
 };
 
 use super::common::NewSpecimenCommon;
@@ -49,16 +49,16 @@ pub struct NewFixedBlock {
 #[cfg(feature = "backend")]
 #[bon::bon]
 impl NewFixedBlock {
-    #[builder(on(NonEmptyString, into))]
+    #[builder(on(ValidString, into))]
     pub fn new(
-        readable_id: NonEmptyString,
-        name: NonEmptyString,
+        readable_id: ValidString,
+        name: ValidString,
         submitted_by: Uuid,
         lab_id: Uuid,
         received_at: OffsetDateTime,
         species: Vec<Species>,
         #[builder(default)] committee_approvals: Vec<NewCommitteeApproval>,
-        notes: Option<NonEmptyString>,
+        notes: Option<ValidString>,
         returned_at: Option<OffsetDateTime>,
         returned_by: Option<Uuid>,
         #[builder(default)] measurements: Vec<NewSpecimenMeasurement>,
@@ -105,16 +105,16 @@ pub struct NewFrozenBlock {
 #[cfg(feature = "backend")]
 #[bon::bon]
 impl NewFrozenBlock {
-    #[builder(on(NonEmptyString, into))]
+    #[builder(on(ValidString, into))]
     pub fn new(
-        readable_id: NonEmptyString,
-        name: NonEmptyString,
+        readable_id: ValidString,
+        name: ValidString,
         submitted_by: Uuid,
         lab_id: Uuid,
         received_at: OffsetDateTime,
         species: Vec<Species>,
         #[builder(default)] committee_approvals: Vec<NewCommitteeApproval>,
-        notes: Option<NonEmptyString>,
+        notes: Option<ValidString>,
         returned_at: Option<OffsetDateTime>,
         returned_by: Option<Uuid>,
         #[builder(default)] measurements: Vec<NewSpecimenMeasurement>,

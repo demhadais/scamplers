@@ -6,4 +6,4 @@ pub use singleplexed::{
 
 mod common;
 mod multiplexed;
-mod singleplexed;
+mod suspension;
