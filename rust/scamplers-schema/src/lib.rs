@@ -46,10 +46,10 @@ diesel::table! {
 }
 
 diesel::table! {
-    chip_loading (gems_id, suspension_id, multiplexed_suspension_id) {
+    chip_loading (gems_id, suspension_id, suspension_pool_id) {
         gems_id -> Uuid,
         suspension_id -> Uuid,
-        multiplexed_suspension_id -> Uuid,
+        suspension_pool_id -> Uuid,
         suspension_volume_loaded -> Jsonb,
         buffer_volume_loaded -> Jsonb,
         notes -> Nullable<Text>,
@@ -189,33 +189,6 @@ diesel::table! {
 }
 
 diesel::table! {
-    multiplexed_suspension (id) {
-        id -> Uuid,
-        link -> Text,
-        name -> Text,
-        readable_id -> Text,
-        pooled_at -> Timestamptz,
-        notes -> Nullable<Text>,
-    }
-}
-
-diesel::table! {
-    multiplexed_suspension_measurement (id) {
-        id -> Uuid,
-        suspension_id -> Uuid,
-        measured_by -> Uuid,
-        data -> Jsonb,
-    }
-}
-
-diesel::table! {
-    multiplexed_suspension_preparers (suspension_id, prepared_by) {
-        suspension_id -> Uuid,
-        prepared_by -> Uuid,
-    }
-}
-
-diesel::table! {
     multiplexing_tag (id) {
         id -> Uuid,
         tag_id -> Text,
@@ -328,6 +301,33 @@ diesel::table! {
 }
 
 diesel::table! {
+    suspension_pool (id) {
+        id -> Uuid,
+        link -> Text,
+        name -> Text,
+        readable_id -> Text,
+        pooled_at -> Timestamptz,
+        notes -> Nullable<Text>,
+    }
+}
+
+diesel::table! {
+    suspension_pool_measurement (id) {
+        id -> Uuid,
+        pool_id -> Uuid,
+        measured_by -> Uuid,
+        data -> Jsonb,
+    }
+}
+
+diesel::table! {
+    suspension_pool_preparers (pool_id, prepared_by) {
+        pool_id -> Uuid,
+        prepared_by -> Uuid,
+    }
+}
+
+diesel::table! {
     suspension_preparers (suspension_id, prepared_by) {
         suspension_id -> Uuid,
         prepared_by -> Uuid,
@@ -340,8 +340,8 @@ diesel::joinable!(cdna_measurement -> person (measured_by));
 diesel::joinable!(cdna_preparers -> cdna (cdna_id));
 diesel::joinable!(cdna_preparers -> person (prepared_by));
 diesel::joinable!(chip_loading -> gems (gems_id));
-diesel::joinable!(chip_loading -> multiplexed_suspension (multiplexed_suspension_id));
 diesel::joinable!(chip_loading -> suspension (suspension_id));
+diesel::joinable!(chip_loading -> suspension_pool (suspension_pool_id));
 diesel::joinable!(chromium_run -> person (run_by));
 diesel::joinable!(committee_approval -> institution (institution_id));
 diesel::joinable!(committee_approval -> specimen (specimen_id));
@@ -362,10 +362,6 @@ diesel::joinable!(library_preparers -> library (library_id));
 diesel::joinable!(library_preparers -> person (prepared_by));
 diesel::joinable!(library_type_specification -> chemistry (chemistry));
 diesel::joinable!(library_type_specification -> index_kit (index_kit));
-diesel::joinable!(multiplexed_suspension_measurement -> multiplexed_suspension (suspension_id));
-diesel::joinable!(multiplexed_suspension_measurement -> person (measured_by));
-diesel::joinable!(multiplexed_suspension_preparers -> multiplexed_suspension (suspension_id));
-diesel::joinable!(multiplexed_suspension_preparers -> person (prepared_by));
 diesel::joinable!(person -> institution (institution_id));
 diesel::joinable!(sequencing_submissions -> library (library_id));
 diesel::joinable!(sequencing_submissions -> sequencing_run (sequencing_run_id));
@@ -373,11 +369,15 @@ diesel::joinable!(single_index_set -> index_kit (kit));
 diesel::joinable!(specimen -> lab (lab_id));
 diesel::joinable!(specimen_measurement -> person (measured_by));
 diesel::joinable!(specimen_measurement -> specimen (specimen_id));
-diesel::joinable!(suspension -> multiplexed_suspension (pooled_into_id));
 diesel::joinable!(suspension -> multiplexing_tag (multiplexing_tag_id));
 diesel::joinable!(suspension -> specimen (parent_specimen_id));
+diesel::joinable!(suspension -> suspension_pool (pooled_into_id));
 diesel::joinable!(suspension_measurement -> person (measured_by));
 diesel::joinable!(suspension_measurement -> suspension (suspension_id));
+diesel::joinable!(suspension_pool_measurement -> person (measured_by));
+diesel::joinable!(suspension_pool_measurement -> suspension_pool (pool_id));
+diesel::joinable!(suspension_pool_preparers -> person (prepared_by));
+diesel::joinable!(suspension_pool_preparers -> suspension_pool (pool_id));
 diesel::joinable!(suspension_preparers -> person (prepared_by));
 diesel::joinable!(suspension_preparers -> suspension (suspension_id));
 
@@ -400,9 +400,6 @@ diesel::allow_tables_to_appear_in_same_query!(
     library_measurement,
     library_preparers,
     library_type_specification,
-    multiplexed_suspension,
-    multiplexed_suspension_measurement,
-    multiplexed_suspension_preparers,
     multiplexing_tag,
     person,
     sequencing_run,
@@ -412,5 +409,8 @@ diesel::allow_tables_to_appear_in_same_query!(
     specimen_measurement,
     suspension,
     suspension_measurement,
+    suspension_pool,
+    suspension_pool_measurement,
+    suspension_pool_preparers,
     suspension_preparers,
 );

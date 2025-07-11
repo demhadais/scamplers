@@ -13,6 +13,7 @@ diesel = { workspace = true, optional = true }
 diesel-async = { workspace = true, optional = true }
 valuable = { workspace = true }
 thiserror = { workspace = true }
+pyo3 = { workspace = true, optional = true }
 
 [lints]
 workspace = true
@@ -20,8 +21,6 @@ workspace = true
 [target.'cfg(target_arch = "wasm32")'.dependencies]
 wasm-bindgen = { workspace = true }
 
-[target.'cfg(not(target_arch = "wasm32"))'.dependencies]
-pyo3 = { workspace = true }
-
 [features]
 backend = ["diesel", "diesel-async"]
+python = ["pyo3"]

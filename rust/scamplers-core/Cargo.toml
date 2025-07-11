@@ -23,9 +23,7 @@ uuid = { path = "../uuid" }
 scamplers-macros = { path = "../scamplers-macros" }
 reqwest = { workspace = true }
 valid-string = { path = "../valid-string" }
-
-[target.'cfg(not(target_arch = "wasm32"))'.dependencies]
-pyo3 = { workspace = true }
+pyo3 = { workspace = true, optional = true }
 
 [target.'cfg(target_arch = "wasm32")'.dependencies]
 wasm-bindgen = { workspace = true }
@@ -43,6 +41,7 @@ backend = [
     "time/backend",
     "valid-string/backend",
 ]
+python = ["pyo3"]
 
 [lints]
 workspace = true

@@ -132,6 +132,7 @@ pub struct SuspensionMeasurement {
     #[cfg_attr(feature = "backend", diesel(embed))]
     pub measured_by: PersonHandle,
     #[serde(flatten)]
+    #[cfg_attr(target_arch = "wasm32", wasm_bindgen(skip))]
     pub data: SuspensionMeasurementData,
 }
 

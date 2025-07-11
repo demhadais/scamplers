@@ -11,7 +11,7 @@ pub(super) const MAX_GEMS_IN_NON_OCM_RUN: usize = 8;
 
 #[db_insertion]
 #[cfg_attr(feature = "backend", diesel(table_name = gems))]
-pub(super) struct NewGemsCommon {
+pub struct NewGemsCommon {
     #[garde(dive)]
     pub readable_id: ValidString,
     #[serde(skip)]
@@ -24,7 +24,7 @@ pub(super) struct NewGemsCommon {
 
 #[db_insertion]
 #[cfg_attr(feature = "backend", diesel(table_name = chip_loading))]
-pub(super) struct NewChipLoadingCommon {
+pub struct NewChipLoadingCommon {
     #[serde(skip)]
     pub gems_id: Uuid,
     #[garde(dive)]
@@ -37,7 +37,7 @@ pub(super) struct NewChipLoadingCommon {
 
 #[db_insertion]
 #[cfg_attr(feature = "backend", diesel(table_name = chromium_run))]
-pub(super) struct NewChromiumRunCommon {
+pub struct NewChromiumRunCommon {
     #[garde(dive)]
     pub readable_id: ValidString,
     pub run_at: OffsetDateTime,

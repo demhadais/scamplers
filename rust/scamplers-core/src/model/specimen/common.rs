@@ -8,6 +8,7 @@ use uuid::Uuid;
 use valid_string::ValidString;
 
 #[db_enum]
+#[cfg_attr(target_arch = "wasm32", wasm_bindgen::prelude::wasm_bindgen)]
 pub enum Species {
     AmbystomaMexicanum,
     CanisFamiliaris,
@@ -42,7 +43,7 @@ pub struct NewCommitteeApproval {
 pub struct CommitteeApproval {
     #[cfg_attr(feature = "backend", diesel(embed))]
     pub institution: InstitutionHandle,
-    pub committee_type: ComplianceCommitteeType,
+    pub committee_type: String,
     pub compliance_identifier: String,
 }
 

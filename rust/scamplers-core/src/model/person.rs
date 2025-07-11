@@ -1,16 +1,16 @@
 use crate::model::{Pagination, SortByGroup, institution::Institution};
-#[cfg(not(target_arch = "wasm32"))]
+#[cfg(feature = "python")]
 use pyo3::prelude::*;
 use scamplers_macros::{
     base_api_model, base_api_model_with_default, db_enum, db_insertion, db_query, db_selection,
-    db_update, getter_method, getters_impl,
+    db_update, getters_impl,
 };
 #[cfg(feature = "backend")]
 use scamplers_schema::person;
 use uuid::Uuid;
 use valid_string::ValidString;
 #[cfg(target_arch = "wasm32")]
-use wasm_bindgen::prelude::wasm_bindgen;
+use wasm_bindgen::prelude::*;
 
 #[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
 #[db_enum]
@@ -126,6 +126,8 @@ struct NewPersonInstitutionId {
 impl NewPersonInstitutionId {
     #[wasm_bindgen]
     pub fn build(self) -> std::result::Result<NewMsLogin, valid_string::EmptyStringError> {
+        use std::str::FromStr;
+
         let Self {
             inner:
                 NewPersonMsUserId {
@@ -139,23 +141,23 @@ impl NewPersonInstitutionId {
             institution_id,
         } = self;
 
-        Self(NewPerson {
+        Ok(NewMsLogin(NewPerson {
             name: ValidString::from_str(&name)?,
             email,
             orcid: None,
             institution_id,
             ms_user_id: Some(ms_user_id),
             roles: vec![],
-        })
+        }))
     }
 }
 
 #[db_selection]
 #[cfg_attr(feature = "backend", diesel(table_name = person))]
 pub struct PersonHandle {
-    #[pyo3(get)]
+    #[cfg_attr(feature = "python", pyo3(get))]
     pub id: Uuid,
-    #[pyo3(get)]
+    #[cfg_attr(feature = "python", pyo3(get))]
     pub link: String,
 }
 
@@ -165,22 +167,20 @@ pub struct PersonSummary {
     #[serde(flatten)]
     #[cfg_attr(feature = "backend", diesel(embed))]
     pub handle: PersonHandle,
-    #[pyo3(get)]
+    #[cfg_attr(feature = "python", pyo3(get))]
     pub name: String,
-    #[pyo3(get)]
+    #[cfg_attr(feature = "python", pyo3(get))]
     pub email: Option<String>,
-    #[pyo3(get)]
+    #[cfg_attr(feature = "python", pyo3(get))]
     pub orcid: Option<String>,
 }
 
 #[getters_impl]
 impl PersonSummary {
-    #[getter_method]
     pub fn id(&self) -> Uuid {
         self.handle.id
     }
 
-    #[getter_method]
     pub fn link(&self) -> String {
         self.handle.link.to_string()
     }
@@ -191,42 +191,37 @@ impl PersonSummary {
 pub struct PersonCore {
     #[serde(flatten)]
     #[cfg_attr(feature = "backend", diesel(embed))]
-    summary: PersonSummary,
+    pub summary: PersonSummary,
     #[cfg_attr(feature = "backend", diesel(embed))]
-    #[pyo3(get)]
-    institution: Institution,
+    #[cfg_attr(feature = "python", pyo3(get))]
+    pub institution: Institution,
 }
 
 #[getters_impl]
 impl PersonCore {
-    #[getter_method]
     pub fn id(&self) -> Uuid {
         self.summary.id()
     }
 
-    #[getter_method]
     pub fn link(&self) -> String {
         self.summary.link()
     }
 
-    #[getter_method]
     pub fn name(&self) -> String {
         self.summary.name.to_string()
     }
 
-    #[getter_method]
     pub fn email(&self) -> Option<String> {
         self.summary.email.to_owned()
     }
 
-    #[getter_method]
     pub fn orcid(&self) -> Option<String> {
         self.summary.orcid.to_owned()
     }
 }
 
 #[cfg_attr(target_arch = "wasm32", wasm_bindgen(getter_with_clone))]
-#[cfg_attr(not(target_arch = "wasm32"), pyclass)]
+#[cfg_attr(feature = "python", pyclass)]
 #[base_api_model]
 pub struct Person {
     #[serde(flatten)]
@@ -236,32 +231,26 @@ pub struct Person {
 
 #[getters_impl]
 impl Person {
-    #[getter_method]
     pub fn id(&self) -> Uuid {
         self.core.id()
     }
 
-    #[getter_method]
     pub fn link(&self) -> String {
         self.core.link()
     }
 
-    #[getter_method]
     pub fn name(&self) -> String {
         self.core.name()
     }
 
-    #[getter_method]
     pub fn email(&self) -> Option<String> {
         self.core.email()
     }
 
-    #[getter_method]
     pub fn orcid(&self) -> Option<String> {
         self.core.orcid()
     }
 
-    #[getter_method]
     pub fn institution(&self) -> Institution {
         self.core.institution.clone()
     }

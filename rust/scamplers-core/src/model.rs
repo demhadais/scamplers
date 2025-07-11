@@ -1,4 +1,4 @@
-#[cfg(not(target_arch = "wasm32"))]
+#[cfg(feature = "python")]
 use pyo3::prelude::*;
 use scamplers_macros::{base_api_model, base_api_model_with_default};
 #[cfg(target_arch = "wasm32")]
@@ -16,7 +16,7 @@ pub mod specimen;
 pub mod suspension;
 pub mod units;
 
-#[cfg_attr(not(target_arch = "wasm32"), pyclass(get_all, set_all))]
+#[cfg_attr(feature = "python", pyclass(get_all, set_all))]
 #[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
 #[base_api_model]
 pub struct Pagination {

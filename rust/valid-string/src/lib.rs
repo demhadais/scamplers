@@ -2,7 +2,7 @@ use std::{fmt::Display, str::FromStr};
 
 #[cfg(feature = "backend")]
 use diesel::{deserialize::FromSqlRow, expression::AsExpression, sql_types};
-#[cfg(not(target_arch = "wasm32"))]
+#[cfg(feature = "python")]
 use pyo3::prelude::*;
 use serde::{Deserialize, Serialize};
 
@@ -20,11 +20,11 @@ use serde::{Deserialize, Serialize};
     garde::Validate,
     valuable::Valuable,
 )]
-#[cfg_attr(not(target_arch = "wasm32"), derive(IntoPyObject, FromPyObject))]
+#[cfg_attr(feature = "python", derive(IntoPyObject, FromPyObject))]
 #[valuable(transparent)]
 #[garde(transparent)]
 #[serde(transparent)]
-#[cfg_attr(not(target_arch = "wasm32"), pyo3(transparent))]
+#[cfg_attr(feature = "python", pyo3(transparent))]
 #[cfg_attr(feature = "backend", derive(FromSqlRow, AsExpression))]
 #[cfg_attr(feature = "backend", diesel(sql_type = sql_types::Text))]
 pub struct ValidString(#[garde(length(min = 1))] String);

@@ -25,7 +25,7 @@ create table chip_loading (
     suspension_volume_loaded jsonb not null,
     buffer_volume_loaded jsonb not null,
     notes text,
-    primary key (gems_id, suspension_id, multiplexed_suspension_id),
+    primary key (gems_id, suspension_id, suspension_pool_id),
 
     constraint has_suspension check ((suspension_id is null) != (suspension_pool_id is null))
 );

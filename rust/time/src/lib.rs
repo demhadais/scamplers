@@ -1,6 +1,6 @@
 #[cfg(feature = "backend")]
 use diesel::{deserialize::FromSqlRow, expression::AsExpression, sql_types};
-#[cfg(not(target_arch = "wasm32"))]
+#[cfg(feature = "python")]
 use pyo3::prelude::*;
 use std::fmt::Display;
 
@@ -9,9 +9,9 @@ const OFFSET_DATETIME_AS_VALUE: &str = "OffsetDateTime";
 #[derive(
     Clone, Copy, Eq, Ord, PartialEq, PartialOrd, Debug, Hash, serde::Deserialize, serde::Serialize,
 )]
-#[cfg_attr(not(target_arch = "wasm32"), derive(IntoPyObject, FromPyObject))]
+#[cfg_attr(feature = "python", derive(IntoPyObject, FromPyObject))]
 #[cfg_attr(feature = "backend", derive(FromSqlRow, AsExpression))]
-#[cfg_attr(not(target_arch = "wasm32"), pyo3(transparent))]
+#[cfg_attr(feature = "python", pyo3(transparent))]
 #[cfg_attr(feature = "backend", diesel(sql_type = sql_types::Timestamptz))]
 #[serde(transparent)]
 pub struct OffsetDateTime(_time::OffsetDateTime);

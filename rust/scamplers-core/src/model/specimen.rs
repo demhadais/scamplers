@@ -42,6 +42,7 @@ pub struct SpecimenSummary {
     pub readable_id: String,
     pub name: String,
     pub received_at: OffsetDateTime,
+    #[cfg_attr(target_arch = "wasm32", wasm_bindgen(skip))]
     pub species: Vec<Option<String>>,
     pub notes: Option<String>,
     pub returned_at: Option<OffsetDateTime>,
@@ -78,7 +79,10 @@ pub struct SpecimenCore {
 }
 
 #[base_api_model]
-#[cfg_attr(target_arch = "wasm32", ::wasm_bindgen::prelude::wasm_bindgen)]
+#[cfg_attr(
+    target_arch = "wasm32",
+    ::wasm_bindgen::prelude::wasm_bindgen(getter_with_clone)
+)]
 pub struct Specimen {
     pub core: SpecimenCore,
     pub measurements: Vec<SpecimenMeasurement>,
@@ -125,12 +129,16 @@ pub struct SpecimenQuery {
     pub species: Vec<Species>,
     pub notes: Option<String>,
     #[serde(alias = "type")]
+    #[cfg_attr(target_arch = "wasm32", wasm_bindgen(skip))]
     pub type_: Option<SpecimenType>,
+    #[cfg_attr(target_arch = "wasm32", wasm_bindgen(skip))]
     pub embedded_in: Option<BlockEmbeddingMatrix>,
+    #[cfg_attr(target_arch = "wasm32", wasm_bindgen(skip))]
     pub fixative: Option<Fixative>,
     pub storage_buffer: Option<String>,
     pub frozen: Option<bool>,
     pub cryopreserved: Option<bool>,
+    #[cfg_attr(target_arch = "wasm32", wasm_bindgen(skip))]
     pub order_by: SortByGroup<SpecimenOrdinalColumn>,
     pub pagination: Pagination,
 }

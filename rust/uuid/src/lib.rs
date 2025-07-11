@@ -1,6 +1,6 @@
 #[cfg(feature = "backend")]
 use diesel::{deserialize::FromSqlRow, expression::AsExpression, sql_types};
-#[cfg(not(target_arch = "wasm32"))]
+#[cfg(feature = "python")]
 use pyo3::prelude::*;
 #[cfg(target_arch = "wasm32")]
 use wasm_bindgen::{
@@ -20,9 +20,9 @@ use {
 #[derive(
     Clone, Copy, Eq, Ord, PartialEq, PartialOrd, Debug, Hash, Default, Deserialize, Serialize,
 )]
-#[cfg_attr(not(target_arch = "wasm32"), derive(IntoPyObject, FromPyObject))]
+#[cfg_attr(feature = "python", derive(IntoPyObject, FromPyObject))]
 #[cfg_attr(feature = "backend", derive(FromSqlRow, AsExpression))]
-#[cfg_attr(not(target_arch = "wasm32"), pyo3(transparent))]
+#[cfg_attr(feature = "python", pyo3(transparent))]
 #[cfg_attr(feature = "backend", diesel(sql_type = sql_types::Uuid))]
 #[serde(transparent)]
 pub struct Uuid(_uuid::Uuid);
@@ -67,6 +67,9 @@ impl valuable::Valuable for Uuid {
 
 #[cfg(target_arch = "wasm32")]
 mod wasm32 {
+    use super::Uuid;
+    use std::str::FromStr;
+
     use wasm_bindgen::{
         JsValue,
         convert::{

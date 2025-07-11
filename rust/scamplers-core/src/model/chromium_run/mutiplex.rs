@@ -9,8 +9,8 @@ use crate::model::chromium_run::common::{
 
 #[db_insertion]
 #[cfg_attr(feature = "backend", diesel(table_name = chip_loading))]
-pub(super) struct NewMultiplexChipLoading {
-    pub multiplexed_suspension_id: Uuid,
+pub struct NewMultiplexChipLoading {
+    pub suspension_pool_id: Uuid,
     #[serde(flatten)]
     #[garde(dive)]
     #[cfg_attr(feature = "backend", diesel(embed))]
@@ -19,7 +19,7 @@ pub(super) struct NewMultiplexChipLoading {
 
 #[db_insertion]
 #[cfg_attr(feature = "backend", diesel(table_name = gems))]
-pub(super) struct NewMultiplexGems {
+pub struct NewMultiplexGems {
     #[serde(flatten)]
     #[garde(dive)]
     #[cfg_attr(feature = "backend", diesel(embed))]
@@ -29,7 +29,7 @@ pub(super) struct NewMultiplexGems {
 }
 
 #[db_enum]
-pub(super) enum MultiplexChromiumChip {
+pub enum MultiplexChromiumChip {
     #[serde(rename = "Q")]
     #[strum(serialize = "Q")]
     Q,
@@ -40,7 +40,7 @@ pub(super) enum MultiplexChromiumChip {
 
 #[db_insertion]
 #[cfg_attr(feature = "backend", diesel(table_name = chromium_run))]
-pub(super) struct NewMultiplexChromiumRun {
+pub struct NewMultiplexChromiumRun {
     #[serde(flatten)]
     #[garde(dive)]
     #[cfg_attr(feature = "backend", diesel(embed))]

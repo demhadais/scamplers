@@ -23,7 +23,7 @@ impl ToApiPath for (NewInstitution, Institution) {
     }
 }
 
-impl ToAPIPath for (Uuid, Institution) {
+impl ToApiPath for (Uuid, Institution) {
     #[must_use]
     fn to_api_path() -> String {
         format!("{INSTITUTIONS}/{{id}}")
