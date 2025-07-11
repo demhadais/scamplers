@@ -7,7 +7,7 @@ use valid_string::ValidString;
 
 use crate::model::suspension::MeasurementDataCore;
 
-pub(super) const MAX_GEMS_IN_CHROMIUM_RUN: usize = 8;
+pub(super) const MAX_GEMS_IN_NON_OCM_RUN: usize = 8;
 
 #[db_insertion]
 #[cfg_attr(feature = "backend", diesel(table_name = gems))]

@@ -1,120 +1,128 @@
-use std::marker::PhantomData;
-
 use uuid::Uuid;
 
 use crate::model::{
     institution::{Institution, InstitutionQuery, NewInstitution},
     lab::{Lab, LabQuery, LabSummary, NewLab},
-    person::{NewPerson, Person, PersonQuery, PersonSummary},
+    person::{CreatedUser, NewMsLogin, NewPerson, Person, PersonQuery, PersonSummary},
     sequencing_run::NewSequencingRun,
     specimen::{NewSpecimen, Specimen, SpecimenQuery, SpecimenSummary},
     suspension::{NewSuspension, Suspension},
 };
 
-pub struct Endpoint<Req, Resp>(PhantomData<Req>, PhantomData<Resp>);
-
 const SEARCH_SUFFIX: &str = "search";
 
+pub trait ToApiPath {
+    fn to_api_path() -> String;
+}
+
 const INSTITUTIONS: &str = "/institutions";
-impl Endpoint<NewInstitution, Institution> {
+impl ToApiPath for (NewInstitution, Institution) {
     #[must_use]
-    pub fn route() -> String {
+    fn to_api_path() -> String {
         INSTITUTIONS.to_string()
     }
 }
 
-impl Endpoint<Uuid, Institution> {
+impl ToAPIPath for (Uuid, Institution) {
     #[must_use]
-    pub fn route() -> String {
+    fn to_api_path() -> String {
         format!("{INSTITUTIONS}/{{id}}")
     }
 }
 
-impl Endpoint<InstitutionQuery, Institution> {
+impl ToApiPath for (InstitutionQuery, Institution) {
     #[must_use]
-    pub fn route() -> String {
+    fn to_api_path() -> String {
         format!("{INSTITUTIONS}/{SEARCH_SUFFIX}")
     }
 }
 
 const PEOPLE: &str = "/people";
-impl Endpoint<NewPerson, Person> {
+impl ToApiPath for (NewPerson, Person) {
     #[must_use]
-    pub fn route() -> String {
+    fn to_api_path() -> String {
         PEOPLE.to_string()
     }
 }
 
-impl Endpoint<Uuid, Person> {
+impl ToApiPath for (Uuid, Person) {
     #[must_use]
-    pub fn route() -> String {
+    fn to_api_path() -> String {
         format!("{PEOPLE}/{{id}}")
     }
 }
 
-impl Endpoint<PersonQuery, PersonSummary> {
+impl ToApiPath for (PersonQuery, PersonSummary) {
     #[must_use]
-    pub fn route() -> String {
+    fn to_api_path() -> String {
         format!("{PEOPLE}/{SEARCH_SUFFIX}")
     }
 }
 
-const LABS: &str = "/labs";
-impl Endpoint<NewLab, Lab> {
+const MICROSOFT_LOGIN: &str = "/microsoft-login";
+impl ToApiPath for (NewMsLogin, CreatedUser) {
     #[must_use]
-    pub fn route() -> String {
+    fn to_api_path() -> String {
+        MICROSOFT_LOGIN.to_string()
+    }
+}
+
+const LABS: &str = "/labs";
+impl ToApiPath for (NewLab, Lab) {
+    #[must_use]
+    fn to_api_path() -> String {
         LABS.to_string()
     }
 }
 
-impl Endpoint<Uuid, Lab> {
+impl ToApiPath for (Uuid, Lab) {
     #[must_use]
-    pub fn route() -> String {
+    fn to_api_path() -> String {
         format!("{LABS}/{{id}}")
     }
 }
 
-impl Endpoint<LabQuery, LabSummary> {
+impl ToApiPath for (LabQuery, LabSummary) {
     #[must_use]
-    pub fn route() -> String {
+    fn to_api_path() -> String {
         format!("{LABS}/{SEARCH_SUFFIX}")
     }
 }
 
 const SPECIMENS: &str = "/specimens";
-impl Endpoint<NewSpecimen, Specimen> {
+impl ToApiPath for (NewSpecimen, Specimen) {
     #[must_use]
-    pub fn route() -> String {
+    fn to_api_path() -> String {
         SPECIMENS.to_string()
     }
 }
 
-impl Endpoint<Uuid, Specimen> {
+impl ToApiPath for (Uuid, Specimen) {
     #[must_use]
-    pub fn route() -> String {
+    fn to_api_path() -> String {
         format!("{SPECIMENS}/{{id}}")
     }
 }
 
-impl Endpoint<SpecimenQuery, SpecimenSummary> {
+impl ToApiPath for (SpecimenQuery, SpecimenSummary) {
     #[must_use]
-    pub fn route() -> String {
+    fn to_api_path() -> String {
         format!("{SPECIMENS}/{SEARCH_SUFFIX}")
     }
 }
 
 const SEQUENCING_RUNS: &str = "/sequencing_runs";
-impl Endpoint<NewSequencingRun, ()> {
+impl ToApiPath for (NewSequencingRun, ()) {
     #[must_use]
-    pub fn route() -> String {
+    fn to_api_path() -> String {
         SEQUENCING_RUNS.to_string()
     }
 }
 
 const SUSPENSIONS: &str = "/suspensions";
-impl Endpoint<NewSuspension, Suspension> {
+impl ToApiPath for (NewSuspension, Suspension) {
     #[must_use]
-    pub fn route() -> String {
+    fn to_api_path() -> String {
         SUSPENSIONS.to_string()
     }
 }

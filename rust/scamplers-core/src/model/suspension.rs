@@ -1,9 +1,9 @@
 pub use common::MeasurementDataCore;
-pub use multiplexed::NewMultiplexedSuspension;
-pub use singleplexed::{
+pub use pool::NewSuspensionPool;
+pub use suspension::{
     NewSuspension, NewSuspensionMeasurement, Suspension, SuspensionCore, SuspensionMeasurement,
 };
 
 mod common;
-mod multiplexed;
+mod pool;
 mod suspension;

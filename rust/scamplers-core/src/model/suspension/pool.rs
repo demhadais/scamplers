@@ -5,12 +5,10 @@ use valid_string::ValidString;
 
 use crate::model::suspension::{common::MeasurementDataCore, suspension::NewSuspension};
 #[cfg(feature = "backend")]
-use scamplers_schema::{
-    multiplexed_suspension, multiplexed_suspension_measurement, multiplexed_suspension_preparers,
-};
+use scamplers_schema::{suspension_pool, suspension_pool_measurement, suspension_pool_preparers};
 
 #[db_json]
-pub struct MultiplexedSuspensionMeasurementData {
+pub struct SuspensionPoolMeasurementData {
     #[serde(flatten)]
     #[garde(dive)]
     pub data: MeasurementDataCore,
@@ -18,19 +16,19 @@ pub struct MultiplexedSuspensionMeasurementData {
 }
 
 #[db_insertion]
-#[cfg_attr(feature = "backend", diesel(table_name = multiplexed_suspension_measurement))]
-pub struct NewMultiplexedSuspensionMeasurement {
+#[cfg_attr(feature = "backend", diesel(table_name = suspension_pool_measurement))]
+pub struct NewSuspensionPoolMeasurement {
     #[serde(default)]
     pub suspension_id: Uuid,
     pub measured_by: Uuid,
     #[serde(flatten)]
     #[garde(dive)]
-    pub data: MultiplexedSuspensionMeasurementData,
+    pub data: SuspensionPoolMeasurementData,
 }
 
 #[db_insertion]
-#[cfg_attr(feature = "backend", diesel(table_name = multiplexed_suspension))]
-pub struct NewMultiplexedSuspension {
+#[cfg_attr(feature = "backend", diesel(table_name = suspension_pool))]
+pub struct NewSuspensionPool {
     #[garde(dive)]
     pub readable_id: ValidString,
     pub pooled_at: OffsetDateTime,
@@ -44,11 +42,11 @@ pub struct NewMultiplexedSuspension {
     #[garde(dive)]
     #[serde(default)]
     #[cfg_attr(feature = "backend", diesel(skip_insertion))]
-    pub measurements: Vec<NewMultiplexedSuspensionMeasurement>,
+    pub measurements: Vec<NewSuspensionPoolMeasurement>,
 }
 
 #[db_insertion]
-pub struct MultiplexedSuspensionPreparer {
+pub struct SuspensionPoolPreparer {
     pub suspension_id: Uuid,
     pub prepared_by: Uuid,
 }

@@ -42,7 +42,7 @@ pub struct SpecimenSummary {
     pub readable_id: String,
     pub name: String,
     pub received_at: OffsetDateTime,
-    pub species: Vec<Option<Species>>,
+    pub species: Vec<Option<String>>,
     pub notes: Option<String>,
     pub returned_at: Option<OffsetDateTime>,
     pub type_: String,
@@ -145,7 +145,7 @@ mod tests {
     use crate::model::specimen::{NewSpecimen, block::NewBlock};
 
     #[test]
-    fn deserialize_specimen() {
+    fn deserialize_new_specimen() {
         let uuid = Uuid::now_v7();
         let received_at = "1999-01-01 00:00:00.0 +00:00:00";
         let frozen_embedding_matrix = "carboxymethyl_cellulose";

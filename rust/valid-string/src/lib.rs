@@ -1,14 +1,7 @@
 use std::{fmt::Display, str::FromStr};
 
 #[cfg(feature = "backend")]
-use diesel::{
-    backend::Backend,
-    deserialize::{FromSql, FromSqlRow},
-    expression::AsExpression,
-    pg::Pg,
-    serialize::{Output, ToSql},
-    sql_types,
-};
+use diesel::{deserialize::FromSqlRow, expression::AsExpression, sql_types};
 #[cfg(not(target_arch = "wasm32"))]
 use pyo3::prelude::*;
 use serde::{Deserialize, Serialize};

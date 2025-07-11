@@ -1,4 +1,4 @@
-create table multiplexed_suspension (
+create table suspension_pool (
     id uuid primary key default uuidv7(),
     link text generated always as ('/samples/' || id) stored not null,
     name text not null,
@@ -7,15 +7,15 @@ create table multiplexed_suspension (
     notes text
 );
 
-create table multiplexed_suspension_measurement (
+create table suspension_pool_measurement (
     id uuid primary key default uuidv7(),
-    suspension_id uuid references multiplexed_suspension on delete restrict on update restrict not null,
+    pool_id uuid references suspension_pool on delete restrict on update restrict not null,
     measured_by uuid references person on delete restrict on update restrict not null,
     data jsonb not null
 );
 
-create table multiplexed_suspension_preparers (
-    suspension_id uuid references multiplexed_suspension on delete restrict on update restrict not null,
+create table suspension_pool_preparers (
+    pool_id uuid references suspension_pool on delete restrict on update restrict not null,
     prepared_by uuid references person on delete restrict on update restrict not null,
-    primary key (suspension_id, prepared_by)
+    primary key (pool_id, prepared_by)
 );

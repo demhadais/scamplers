@@ -4,7 +4,7 @@ use scamplers_schema::{chip_loading, chromium_run, gems};
 use uuid::Uuid;
 
 use crate::model::chromium_run::common::{
-    MAX_GEMS_IN_CHROMIUM_RUN, NewChipLoadingCommon, NewChromiumRunCommon, NewGemsCommon,
+    MAX_GEMS_IN_NON_OCM_RUN, NewChipLoadingCommon, NewChromiumRunCommon, NewGemsCommon,
 };
 
 #[db_insertion]
@@ -19,7 +19,7 @@ pub(super) struct NewSingleplexChipLoading {
 
 #[db_insertion]
 #[cfg_attr(feature = "backend", diesel(table_name = gems))]
-pub(super) struct NewSingleplexGems {
+struct NewSingleplexGems {
     #[serde(flatten)]
     #[garde(dive)]
     #[cfg_attr(feature = "backend", diesel(embed))]
@@ -30,15 +30,20 @@ pub(super) struct NewSingleplexGems {
 
 #[db_enum]
 enum SingleplexChromiumChip {
+    #[serde(rename = "J")]
+    #[strum(serialize = "J")]
     J,
+    #[serde(rename = "H")]
+    #[strum(serialize = "H")]
     H,
-    Q,
+    #[serde(rename = "GEM-X FX")]
+    #[strum(serialize = "GEM-X FX")]
     GemxFx,
-    #[serde(rename = "gemx_3p")]
-    #[strum(serialize = "gemx_3p")]
+    #[serde(rename = "GEM-X 3'")]
+    #[strum(serialize = "GEM-X 3'")]
     Gemx3p,
-    #[serde(rename = "gemx_ocm_5p")]
-    #[strum(serialize = "gemx_ocm_5p")]
+    #[serde(rename = "GEM-X 5'")]
+    #[strum(serialize = "GEM-X 5'")]
     Gemx5p,
 }
 
@@ -51,6 +56,6 @@ pub(super) struct NewSingleplexChromiumRun {
     pub inner: NewChromiumRunCommon,
     pub chip: SingleplexChromiumChip,
     #[cfg_attr(feature = "backend", diesel(skip_insertion))]
-    #[garde(dive, length(min = 1, max = MAX_GEMS_IN_CHROMIUM_RUN))]
+    #[garde(dive, length(min = 1, max = MAX_GEMS_IN_NON_OCM_RUN))]
     pub gems: Vec<NewSingleplexGems>,
 }

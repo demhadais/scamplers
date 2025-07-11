@@ -22,7 +22,6 @@ pub enum UserRole {
 }
 
 #[db_insertion]
-#[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
 #[cfg_attr(feature = "backend", diesel(table_name = person))]
 pub struct NewPerson {
     #[garde(dive)]
@@ -37,16 +36,15 @@ pub struct NewPerson {
     #[cfg_attr(feature = "backend", diesel(skip_insertion))]
     pub roles: Vec<UserRole>,
 }
-impl NewPerson {
-    #[must_use]
-    pub fn new_user_route() -> String {
-        "/users".to_string()
-    }
-}
+
+#[base_api_model]
+#[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
+#[serde(transparent)]
+pub struct NewMsLogin(#[cfg_attr(target_arch = "wasm32", wasm_bindgen(skip))] pub NewPerson);
 
 #[cfg(target_arch = "wasm32")]
 #[wasm_bindgen]
-impl NewPerson {
+impl NewMsLogin {
     #[wasm_bindgen]
     pub fn new() -> NewPersonEmpty {
         NewPersonEmpty
@@ -127,7 +125,7 @@ struct NewPersonInstitutionId {
 #[wasm_bindgen]
 impl NewPersonInstitutionId {
     #[wasm_bindgen]
-    pub fn build(self) -> NewPerson {
+    pub fn build(self) -> std::result::Result<NewMsLogin, valid_string::EmptyStringError> {
         let Self {
             inner:
                 NewPersonMsUserId {
@@ -141,14 +139,14 @@ impl NewPersonInstitutionId {
             institution_id,
         } = self;
 
-        NewPerson {
-            name: ValidString::from_str(&name),
+        Self(NewPerson {
+            name: ValidString::from_str(&name)?,
             email,
             orcid: None,
             institution_id,
             ms_user_id: Some(ms_user_id),
             roles: vec![],
-        }
+        })
     }
 }
 

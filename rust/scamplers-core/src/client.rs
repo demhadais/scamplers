@@ -1,23 +1,34 @@
 use {
-    crate::model::{
-        institution::{Institution, NewInstitution},
-        lab::{Lab, NewLab},
-        person::{CreatedUser, NewPerson, Person},
+    crate::{
+        api_path::ToApiPath,
+        model::{
+            institution::{Institution, NewInstitution},
+            lab::{Lab, NewLab},
+            person::{CreatedUser, NewPerson, Person},
+        },
     },
     serde::{Serialize, de::DeserializeOwned},
-    wasm_bindgen::prelude::*,
 };
 
-#[wasm_bindgen]
+#[cfg(target_arch = "wasm32")]
+use {crate::model::person::NewMsLogin, wasm_bindgen::prelude::*};
+
+#[cfg(not(target_arch = "wasm32"))]
+use pyo3::prelude::*;
+
+#[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
+#[cfg_attr(not(target_arch = "wasm32"), pyclass)]
 struct Client {
-    backend_url: String,
+    backend_base_url: String,
     client: reqwest::Client,
 }
 
-#[wasm_bindgen]
+#[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
+#[cfg_attr(not(target_arch = "wasm32"), pymethods)]
 impl Client {
-    #[wasm_bindgen(constructor)]
-    pub fn new(backend_url: String, token: &str) -> Self {
+    #[cfg_attr(target_arch = "wasm32", wasm_bindgen(constructor))]
+    #[cfg_attr(not(target_arch = "wasm32"), new)]
+    pub fn new(backend_base_url: String, token: &str) -> Self {
         use reqwest::{
             ClientBuilder,
             header::{AUTHORIZATION, HeaderMap, HeaderValue},
@@ -34,25 +45,29 @@ impl Client {
             .unwrap();
 
         Self {
-            backend_url,
+            backend_base_url,
             client,
         }
     }
+}
 
+impl Client {
     async fn send_request<Req, Resp>(
         &self,
         data: &Req,
-        route: &str,
         api_key: Option<String>,
     ) -> Result<Resp, JsValue>
     where
         Req: Serialize,
         Resp: DeserializeOwned,
+        (Req, Resp): ToApiPath,
     {
         let Self {
-            backend_url,
+            backend_base_url,
             client,
         } = self;
+
+        let route = <(Req, Resp)>::to_api_path();
 
         let mut request = client.post(format!("{backend_url}{route}")).json(data);
 
@@ -77,13 +92,15 @@ impl Client {
 
         Ok(response)
     }
+}
 
+#[cfg(target_arch = "wasm32")]
+impl Client {
     #[wasm_bindgen]
     pub async fn send_new_ms_login(
         &self,
-        data: NewPerson,
+        data: NewMsLogin,
     ) -> Result<CreatedUser, wasm_bindgen::JsValue> {
-        self.send_request(&data, &NewPerson::new_user_route(), None)
-            .await
+        self.send_request(&data, None).await
     }
 }

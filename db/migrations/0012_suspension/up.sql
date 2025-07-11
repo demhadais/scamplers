@@ -12,7 +12,7 @@ create table suspension (
     parent_specimen_id uuid references specimen on delete restrict on update restrict not null,
     biological_material text not null,
     created_at timestamptz,
-    pooled_into_id uuid references multiplexed_suspension on delete restrict on update restrict,
+    pooled_into_id uuid references suspension_pool on delete restrict on update restrict,
     multiplexing_tag_id uuid references multiplexing_tag on delete restrict on update restrict,
     lysis_duration_minutes real,
     target_cell_recovery real not null, -- validated on Rust side
