@@ -61,7 +61,7 @@ where
     where
         QuerySource: 'a,
     {
-        let (ids, name) = (self.ids(), self.name());
+        let Self { ids, name, .. } = self;
         let q1 = (!ids.is_empty()).then(|| id_col.eq_any(ids));
         let q2 = name.as_ref().map(|name| name_col.ilike(name.as_ilike()));
 
@@ -94,7 +94,7 @@ mod tests {
     use crate::db::test_util::{DbConnection, N_INSTITUTIONS, db_conn, test_query};
 
     fn comparison_fn(i: &Institution) -> String {
-        i.name().to_string()
+        i.name.to_string()
     }
 
     #[rstest]
@@ -116,11 +116,10 @@ mod tests {
     #[awt]
     #[tokio::test]
     async fn specific_institution_query(#[future] db_conn: DbConnection) {
-        let query = InstitutionQueryBuilder::default()
+        let query = InstitutionQuery::builder()
             .name("institution1")
-            .order_by(InstitutionOrdinalColumn::Name, true)
-            .build()
-            .unwrap();
+            .order_by((InstitutionOrdinalColumn::Name, true))
+            .build();
 
         let expected = [(0, "institution19"), (10, "institution1")];
 

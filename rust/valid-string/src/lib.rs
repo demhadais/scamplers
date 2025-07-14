@@ -62,6 +62,12 @@ impl FromStr for ValidString {
     }
 }
 
+impl From<&str> for ValidString {
+    fn from(value: &str) -> Self {
+        value.to_valid_string().unwrap()
+    }
+}
+
 impl PartialEq<&str> for ValidString {
     fn eq(&self, other: &&str) -> bool {
         self.0.eq(other)

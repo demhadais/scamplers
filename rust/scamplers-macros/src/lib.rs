@@ -72,6 +72,8 @@ pub fn db_insertion(_attr: TokenStream, input: TokenStream) -> TokenStream {
             derive(::diesel::Insertable),
             diesel(check_for_backend(::diesel::pg::Pg))
         )]
+        #[derive(::bon::Builder)]
+        #[builder(on(_, into))]
         #struct_item
     };
 
@@ -88,6 +90,8 @@ pub fn db_query(_attr: TokenStream, input: TokenStream) -> TokenStream {
     let output = quote! {
         #[cfg_attr(feature = "python", ::pyo3::pyclass)]
         #[cfg_attr(target_arch = "wasm32", ::wasm_bindgen::prelude::wasm_bindgen(getter_with_clone))]
+        #[derive(::bon::Builder)]
+        #[builder(on(_, into))]
         #struct_item
 
         #[cfg(target_arch = "wasm32")]
@@ -154,6 +158,8 @@ pub fn db_update(_attr: TokenStream, input: TokenStream) -> TokenStream {
     let output = quote! {
         #[cfg_attr(feature = "python", ::pyo3::pyclass)]
         #[cfg_attr(feature = "backend", derive(::diesel::AsChangeset, ::diesel::Identifiable), diesel(check_for_backend(::diesel::pg::Pg)))]
+        #[derive(::bon::Builder)]
+        #[builder(on(_, into))]
         #struct_item
     };
 

@@ -61,6 +61,10 @@ trait WriteToDbInternal {
     async fn write(self, db_conn: &mut AsyncPgConnection) -> error::Result<Self::Returns>;
 }
 
+trait IsUpdate {
+    fn is_update(&self) -> bool;
+}
+
 pub trait FetchById: Sized {
     type Id;
 
@@ -89,48 +93,11 @@ pub trait FetchRelatives<R>: diesel::Table {
 }
 
 #[macro_export]
-macro_rules! fetch_by_query2 {
-    ($query:ident, [$($ordinal_column:path),*], $db_conn:ident) => {{
-        use super::AsDieselFilter;
-        use scamplers_core::model::Pagination;
-
-        let Self::QueryParams {
-            order_by,
-            pagination: Pagination { limit, offset },
-            ..
-        } = $query;
-
-        let query = $query.as_diesel_filter();
-
-        let mut statement = Self::as_diesel_query_base()
-            .select(Self::as_select())
-            .limit(*limit)
-            .offset(*offset)
-            .into_boxed();
-
-        if let Some(query) = query {
-            statement = statement.filter(query);
-        }
-
-        for ordering in order_by {
-            statement = match (&ordering.by, ordering.descending) {
-                $(
-                    ($ordinal_column(col), false) => statement.then_order_by(col.asc()),
-                    ($ordinal_column(col), true) => statement.then_order_by(col.desc()),
-                )+
-            };
-        }
-
-        Ok(statement.load($db_conn).await?)
-    }};
-}
-
-#[macro_export]
 macro_rules! fetch_by_query {
     ($query:ident, [$(($ordinal_col_enum_variant:ident, $corresponding_db_col:ident)),*], $db_conn:ident) => {{
         use super::AsDieselFilter;
 
-        let (order_by, limit, offset) = ($query.order_by(), $query.pagination().limit(), $query.pagination().offset());
+        let Self::QueryParams{order_by, pagination: scamplers_core::model::Pagination{limit, offset}, ..} = $query;
 
         let query = $query.as_diesel_filter();
 
@@ -145,7 +112,7 @@ macro_rules! fetch_by_query {
         }
 
         for ordering in order_by.as_slice() {
-            statement = match (ordering.by(), ordering.descending()) {
+            statement = match (&ordering.by, ordering.descending) {
                 $(
                     ($ordinal_col_enum_variant, false) => statement.then_order_by($corresponding_db_col.asc()),
                     ($ordinal_col_enum_variant, true) => statement.then_order_by($corresponding_db_col.desc()),

@@ -3,15 +3,18 @@ use crate::model::{
 };
 
 use super::{lab::LabSummary, person::PersonSummary};
-use block::NewBlock;
 use common::{MeasurementData, Species};
-use scamplers_macros::{base_api_model, base_api_model_with_default, db_query, db_selection};
+use scamplers_macros::{
+    base_api_model, base_api_model_with_default, db_enum, db_query, db_selection,
+};
 #[cfg(feature = "backend")]
 use scamplers_schema::{specimen, specimen_measurement};
 use time::OffsetDateTime;
-use tissue::NewTissue;
 use uuid::Uuid;
-use virtual_::NewVirtualSpecimen;
+pub use {
+    block::NewBlock, common::NewSpecimenMeasurement, tissue::NewTissue,
+    virtual_::NewVirtualSpecimen,
+};
 
 mod block;
 mod common;
@@ -88,7 +91,7 @@ pub struct Specimen {
     pub measurements: Vec<SpecimenMeasurement>,
 }
 
-#[base_api_model]
+#[db_enum]
 #[serde(untagged)]
 pub enum SpecimenType {
     Block(block::BlockType),

@@ -55,12 +55,14 @@ pub enum InstitutionOrdinalColumn {
 
 #[db_query]
 pub struct InstitutionQuery {
+    #[builder(default)]
     #[cfg_attr(feature = "python", pyo3(get, set))]
     pub ids: Vec<Uuid>,
     #[cfg_attr(feature = "python", pyo3(get, set))]
     pub name: Option<String>,
     #[cfg_attr(target_arch = "wasm32", wasm_bindgen(skip))]
     pub order_by: SortByGroup<InstitutionOrdinalColumn>,
+    #[builder(default)]
     #[cfg_attr(feature = "python", pyo3(get, set))]
     pub pagination: Pagination,
 }

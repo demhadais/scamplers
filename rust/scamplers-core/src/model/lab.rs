@@ -1,6 +1,7 @@
 use crate::model::{Pagination, SortByGroup, person::PersonSummary};
 use scamplers_macros::{
     base_api_model, base_api_model_with_default, db_insertion, db_query, db_selection, db_update,
+    getters_impl,
 };
 #[cfg(feature = "backend")]
 use scamplers_schema::lab;
@@ -16,6 +17,7 @@ pub struct NewLab {
     #[garde(dive)]
     pub delivery_dir: ValidString,
     #[cfg_attr(feature = "backend", diesel(skip_insertion))]
+    #[builder(default)]
     pub member_ids: Vec<Uuid>,
 }
 
@@ -34,6 +36,17 @@ pub struct LabSummary {
     pub handle: LabHandle,
     pub name: String,
     pub delivery_dir: String,
+}
+
+#[getters_impl]
+impl LabSummary {
+    pub fn id(&self) -> Uuid {
+        self.handle.id
+    }
+
+    pub fn link(&self) -> String {
+        self.handle.link.to_string()
+    }
 }
 
 #[db_selection]
@@ -55,6 +68,13 @@ pub struct Lab {
     #[serde(flatten)]
     pub core: LabCore,
     pub members: Vec<PersonSummary>,
+}
+
+#[getters_impl]
+impl Lab {
+    pub fn id(&self) -> Uuid {
+        self.core.summary.id()
+    }
 }
 
 #[db_update]

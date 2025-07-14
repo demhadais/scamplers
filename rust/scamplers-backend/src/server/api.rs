@@ -3,11 +3,11 @@ use axum::{
     routing::{get, post},
 };
 use scamplers_core::{
-    endpoint::Endpoint,
+    api_path::ToApiPath,
     model::{
         institution::{Institution, InstitutionQuery, NewInstitution},
         lab::{Lab, LabQuery, LabSummary, NewLab},
-        person::{NewPerson, Person, PersonQuery, PersonSummary},
+        person::{CreatedUser, NewMsLogin, NewPerson, Person, PersonQuery, PersonSummary},
         sequencing_run::NewSequencingRun,
         specimen::{NewSpecimen, Specimen, SpecimenQuery, SpecimenSummary},
         suspension::{NewSuspension, Suspension},
@@ -27,52 +27,52 @@ pub(super) fn router() -> Router<AppState> {
     Router::new()
         .route("/", get(|| async {}))
         .route(
-            &Endpoint::<NewInstitution, Institution>::route(),
+            &<(NewInstitution, Institution)>::to_api_path(),
             post(write::<NewInstitution>),
         )
         .route(
-            &Endpoint::<Uuid, Institution>::route(),
+            &<(Uuid, Institution)>::to_api_path(),
             get(by_id::<Institution>),
         )
         .route(
-            &Endpoint::<InstitutionQuery, Institution>::route(),
+            &<(InstitutionQuery, Institution)>::to_api_path(),
             post(by_query::<Institution>),
         )
         .route(
-            &Endpoint::<NewPerson, Person>::route(),
+            &<(NewPerson, Person)>::to_api_path(),
             post(write::<NewPerson>),
         )
-        .route(&NewPerson::new_user_route(), post(new_user))
-        .route(&Endpoint::<Uuid, Person>::route(), get(by_id::<Person>))
+        .route(&<(NewMsLogin, CreatedUser)>::to_api_path(), post(new_user))
+        .route(&<(Uuid, Person)>::to_api_path(), get(by_id::<Person>))
         .route(
-            &Endpoint::<PersonQuery, PersonSummary>::route(),
+            &<(PersonQuery, PersonSummary)>::to_api_path(),
             post(by_query::<PersonSummary>),
         )
-        .route(&Endpoint::<NewLab, Lab>::route(), post(write::<NewLab>))
-        .route(&Endpoint::<Uuid, Lab>::route(), get(by_id::<Lab>))
+        .route(&<(NewLab, Lab)>::to_api_path(), post(write::<NewLab>))
+        .route(&<(Uuid, Lab)>::to_api_path(), get(by_id::<Lab>))
         .route(
-            &Endpoint::<LabQuery, LabSummary>::route(),
+            &<(LabQuery, LabSummary)>::to_api_path(),
             post(by_query::<LabSummary>),
         )
         .route(
-            &format!("{}/members", Endpoint::<Uuid, Lab>::route()),
+            &format!("{}/members", <(Uuid, Lab)>::to_api_path()),
             get(relatives::<lab, PersonSummary>),
         )
         .route(
-            &Endpoint::<NewSpecimen, Specimen>::route(),
+            &<(NewSpecimen, Specimen)>::to_api_path(),
             post(write::<NewSpecimen>),
         )
-        .route(&Endpoint::<Uuid, Specimen>::route(), get(by_id::<Specimen>))
+        .route(&<(Uuid, Specimen)>::to_api_path(), get(by_id::<Specimen>))
         .route(
-            &Endpoint::<SpecimenQuery, SpecimenSummary>::route(),
+            &<(SpecimenQuery, SpecimenSummary)>::to_api_path(),
             post(by_query::<SpecimenSummary>),
         )
         .route(
-            &Endpoint::<NewSequencingRun, ()>::route(),
+            &<(NewSequencingRun, ())>::to_api_path(),
             post(write::<NewSequencingRun>),
         )
         .route(
-            &Endpoint::<NewSuspension, Suspension>::route(),
+            &<(NewSuspension, Suspension)>::to_api_path(),
             post(write::<NewSuspension>),
         )
 }

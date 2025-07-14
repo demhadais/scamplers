@@ -3,7 +3,6 @@ use crate::{
         self,
         model::{
             AsDieselFilter, AsDieselQueryBase, FetchById, FetchByQuery, FetchRelatives, WriteToDb,
-            WriteToDbInternal,
         },
         util::{AsIlike, BoxedDieselExpression, NewBoxedDieselExpression},
     },
@@ -12,9 +11,10 @@ use crate::{
 use diesel::{dsl::AssumeNotNull, prelude::*};
 use diesel_async::{AsyncPgConnection, RunQueryDsl};
 use scamplers_core::model::specimen::{
-    BlockEmbeddingMatrix, Fixative, NewSpecimen, Specimen, SpecimenCore, SpecimenMeasurement,
-    SpecimenQuery, SpecimenSummary,
+    BlockEmbeddingMatrix, Fixative, NewSpecimen, NewSpecimenMeasurement, Specimen, SpecimenCore,
+    SpecimenMeasurement, SpecimenQuery, SpecimenSummary, SpecimenType,
 };
+use scamplers_core::model::specimen::{NewBlock, NewTissue, NewVirtualSpecimen};
 use scamplers_schema::{
     lab, person,
     specimen::{
@@ -43,14 +43,14 @@ fn specimen_measurement_query_base() -> _ {
 }
 
 impl FetchRelatives<SpecimenMeasurement> for specimen::table {
-    type Id = Uuid;
+    type Id = Vec<Uuid>;
 
     async fn fetch_relatives(
-        id: &Self::Id,
+        specimen_ids: &Self::Id,
         db_conn: &mut AsyncPgConnection,
     ) -> db::error::Result<Vec<SpecimenMeasurement>> {
         Ok(specimen_measurement_query_base()
-            .filter(specimen_measurement::specimen_id.eq(id))
+            .filter(specimen_measurement::specimen_id.eq_any(specimen_ids))
             .select(SpecimenMeasurement::as_select())
             .load(db_conn)
             .await?)
@@ -62,16 +62,42 @@ impl WriteToDb for &[NewSpecimenMeasurement] {
 
     async fn write(self, db_conn: &mut AsyncPgConnection) -> db::error::Result<Self::Returns> {
         let specimen_ids: Vec<Uuid> = diesel::insert_into(specimen_measurement::table)
-            .values(&self)
+            .values(self.clone())
             .returning(specimen_measurement::specimen_id)
             .get_results(db_conn)
             .await?;
 
-        if specimen_ids.is_empty() {
-            return Ok(vec![]);
+        Ok(specimen_measurement_query_base()
+            .filter(specimen_measurement::specimen_id.eq_any(specimen_ids))
+            .select(SpecimenMeasurement::as_select())
+            .load(db_conn)
+            .await?)
+    }
+}
+
+trait NewSpecimenExt {
+    fn measurements(&mut self, id: Uuid) -> &[NewSpecimenMeasurement];
+}
+impl NewSpecimenExt for NewSpecimen {
+    fn measurements(&mut self, self_id: Uuid) -> &[NewSpecimenMeasurement] {
+        let inner = match self {
+            Self::Block(block) => match block {
+                NewBlock::Fixed(b) => &mut b.inner,
+                NewBlock::Frozen(b) => &mut b.inner,
+            },
+            Self::Suspension(susp) => &mut susp.inner,
+            Self::Tissue(tissue) => match tissue {
+                NewTissue::Cryopreserved(t) => &mut t.inner,
+                NewTissue::Fixed(t) => &mut t.inner,
+                NewTissue::Frozen(t) => &mut t.inner,
+            },
+        };
+
+        for m in &mut inner.measurements {
+            m.specimen_id = self_id;
         }
 
-        specimen::table::fetch_relatives(&specimen_ids[0], db_conn).await
+        &inner.measurements
     }
 }
 
@@ -79,7 +105,7 @@ impl WriteToDb for NewSpecimen {
     type Returns = Specimen;
 
     async fn write(
-        self,
+        mut self,
         db_conn: &mut diesel_async::AsyncPgConnection,
     ) -> crate::db::error::Result<Self::Returns> {
         let id = match &self {
@@ -123,18 +149,16 @@ impl FetchById for Specimen {
         id: &Self::Id,
         db_conn: &mut AsyncPgConnection,
     ) -> db::error::Result<Self> {
-        let specimen_core: SpecimenCore = core_query_base()
+        let core: SpecimenCore = core_query_base()
             .select(SpecimenCore::as_select())
             .filter(id_col.eq(id))
             .first(db_conn)
             .await?;
 
-        let measurements = specimen::table::fetch_relatives(specimen_core.id(), db_conn).await?;
+        let measurements =
+            specimen::table::fetch_relatives(&vec![core.summary.handle.id], db_conn).await?;
 
-        Ok(SpecimenBuilder::default()
-            .core(specimen_core)
-            .measurements(measurements)
-            .build()?)
+        Ok(Specimen { core, measurements })
     }
 }
 
@@ -186,7 +210,7 @@ where
         let q6 = notes
             .as_ref()
             .map(|notes| notes_col.assume_not_null().ilike(notes.as_ilike()));
-        let q7 = type_.map(|t| type_col.eq(t));
+        let q7 = type_.as_ref().map(|t| type_col.eq(t));
         let q8 = storage_buffer
             .as_ref()
             .map(|buf| buffer_col.assume_not_null().ilike(buf.as_ilike()));

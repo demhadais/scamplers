@@ -24,6 +24,7 @@ scamplers-macros = { path = "../scamplers-macros" }
 reqwest = { workspace = true }
 valid-string = { path = "../valid-string" }
 pyo3 = { workspace = true, optional = true }
+bon = { workspace = true }
 
 [target.'cfg(target_arch = "wasm32")'.dependencies]
 wasm-bindgen = { workspace = true }

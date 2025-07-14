@@ -1,23 +1,24 @@
 use crate::{
     db::{
         error::Result,
-        model::{self, AsDieselQueryBase, FetchById},
+        model::{self, AsDieselQueryBase, FetchById, IsUpdate, WriteToDb},
         util::{AsIlike, BoxedDieselExpression, NewBoxedDieselExpression},
     },
     fetch_by_query,
     server::auth::{ApiKey, HashedApiKey},
 };
 use diesel::{
+    define_sql_function,
+    sql_types::{Array, Text},
+};
+use diesel::{
     dsl::{AssumeNotNull, InnerJoin},
     prelude::*,
 };
 use diesel_async::{AsyncPgConnection, RunQueryDsl};
-use scamplers_core::model::{
-    IsUpdate,
-    person::{
-        CreatedUser, NewPerson, Person, PersonBuilder, PersonCore, PersonQuery, PersonSummary,
-        PersonUpdate, UserRole,
-    },
+use scamplers_core::model::person::{
+    CreatedUser, NewMsLogin, NewPerson, Person, PersonCore, PersonQuery, PersonSummary,
+    PersonUpdate, PersonUpdateCore, UserRole,
 };
 use scamplers_schema::{
     institution,
@@ -30,11 +31,7 @@ use scamplers_schema::{
     },
 };
 use uuid::Uuid;
-
-use diesel::{
-    define_sql_function,
-    sql_types::{Array, Text},
-};
+use valid_string::ValidString;
 
 define_sql_function! {fn grant_roles_to_user(user_id: Text, roles: Array<Text>)}
 define_sql_function! {fn revoke_roles_from_user(user_id: Text, roles: Array<Text>)}
@@ -53,13 +50,14 @@ where
     where
         QuerySource: 'a,
     {
-        let (ids, name, email, orcid, ms_user_id) = (
-            self.ids(),
-            self.name(),
-            self.email(),
-            self.orcid(),
-            self.ms_user_id(),
-        );
+        let Self {
+            ids,
+            name,
+            email,
+            orcid,
+            ms_user_id,
+            ..
+        } = self;
 
         let q1 = (!ids.is_empty()).then(|| id_col.eq_any(ids));
         let q2 = name.as_ref().map(|name| name_col.ilike(name.as_ilike()));
@@ -134,11 +132,11 @@ impl model::FetchById for Person {
             .get_result(db_conn)
             .await?;
 
-        let roles: Vec<UserRole> = diesel::select(get_user_roles(core.id().to_string()))
+        let roles: Vec<UserRole> = diesel::select(get_user_roles(core.summary.id().to_string()))
             .get_result(db_conn)
             .await?;
 
-        Ok(PersonBuilder::default().core(core).roles(roles).build()?)
+        Ok(Person { core, roles })
     }
 }
 
@@ -155,17 +153,36 @@ impl model::WriteToDb for NewPerson {
     }
 }
 
+impl IsUpdate for PersonUpdateCore {
+    fn is_update(&self) -> bool {
+        matches!(
+            self,
+            Self {
+                name: Some(_),
+                email: Some(_),
+                ms_user_id: Some(_),
+                orcid: Some(_),
+                institution_id: Some(_),
+                ..
+            }
+        )
+    }
+}
+
 impl model::WriteToDb for PersonUpdate {
     type Returns = Person;
     async fn write(self, db_conn: &mut AsyncPgConnection) -> Result<Self::Returns> {
-        let (core, grant_roles, revoke_roles) =
-            (self.core(), self.grant_roles(), self.revoke_roles());
+        let Self {
+            core,
+            grant_roles,
+            revoke_roles,
+        } = self;
 
         if core.is_update() {
-            diesel::update(core).set(core).execute(db_conn).await?;
+            diesel::update(&core).set(&core).execute(db_conn).await?;
         }
 
-        let user_id = core.id();
+        let user_id = &core.id;
         let user_id_str = user_id.to_string();
 
         diesel::select(grant_roles_to_user(&user_id_str, grant_roles))
@@ -187,28 +204,30 @@ pub trait WriteLogin {
     ) -> crate::db::error::Result<CreatedUser>;
 }
 
-impl WriteLogin for NewPerson {
-    async fn write_ms_login(
+impl WriteToDb for NewMsLogin {
+    type Returns = CreatedUser;
+
+    async fn write(
         self,
         db_conn: &mut AsyncPgConnection,
-    ) -> super::error::Result<CreatedUser> {
+    ) -> crate::db::error::Result<Self::Returns> {
         #[derive(Insertable, AsChangeset, Clone, Copy)]
         #[diesel(table_name = person, primary_key(ms_user_id))]
         struct Upsert<'a> {
             ms_user_id: Option<&'a Uuid>,
-            name: &'a str,
+            name: &'a ValidString,
             email: &'a str,
             hashed_api_key: &'a HashedApiKey,
             institution_id: &'a Uuid,
         }
 
-        let Self {
+        let Self(NewPerson {
             name,
             email,
             institution_id,
             ms_user_id,
             ..
-        } = &self;
+        }) = &self;
 
         // TODO: We shouldn't overwrite the user's API key on every single login
         let api_key = ApiKey::new();
@@ -216,7 +235,7 @@ impl WriteLogin for NewPerson {
 
         let upsert = Upsert {
             ms_user_id: ms_user_id.as_ref(),
-            name: name.as_ref(),
+            name,
             email,
             hashed_api_key: &hashed_api_key,
             institution_id,
@@ -246,10 +265,10 @@ impl WriteLogin for NewPerson {
 
         let person = Person::fetch_by_id(&id, db_conn).await?;
 
-        Ok(CreatedUser::builder()
-            .person(person)
-            .api_key(api_key)
-            .build())
+        Ok(CreatedUser {
+            person,
+            api_key: api_key.into(),
+        })
     }
 }
 
@@ -261,8 +280,8 @@ mod tests {
     use scamplers_core::model::{
         institution::{Institution, InstitutionQuery},
         person::{
-            NewPerson, PersonOrdering, PersonOrdinalColumn, PersonQuery, PersonSummary,
-            PersonUpdate, UserRole,
+            NewMsLogin, PersonOrdinalColumn, PersonQuery, PersonSummary, PersonUpdate,
+            PersonUpdateCore, UserRole,
         },
     };
     use uuid::Uuid;
@@ -278,7 +297,7 @@ mod tests {
     };
 
     fn comparison_fn(p: &PersonSummary) -> String {
-        p.name().to_string()
+        p.name.to_string()
     }
 
     #[rstest]
@@ -300,14 +319,10 @@ mod tests {
     #[awt]
     #[tokio::test]
     async fn specific_person_query(#[future] db_conn: DbConnection) {
-        let query = PersonQuery {
-            name: Some("person1".to_string()),
-            order_by: vec![PersonOrdering {
-                by: PersonOrdinalColumn::Name,
-                descending: true,
-            }],
-            ..Default::default()
-        };
+        let query = PersonQuery::builder()
+            .name("person1")
+            .order_by((PersonOrdinalColumn::Name, true))
+            .build();
 
         let expected = [(0, "person19"), (10, "person1")];
         test_query(query, db_conn, 11, comparison_fn, &expected).await;
@@ -329,17 +344,21 @@ mod tests {
                     let new_name = "Thomas Anderson";
                     let new_email = "thomas.anderson@neo.com";
 
-                    let updated_person = PersonUpdate::builder()
-                        .id(*id)
+                    let updated_person = PersonUpdateCore::builder()
+                        .id(id)
                         .name(new_name)
                         .email(new_email)
-                        .build()
-                        .write(tx)
-                        .await
-                        .unwrap();
+                        .build();
+                    let updated_person = PersonUpdate {
+                        core: updated_person,
+                        ..Default::default()
+                    }
+                    .write(tx)
+                    .await
+                    .unwrap();
 
                     assert_eq!(new_name, updated_person.name());
-                    assert_eq!(new_email, updated_person.email().as_ref().unwrap());
+                    assert_eq!(new_email, updated_person.email().unwrap());
 
                     Ok(())
                 }
@@ -358,7 +377,7 @@ mod tests {
                     tx.set_transaction_user(LOGIN_USER).await.unwrap();
 
                     let institution_id =
-                        *Institution::fetch_by_query(&InstitutionQuery::default(), tx)
+                        Institution::fetch_by_query(&InstitutionQuery::default(), tx)
                             .await
                             .unwrap()
                             .get(0)
@@ -368,19 +387,20 @@ mod tests {
                     // First, write a new user to the db as a login from the frontend
                     let ms_user_id = Uuid::now_v7();
 
-                    let mut new_person = NewPerson::builder()
-                        .name("Peter Parker")
-                        .email("peter.parker@example.com")
+                    let mut new_ms_login = NewMsLogin::new()
+                        .name("Peter Parker".into())
+                        .email("peter.parker@example.com".into())
                         .ms_user_id(ms_user_id)
                         .institution_id(institution_id)
-                        .build();
+                        .build()
+                        .unwrap();
 
-                    let created_user = new_person.clone().write_ms_login(tx).await.unwrap();
+                    let created_user = new_ms_login.clone().write(tx).await.unwrap();
 
                     // The user logs out and changes their email address, then logs back in
                     let new_email = "spider.man@example.com".to_string();
-                    new_person.email = new_email.clone();
-                    let recreated_user = new_person.write_ms_login(tx).await.unwrap();
+                    new_ms_login.0.email = new_email.clone();
+                    let recreated_user = new_ms_login.write(tx).await.unwrap();
 
                     assert_eq!(created_user.id(), recreated_user.id());
                     assert_eq!(new_email, *recreated_user.email().as_ref().unwrap());
@@ -388,27 +408,30 @@ mod tests {
 
                     tx.set_transaction_user("postgres").await.unwrap();
 
-                    let id = *created_user.id();
+                    let id = created_user.id();
 
-                    let person_with_granted_roles = PersonUpdate::builder()
-                        .id(id)
-                        .grant_role(UserRole::AppAdmin)
-                        .build()
-                        .write(tx)
-                        .await
-                        .unwrap();
+                    let core = PersonUpdateCore::builder().id(created_user.id()).build();
+                    let person_with_granted_roles = PersonUpdate {
+                        core: core.clone(),
+                        grant_roles: vec![UserRole::AppAdmin],
+                        ..Default::default()
+                    }
+                    .write(tx)
+                    .await
+                    .unwrap();
 
-                    assert_eq!(person_with_granted_roles.roles(), &[UserRole::AppAdmin]);
+                    assert_eq!(person_with_granted_roles.roles, &[UserRole::AppAdmin]);
 
-                    let person_with_revoked_roles = PersonUpdate::builder()
-                        .id(id)
-                        .revoke_role(UserRole::AppAdmin)
-                        .build()
-                        .write(tx)
-                        .await
-                        .unwrap();
+                    let person_with_revoked_roles = PersonUpdate {
+                        core,
+                        revoke_roles: vec![UserRole::AppAdmin],
+                        ..Default::default()
+                    }
+                    .write(tx)
+                    .await
+                    .unwrap();
 
-                    assert_eq!(person_with_revoked_roles.roles(), &[]);
+                    assert_eq!(person_with_revoked_roles.roles, &[]);
 
                     Ok(())
                 }

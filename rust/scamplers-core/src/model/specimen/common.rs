@@ -2,7 +2,6 @@ use crate::model::institution::InstitutionHandle;
 use scamplers_macros::{db_enum, db_insertion, db_json, db_selection};
 #[cfg(feature = "backend")]
 use scamplers_schema::{committee_approval, specimen, specimen_measurement};
-use serde::Serialize;
 use time::OffsetDateTime;
 use uuid::Uuid;
 use valid_string::ValidString;

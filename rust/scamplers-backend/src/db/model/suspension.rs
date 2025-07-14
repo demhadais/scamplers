@@ -51,11 +51,11 @@ impl FetchById for Suspension {
             .load(db_conn)
             .await?;
 
-        Ok(Suspension::builder()
-            .core(core)
-            .measurements(measurements)
-            .preparers(preparers)
-            .build())
+        Ok(Suspension {
+            core,
+            measurements,
+            preparers,
+        })
     }
 }
 
@@ -66,12 +66,11 @@ impl WriteToDbInternal for &[NewSuspensionMeasurement] {
         self,
         db_conn: &mut diesel_async::AsyncPgConnection,
     ) -> db::error::Result<Self::Returns> {
-        let Some(first_suspension) = self.get(0).map(NewSuspensionMeasurement::suspension_id)
-        else {
+        let Some(first_suspension) = self.get(0).map(|s| s.suspension_id) else {
             return Ok(());
         };
 
-        if self.iter().any(|m| m.suspension_id() != first_suspension) {
+        if self.iter().any(|m| m.suspension_id != first_suspension) {
             return Err(db::error::Error::Other { message: "bug: inserting multiple suspension measurements should only occur when inserting a suspension".to_string() });
         }
 

@@ -9,7 +9,7 @@ use crate::model::chromium_run::{
 
 #[db_insertion]
 #[cfg_attr(feature = "backend", diesel(table_name = gems))]
-pub(super) struct NewOcmGems {
+pub struct NewOcmGems {
     #[serde(flatten)]
     #[garde(dive)]
     #[cfg_attr(feature = "backend", diesel(embed))]
@@ -20,7 +20,7 @@ pub(super) struct NewOcmGems {
 }
 
 #[db_enum]
-pub(super) enum OcmChromiumChip {
+pub enum OcmChromiumChip {
     #[serde(rename = "GEM-X OCM 3'")]
     #[strum(serialize = "GEM-X OCM 3'")]
     GemxOcm3p,
@@ -28,7 +28,7 @@ pub(super) enum OcmChromiumChip {
 
 #[db_insertion]
 #[cfg_attr(feature = "backend", diesel(table_name = chromium_run))]
-pub(super) struct NewOcmChromiumRun {
+pub struct NewOcmChromiumRun {
     #[serde(flatten)]
     #[garde(dive)]
     #[cfg_attr(feature = "backend", diesel(embed))]

@@ -40,8 +40,8 @@ pub struct SortBy<C>
 where
     C: valuable::Valuable + Default,
 {
-    by: C,
-    descending: bool,
+    pub by: C,
+    pub descending: bool,
 }
 
 #[base_api_model]
@@ -58,6 +58,33 @@ where
 {
     fn default() -> Self {
         Self(vec![SortBy::<C>::default()])
+    }
+}
+
+impl<C> From<SortBy<C>> for SortByGroup<C>
+where
+    C: valuable::Valuable + Default,
+{
+    fn from(value: SortBy<C>) -> Self {
+        Self(vec![value])
+    }
+}
+
+impl<C> From<(C, bool)> for SortBy<C>
+where
+    C: valuable::Valuable + Default,
+{
+    fn from((by, descending): (C, bool)) -> Self {
+        Self { by, descending }
+    }
+}
+
+impl<C> From<(C, bool)> for SortByGroup<C>
+where
+    C: valuable::Valuable + Default,
+{
+    fn from(value: (C, bool)) -> Self {
+        SortByGroup(vec![value.into()])
     }
 }
 
