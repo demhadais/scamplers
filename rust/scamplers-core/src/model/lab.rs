@@ -1,12 +1,13 @@
 use crate::model::{Pagination, SortByGroup, person::PersonSummary};
 use scamplers_macros::{
     base_api_model, base_api_model_with_default, db_insertion, db_query, db_selection, db_update,
-    getters_impl,
 };
 #[cfg(feature = "backend")]
 use scamplers_schema::lab;
 use uuid::Uuid;
 use valid_string::ValidString;
+#[cfg(target_arch = "wasm32")]
+use wasm_bindgen::prelude::*;
 
 #[db_insertion]
 #[cfg_attr(feature = "backend", diesel(table_name = lab))]
@@ -38,9 +39,10 @@ pub struct LabSummary {
     pub delivery_dir: String,
 }
 
-#[getters_impl]
+#[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
 impl LabSummary {
     #[must_use]
+    #[cfg_attr(target_arch = "wasm32", wasm_bindgen(getter))]
     pub fn id(&self) -> Uuid {
         self.handle.id
     }
@@ -72,7 +74,6 @@ pub struct Lab {
     pub members: Vec<PersonSummary>,
 }
 
-#[getters_impl]
 impl Lab {
     #[must_use]
     pub fn id(&self) -> Uuid {

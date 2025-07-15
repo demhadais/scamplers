@@ -1,6 +1,8 @@
 use proc_macro::TokenStream;
 use quote::quote;
-use syn::{ImplItem, Item, ItemEnum, ItemImpl, ItemStruct, parse, parse_macro_input, parse2};
+use syn::{
+    ImplItem, ImplItemFn, Item, ItemEnum, ItemImpl, ItemStruct, parse, parse_macro_input, parse2,
+};
 
 fn base_api_model_derives(input: TokenStream) -> proc_macro2::TokenStream {
     let item: Item = parse(input).unwrap();
@@ -113,7 +115,7 @@ pub fn db_selection(_attr: TokenStream, input: TokenStream) -> TokenStream {
     let struct_item = parse_macro_input!(input as ItemStruct);
 
     let output = quote! {
-        #[cfg_attr(feature = "python", ::pyo3::pyclass)]
+        #[cfg_attr(feature = "python", ::pyo3::pyclass(get_all))]
         #[cfg_attr(target_arch = "wasm32", ::wasm_bindgen::prelude::wasm_bindgen(getter_with_clone))]
         #[cfg_attr(feature = "backend", derive(::diesel::Selectable, ::diesel::Queryable), diesel(check_for_backend(::diesel::pg::Pg)))]
         #struct_item
@@ -122,29 +124,47 @@ pub fn db_selection(_attr: TokenStream, input: TokenStream) -> TokenStream {
     output.into()
 }
 
+fn add_attribute_to_method(
+    method: ImplItemFn,
+    attribute: proc_macro2::TokenStream,
+) -> proc_macro2::TokenStream {
+    quote! {
+        #attribute
+        #method
+    }
+}
+
 #[proc_macro_attribute]
 pub fn getters_impl(_attr: TokenStream, input: TokenStream) -> TokenStream {
     let mut impl_block = parse_macro_input!(input as ItemImpl);
 
-    let methods = impl_block.items.iter_mut().filter_map(|i| match i {
+    let mut py_impl_block = impl_block.clone();
+
+    let og_methods = impl_block.items.iter_mut().filter_map(|i| match i {
         ImplItem::Fn(f) => Some(f),
         _ => None,
     });
 
-    for method in methods {
-        let new_method = quote! {
-            #[cfg_attr(target_arch = "wasm32", wasm_bindgen(getter))]
-            #[cfg_attr(feature = "python", getter)]
-            #method
-        };
+    for (i, og_method) in og_methods.enumerate() {
+        let wasmified_method = add_attribute_to_method(
+            og_method.clone(),
+            quote! { #[cfg_attr(target_arch = "wasm32", wasm_bindgen(getter))] },
+        );
 
-        *method = parse2(new_method).unwrap();
+        let pythonized_method = add_attribute_to_method(og_method.clone(), quote! { #[getter] });
+        py_impl_block.items[i] = parse2(pythonized_method).unwrap();
+
+        *og_method = parse2(wasmified_method).unwrap();
     }
 
     let output = quote! {
+        #[cfg(not(feature = "python"))]
         #[cfg_attr(target_arch = "wasm32", ::wasm_bindgen::prelude::wasm_bindgen)]
-        #[cfg_attr(feature = "python", ::pyo3::pymethods)]
         #impl_block
+
+        #[cfg(feature = "python")]
+        #[::pyo3::pymethods]
+        #py_impl_block
     };
 
     output.into()

@@ -12,7 +12,7 @@ use {
 
 #[cfg(feature = "python")]
 use {
-    crate::model::person::NewPerson,
+    crate::model::person::{NewPerson, Person},
     pyo3::{exceptions::PyException, prelude::*},
 };
 
@@ -24,11 +24,18 @@ pub struct Client {
     api_key: Option<String>,
 }
 
+#[cfg(feature = "python")]
+#[pymethods]
+impl Client {
+    #[new]
+    fn py_new(backend_base_url: String, token: &str, api_key: Option<String>) -> Self {
+        Self::new(backend_base_url, token, api_key)
+    }
+}
+
 #[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
-#[cfg_attr(feature = "python", pymethods)]
 impl Client {
     #[cfg_attr(target_arch = "wasm32", wasm_bindgen(constructor))]
-    #[cfg_attr(feature = "python", new)]
     pub fn new(backend_base_url: String, token: &str, api_key: Option<String>) -> Self {
         use reqwest::{
             ClientBuilder,

@@ -71,7 +71,6 @@ export class Lab {
   free(): void;
   core: LabCore;
   members: PersonSummary[];
-  readonly id: string;
 }
 export class LabCore {
   private constructor();
@@ -96,11 +95,11 @@ export class LabQuery {
 export class LabSummary {
   private constructor();
   free(): void;
+  link(): string;
   handle: LabHandle;
   name: string;
   delivery_dir: string;
   readonly id: string;
-  readonly link: string;
 }
 export class MultiplexingTag {
   private constructor();

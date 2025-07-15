@@ -3,7 +3,7 @@ use crate::model::{Pagination, SortByGroup, institution::Institution};
 use pyo3::prelude::*;
 use scamplers_macros::{
     base_api_model, base_api_model_with_default, db_enum, db_insertion, db_query, db_selection,
-    db_update, getters_impl,
+    db_update,
 };
 #[cfg(feature = "backend")]
 use scamplers_schema::person;
@@ -39,7 +39,7 @@ pub struct NewPerson {
 }
 
 #[base_api_model]
-#[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
+#[cfg_attr(target_arch = "wasm32", wasm_bindgen::prelude::wasm_bindgen)]
 #[serde(transparent)]
 pub struct NewMsLogin(#[cfg_attr(target_arch = "wasm32", wasm_bindgen(skip))] pub NewPerson);
 
@@ -153,9 +153,7 @@ impl NewPersonInstitutionId {
 #[db_selection]
 #[cfg_attr(feature = "backend", diesel(table_name = person))]
 pub struct PersonHandle {
-    #[cfg_attr(feature = "python", pyo3(get))]
     pub id: Uuid,
-    #[cfg_attr(feature = "python", pyo3(get))]
     pub link: String,
 }
 
@@ -165,22 +163,21 @@ pub struct PersonSummary {
     #[serde(flatten)]
     #[cfg_attr(feature = "backend", diesel(embed))]
     pub handle: PersonHandle,
-    #[cfg_attr(feature = "python", pyo3(get))]
     pub name: String,
-    #[cfg_attr(feature = "python", pyo3(get))]
     pub email: Option<String>,
-    #[cfg_attr(feature = "python", pyo3(get))]
     pub orcid: Option<String>,
 }
 
-#[getters_impl]
+#[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
 impl PersonSummary {
     #[must_use]
+    #[cfg_attr(target_arch = "wasm32", wasm_bindgen(getter))]
     pub fn id(&self) -> Uuid {
         self.handle.id
     }
 
     #[must_use]
+    #[cfg_attr(target_arch = "wasm32", wasm_bindgen(getter))]
     pub fn link(&self) -> String {
         self.handle.link.to_string()
     }
@@ -193,7 +190,6 @@ pub struct PersonCore {
     #[cfg_attr(feature = "backend", diesel(embed))]
     pub summary: PersonSummary,
     #[cfg_attr(feature = "backend", diesel(embed))]
-    #[cfg_attr(feature = "python", pyo3(get))]
     pub institution: Institution,
 }
 
@@ -206,34 +202,40 @@ pub struct Person {
     pub roles: Vec<UserRole>,
 }
 
-#[getters_impl]
+#[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
 impl Person {
     #[must_use]
+    #[cfg_attr(target_arch = "wasm32", wasm_bindgen(getter))]
     pub fn id(&self) -> Uuid {
         self.core.summary.id()
     }
 
     #[must_use]
+    #[cfg_attr(target_arch = "wasm32", wasm_bindgen(getter))]
     pub fn link(&self) -> String {
         self.core.summary.link()
     }
 
     #[must_use]
+    #[cfg_attr(target_arch = "wasm32", wasm_bindgen(getter))]
     pub fn name(&self) -> String {
         self.core.summary.name.clone()
     }
 
     #[must_use]
+    #[cfg_attr(target_arch = "wasm32", wasm_bindgen(getter))]
     pub fn email(&self) -> Option<String> {
         self.core.summary.email.clone()
     }
 
     #[must_use]
+    #[cfg_attr(target_arch = "wasm32", wasm_bindgen(getter))]
     pub fn orcid(&self) -> Option<String> {
         self.core.summary.orcid.clone()
     }
 
     #[must_use]
+    #[cfg_attr(target_arch = "wasm32", wasm_bindgen(getter))]
     pub fn institution(&self) -> Institution {
         self.core.institution.clone()
     }
@@ -241,52 +243,53 @@ impl Person {
 
 #[cfg_attr(target_arch = "wasm32", wasm_bindgen(getter_with_clone))]
 #[base_api_model]
+#[cfg_attr(feature = "python", pyclass)]
 pub struct CreatedUser {
     #[serde(flatten)]
     pub person: Person,
     pub api_key: String,
 }
 
-#[getters_impl]
+#[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
 impl CreatedUser {
-    #[cfg_attr(target_arch = "wasm32", wasm_bindgen(getter))]
     #[must_use]
+    #[cfg_attr(target_arch = "wasm32", wasm_bindgen(getter))]
     pub fn id(&self) -> Uuid {
         self.person.id()
     }
 
-    #[cfg_attr(target_arch = "wasm32", wasm_bindgen(getter))]
     #[must_use]
+    #[cfg_attr(target_arch = "wasm32", wasm_bindgen(getter))]
     pub fn link(&self) -> String {
         self.person.link()
     }
 
-    #[cfg_attr(target_arch = "wasm32", wasm_bindgen(getter))]
     #[must_use]
+    #[cfg_attr(target_arch = "wasm32", wasm_bindgen(getter))]
     pub fn name(&self) -> String {
         self.person.name()
     }
 
-    #[cfg_attr(target_arch = "wasm32", wasm_bindgen(getter))]
     #[must_use]
+    #[cfg_attr(target_arch = "wasm32", wasm_bindgen(getter))]
     pub fn email(&self) -> Option<String> {
         self.person.email()
     }
 
-    #[cfg_attr(target_arch = "wasm32", wasm_bindgen(getter))]
     #[must_use]
+    #[cfg_attr(target_arch = "wasm32", wasm_bindgen(getter))]
     pub fn orcid(&self) -> Option<String> {
         self.person.orcid()
     }
 
-    #[cfg_attr(target_arch = "wasm32", wasm_bindgen(getter))]
     #[must_use]
+    #[cfg_attr(target_arch = "wasm32", wasm_bindgen(getter))]
     pub fn roles(&self) -> Vec<UserRole> {
         self.person.roles.clone()
     }
 
-    #[cfg_attr(target_arch = "wasm32", wasm_bindgen(getter))]
     #[must_use]
+    #[cfg_attr(target_arch = "wasm32", wasm_bindgen(getter))]
     pub fn institution(&self) -> Institution {
         self.person.institution()
     }
