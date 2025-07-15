@@ -46,13 +46,13 @@ pub(super) enum IndexSets {
 impl WriteToDb for IndexSets {
     type Returns = ();
 
-    async fn write(
+    async fn write_to_db(
         self,
         db_conn: &mut AsyncPgConnection,
     ) -> crate::db::error::Result<Self::Returns> {
         match self {
-            Self::Single(sets) => sets.write(db_conn).await?,
-            Self::Dual(sets) => sets.write(db_conn).await?,
+            Self::Single(sets) => sets.write_to_db(db_conn).await?,
+            Self::Dual(sets) => sets.write_to_db(db_conn).await?,
         }
 
         Ok(())
@@ -124,7 +124,7 @@ impl WriteToDb for Vec<NewSingleIndexSet> {
     // We should technically validate the fact that this whole set has the same kit,
     // but it doesn't really matter because this won't be exposed as an API route -
     // we are downloading these files from 10X ourselves.
-    async fn write(
+    async fn write_to_db(
         self,
         conn: &mut diesel_async::AsyncPgConnection,
     ) -> super::super::error::Result<Self::Returns> {
@@ -218,7 +218,7 @@ where
 impl WriteToDb for HashMap<IndexSetName, NewDualIndexSet> {
     type Returns = ();
 
-    async fn write(
+    async fn write_to_db(
         self,
         conn: &mut diesel_async::AsyncPgConnection,
     ) -> crate::db::error::Result<Self::Returns> {

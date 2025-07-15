@@ -1,17 +1,14 @@
 /* tslint:disable */
 /* eslint-disable */
-export enum InstitutionOrdinalColumn {
-  Name = 0,
-}
-export enum LabOrdinalColumn {
-  Name = 0,
-}
-export enum PersonOrdinalColumn {
-  Name = 0,
-  Email = 1,
-}
-export enum TissueType {
-  Tissue = 0,
+export enum Species {
+  AmbystomaMexicanum = 0,
+  CanisFamiliaris = 1,
+  DrosophilaMelanogaster = 2,
+  GasterosteusAculeatus = 3,
+  HomoSapiens = 4,
+  MusMusculus = 5,
+  RattusNorvegicus = 6,
+  SminthopsisCrassicaudata = 7,
 }
 export enum UserRole {
   AppAdmin = 0,
@@ -20,26 +17,28 @@ export enum UserRole {
 }
 export class Client {
   free(): void;
-  send_new_institution(
-    data: NewInstitution,
-    api_key?: string | null,
-  ): Promise<Institution>;
-  send_new_person(data: NewPerson, api_key?: string | null): Promise<Person>;
-  send_new_lab(data: NewLab, api_key?: string | null): Promise<Lab>;
-  constructor(backend_url: string, token: string);
-  send_new_ms_login(data: NewPerson): Promise<CreatedUser>;
+  constructor(backend_base_url: string, token: string, api_key?: string | null);
+  ms_login(data: NewMsLogin): Promise<CreatedUser>;
+}
+export class CommitteeApproval {
+  private constructor();
+  free(): void;
+  institution: InstitutionHandle;
+  committee_type: string;
+  compliance_identifier: string;
 }
 export class CreatedUser {
   private constructor();
   free(): void;
-  id(): string;
-  link(): string;
-  name(): string;
-  email(): string;
-  orcid(): string;
-  institution(): Institution;
-  roles(): any[];
-  api_key(): string;
+  person: Person;
+  api_key: string;
+  readonly id: string;
+  readonly link: string;
+  readonly name: string;
+  readonly email: string;
+  readonly orcid: string;
+  readonly roles: any[];
+  readonly institution: Institution;
 }
 export class EmptyStringError {
   private constructor();
@@ -48,44 +47,16 @@ export class EmptyStringError {
 export class Institution {
   private constructor();
   free(): void;
-  id(): string;
-  link(): string;
-  name(): string;
+  handle: InstitutionHandle;
+  name: string;
+  readonly id: string;
+  readonly link: string;
 }
 export class InstitutionHandle {
   private constructor();
   free(): void;
-  id(): string;
-  link(): string;
-}
-export class InstitutionOrdering {
-  private constructor();
-  free(): void;
-  static new(): InstitutionOrderingBuilder;
-  by: InstitutionOrdinalColumn;
-  descending: boolean;
-}
-/**
- * Builder for [`InstitutionOrdering`](struct.InstitutionOrdering.html).
- */
-export class InstitutionOrderingBuilder {
-  private constructor();
-  free(): void;
-  by(value: InstitutionOrdinalColumn): InstitutionOrderingBuilder;
-  descending(value: boolean): InstitutionOrderingBuilder;
-  /**
-   * Builds a new `InstitutionOrdering`.
-   *
-   * # Errors
-   *
-   * If a required field has not been initialized.
-   */
-  build(): InstitutionOrdering;
-}
-export class InstitutionOrderingError {
-  private constructor();
-  free(): void;
-  error(): string;
+  id: string;
+  link: string;
 }
 export class InstitutionQuery {
   free(): void;
@@ -93,62 +64,26 @@ export class InstitutionQuery {
   ids: string[];
   get name(): string;
   set name(value: string | null | undefined);
-  order_by: InstitutionOrdering[];
   pagination: Pagination;
 }
 export class Lab {
   private constructor();
   free(): void;
-  id(): string;
-  link(): string;
-  name(): string;
-  delivery_dir(): string;
-  pi(): PersonSummary;
-  members(): PersonSummary[];
+  core: LabCore;
+  members: PersonSummary[];
+  readonly id: string;
 }
 export class LabCore {
   private constructor();
   free(): void;
-  id(): string;
-  link(): string;
-  name(): string;
-  delivery_dir(): string;
-  pi(): PersonSummary;
+  summary: LabSummary;
+  pi: PersonSummary;
 }
 export class LabHandle {
   private constructor();
   free(): void;
-  id(): string;
-  link(): string;
-}
-export class LabOrdering {
-  private constructor();
-  free(): void;
-  static new(): LabOrderingBuilder;
-  by: LabOrdinalColumn;
-  descending: boolean;
-}
-/**
- * Builder for [`LabOrdering`](struct.LabOrdering.html).
- */
-export class LabOrderingBuilder {
-  private constructor();
-  free(): void;
-  by(value: LabOrdinalColumn): LabOrderingBuilder;
-  descending(value: boolean): LabOrderingBuilder;
-  /**
-   * Builds a new `LabOrdering`.
-   *
-   * # Errors
-   *
-   * If a required field has not been initialized.
-   */
-  build(): LabOrdering;
-}
-export class LabOrderingError {
-  private constructor();
-  free(): void;
-  error(): string;
+  id: string;
+  link: string;
 }
 export class LabQuery {
   free(): void;
@@ -156,244 +91,83 @@ export class LabQuery {
   ids: string[];
   get name(): string;
   set name(value: string | null | undefined);
-  order_by: LabOrdering[];
   pagination: Pagination;
 }
 export class LabSummary {
   private constructor();
   free(): void;
-  id(): string;
-  link(): string;
-  name(): string;
-  delivery_dir(): string;
+  handle: LabHandle;
+  name: string;
+  delivery_dir: string;
+  readonly id: string;
+  readonly link: string;
 }
-export class LabUpdate {
+export class MultiplexingTag {
   private constructor();
   free(): void;
-  id(): string;
-  name(): ValidString | undefined;
-  pi_id(): string;
-  delivery_dir(): ValidString | undefined;
-  add_members(): string[];
-  remove_members(): string[];
-  static new(): LabUpdateBuilder;
+  id: string;
+  tag_id: string;
+  type_: string;
 }
-/**
- * Builder for [`LabUpdate`](struct.LabUpdate.html).
- */
-export class LabUpdateBuilder {
+export class NewMsLogin {
   private constructor();
   free(): void;
-  core(value: LabUpdateCore): LabUpdateBuilder;
-  add_members(value: string[]): LabUpdateBuilder;
-  remove_members(value: string[]): LabUpdateBuilder;
-  /**
-   * Builds a new `LabUpdate`.
-   *
-   * # Errors
-   *
-   * If a required field has not been initialized.
-   */
-  build(): LabUpdate;
+  static new(): NewPersonEmpty;
 }
-export class LabUpdateCore {
+export class NewPersonEmail {
   private constructor();
   free(): void;
-  id(): string;
-  name(): ValidString | undefined;
-  pi_id(): string;
-  delivery_dir(): ValidString | undefined;
-  static new(): LabUpdateCoreBuilder;
+  ms_user_id(ms_user_id: string): NewPersonMsUserId;
 }
-/**
- * Builder for [`LabUpdateCore`](struct.LabUpdateCore.html).
- */
-export class LabUpdateCoreBuilder {
+export class NewPersonEmpty {
   private constructor();
   free(): void;
-  id(value: string): LabUpdateCoreBuilder;
-  name(value?: ValidString | null): LabUpdateCoreBuilder;
-  pi_id(value?: string | null): LabUpdateCoreBuilder;
-  delivery_dir(value?: ValidString | null): LabUpdateCoreBuilder;
-  /**
-   * Builds a new `LabUpdateCore`.
-   *
-   * # Errors
-   *
-   * If a required field has not been initialized.
-   */
-  build(): LabUpdateCore;
+  name(name: string): NewPersonName;
 }
-export class LabUpdateCoreError {
+export class NewPersonInstitutionId {
   private constructor();
   free(): void;
-  error(): string;
+  build(): NewMsLogin;
 }
-export class LabUpdateError {
+export class NewPersonMsUserId {
   private constructor();
   free(): void;
-  error(): string;
+  institution_id(institution_id: string): NewPersonInstitutionId;
 }
-export class NewInstitution {
+export class NewPersonName {
   private constructor();
   free(): void;
-  static new(): NewInstitutionBuilder;
-}
-/**
- * Builder for [`NewInstitution`](struct.NewInstitution.html).
- */
-export class NewInstitutionBuilder {
-  private constructor();
-  free(): void;
-  id(value: string): NewInstitutionBuilder;
-  name(value: ValidString): NewInstitutionBuilder;
-  /**
-   * Builds a new `NewInstitution`.
-   *
-   * # Errors
-   *
-   * If a required field has not been initialized.
-   */
-  build(): NewInstitution;
-}
-export class NewInstitutionError {
-  private constructor();
-  free(): void;
-  error(): string;
-}
-export class NewLab {
-  private constructor();
-  free(): void;
-  static new(): NewLabBuilder;
-}
-/**
- * Builder for [`NewLab`](struct.NewLab.html).
- */
-export class NewLabBuilder {
-  private constructor();
-  free(): void;
-  name(value: ValidString): NewLabBuilder;
-  pi_id(value: string): NewLabBuilder;
-  delivery_dir(value: ValidString): NewLabBuilder;
-  member_ids(value: string[]): NewLabBuilder;
-  /**
-   * Builds a new `NewLab`.
-   *
-   * # Errors
-   *
-   * If a required field has not been initialized.
-   */
-  build(): NewLab;
-}
-export class NewLabError {
-  private constructor();
-  free(): void;
-  error(): string;
-}
-export class NewPerson {
-  private constructor();
-  free(): void;
-  static new(): NewPersonBuilder;
-  name: ValidString;
-  email: string;
-  get orcid(): ValidString | undefined;
-  set orcid(value: ValidString | null | undefined);
-  institution_id: string;
-  get ms_user_id(): string;
-  set ms_user_id(value: string | null | undefined);
-  roles: any[];
-}
-/**
- * Builder for [`NewPerson`](struct.NewPerson.html).
- */
-export class NewPersonBuilder {
-  private constructor();
-  free(): void;
-  name(value: ValidString): NewPersonBuilder;
-  email(value: string): NewPersonBuilder;
-  orcid(value?: ValidString | null): NewPersonBuilder;
-  institution_id(value: string): NewPersonBuilder;
-  ms_user_id(value?: string | null): NewPersonBuilder;
-  roles(value: any[]): NewPersonBuilder;
-  /**
-   * Builds a new `NewPerson`.
-   *
-   * # Errors
-   *
-   * If a required field has not been initialized.
-   */
-  build(): NewPerson;
-}
-export class NewPersonError {
-  private constructor();
-  free(): void;
-  error(): string;
-}
-export class ValidString {
-  free(): void;
-  constructor(s: string);
+  email(email: string): NewPersonEmail;
 }
 export class Pagination {
+  private constructor();
   free(): void;
-  constructor(limit: bigint, offset: bigint);
   limit: bigint;
   offset: bigint;
 }
 export class Person {
   private constructor();
   free(): void;
-  id(): string;
-  link(): string;
-  name(): string;
-  email(): string;
-  orcid(): string;
-  institution(): Institution;
-  roles(): any[];
+  core: PersonCore;
+  roles: any[];
+  readonly id: string;
+  readonly link: string;
+  readonly name: string;
+  readonly email: string;
+  readonly orcid: string;
+  readonly institution: Institution;
 }
 export class PersonCore {
   private constructor();
   free(): void;
-  id(): string;
-  link(): string;
-  name(): string;
-  email(): string;
-  orcid(): string;
-  institution(): Institution;
+  summary: PersonSummary;
+  institution: Institution;
 }
 export class PersonHandle {
   private constructor();
   free(): void;
-  id(): string;
-  link(): string;
-}
-export class PersonOrdering {
-  private constructor();
-  free(): void;
-  static new(): PersonOrderingBuilder;
-  by: PersonOrdinalColumn;
-  descending: boolean;
-}
-/**
- * Builder for [`PersonOrdering`](struct.PersonOrdering.html).
- */
-export class PersonOrderingBuilder {
-  private constructor();
-  free(): void;
-  by(value: PersonOrdinalColumn): PersonOrderingBuilder;
-  descending(value: boolean): PersonOrderingBuilder;
-  /**
-   * Builds a new `PersonOrdering`.
-   *
-   * # Errors
-   *
-   * If a required field has not been initialized.
-   */
-  build(): PersonOrdering;
-}
-export class PersonOrderingError {
-  private constructor();
-  free(): void;
-  error(): string;
+  id: string;
+  link: string;
 }
 export class PersonQuery {
   free(): void;
@@ -407,88 +181,148 @@ export class PersonQuery {
   set orcid(value: string | null | undefined);
   get ms_user_id(): string;
   set ms_user_id(value: string | null | undefined);
-  order_by: PersonOrdering[];
   pagination: Pagination;
 }
 export class PersonSummary {
   private constructor();
   free(): void;
-  id(): string;
-  link(): string;
-  name(): string;
-  email(): string;
-  orcid(): string;
+  handle: PersonHandle;
+  name: string;
+  get email(): string;
+  set email(value: string | null | undefined);
+  get orcid(): string;
+  set orcid(value: string | null | undefined);
+  readonly id: string;
+  readonly link: string;
 }
-export class PersonUpdate {
+export class SequencingRunHandle {
   private constructor();
   free(): void;
-  grant_roles(): any[];
-  revoke_roles(): any[];
-  id(): string;
-  name(): ValidString | undefined;
-  email(): string;
-  ms_user_id(): string;
-  orcid(): ValidString | undefined;
-  institution_id(): string;
-  static new(): PersonUpdateBuilder;
+  id: string;
+  link: string;
 }
-/**
- * Builder for [`PersonUpdate`](struct.PersonUpdate.html).
- */
-export class PersonUpdateBuilder {
+export class SequencingRunSummary {
   private constructor();
   free(): void;
-  grant_roles(value: any[]): PersonUpdateBuilder;
-  revoke_roles(value: any[]): PersonUpdateBuilder;
-  core(value: PersonUpdateCore): PersonUpdateBuilder;
-  /**
-   * Builds a new `PersonUpdate`.
-   *
-   * # Errors
-   *
-   * If a required field has not been initialized.
-   */
-  build(): PersonUpdate;
+  handle: SequencingRunHandle;
+  readable_id: string;
+  begun_at: Date;
+  finished_at: Date;
+  get notes(): string;
+  set notes(value: string | null | undefined);
 }
-export class PersonUpdateCore {
+export class Specimen {
   private constructor();
   free(): void;
-  id(): string;
-  name(): ValidString | undefined;
-  email(): string;
-  ms_user_id(): string;
-  orcid(): ValidString | undefined;
-  institution_id(): string;
-  static new(): PersonUpdateCoreBuilder;
+  core: SpecimenCore;
+  measurements: SpecimenMeasurement[];
 }
-/**
- * Builder for [`PersonUpdateCore`](struct.PersonUpdateCore.html).
- */
-export class PersonUpdateCoreBuilder {
+export class SpecimenCore {
   private constructor();
   free(): void;
-  id(value: string): PersonUpdateCoreBuilder;
-  name(value?: ValidString | null): PersonUpdateCoreBuilder;
-  email(value?: string | null): PersonUpdateCoreBuilder;
-  ms_user_id(value?: string | null): PersonUpdateCoreBuilder;
-  orcid(value?: ValidString | null): PersonUpdateCoreBuilder;
-  institution_id(value?: string | null): PersonUpdateCoreBuilder;
-  /**
-   * Builds a new `PersonUpdateCore`.
-   *
-   * # Errors
-   *
-   * If a required field has not been initialized.
-   */
-  build(): PersonUpdateCore;
+  summary: SpecimenSummary;
+  lab: LabSummary;
+  submitted_by: PersonSummary;
+  returned_by: PersonSummary;
 }
-export class PersonUpdateCoreError {
+export class SpecimenHandle {
   private constructor();
   free(): void;
-  error(): string;
+  id: string;
+  link: string;
 }
-export class PersonUpdateError {
+export class SpecimenMeasurement {
   private constructor();
   free(): void;
-  error(): string;
+  measured_by: PersonHandle;
+}
+export class SpecimenQuery {
+  free(): void;
+  constructor();
+  ids: string[];
+  get name(): string;
+  set name(value: string | null | undefined);
+  submitters: string[];
+  labs: string[];
+  get received_before(): Date | undefined;
+  set received_before(value: Date | null | undefined);
+  get received_after(): Date | undefined;
+  set received_after(value: Date | null | undefined);
+  species: any[];
+  get notes(): string;
+  set notes(value: string | null | undefined);
+  get storage_buffer(): string;
+  set storage_buffer(value: string | null | undefined);
+  get frozen(): boolean | undefined;
+  set frozen(value: boolean | null | undefined);
+  get cryopreserved(): boolean | undefined;
+  set cryopreserved(value: boolean | null | undefined);
+  pagination: Pagination;
+}
+export class SpecimenSummary {
+  private constructor();
+  free(): void;
+  handle: SpecimenHandle;
+  readable_id: string;
+  name: string;
+  received_at: Date;
+  get notes(): string;
+  set notes(value: string | null | undefined);
+  get returned_at(): Date | undefined;
+  set returned_at(value: Date | null | undefined);
+  type_: string;
+  get embedded_in(): string;
+  set embedded_in(value: string | null | undefined);
+  get fixative(): string;
+  set fixative(value: string | null | undefined);
+  frozen: boolean;
+  cryopreserved: boolean;
+  get storage_buffer(): string;
+  set storage_buffer(value: string | null | undefined);
+}
+export class SuspensionCore {
+  private constructor();
+  free(): void;
+  summary: SuspensionSummary;
+  parent_specimen: SpecimenSummary;
+  multiplexing_tag: MultiplexingTag;
+}
+export class SuspensionHandle {
+  private constructor();
+  free(): void;
+  id: string;
+  link: string;
+}
+export class SuspensionMeasurement {
+  private constructor();
+  free(): void;
+  measured_by: PersonHandle;
+}
+export class SuspensionPoolHandle {
+  private constructor();
+  free(): void;
+  id: string;
+  link: string;
+}
+export class SuspensionPoolSummary {
+  private constructor();
+  free(): void;
+  handle: SuspensionPoolHandle;
+  readable_id: string;
+  pooled_at: Date;
+}
+export class SuspensionSummary {
+  private constructor();
+  free(): void;
+  handle: SuspensionHandle;
+  readable_id: string;
+  biological_material: string;
+  get created_at(): Date | undefined;
+  set created_at(value: Date | null | undefined);
+  get lysis_duration_minutes(): number | undefined;
+  set lysis_duration_minutes(value: number | null | undefined);
+  target_cell_recovery: number;
+  target_reads_per_cell: number;
+  get notes(): string;
+  set notes(value: string | null | undefined);
 }

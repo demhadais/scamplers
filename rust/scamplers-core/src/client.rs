@@ -1,12 +1,5 @@
 use {
-    crate::{
-        api_path::ToApiPath,
-        model::{
-            institution::{Institution, NewInstitution},
-            lab::{Lab, NewLab},
-            person::Person,
-        },
-    },
+    crate::api_path::ToApiPath,
     reqwest::Method,
     serde::{Serialize, de::DeserializeOwned},
 };

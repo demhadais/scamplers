@@ -1,456 +1,295 @@
 /* tslint:disable */
 /* eslint-disable */
 export const memory: WebAssembly.Memory;
-export const __wbg_ValidString_free: (a: number, b: number) => void;
-export const __wbg_emptystringerror_free: (a: number, b: number) => void;
-export const ValidString_new: (
-  a: number,
-  b: number,
-) => [number, number, number];
-export const labhandle_link: (a: number) => [number, number];
-export const labsummary_link: (a: number) => [number, number];
-export const labsummary_name: (a: number) => [number, number];
-export const labsummary_delivery_dir: (a: number) => [number, number];
-export const labcore_link: (a: number) => [number, number];
-export const labcore_name: (a: number) => [number, number];
-export const labcore_delivery_dir: (a: number) => [number, number];
-export const labcore_pi: (a: number) => number;
-export const lab_id: (a: number) => [number, number];
-export const lab_link: (a: number) => [number, number];
-export const lab_name: (a: number) => [number, number];
-export const lab_delivery_dir: (a: number) => [number, number];
-export const lab_pi: (a: number) => number;
-export const lab_members: (a: number) => [number, number];
-export const labupdatecore_id: (a: number) => [number, number];
-export const labupdatecore_name: (a: number) => number;
-export const labupdatecore_pi_id: (a: number) => [number, number];
-export const labupdatecore_delivery_dir: (a: number) => number;
-export const labupdate_id: (a: number) => [number, number];
-export const labupdate_name: (a: number) => number;
-export const labupdate_pi_id: (a: number) => [number, number];
-export const labupdate_delivery_dir: (a: number) => number;
-export const labupdate_add_members: (a: number) => [number, number];
-export const labupdate_remove_members: (a: number) => [number, number];
-export const __wbg_labupdatebuilder_free: (a: number, b: number) => void;
-export const labupdatebuilder_core: (a: number, b: number) => number;
-export const labupdatebuilder_add_members: (
-  a: number,
-  b: number,
-  c: number,
-) => number;
-export const labupdatebuilder_remove_members: (
-  a: number,
-  b: number,
-  c: number,
-) => number;
-export const labupdatebuilder_build: (a: number) => [number, number, number];
-export const __wbg_labupdate_free: (a: number, b: number) => void;
-export const __wbg_labupdateerror_free: (a: number, b: number) => void;
-export const labupdateerror_error: (a: number) => [number, number];
-export const labupdate_new: () => number;
-export const __wbg_labupdatecorebuilder_free: (a: number, b: number) => void;
-export const labupdatecorebuilder_id: (
-  a: number,
-  b: number,
-  c: number,
-) => number;
-export const labupdatecorebuilder_name: (a: number, b: number) => number;
-export const labupdatecorebuilder_pi_id: (
-  a: number,
-  b: number,
-  c: number,
-) => number;
-export const labupdatecorebuilder_delivery_dir: (
-  a: number,
-  b: number,
-) => number;
-export const labupdatecorebuilder_build: (
-  a: number,
-) => [number, number, number];
-export const __wbg_labupdatecore_free: (a: number, b: number) => void;
-export const __wbg_labupdatecoreerror_free: (a: number, b: number) => void;
-export const labupdatecoreerror_error: (a: number) => [number, number];
-export const labupdatecore_new: () => number;
-export const __wbg_lab_free: (a: number, b: number) => void;
-export const __wbg_labcore_free: (a: number, b: number) => void;
-export const __wbg_labsummary_free: (a: number, b: number) => void;
-export const __wbg_labhandle_free: (a: number, b: number) => void;
-export const labsummary_id: (a: number) => [number, number];
-export const labhandle_id: (a: number) => [number, number];
-export const labcore_id: (a: number) => [number, number];
-export const institutionhandle_link: (a: number) => [number, number];
+export const __wbg_institutionhandle_free: (a: number, b: number) => void;
+export const __wbg_get_institutionhandle_id: (a: number) => [number, number];
+export const __wbg_set_institutionhandle_id: (a: number, b: number, c: number) => void;
+export const __wbg_get_institutionhandle_link: (a: number) => [number, number];
+export const __wbg_set_institutionhandle_link: (a: number, b: number, c: number) => void;
+export const __wbg_institution_free: (a: number, b: number) => void;
+export const __wbg_get_institution_handle: (a: number) => number;
+export const __wbg_set_institution_handle: (a: number, b: number) => void;
+export const __wbg_get_institution_name: (a: number) => [number, number];
+export const __wbg_set_institution_name: (a: number, b: number, c: number) => void;
 export const institution_id: (a: number) => [number, number];
 export const institution_link: (a: number) => [number, number];
-export const institution_name: (a: number) => [number, number];
-export const __wbg_newlabbuilder_free: (a: number, b: number) => void;
-export const newlabbuilder_name: (a: number, b: number) => number;
-export const newlabbuilder_pi_id: (a: number, b: number, c: number) => number;
-export const newlabbuilder_delivery_dir: (a: number, b: number) => number;
-export const newlabbuilder_member_ids: (
-  a: number,
-  b: number,
-  c: number,
-) => number;
-export const newlabbuilder_build: (a: number) => [number, number, number];
-export const __wbg_newlab_free: (a: number, b: number) => void;
-export const __wbg_newlaberror_free: (a: number, b: number) => void;
-export const newlaberror_error: (a: number) => [number, number];
-export const newlab_new: () => number;
-export const __wbg_laborderingbuilder_free: (a: number, b: number) => void;
-export const laborderingbuilder_by: (a: number, b: number) => number;
-export const laborderingbuilder_descending: (a: number, b: number) => number;
-export const laborderingbuilder_build: (a: number) => [number, number, number];
-export const __wbg_labordering_free: (a: number, b: number) => void;
-export const __wbg_get_labordering_by: (a: number) => number;
-export const __wbg_set_labordering_by: (a: number, b: number) => void;
-export const __wbg_get_labordering_descending: (a: number) => number;
-export const __wbg_set_labordering_descending: (a: number, b: number) => void;
-export const __wbg_laborderingerror_free: (a: number, b: number) => void;
-export const laborderingerror_error: (a: number) => [number, number];
-export const labordering_new: () => number;
-export const __wbg_labquery_free: (a: number, b: number) => void;
-export const __wbg_get_labquery_ids: (a: number) => [number, number];
-export const __wbg_set_labquery_ids: (a: number, b: number, c: number) => void;
-export const __wbg_get_labquery_name: (a: number) => [number, number];
-export const __wbg_set_labquery_name: (a: number, b: number, c: number) => void;
-export const __wbg_get_labquery_order_by: (a: number) => [number, number];
-export const __wbg_set_labquery_order_by: (
-  a: number,
-  b: number,
-  c: number,
-) => void;
-export const __wbg_get_labquery_pagination: (a: number) => number;
-export const __wbg_set_labquery_pagination: (a: number, b: number) => void;
-export const labquery_new: () => number;
-export const __wbg_institution_free: (a: number, b: number) => void;
-export const __wbg_institutionhandle_free: (a: number, b: number) => void;
-export const institutionhandle_id: (a: number) => [number, number];
-export const __wbg_client_free: (a: number, b: number) => void;
-export const client_send_new_institution: (
-  a: number,
-  b: number,
-  c: number,
-  d: number,
-) => any;
-export const client_send_new_person: (
-  a: number,
-  b: number,
-  c: number,
-  d: number,
-) => any;
-export const client_send_new_lab: (
-  a: number,
-  b: number,
-  c: number,
-  d: number,
-) => any;
-export const client_new: (a: number, b: number, c: number, d: number) => number;
-export const client_send_new_ms_login: (a: number, b: number) => any;
-export const __wbg_newinstitutionbuilder_free: (a: number, b: number) => void;
-export const newinstitutionbuilder_id: (
-  a: number,
-  b: number,
-  c: number,
-) => number;
-export const newinstitutionbuilder_name: (a: number, b: number) => number;
-export const newinstitutionbuilder_build: (
-  a: number,
-) => [number, number, number];
-export const __wbg_newinstitution_free: (a: number, b: number) => void;
-export const __wbg_newinstitutionerror_free: (a: number, b: number) => void;
-export const newinstitutionerror_error: (a: number) => [number, number];
-export const newinstitution_new: () => number;
-export const __wbg_institutionorderingbuilder_free: (
-  a: number,
-  b: number,
-) => void;
-export const institutionorderingbuilder_by: (a: number, b: number) => number;
-export const institutionorderingbuilder_descending: (
-  a: number,
-  b: number,
-) => number;
-export const institutionorderingbuilder_build: (
-  a: number,
-) => [number, number, number];
-export const __wbg_institutionordering_free: (a: number, b: number) => void;
-export const __wbg_get_institutionordering_by: (a: number) => number;
-export const __wbg_set_institutionordering_by: (a: number, b: number) => void;
-export const __wbg_get_institutionordering_descending: (a: number) => number;
-export const __wbg_set_institutionordering_descending: (
-  a: number,
-  b: number,
-) => void;
-export const __wbg_institutionorderingerror_free: (
-  a: number,
-  b: number,
-) => void;
-export const institutionorderingerror_error: (a: number) => [number, number];
-export const institutionordering_new: () => number;
 export const __wbg_institutionquery_free: (a: number, b: number) => void;
 export const __wbg_get_institutionquery_ids: (a: number) => [number, number];
-export const __wbg_set_institutionquery_ids: (
-  a: number,
-  b: number,
-  c: number,
-) => void;
+export const __wbg_set_institutionquery_ids: (a: number, b: number, c: number) => void;
 export const __wbg_get_institutionquery_name: (a: number) => [number, number];
-export const __wbg_set_institutionquery_name: (
-  a: number,
-  b: number,
-  c: number,
-) => void;
-export const __wbg_get_institutionquery_order_by: (
-  a: number,
-) => [number, number];
-export const __wbg_set_institutionquery_order_by: (
-  a: number,
-  b: number,
-  c: number,
-) => void;
+export const __wbg_set_institutionquery_name: (a: number, b: number, c: number) => void;
 export const __wbg_get_institutionquery_pagination: (a: number) => number;
-export const __wbg_set_institutionquery_pagination: (
-  a: number,
-  b: number,
-) => void;
+export const __wbg_set_institutionquery_pagination: (a: number, b: number) => void;
 export const institutionquery_new: () => number;
 export const __wbg_pagination_free: (a: number, b: number) => void;
 export const __wbg_get_pagination_limit: (a: number) => bigint;
 export const __wbg_set_pagination_limit: (a: number, b: bigint) => void;
 export const __wbg_get_pagination_offset: (a: number) => bigint;
 export const __wbg_set_pagination_offset: (a: number, b: bigint) => void;
-export const pagination_new: (a: bigint, b: bigint) => number;
-export const __wbg_newpersonbuilder_free: (a: number, b: number) => void;
-export const newpersonbuilder_name: (a: number, b: number) => number;
-export const newpersonbuilder_email: (
-  a: number,
-  b: number,
-  c: number,
-) => number;
-export const newpersonbuilder_orcid: (a: number, b: number) => number;
-export const newpersonbuilder_institution_id: (
-  a: number,
-  b: number,
-  c: number,
-) => number;
-export const newpersonbuilder_ms_user_id: (
-  a: number,
-  b: number,
-  c: number,
-) => number;
-export const newpersonbuilder_roles: (
-  a: number,
-  b: number,
-  c: number,
-) => number;
-export const newpersonbuilder_build: (a: number) => [number, number, number];
-export const __wbg_newperson_free: (a: number, b: number) => void;
-export const __wbg_get_newperson_name: (a: number) => number;
-export const __wbg_set_newperson_name: (a: number, b: number) => void;
-export const __wbg_get_newperson_email: (a: number) => [number, number];
-export const __wbg_set_newperson_email: (
-  a: number,
-  b: number,
-  c: number,
-) => void;
-export const __wbg_get_newperson_orcid: (a: number) => number;
-export const __wbg_set_newperson_orcid: (a: number, b: number) => void;
-export const __wbg_get_newperson_institution_id: (
-  a: number,
-) => [number, number];
-export const __wbg_set_newperson_institution_id: (
-  a: number,
-  b: number,
-  c: number,
-) => void;
-export const __wbg_get_newperson_ms_user_id: (a: number) => [number, number];
-export const __wbg_set_newperson_ms_user_id: (
-  a: number,
-  b: number,
-  c: number,
-) => void;
-export const __wbg_get_newperson_roles: (a: number) => [number, number];
-export const __wbg_set_newperson_roles: (
-  a: number,
-  b: number,
-  c: number,
-) => void;
-export const __wbg_newpersonerror_free: (a: number, b: number) => void;
-export const newpersonerror_error: (a: number) => [number, number];
-export const newperson_new: () => number;
-export const __wbg_personorderingbuilder_free: (a: number, b: number) => void;
-export const personorderingbuilder_by: (a: number, b: number) => number;
-export const personorderingbuilder_descending: (a: number, b: number) => number;
-export const personorderingbuilder_build: (
-  a: number,
-) => [number, number, number];
-export const __wbg_personordering_free: (a: number, b: number) => void;
-export const __wbg_get_personordering_by: (a: number) => number;
-export const __wbg_set_personordering_by: (a: number, b: number) => void;
-export const __wbg_get_personordering_descending: (a: number) => number;
-export const __wbg_set_personordering_descending: (
-  a: number,
-  b: number,
-) => void;
-export const __wbg_personorderingerror_free: (a: number, b: number) => void;
-export const personorderingerror_error: (a: number) => [number, number];
-export const personordering_new: () => number;
-export const __wbg_personquery_free: (a: number, b: number) => void;
-export const __wbg_get_personquery_ids: (a: number) => [number, number];
-export const __wbg_set_personquery_ids: (
-  a: number,
-  b: number,
-  c: number,
-) => void;
-export const __wbg_get_personquery_name: (a: number) => [number, number];
-export const __wbg_set_personquery_name: (
-  a: number,
-  b: number,
-  c: number,
-) => void;
-export const __wbg_get_personquery_email: (a: number) => [number, number];
-export const __wbg_set_personquery_email: (
-  a: number,
-  b: number,
-  c: number,
-) => void;
-export const __wbg_get_personquery_orcid: (a: number) => [number, number];
-export const __wbg_set_personquery_orcid: (
-  a: number,
-  b: number,
-  c: number,
-) => void;
-export const __wbg_get_personquery_ms_user_id: (a: number) => [number, number];
-export const __wbg_set_personquery_ms_user_id: (
-  a: number,
-  b: number,
-  c: number,
-) => void;
-export const __wbg_get_personquery_order_by: (a: number) => [number, number];
-export const __wbg_set_personquery_order_by: (
-  a: number,
-  b: number,
-  c: number,
-) => void;
-export const __wbg_get_personquery_pagination: (a: number) => number;
-export const __wbg_set_personquery_pagination: (a: number, b: number) => void;
-export const personquery_new: () => number;
-export const personhandle_link: (a: number) => [number, number];
+export const __wbg_newmslogin_free: (a: number, b: number) => void;
+export const newmslogin_new: () => number;
+export const __wbg_newpersonempty_free: (a: number, b: number) => void;
+export const newpersonempty_name: (a: number, b: number, c: number) => number;
+export const __wbg_newpersonname_free: (a: number, b: number) => void;
+export const newpersonname_email: (a: number, b: number, c: number) => number;
+export const __wbg_newpersonemail_free: (a: number, b: number) => void;
+export const newpersonemail_ms_user_id: (a: number, b: number, c: number) => number;
+export const __wbg_newpersonmsuserid_free: (a: number, b: number) => void;
+export const newpersonmsuserid_institution_id: (a: number, b: number, c: number) => number;
+export const __wbg_newpersoninstitutionid_free: (a: number, b: number) => void;
+export const newpersoninstitutionid_build: (a: number) => [number, number, number];
+export const __wbg_personhandle_free: (a: number, b: number) => void;
+export const __wbg_get_personhandle_id: (a: number) => [number, number];
+export const __wbg_set_personhandle_id: (a: number, b: number, c: number) => void;
+export const __wbg_get_personhandle_link: (a: number) => [number, number];
+export const __wbg_set_personhandle_link: (a: number, b: number, c: number) => void;
+export const __wbg_personsummary_free: (a: number, b: number) => void;
+export const __wbg_get_personsummary_handle: (a: number) => number;
+export const __wbg_set_personsummary_handle: (a: number, b: number) => void;
+export const __wbg_get_personsummary_name: (a: number) => [number, number];
+export const __wbg_set_personsummary_name: (a: number, b: number, c: number) => void;
+export const __wbg_get_personsummary_email: (a: number) => [number, number];
+export const __wbg_set_personsummary_email: (a: number, b: number, c: number) => void;
+export const __wbg_get_personsummary_orcid: (a: number) => [number, number];
+export const __wbg_set_personsummary_orcid: (a: number, b: number, c: number) => void;
 export const personsummary_link: (a: number) => [number, number];
-export const personsummary_name: (a: number) => [number, number];
-export const personsummary_email: (a: number) => [number, number];
-export const personsummary_orcid: (a: number) => [number, number];
-export const personcore_link: (a: number) => [number, number];
-export const personcore_name: (a: number) => [number, number];
-export const personcore_email: (a: number) => [number, number];
-export const personcore_orcid: (a: number) => [number, number];
-export const personcore_institution: (a: number) => number;
+export const __wbg_personcore_free: (a: number, b: number) => void;
+export const __wbg_get_personcore_summary: (a: number) => number;
+export const __wbg_set_personcore_summary: (a: number, b: number) => void;
+export const __wbg_get_personcore_institution: (a: number) => number;
+export const __wbg_set_personcore_institution: (a: number, b: number) => void;
+export const __wbg_person_free: (a: number, b: number) => void;
+export const __wbg_get_person_core: (a: number) => number;
+export const __wbg_set_person_core: (a: number, b: number) => void;
+export const __wbg_get_person_roles: (a: number) => [number, number];
+export const __wbg_set_person_roles: (a: number, b: number, c: number) => void;
 export const person_link: (a: number) => [number, number];
 export const person_name: (a: number) => [number, number];
 export const person_email: (a: number) => [number, number];
 export const person_orcid: (a: number) => [number, number];
 export const person_institution: (a: number) => number;
-export const person_roles: (a: number) => [number, number];
+export const __wbg_createduser_free: (a: number, b: number) => void;
+export const __wbg_get_createduser_person: (a: number) => number;
+export const __wbg_set_createduser_person: (a: number, b: number) => void;
+export const __wbg_get_createduser_api_key: (a: number) => [number, number];
+export const __wbg_set_createduser_api_key: (a: number, b: number, c: number) => void;
 export const createduser_id: (a: number) => [number, number];
 export const createduser_link: (a: number) => [number, number];
 export const createduser_name: (a: number) => [number, number];
 export const createduser_email: (a: number) => [number, number];
 export const createduser_orcid: (a: number) => [number, number];
-export const createduser_institution: (a: number) => number;
 export const createduser_roles: (a: number) => [number, number];
-export const createduser_api_key: (a: number) => [number, number];
-export const personupdatecore_id: (a: number) => [number, number];
-export const personupdatecore_name: (a: number) => number;
-export const personupdatecore_email: (a: number) => [number, number];
-export const personupdatecore_ms_user_id: (a: number) => [number, number];
-export const personupdatecore_orcid: (a: number) => number;
-export const personupdatecore_institution_id: (a: number) => [number, number];
-export const personupdate_grant_roles: (a: number) => [number, number];
-export const personupdate_revoke_roles: (a: number) => [number, number];
-export const personupdate_id: (a: number) => [number, number];
-export const personupdate_name: (a: number) => number;
-export const personupdate_email: (a: number) => [number, number];
-export const personupdate_ms_user_id: (a: number) => [number, number];
-export const personupdate_orcid: (a: number) => number;
-export const personupdate_institution_id: (a: number) => [number, number];
-export const __wbg_personupdatebuilder_free: (a: number, b: number) => void;
-export const personupdatebuilder_grant_roles: (
-  a: number,
-  b: number,
-  c: number,
-) => number;
-export const personupdatebuilder_revoke_roles: (
-  a: number,
-  b: number,
-  c: number,
-) => number;
-export const personupdatebuilder_core: (a: number, b: number) => number;
-export const personupdatebuilder_build: (a: number) => [number, number, number];
-export const __wbg_personupdate_free: (a: number, b: number) => void;
-export const __wbg_personupdateerror_free: (a: number, b: number) => void;
-export const personupdateerror_error: (a: number) => [number, number];
-export const personupdate_new: () => number;
-export const __wbg_personupdatecorebuilder_free: (a: number, b: number) => void;
-export const personupdatecorebuilder_id: (
-  a: number,
-  b: number,
-  c: number,
-) => number;
-export const personupdatecorebuilder_name: (a: number, b: number) => number;
-export const personupdatecorebuilder_email: (
-  a: number,
-  b: number,
-  c: number,
-) => number;
-export const personupdatecorebuilder_ms_user_id: (
-  a: number,
-  b: number,
-  c: number,
-) => number;
-export const personupdatecorebuilder_orcid: (a: number, b: number) => number;
-export const personupdatecorebuilder_institution_id: (
-  a: number,
-  b: number,
-  c: number,
-) => number;
-export const personupdatecorebuilder_build: (
-  a: number,
-) => [number, number, number];
-export const __wbg_personupdatecore_free: (a: number, b: number) => void;
-export const __wbg_personupdatecoreerror_free: (a: number, b: number) => void;
-export const personupdatecoreerror_error: (a: number) => [number, number];
-export const personupdatecore_new: () => number;
-export const __wbg_createduser_free: (a: number, b: number) => void;
-export const __wbg_person_free: (a: number, b: number) => void;
-export const __wbg_personcore_free: (a: number, b: number) => void;
-export const __wbg_personsummary_free: (a: number, b: number) => void;
-export const __wbg_personhandle_free: (a: number, b: number) => void;
+export const createduser_institution: (a: number) => number;
+export const __wbg_personquery_free: (a: number, b: number) => void;
+export const __wbg_get_personquery_ids: (a: number) => [number, number];
+export const __wbg_set_personquery_ids: (a: number, b: number, c: number) => void;
+export const __wbg_get_personquery_name: (a: number) => [number, number];
+export const __wbg_set_personquery_name: (a: number, b: number, c: number) => void;
+export const __wbg_get_personquery_email: (a: number) => [number, number];
+export const __wbg_set_personquery_email: (a: number, b: number, c: number) => void;
+export const __wbg_get_personquery_orcid: (a: number) => [number, number];
+export const __wbg_set_personquery_orcid: (a: number, b: number, c: number) => void;
+export const __wbg_get_personquery_ms_user_id: (a: number) => [number, number];
+export const __wbg_set_personquery_ms_user_id: (a: number, b: number, c: number) => void;
+export const __wbg_get_personquery_pagination: (a: number) => number;
+export const __wbg_set_personquery_pagination: (a: number, b: number) => void;
+export const personquery_new: () => number;
 export const personsummary_id: (a: number) => [number, number];
-export const personhandle_id: (a: number) => [number, number];
-export const personcore_id: (a: number) => [number, number];
 export const person_id: (a: number) => [number, number];
+export const __wbg_labhandle_free: (a: number, b: number) => void;
+export const __wbg_get_labhandle_id: (a: number) => [number, number];
+export const __wbg_set_labhandle_id: (a: number, b: number, c: number) => void;
+export const __wbg_get_labhandle_link: (a: number) => [number, number];
+export const __wbg_set_labhandle_link: (a: number, b: number, c: number) => void;
+export const __wbg_labsummary_free: (a: number, b: number) => void;
+export const __wbg_get_labsummary_handle: (a: number) => number;
+export const __wbg_set_labsummary_handle: (a: number, b: number) => void;
+export const __wbg_get_labsummary_name: (a: number) => [number, number];
+export const __wbg_set_labsummary_name: (a: number, b: number, c: number) => void;
+export const __wbg_get_labsummary_delivery_dir: (a: number) => [number, number];
+export const __wbg_set_labsummary_delivery_dir: (a: number, b: number, c: number) => void;
+export const labsummary_link: (a: number) => [number, number];
+export const __wbg_labcore_free: (a: number, b: number) => void;
+export const __wbg_get_labcore_summary: (a: number) => number;
+export const __wbg_set_labcore_summary: (a: number, b: number) => void;
+export const __wbg_get_labcore_pi: (a: number) => number;
+export const __wbg_set_labcore_pi: (a: number, b: number) => void;
+export const __wbg_lab_free: (a: number, b: number) => void;
+export const __wbg_get_lab_core: (a: number) => number;
+export const __wbg_set_lab_core: (a: number, b: number) => void;
+export const __wbg_get_lab_members: (a: number) => [number, number];
+export const __wbg_set_lab_members: (a: number, b: number, c: number) => void;
+export const lab_id: (a: number) => [number, number];
+export const __wbg_labquery_free: (a: number, b: number) => void;
+export const __wbg_get_labquery_ids: (a: number) => [number, number];
+export const __wbg_set_labquery_ids: (a: number, b: number, c: number) => void;
+export const __wbg_get_labquery_name: (a: number) => [number, number];
+export const __wbg_set_labquery_name: (a: number, b: number, c: number) => void;
+export const __wbg_get_labquery_pagination: (a: number) => number;
+export const __wbg_set_labquery_pagination: (a: number, b: number) => void;
+export const labquery_new: () => number;
+export const labsummary_id: (a: number) => [number, number];
+export const __wbg_specimenhandle_free: (a: number, b: number) => void;
+export const __wbg_get_specimenhandle_id: (a: number) => [number, number];
+export const __wbg_set_specimenhandle_id: (a: number, b: number, c: number) => void;
+export const __wbg_get_specimenhandle_link: (a: number) => [number, number];
+export const __wbg_set_specimenhandle_link: (a: number, b: number, c: number) => void;
+export const __wbg_specimensummary_free: (a: number, b: number) => void;
+export const __wbg_get_specimensummary_handle: (a: number) => number;
+export const __wbg_set_specimensummary_handle: (a: number, b: number) => void;
+export const __wbg_get_specimensummary_readable_id: (a: number) => [number, number];
+export const __wbg_set_specimensummary_readable_id: (a: number, b: number, c: number) => void;
+export const __wbg_get_specimensummary_name: (a: number) => [number, number];
+export const __wbg_set_specimensummary_name: (a: number, b: number, c: number) => void;
+export const __wbg_get_specimensummary_received_at: (a: number) => any;
+export const __wbg_set_specimensummary_received_at: (a: number, b: any) => void;
+export const __wbg_get_specimensummary_notes: (a: number) => [number, number];
+export const __wbg_set_specimensummary_notes: (a: number, b: number, c: number) => void;
+export const __wbg_get_specimensummary_returned_at: (a: number) => any;
+export const __wbg_set_specimensummary_returned_at: (a: number, b: number) => void;
+export const __wbg_get_specimensummary_type_: (a: number) => [number, number];
+export const __wbg_set_specimensummary_type_: (a: number, b: number, c: number) => void;
+export const __wbg_get_specimensummary_embedded_in: (a: number) => [number, number];
+export const __wbg_set_specimensummary_embedded_in: (a: number, b: number, c: number) => void;
+export const __wbg_get_specimensummary_fixative: (a: number) => [number, number];
+export const __wbg_set_specimensummary_fixative: (a: number, b: number, c: number) => void;
+export const __wbg_get_specimensummary_frozen: (a: number) => number;
+export const __wbg_set_specimensummary_frozen: (a: number, b: number) => void;
+export const __wbg_get_specimensummary_cryopreserved: (a: number) => number;
+export const __wbg_set_specimensummary_cryopreserved: (a: number, b: number) => void;
+export const __wbg_get_specimensummary_storage_buffer: (a: number) => [number, number];
+export const __wbg_set_specimensummary_storage_buffer: (a: number, b: number, c: number) => void;
+export const __wbg_specimenmeasurement_free: (a: number, b: number) => void;
+export const __wbg_get_specimenmeasurement_measured_by: (a: number) => number;
+export const __wbg_set_specimenmeasurement_measured_by: (a: number, b: number) => void;
+export const __wbg_specimencore_free: (a: number, b: number) => void;
+export const __wbg_get_specimencore_summary: (a: number) => number;
+export const __wbg_set_specimencore_summary: (a: number, b: number) => void;
+export const __wbg_get_specimencore_lab: (a: number) => number;
+export const __wbg_set_specimencore_lab: (a: number, b: number) => void;
+export const __wbg_get_specimencore_submitted_by: (a: number) => number;
+export const __wbg_set_specimencore_submitted_by: (a: number, b: number) => void;
+export const __wbg_get_specimencore_returned_by: (a: number) => number;
+export const __wbg_set_specimencore_returned_by: (a: number, b: number) => void;
+export const __wbg_specimen_free: (a: number, b: number) => void;
+export const __wbg_get_specimen_core: (a: number) => number;
+export const __wbg_set_specimen_core: (a: number, b: number) => void;
+export const __wbg_get_specimen_measurements: (a: number) => [number, number];
+export const __wbg_set_specimen_measurements: (a: number, b: number, c: number) => void;
+export const __wbg_specimenquery_free: (a: number, b: number) => void;
+export const __wbg_get_specimenquery_ids: (a: number) => [number, number];
+export const __wbg_set_specimenquery_ids: (a: number, b: number, c: number) => void;
+export const __wbg_get_specimenquery_name: (a: number) => [number, number];
+export const __wbg_set_specimenquery_name: (a: number, b: number, c: number) => void;
+export const __wbg_get_specimenquery_submitters: (a: number) => [number, number];
+export const __wbg_set_specimenquery_submitters: (a: number, b: number, c: number) => void;
+export const __wbg_get_specimenquery_labs: (a: number) => [number, number];
+export const __wbg_set_specimenquery_labs: (a: number, b: number, c: number) => void;
+export const __wbg_get_specimenquery_received_before: (a: number) => any;
+export const __wbg_set_specimenquery_received_before: (a: number, b: number) => void;
+export const __wbg_get_specimenquery_received_after: (a: number) => any;
+export const __wbg_set_specimenquery_received_after: (a: number, b: number) => void;
+export const __wbg_get_specimenquery_species: (a: number) => [number, number];
+export const __wbg_set_specimenquery_species: (a: number, b: number, c: number) => void;
+export const __wbg_get_specimenquery_notes: (a: number) => [number, number];
+export const __wbg_set_specimenquery_notes: (a: number, b: number, c: number) => void;
+export const __wbg_get_specimenquery_storage_buffer: (a: number) => [number, number];
+export const __wbg_set_specimenquery_storage_buffer: (a: number, b: number, c: number) => void;
+export const __wbg_get_specimenquery_frozen: (a: number) => number;
+export const __wbg_set_specimenquery_frozen: (a: number, b: number) => void;
+export const __wbg_get_specimenquery_cryopreserved: (a: number) => number;
+export const __wbg_set_specimenquery_cryopreserved: (a: number, b: number) => void;
+export const __wbg_get_specimenquery_pagination: (a: number) => number;
+export const __wbg_set_specimenquery_pagination: (a: number, b: number) => void;
+export const specimenquery_new: () => number;
+export const __wbg_suspensionpoolhandle_free: (a: number, b: number) => void;
+export const __wbg_suspensionpoolsummary_free: (a: number, b: number) => void;
+export const __wbg_get_suspensionpoolsummary_pooled_at: (a: number) => any;
+export const __wbg_set_suspensionpoolsummary_pooled_at: (a: number, b: any) => void;
+export const __wbg_set_suspensionpoolhandle_link: (a: number, b: number, c: number) => void;
+export const __wbg_set_suspensionpoolsummary_readable_id: (a: number, b: number, c: number) => void;
+export const __wbg_get_suspensionpoolsummary_handle: (a: number) => number;
+export const __wbg_set_suspensionpoolsummary_handle: (a: number, b: number) => void;
+export const __wbg_get_suspensionpoolhandle_id: (a: number) => [number, number];
+export const __wbg_set_suspensionpoolhandle_id: (a: number, b: number, c: number) => void;
+export const __wbg_get_suspensionpoolhandle_link: (a: number) => [number, number];
+export const __wbg_get_suspensionpoolsummary_readable_id: (a: number) => [number, number];
+export const __wbg_client_free: (a: number, b: number) => void;
+export const client_new: (a: number, b: number, c: number, d: number, e: number, f: number) => number;
+export const client_ms_login: (a: number, b: number) => any;
+export const __wbg_sequencingrunhandle_free: (a: number, b: number) => void;
+export const __wbg_get_sequencingrunhandle_id: (a: number) => [number, number];
+export const __wbg_set_sequencingrunhandle_id: (a: number, b: number, c: number) => void;
+export const __wbg_get_sequencingrunhandle_link: (a: number) => [number, number];
+export const __wbg_set_sequencingrunhandle_link: (a: number, b: number, c: number) => void;
+export const __wbg_sequencingrunsummary_free: (a: number, b: number) => void;
+export const __wbg_get_sequencingrunsummary_handle: (a: number) => number;
+export const __wbg_set_sequencingrunsummary_handle: (a: number, b: number) => void;
+export const __wbg_get_sequencingrunsummary_readable_id: (a: number) => [number, number];
+export const __wbg_set_sequencingrunsummary_readable_id: (a: number, b: number, c: number) => void;
+export const __wbg_get_sequencingrunsummary_begun_at: (a: number) => any;
+export const __wbg_set_sequencingrunsummary_begun_at: (a: number, b: any) => void;
+export const __wbg_get_sequencingrunsummary_finished_at: (a: number) => any;
+export const __wbg_set_sequencingrunsummary_finished_at: (a: number, b: any) => void;
+export const __wbg_get_sequencingrunsummary_notes: (a: number) => [number, number];
+export const __wbg_set_sequencingrunsummary_notes: (a: number, b: number, c: number) => void;
+export const __wbg_suspensionhandle_free: (a: number, b: number) => void;
+export const __wbg_get_suspensionhandle_id: (a: number) => [number, number];
+export const __wbg_set_suspensionhandle_id: (a: number, b: number, c: number) => void;
+export const __wbg_suspensionsummary_free: (a: number, b: number) => void;
+export const __wbg_get_suspensionsummary_handle: (a: number) => number;
+export const __wbg_set_suspensionsummary_handle: (a: number, b: number) => void;
+export const __wbg_get_suspensionsummary_readable_id: (a: number) => [number, number];
+export const __wbg_set_suspensionsummary_readable_id: (a: number, b: number, c: number) => void;
+export const __wbg_get_suspensionsummary_biological_material: (a: number) => [number, number];
+export const __wbg_set_suspensionsummary_biological_material: (a: number, b: number, c: number) => void;
+export const __wbg_get_suspensionsummary_created_at: (a: number) => any;
+export const __wbg_set_suspensionsummary_created_at: (a: number, b: number) => void;
+export const __wbg_get_suspensionsummary_lysis_duration_minutes: (a: number) => number;
+export const __wbg_set_suspensionsummary_lysis_duration_minutes: (a: number, b: number) => void;
+export const __wbg_get_suspensionsummary_target_cell_recovery: (a: number) => number;
+export const __wbg_set_suspensionsummary_target_cell_recovery: (a: number, b: number) => void;
+export const __wbg_get_suspensionsummary_target_reads_per_cell: (a: number) => number;
+export const __wbg_set_suspensionsummary_target_reads_per_cell: (a: number, b: number) => void;
+export const __wbg_get_suspensionsummary_notes: (a: number) => [number, number];
+export const __wbg_set_suspensionsummary_notes: (a: number, b: number, c: number) => void;
+export const __wbg_multiplexingtag_free: (a: number, b: number) => void;
+export const __wbg_get_multiplexingtag_id: (a: number) => [number, number];
+export const __wbg_set_multiplexingtag_id: (a: number, b: number, c: number) => void;
+export const __wbg_get_multiplexingtag_tag_id: (a: number) => [number, number];
+export const __wbg_set_multiplexingtag_tag_id: (a: number, b: number, c: number) => void;
+export const __wbg_get_multiplexingtag_type_: (a: number) => [number, number];
+export const __wbg_set_multiplexingtag_type_: (a: number, b: number, c: number) => void;
+export const __wbg_suspensioncore_free: (a: number, b: number) => void;
+export const __wbg_get_suspensioncore_summary: (a: number) => number;
+export const __wbg_set_suspensioncore_summary: (a: number, b: number) => void;
+export const __wbg_get_suspensioncore_parent_specimen: (a: number) => number;
+export const __wbg_set_suspensioncore_parent_specimen: (a: number, b: number) => void;
+export const __wbg_get_suspensioncore_multiplexing_tag: (a: number) => number;
+export const __wbg_set_suspensioncore_multiplexing_tag: (a: number, b: number) => void;
+export const __wbg_suspensionmeasurement_free: (a: number, b: number) => void;
+export const __wbg_get_suspensionmeasurement_measured_by: (a: number) => number;
+export const __wbg_set_suspensionmeasurement_measured_by: (a: number, b: number) => void;
+export const __wbg_set_suspensionhandle_link: (a: number, b: number, c: number) => void;
+export const __wbg_get_suspensionhandle_link: (a: number) => [number, number];
+export const __wbg_committeeapproval_free: (a: number, b: number) => void;
+export const __wbg_get_committeeapproval_institution: (a: number) => number;
+export const __wbg_set_committeeapproval_institution: (a: number, b: number) => void;
+export const __wbg_get_committeeapproval_committee_type: (a: number) => [number, number];
+export const __wbg_set_committeeapproval_committee_type: (a: number, b: number, c: number) => void;
+export const __wbg_get_committeeapproval_compliance_identifier: (a: number) => [number, number];
+export const __wbg_set_committeeapproval_compliance_identifier: (a: number, b: number, c: number) => void;
+export const __wbg_emptystringerror_free: (a: number, b: number) => void;
 export const __wbindgen_export_0: WebAssembly.Table;
 export const __wbindgen_exn_store: (a: number) => void;
 export const __externref_table_alloc: () => number;
 export const __wbindgen_malloc: (a: number, b: number) => number;
-export const __wbindgen_realloc: (
-  a: number,
-  b: number,
-  c: number,
-  d: number,
-) => number;
+export const __wbindgen_realloc: (a: number, b: number, c: number, d: number) => number;
 export const __wbindgen_export_5: WebAssembly.Table;
-export const __externref_table_dealloc: (a: number) => void;
 export const __wbindgen_free: (a: number, b: number, c: number) => void;
 export const __externref_drop_slice: (a: number, b: number) => void;
-export const _dyn_core__ops__function__FnMut_____Output___R_as_wasm_bindgen__closure__WasmClosure___describe__invoke__h1184864bd135d6c5: (
-  a: number,
-  b: number,
-) => void;
-export const closure124_externref_shim: (a: number, b: number, c: any) => void;
-export const closure223_externref_shim: (
-  a: number,
-  b: number,
-  c: any,
-  d: any,
-) => void;
+export const __externref_table_dealloc: (a: number) => void;
+export const _dyn_core__ops__function__FnMut_____Output___R_as_wasm_bindgen__closure__WasmClosure___describe__invoke__hba324d8185144b2c: (a: number, b: number) => void;
+export const closure120_externref_shim: (a: number, b: number, c: any) => void;
+export const closure155_externref_shim: (a: number, b: number, c: any, d: any) => void;
 export const __wbindgen_start: () => void;

@@ -10,11 +10,11 @@ use crate::{
 };
 use diesel::{dsl::AssumeNotNull, prelude::*};
 use diesel_async::{AsyncPgConnection, RunQueryDsl};
+use scamplers_core::model::specimen::{NewBlock, NewTissue};
 use scamplers_core::model::specimen::{
-    BlockEmbeddingMatrix, Fixative, NewSpecimen, NewSpecimenMeasurement, Specimen, SpecimenCore,
-    SpecimenMeasurement, SpecimenQuery, SpecimenSummary, SpecimenType,
+    NewSpecimen, NewSpecimenMeasurement, Specimen, SpecimenCore, SpecimenMeasurement,
+    SpecimenQuery, SpecimenSummary,
 };
-use scamplers_core::model::specimen::{NewBlock, NewTissue, NewVirtualSpecimen};
 use scamplers_schema::{
     lab, person,
     specimen::{
@@ -60,9 +60,12 @@ impl FetchRelatives<SpecimenMeasurement> for specimen::table {
 impl WriteToDb for &[NewSpecimenMeasurement] {
     type Returns = Vec<SpecimenMeasurement>;
 
-    async fn write(self, db_conn: &mut AsyncPgConnection) -> db::error::Result<Self::Returns> {
+    async fn write_to_db(
+        self,
+        db_conn: &mut AsyncPgConnection,
+    ) -> db::error::Result<Self::Returns> {
         let specimen_ids: Vec<Uuid> = diesel::insert_into(specimen_measurement::table)
-            .values(self.clone())
+            .values(self)
             .returning(specimen_measurement::specimen_id)
             .get_results(db_conn)
             .await?;
@@ -104,7 +107,7 @@ impl NewSpecimenExt for NewSpecimen {
 impl WriteToDb for NewSpecimen {
     type Returns = Specimen;
 
-    async fn write(
+    async fn write_to_db(
         mut self,
         db_conn: &mut diesel_async::AsyncPgConnection,
     ) -> crate::db::error::Result<Self::Returns> {
@@ -121,8 +124,9 @@ impl WriteToDb for NewSpecimen {
             },
         };
 
+        // TODO: technically we can get away with one less query here by building the Specimen rather than fetching it again
         let new_measurements = self.measurements(id);
-        new_measurements.write(db_conn).await?;
+        new_measurements.write_to_db(db_conn).await?;
 
         Specimen::fetch_by_id(&id, db_conn).await
     }
@@ -216,8 +220,14 @@ where
             .map(|buf| buffer_col.assume_not_null().ilike(buf.as_ilike()));
         let q9 = frozen.map(|f| frozen_col.eq(f));
         let q10 = cryopreserved.map(|c| cryopreserved_col.eq(c));
+        let q11 = embedded_in
+            .as_ref()
+            .map(|e| embedding_col.assume_not_null().eq(e));
+        let q12 = fixative
+            .as_ref()
+            .map(|f| fixative_col.assume_not_null().eq(f));
 
-        let mut query = BoxedDieselExpression::new_expression()
+        let query = BoxedDieselExpression::new_expression()
             .and_condition(q1)
             .and_condition(q2)
             .and_condition(q3)
@@ -227,32 +237,9 @@ where
             .and_condition(q7)
             .and_condition(q8)
             .and_condition(q9)
-            .and_condition(q10);
-
-        if let Some(embedded_in) = embedded_in {
-            match embedded_in {
-                BlockEmbeddingMatrix::Fixed(e) => {
-                    query = query.and_condition(Some(embedding_col.assume_not_null().eq(e)));
-                }
-                BlockEmbeddingMatrix::Frozen(e) => {
-                    query = query.and_condition(Some(embedding_col.assume_not_null().eq(e)));
-                }
-            }
-        }
-
-        if let Some(fixative) = fixative {
-            match fixative {
-                Fixative::Block(f) => {
-                    query = query.and_condition(Some(fixative_col.assume_not_null().eq(f)));
-                }
-                Fixative::Suspension(f) => {
-                    query = query.and_condition(Some(fixative_col.assume_not_null().eq(f)));
-                }
-                Fixative::Tissue(f) => {
-                    query = query.and_condition(Some(fixative_col.assume_not_null().eq(f)));
-                }
-            }
-        }
+            .and_condition(q10)
+            .and_condition(q11)
+            .and_condition(q12);
 
         query.build()
     }

@@ -1,157 +1,68 @@
-#[cfg(feature = "backend")]
-use time::OffsetDateTime;
-#[cfg(feature = "backend")]
-use uuid::Uuid;
-
-#[cfg(feature = "backend")]
-use crate::{
-    model::specimen::{
-        common::{NewCommitteeApproval, Species},
-        NewSpecimenMeasurement,
-    },
-    string::ValidString,
-};
-
 use super::common::NewSpecimenCommon;
+use scamplers_macros::{base_api_model, db_enum, db_insertion};
 #[cfg(feature = "backend")]
-use {
-    scamplers_macros::{backend_db_enum, backend_insertion},
-    scamplers_schema::specimen,
-};
+use scamplers_schema::specimen;
 
-#[cfg_attr(feature = "backend", backend_db_enum)]
+#[db_enum]
 #[derive(Default)]
 pub enum BlockType {
     #[default]
     Block,
 }
 
-#[cfg_attr(feature = "backend", backend_db_enum)]
+#[db_enum]
+#[derive(Default)]
 pub enum FixedBlockEmbeddingMatrix {
+    #[default]
     Paraffin,
 }
 
-#[cfg_attr(feature = "backend", backend_db_enum)]
+#[db_enum]
+#[derive(Default)]
 pub enum BlockFixative {
+    #[default]
     FormaldehydeDerivative,
 }
 
-#[cfg_attr(feature = "backend", backend_insertion(specimen))]
+#[db_insertion]
+#[cfg_attr(feature = "backend", diesel(table_name = specimen))]
 pub struct NewFixedBlock {
-    #[cfg_attr(feature = "backend", diesel(embed), serde(flatten), garde(dive))]
-    pub(super) common: NewSpecimenCommon,
-    #[cfg_attr(feature = "backend", serde(skip))]
-    type_: BlockType,
-    embedded_in: FixedBlockEmbeddingMatrix,
-    fixative: BlockFixative,
+    #[serde(flatten)]
+    #[garde(dive)]
+    #[cfg_attr(feature = "backend", diesel(embed))]
+    pub inner: NewSpecimenCommon,
+    #[serde(skip)]
+    pub type_: BlockType,
+    pub embedded_in: FixedBlockEmbeddingMatrix,
+    pub fixative: BlockFixative,
 }
 
-#[cfg(feature = "backend")]
-#[bon::bon]
-impl NewFixedBlock {
-    #[builder(on(ValidString, into))]
-    pub fn new(
-        readable_id: ValidString,
-        name: ValidString,
-        submitted_by: Uuid,
-        lab_id: Uuid,
-        received_at: OffsetDateTime,
-        species: Vec<Species>,
-        #[builder(default)] committee_approvals: Vec<NewCommitteeApproval>,
-        notes: Option<ValidString>,
-        returned_at: Option<OffsetDateTime>,
-        returned_by: Option<Uuid>,
-        #[builder(default)] measurements: Vec<NewSpecimenMeasurement>,
-    ) -> Self {
-        Self {
-            common: NewSpecimenCommon {
-                readable_id,
-                name,
-                submitted_by,
-                lab_id,
-                received_at,
-                species,
-                committee_approvals,
-                notes,
-                returned_at,
-                returned_by,
-                measurements,
-            },
-            type_: BlockType::Block,
-            embedded_in: FixedBlockEmbeddingMatrix::Paraffin,
-            fixative: BlockFixative::FormaldehydeDerivative,
-        }
-    }
-}
-
-#[cfg_attr(feature = "backend", backend_db_enum)]
+#[db_enum]
+#[derive(Default)]
 pub enum FrozenBlockEmbeddingMatrix {
+    #[default] // Honestly not sure why I need this :(
     CarboxymethylCellulose,
     OptimalCuttingTemperatureCompound,
 }
 
-#[cfg_attr(feature = "backend", backend_insertion(specimen))]
+#[db_insertion]
+#[cfg_attr(feature = "backend", diesel(table_name = specimen))]
 pub struct NewFrozenBlock {
-    #[cfg_attr(feature = "backend", diesel(embed), serde(flatten), garde(dive))]
-    pub(super) common: NewSpecimenCommon,
-    #[cfg_attr(feature = "backend", serde(skip))]
-    type_: BlockType,
-    embedded_in: FrozenBlockEmbeddingMatrix,
-    fixative: Option<BlockFixative>,
-    #[cfg_attr(feature = "backend", garde(custom(super::common::is_true)))]
-    frozen: bool,
+    #[serde(flatten)]
+    #[garde(dive)]
+    #[cfg_attr(feature = "backend", diesel(embed))]
+    pub inner: NewSpecimenCommon,
+    #[serde(skip)]
+    pub type_: BlockType,
+    pub embedded_in: FrozenBlockEmbeddingMatrix,
+    pub fixative: Option<BlockFixative>,
+    #[garde(custom(super::common::is_true))]
+    pub frozen: bool,
 }
 
-#[cfg(feature = "backend")]
-#[bon::bon]
-impl NewFrozenBlock {
-    #[builder(on(ValidString, into))]
-    pub fn new(
-        readable_id: ValidString,
-        name: ValidString,
-        submitted_by: Uuid,
-        lab_id: Uuid,
-        received_at: OffsetDateTime,
-        species: Vec<Species>,
-        #[builder(default)] committee_approvals: Vec<NewCommitteeApproval>,
-        notes: Option<ValidString>,
-        returned_at: Option<OffsetDateTime>,
-        returned_by: Option<Uuid>,
-        #[builder(default)] measurements: Vec<NewSpecimenMeasurement>,
-        embedded_in: FrozenBlockEmbeddingMatrix,
-        fixative: Option<BlockFixative>,
-    ) -> Self {
-        Self {
-            common: NewSpecimenCommon {
-                readable_id,
-                name,
-                submitted_by,
-                lab_id,
-                received_at,
-                species,
-                committee_approvals,
-                notes,
-                returned_at,
-                returned_by,
-                measurements,
-            },
-            type_: BlockType::Block,
-            embedded_in,
-            fixative,
-            frozen: true,
-        }
-    }
-}
-
-#[cfg_attr(
-    feature = "backend",
-    derive(serde::Deserialize, Debug, valuable::Valuable, garde::Validate)
-)]
-#[cfg_attr(
-    feature = "backend",
-    serde(rename_all = "snake_case", tag = "preservation")
-)]
+#[base_api_model]
+#[serde(tag = "preservation")]
 pub enum NewBlock {
-    Fixed(#[cfg_attr(feature = "backend", garde(dive))] NewFixedBlock),
-    Frozen(#[cfg_attr(feature = "backend", garde(dive))] NewFrozenBlock),
+    Fixed(#[garde(dive)] NewFixedBlock),
+    Frozen(#[garde(dive)] NewFrozenBlock),
 }

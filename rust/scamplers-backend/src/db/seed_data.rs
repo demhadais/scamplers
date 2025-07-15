@@ -4,7 +4,10 @@ use anyhow::Context;
 use diesel_async::AsyncPgConnection;
 use garde::Validate;
 use index_set::IndexSetFileUrl;
-use scamplers_core::model::institution::NewInstitution;
+use scamplers_core::model::{
+    chemistry::Chemistry, institution::NewInstitution,
+    library_type_specification::NewLibraryTypeSpecification,
+};
 use serde::Deserialize;
 mod admin;
 mod chemistry;
@@ -42,7 +45,7 @@ impl SeedData {
             library_type_specifications,
         } = self;
 
-        let institutions_result = institution.write(db_conn).await;
+        let institutions_result = institution.write_to_db(db_conn).await;
         if !matches!(
             institutions_result,
             Err(super::error::Error::DuplicateRecord { .. }) | Ok(_)
@@ -52,8 +55,8 @@ impl SeedData {
 
         app_admin.write(db_conn).await?;
         download_and_insert_index_sets(db_conn, http_client, &index_set_urls).await?;
-        chemistries.write(db_conn).await?;
-        library_type_specifications.write(db_conn).await?;
+        chemistries.write_to_db(db_conn).await?;
+        library_type_specifications.write_to_db(db_conn).await?;
 
         Ok(())
     }
@@ -76,7 +79,7 @@ async fn download_and_insert_index_sets(
     // A for-loop is fine because this is like 10 URLs max, and each of these is a
     // bulk insert
     for sets in index_sets {
-        sets.write(db_conn)
+        sets.write_to_db(db_conn)
             .await
             .context("failed to insert index sets into database")?;
     }

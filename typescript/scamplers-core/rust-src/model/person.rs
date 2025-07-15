@@ -1,244 +1,337 @@
-use crate::string::ValidString;
-
-use super::Pagination;
-#[cfg(feature = "typescript")]
+use crate::model::{Pagination, SortByGroup, institution::Institution};
+#[cfg(feature = "python")]
+use pyo3::prelude::*;
 use scamplers_macros::{
-    frontend_enum, frontend_insertion, frontend_ordering, frontend_ordinal_columns_enum,
-    frontend_query_request, frontend_with_getters,
+    base_api_model, base_api_model_with_default, db_enum, db_insertion, db_query, db_selection,
+    db_update, getters_impl,
 };
-use uuid::Uuid;
 #[cfg(feature = "backend")]
-use {
-    scamplers_macros::{
-        backend_db_enum, backend_insertion, backend_ordering, backend_ordinal_columns_enum,
-        backend_query_request, backend_with_getters,
-    },
-    scamplers_schema::person,
-};
+use scamplers_schema::person;
+use uuid::Uuid;
+use valid_string::ValidString;
+#[cfg(target_arch = "wasm32")]
+use wasm_bindgen::prelude::*;
 
+#[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
+#[db_enum]
 #[derive(PartialEq)]
-#[cfg_attr(feature = "backend", backend_db_enum)]
-#[cfg_attr(feature = "typescript", frontend_enum)]
 pub enum UserRole {
     AppAdmin,
     ComputationalStaff,
     BiologyStaff,
 }
 
-#[cfg_attr(
-    feature = "backend",
-    backend_insertion(person),
-    derive(Clone, bon::Builder)
-)]
-#[cfg_attr(feature = "backend", builder(on(ValidString, into), on(String, into)))]
-#[cfg_attr(feature = "typescript", frontend_insertion)]
+#[db_insertion]
+#[cfg_attr(feature = "backend", diesel(table_name = person))]
 pub struct NewPerson {
-    #[cfg_attr(feature = "backend", garde(dive))]
+    #[garde(dive)]
     pub name: ValidString,
-    #[cfg_attr(feature = "backend", garde(email))]
+    #[garde(email)]
     pub email: String,
-    #[cfg_attr(feature = "backend", garde(dive))]
-    #[cfg_attr(feature = "typescript", builder(default))]
+    #[garde(dive)]
     pub orcid: Option<ValidString>,
     pub institution_id: Uuid,
-    #[cfg_attr(feature = "typescript", builder(default))]
     pub ms_user_id: Option<Uuid>,
-    #[cfg_attr(
-        feature = "backend",
-        diesel(skip_insertion),
-        serde(default),
-        builder(default)
-    )]
-    #[cfg_attr(feature = "typescript", builder(default))]
+    #[serde(default)]
+    #[builder(default)]
+    #[cfg_attr(feature = "backend", diesel(skip_insertion))]
     pub roles: Vec<UserRole>,
 }
-impl NewPerson {
+
+#[base_api_model]
+#[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
+#[serde(transparent)]
+pub struct NewMsLogin(#[cfg_attr(target_arch = "wasm32", wasm_bindgen(skip))] pub NewPerson);
+
+#[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
+impl NewMsLogin {
+    #[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
     #[must_use]
-    pub fn new_user_route() -> String {
-        "/users".to_string()
+    pub fn new() -> NewPersonEmpty {
+        NewPersonEmpty
     }
 }
 
-#[cfg_attr(feature = "backend", backend_with_getters)]
-#[cfg_attr(feature = "typescript", frontend_with_getters)]
-mod with_getters {
-    #[cfg(feature = "backend")]
-    use crate::model::IsUpdate;
-    use crate::{
-        model::{institution::Institution, person::UserRole},
-        string::ValidString,
-    };
-    #[cfg(feature = "typescript")]
-    use scamplers_macros::{frontend_response, frontend_update};
-    use uuid::Uuid;
-    #[cfg(feature = "backend")]
-    use {
-        scamplers_macros::{backend_selection, backend_update},
-        scamplers_schema::person,
-    };
+#[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
+pub struct NewPersonEmpty;
 
-    #[cfg_attr(feature = "backend", backend_selection(person))]
-    #[cfg_attr(feature = "typescript", frontend_response)]
-    pub struct PersonHandle {
-        id: Uuid,
-        link: String,
+#[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
+impl NewPersonEmpty {
+    #[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
+    #[must_use]
+    pub fn name(self, name: String) -> NewPersonName {
+        NewPersonName { name }
     }
+}
 
-    #[cfg_attr(feature = "backend", backend_selection(person))]
-    #[cfg_attr(feature = "typescript", frontend_response)]
-    pub struct PersonSummary {
-        #[serde(flatten)]
-        #[cfg_attr(feature = "backend", diesel(embed))]
-        handle: PersonHandle,
-        name: String,
-        email: Option<String>,
-        orcid: Option<String>,
+#[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
+pub struct NewPersonName {
+    name: String,
+}
+
+#[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
+impl NewPersonName {
+    #[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
+    #[must_use]
+    pub fn email(self, email: String) -> NewPersonEmail {
+        NewPersonEmail { inner: self, email }
     }
+}
 
-    #[cfg_attr(feature = "backend", backend_selection(person))]
-    #[cfg_attr(feature = "typescript", frontend_response)]
-    pub struct PersonCore {
-        #[serde(flatten)]
-        #[cfg_attr(feature = "backend", diesel(embed))]
-        summary: PersonSummary,
-        #[cfg_attr(feature = "backend", diesel(embed))]
-        institution: Institution,
-    }
+#[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
+pub struct NewPersonEmail {
+    inner: NewPersonName,
+    email: String,
+}
 
-    #[cfg_attr(feature = "backend", derive(serde::Serialize, Debug, bon::Builder))]
-    #[cfg_attr(feature = "typescript", frontend_response)]
-    pub struct Person {
-        #[serde(flatten)]
-        core: PersonCore,
-        roles: Vec<UserRole>,
-    }
-
-    #[cfg_attr(feature = "backend", derive(serde::Serialize, Debug, bon::Builder))]
-    #[cfg_attr(feature = "backend", builder(on(String, into)))]
-    #[cfg_attr(feature = "typescript", frontend_response)]
-    pub struct CreatedUser {
-        person: Person,
-        api_key: String,
-    }
-
-    #[cfg_attr(feature = "backend", backend_update(person))]
-    #[cfg_attr(feature = "typescript", frontend_update)]
-    pub struct PersonUpdateCore {
-        id: Uuid,
-        #[cfg_attr(feature = "backend", garde(dive))]
-        name: Option<ValidString>,
-        #[cfg_attr(feature = "backend", garde(email))]
-        email: Option<String>,
-        ms_user_id: Option<Uuid>,
-        #[cfg_attr(feature = "backend", garde(dive))]
-        orcid: Option<ValidString>,
-        institution_id: Option<Uuid>,
-    }
-
-    #[cfg(feature = "backend")]
-    impl IsUpdate for PersonUpdateCore {
-        fn is_update(&self) -> bool {
-            !matches!(
-                self,
-                Self {
-                    name: None,
-                    email: None,
-                    orcid: None,
-                    institution_id: None,
-                    ..
-                }
-            )
-        }
-    }
-
-    #[cfg_attr(
-        feature = "backend",
-        derive(serde::Deserialize, Default, garde::Validate)
-    )]
-    #[cfg_attr(feature = "backend", garde(allow_unvalidated), serde(default))]
-    #[cfg_attr(feature = "typescript", frontend_update)]
-    pub struct PersonUpdate {
-        grant_roles: Vec<UserRole>,
-        revoke_roles: Vec<UserRole>,
-        #[cfg_attr(feature = "backend", garde(dive), serde(flatten))]
-        core: PersonUpdateCore,
-    }
-
-    #[cfg(feature = "backend")]
-    impl PersonUpdate {
-        #[must_use]
-        pub fn core(&self) -> &PersonUpdateCore {
-            &self.core
-        }
-    }
-
-    #[cfg(feature = "backend")]
-    #[bon::bon]
-    impl PersonUpdate {
-        #[builder(on(String, into), on(ValidString, into))]
-        pub fn new(
-            #[builder(field)] grant_roles: Vec<UserRole>,
-            #[builder(field)] revoke_roles: Vec<UserRole>,
-            id: Uuid,
-            name: Option<ValidString>,
-            email: Option<String>,
-            ms_user_id: Option<Uuid>,
-            orcid: Option<ValidString>,
-            institution_id: Option<Uuid>,
-        ) -> Self {
-            let core = PersonUpdateCore {
-                id,
-                name,
-                email,
-                ms_user_id,
-                orcid,
-                institution_id,
-            };
-            Self {
-                grant_roles,
-                revoke_roles,
-                core,
-            }
-        }
-    }
-
-    #[cfg(feature = "backend")]
-    impl<S: person_update_builder::State> PersonUpdateBuilder<S> {
-        pub fn grant_role(mut self, role: UserRole) -> Self {
-            self.grant_roles.push(role);
-            self
-        }
-        pub fn revoke_role(mut self, role: UserRole) -> Self {
-            self.revoke_roles.push(role);
-            self
+#[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
+impl NewPersonEmail {
+    #[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
+    #[must_use]
+    pub fn ms_user_id(self, ms_user_id: Uuid) -> NewPersonMsUserId {
+        NewPersonMsUserId {
+            inner: self,
+            ms_user_id,
         }
     }
 }
-pub use with_getters::*;
 
-#[cfg_attr(feature = "backend", backend_ordinal_columns_enum)]
-#[cfg_attr(feature = "typescript", frontend_ordinal_columns_enum)]
+#[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
+pub struct NewPersonMsUserId {
+    inner: NewPersonEmail,
+    ms_user_id: Uuid,
+}
+
+#[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
+impl NewPersonMsUserId {
+    #[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
+    #[must_use]
+    pub fn institution_id(self, institution_id: Uuid) -> NewPersonInstitutionId {
+        NewPersonInstitutionId {
+            inner: self,
+            institution_id,
+        }
+    }
+}
+
+#[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
+pub struct NewPersonInstitutionId {
+    inner: NewPersonMsUserId,
+    institution_id: Uuid,
+}
+
+#[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
+impl NewPersonInstitutionId {
+    #[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
+    pub fn build(self) -> std::result::Result<NewMsLogin, valid_string::EmptyStringError> {
+        use std::str::FromStr;
+
+        let Self {
+            inner:
+                NewPersonMsUserId {
+                    inner:
+                        NewPersonEmail {
+                            inner: NewPersonName { name },
+                            email,
+                        },
+                    ms_user_id,
+                },
+            institution_id,
+        } = self;
+
+        Ok(NewMsLogin(NewPerson {
+            name: ValidString::from_str(&name)?,
+            email,
+            orcid: None,
+            institution_id,
+            ms_user_id: Some(ms_user_id),
+            roles: vec![],
+        }))
+    }
+}
+
+#[db_selection]
+#[cfg_attr(feature = "backend", diesel(table_name = person))]
+pub struct PersonHandle {
+    #[cfg_attr(feature = "python", pyo3(get))]
+    pub id: Uuid,
+    #[cfg_attr(feature = "python", pyo3(get))]
+    pub link: String,
+}
+
+#[db_selection]
+#[cfg_attr(feature = "backend", diesel(table_name = person))]
+pub struct PersonSummary {
+    #[serde(flatten)]
+    #[cfg_attr(feature = "backend", diesel(embed))]
+    pub handle: PersonHandle,
+    #[cfg_attr(feature = "python", pyo3(get))]
+    pub name: String,
+    #[cfg_attr(feature = "python", pyo3(get))]
+    pub email: Option<String>,
+    #[cfg_attr(feature = "python", pyo3(get))]
+    pub orcid: Option<String>,
+}
+
+#[getters_impl]
+impl PersonSummary {
+    #[must_use]
+    pub fn id(&self) -> Uuid {
+        self.handle.id
+    }
+
+    #[must_use]
+    pub fn link(&self) -> String {
+        self.handle.link.to_string()
+    }
+}
+
+#[db_selection]
+#[cfg_attr(feature = "backend", diesel(table_name = person))]
+pub struct PersonCore {
+    #[serde(flatten)]
+    #[cfg_attr(feature = "backend", diesel(embed))]
+    pub summary: PersonSummary,
+    #[cfg_attr(feature = "backend", diesel(embed))]
+    #[cfg_attr(feature = "python", pyo3(get))]
+    pub institution: Institution,
+}
+
+#[cfg_attr(target_arch = "wasm32", wasm_bindgen(getter_with_clone))]
+#[cfg_attr(feature = "python", pyclass)]
+#[base_api_model]
+pub struct Person {
+    #[serde(flatten)]
+    pub core: PersonCore,
+    pub roles: Vec<UserRole>,
+}
+
+#[getters_impl]
+impl Person {
+    #[must_use]
+    pub fn id(&self) -> Uuid {
+        self.core.summary.id()
+    }
+
+    #[must_use]
+    pub fn link(&self) -> String {
+        self.core.summary.link()
+    }
+
+    #[must_use]
+    pub fn name(&self) -> String {
+        self.core.summary.name.clone()
+    }
+
+    #[must_use]
+    pub fn email(&self) -> Option<String> {
+        self.core.summary.email.clone()
+    }
+
+    #[must_use]
+    pub fn orcid(&self) -> Option<String> {
+        self.core.summary.orcid.clone()
+    }
+
+    #[must_use]
+    pub fn institution(&self) -> Institution {
+        self.core.institution.clone()
+    }
+}
+
+#[cfg_attr(target_arch = "wasm32", wasm_bindgen(getter_with_clone))]
+#[base_api_model]
+pub struct CreatedUser {
+    #[serde(flatten)]
+    pub person: Person,
+    pub api_key: String,
+}
+
+#[getters_impl]
+impl CreatedUser {
+    #[cfg_attr(target_arch = "wasm32", wasm_bindgen(getter))]
+    #[must_use]
+    pub fn id(&self) -> Uuid {
+        self.person.id()
+    }
+
+    #[cfg_attr(target_arch = "wasm32", wasm_bindgen(getter))]
+    #[must_use]
+    pub fn link(&self) -> String {
+        self.person.link()
+    }
+
+    #[cfg_attr(target_arch = "wasm32", wasm_bindgen(getter))]
+    #[must_use]
+    pub fn name(&self) -> String {
+        self.person.name()
+    }
+
+    #[cfg_attr(target_arch = "wasm32", wasm_bindgen(getter))]
+    #[must_use]
+    pub fn email(&self) -> Option<String> {
+        self.person.email()
+    }
+
+    #[cfg_attr(target_arch = "wasm32", wasm_bindgen(getter))]
+    #[must_use]
+    pub fn orcid(&self) -> Option<String> {
+        self.person.orcid()
+    }
+
+    #[cfg_attr(target_arch = "wasm32", wasm_bindgen(getter))]
+    #[must_use]
+    pub fn roles(&self) -> Vec<UserRole> {
+        self.person.roles.clone()
+    }
+
+    #[cfg_attr(target_arch = "wasm32", wasm_bindgen(getter))]
+    #[must_use]
+    pub fn institution(&self) -> Institution {
+        self.person.institution()
+    }
+}
+
+#[db_update]
+#[cfg_attr(feature = "backend", diesel(table_name = person))]
+pub struct PersonUpdateCore {
+    pub id: Uuid,
+    #[garde(dive)]
+    pub name: Option<ValidString>,
+    #[garde(email)]
+    pub email: Option<String>,
+    pub ms_user_id: Option<Uuid>,
+    #[garde(dive)]
+    pub orcid: Option<ValidString>,
+    pub institution_id: Option<Uuid>,
+}
+
+#[base_api_model_with_default]
+pub struct PersonUpdate {
+    pub grant_roles: Vec<UserRole>,
+    pub revoke_roles: Vec<UserRole>,
+    #[serde(flatten)]
+    #[garde(dive)]
+    pub core: PersonUpdateCore,
+}
+
+#[base_api_model_with_default]
 pub enum PersonOrdinalColumn {
     #[default]
     Name,
     Email,
 }
 
-#[cfg_attr(feature = "backend", backend_ordering)]
-#[cfg_attr(feature = "typescript", frontend_ordering)]
-pub struct PersonOrdering {
-    pub by: PersonOrdinalColumn,
-    pub descending: bool,
-}
-
-#[cfg_attr(feature = "backend", backend_query_request)]
-#[cfg_attr(feature = "typescript", frontend_query_request)]
+#[db_query]
 pub struct PersonQuery {
+    #[builder(default)]
     pub ids: Vec<Uuid>,
     pub name: Option<String>,
     pub email: Option<String>,
     pub orcid: Option<String>,
     pub ms_user_id: Option<Uuid>,
-    pub order_by: Vec<PersonOrdering>,
+    #[cfg_attr(target_arch = "wasm32", wasm_bindgen(skip))]
+    pub order_by: SortByGroup<PersonOrdinalColumn>,
+    #[builder(default)]
     pub pagination: Pagination,
 }

@@ -1,7 +1,11 @@
-#[cfg(feature = "typescript")]
+#[cfg(feature = "python")]
+use pyo3::prelude::*;
+use scamplers_macros::{base_api_model, base_api_model_with_default};
+#[cfg(target_arch = "wasm32")]
 use wasm_bindgen::prelude::*;
 
 pub mod chemistry;
+pub mod chromium_run;
 pub mod index_sets;
 pub mod institution;
 pub mod lab;
@@ -12,18 +16,12 @@ pub mod specimen;
 pub mod suspension;
 pub mod units;
 
-#[cfg_attr(
-    feature = "typescript",
-    derive(Clone, serde::Serialize),
-    wasm_bindgen(setter)
-)]
-#[cfg_attr(
-    feature = "backend",
-    derive(serde::Deserialize, valuable::Valuable, Debug),
-    serde(default)
-)]
+#[cfg_attr(feature = "python", pyclass(get_all, set_all))]
+#[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
+#[base_api_model]
 pub struct Pagination {
     pub limit: i64,
+    #[garde(range(min = 1))]
     pub offset: i64,
 }
 
@@ -36,93 +34,70 @@ impl Default for Pagination {
     }
 }
 
-#[cfg(feature = "typescript")]
-#[wasm_bindgen]
-impl Pagination {
-    #[wasm_bindgen(constructor)]
-    #[must_use]
-    pub fn new(limit: i64, offset: i64) -> Self {
-        Self { limit, offset }
-    }
-}
-
-pub trait IsUpdate {
-    fn is_update(&self) -> bool;
-}
-
-trait DefaultOrdering {
-    fn default() -> Self;
-}
-impl<T> DefaultOrdering for Vec<T>
+#[base_api_model_with_default]
+#[derive(PartialEq)]
+pub struct SortBy<C>
 where
-    T: Default,
-{
-    fn default() -> Self {
-        vec![T::default()]
-    }
-}
-
-#[derive(serde::Deserialize, Default, Debug, valuable::Valuable)]
-#[serde(default)]
-pub struct Order<C>
-where
-    C: valuable::Valuable,
+    C: valuable::Valuable + Default,
 {
     pub by: C,
     pub descending: bool,
 }
 
-#[cfg(test)]
-mod tests {
-    #[cfg(feature = "typescript")]
-    #[test]
-    fn write_request_builder() {
-        use scamplers_macros::frontend_insertion;
+#[base_api_model]
+#[serde(transparent)]
+#[valuable(transparent)]
+#[derive(PartialEq)]
+pub struct SortByGroup<C>(Vec<SortBy<C>>)
+where
+    C: valuable::Valuable + Default;
 
-        #[frontend_insertion]
-        #[derive(Debug, PartialEq)]
-        struct WriteStruct {
-            field: String,
-            #[builder(default)]
-            optional_field: Option<String>,
-        }
+impl<C> Default for SortByGroup<C>
+where
+    C: valuable::Valuable + Default,
+{
+    fn default() -> Self {
+        Self(vec![SortBy::<C>::default()])
+    }
+}
 
-        let functional = WriteStruct::new()
-            .field(String::new())
-            .build()
-            .expect("failed to build struct without setting optional field");
+impl<C> From<SortBy<C>> for SortByGroup<C>
+where
+    C: valuable::Valuable + Default,
+{
+    fn from(value: SortBy<C>) -> Self {
+        Self(vec![value])
+    }
+}
 
-        assert_eq!(
-            functional,
-            WriteStruct {
-                field: String::new(),
-                optional_field: None
-            }
-        );
+impl<C> From<(C, bool)> for SortBy<C>
+where
+    C: valuable::Valuable + Default,
+{
+    fn from((by, descending): (C, bool)) -> Self {
+        Self { by, descending }
+    }
+}
 
-        WriteStruct::new().build().unwrap_err();
+impl<C> From<(C, bool)> for SortByGroup<C>
+where
+    C: valuable::Valuable + Default,
+{
+    fn from(value: (C, bool)) -> Self {
+        SortByGroup(vec![value.into()])
+    }
+}
+
+impl<C> SortByGroup<C>
+where
+    C: valuable::Valuable + Default,
+{
+    #[must_use]
+    pub fn as_slice(&self) -> &[SortBy<C>] {
+        self.0.as_slice()
     }
 
-    #[cfg(feature = "typescript")]
-    #[test]
-    fn default_query_request() {
-        use scamplers_macros::frontend_query_request;
-
-        #[frontend_query_request]
-        #[derive(Debug, PartialEq)]
-        struct QueryStruct {
-            optional_field: Option<String>,
-            order_by: Vec<String>,
-        }
-
-        let default_query = QueryStruct::default();
-
-        assert_eq!(
-            default_query,
-            QueryStruct {
-                optional_field: None,
-                order_by: vec![String::new()]
-            }
-        );
+    pub fn push(&mut self, value: SortBy<C>) {
+        self.0.push(value);
     }
 }

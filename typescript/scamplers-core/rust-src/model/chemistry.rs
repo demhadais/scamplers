@@ -1,17 +1,22 @@
-use crate::string::ValidString;
-use serde_json::Value;
 #[cfg(feature = "backend")]
-use {scamplers_macros::backend_insertion, scamplers_schema::chemistry};
+use scamplers_schema::chemistry;
+use serde_json::Value;
+use valid_string::ValidString;
 
-#[cfg_attr(feature = "backend", backend_insertion(chemistry))]
-#[cfg_attr(feature = "backend", derive(Clone))]
+#[derive(
+    Debug, ::serde::Deserialize, ::serde::Serialize, Clone, ::garde::Validate, ::valuable::Valuable,
+)]
+#[garde(allow_unvalidated)]
+#[cfg_attr(feature = "backend", derive(::diesel::Insertable))]
+#[cfg_attr(feature = "backend", diesel(check_for_backend(diesel::pg::Pg), table_name = chemistry))]
 pub struct Chemistry {
-    #[cfg_attr(feature = "backend", garde(dive))]
-    name: ValidString,
-    #[cfg_attr(feature = "backend", garde(dive))]
-    description: ValidString,
-    #[cfg_attr(feature = "backend", serde(flatten), valuable(skip))]
-    definition: Value,
-    #[cfg_attr(feature = "backend", garde(dive))]
-    cmdline: ValidString,
+    #[garde(dive)]
+    pub name: ValidString,
+    #[garde(dive)]
+    pub description: ValidString,
+    #[serde(flatten)]
+    #[valuable(skip)]
+    pub definition: Value,
+    #[garde(dive)]
+    pub cmdline: ValidString,
 }

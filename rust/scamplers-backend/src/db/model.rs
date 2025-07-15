@@ -2,13 +2,14 @@ use super::error;
 use crate::db::util::{BoxedDieselExpression, NewBoxedDieselExpression};
 use diesel_async::AsyncPgConnection;
 
+pub mod chromium_run;
 pub mod institution;
 pub mod lab;
-pub mod multiplexed_suspension;
 pub mod person;
 pub mod sequencing_run;
 pub mod specimen;
 pub mod suspension;
+pub mod suspension_pool;
 
 trait AsDieselFilter<QuerySource = ()> {
     fn as_diesel_filter<'a>(&'a self) -> Option<BoxedDieselExpression<'a, QuerySource>>
@@ -49,7 +50,7 @@ trait AsDieselQueryBase {
 pub trait WriteToDb {
     type Returns;
 
-    fn write(
+    fn write_to_db(
         self,
         db_conn: &mut AsyncPgConnection,
     ) -> impl Future<Output = error::Result<Self::Returns>> + Send;
@@ -61,8 +62,11 @@ trait WriteToDbInternal {
     async fn write(self, db_conn: &mut AsyncPgConnection) -> error::Result<Self::Returns>;
 }
 
-trait IsUpdate {
-    fn is_update(&self) -> bool;
+trait IsUpdate<const N: usize> {
+    fn fields_are_some(&self) -> [bool; N];
+    fn is_update(&self) -> bool {
+        self.fields_are_some().iter().any(|b| *b)
+    }
 }
 
 pub trait FetchById: Sized {

@@ -6,7 +6,10 @@ use scamplers_schema::chemistry;
 impl WriteToDb for Vec<Chemistry> {
     type Returns = ();
 
-    async fn write(self, db_conn: &mut AsyncPgConnection) -> db::error::Result<Self::Returns> {
+    async fn write_to_db(
+        self,
+        db_conn: &mut AsyncPgConnection,
+    ) -> db::error::Result<Self::Returns> {
         diesel::insert_into(chemistry::table)
             .values(self)
             .on_conflict_do_nothing()

@@ -6,7 +6,7 @@ use scamplers_schema::library_type_specification;
 
 impl WriteToDb for Vec<NewLibraryTypeSpecification> {
     type Returns = ();
-    async fn write(
+    async fn write_to_db(
         self,
         db_conn: &mut diesel_async::AsyncPgConnection,
     ) -> db::error::Result<Self::Returns> {

@@ -5,14 +5,14 @@ use axum::{
 };
 use diesel_async::{AsyncConnection, scoped_futures::ScopedFutureExt};
 use garde::Validate;
-use scamplers_core::model::person::{CreatedUser, NewPerson};
+use scamplers_core::model::person::{CreatedUser, NewMsLogin};
 use serde::{Serialize, de::DeserializeOwned};
 use valuable::Valuable;
 
 use crate::{
     db::{
         DbTransaction,
-        model::{self, FetchRelatives, person::WriteLogin},
+        model::{self, FetchRelatives, WriteToDb},
     },
     server::{
         AppState,
@@ -79,13 +79,13 @@ impl<T: Serialize> IntoResponse for ValidJson<T> {
 pub(super) async fn new_user(
     _auth: Frontend,
     State(app_state): State<AppState>,
-    ValidJson(person): ValidJson<NewPerson>,
+    ValidJson(new_login): ValidJson<NewMsLogin>,
 ) -> Result<Json<CreatedUser>> {
-    tracing::info!(deserialized_new_user = person.as_value());
+    tracing::info!(deserialized_new_user = new_login.as_value());
 
     let mut db_conn = app_state.db_conn().await?;
 
-    let created_user = person.write_ms_login(&mut db_conn).await?;
+    let created_user = new_login.write_to_db(&mut db_conn).await?;
 
     Ok(Json(created_user))
 }
@@ -108,7 +108,7 @@ where
             async move {
                 conn.set_transaction_user(&user_id.to_string()).await?;
 
-                data.write(conn).await
+                data.write_to_db(conn).await
             }
             .scope_boxed()
         })

@@ -1,68 +1,72 @@
-use crate::{model::specimen::common::NewSpecimenCommon, string::ValidString};
-#[cfg(feature = "typescript")]
-use scamplers_macros::frontend_enum;
+use scamplers_macros::{base_api_model, db_enum, db_insertion};
 #[cfg(feature = "backend")]
-use {
-    super::common::is_true,
-    scamplers_macros::{backend_db_enum, backend_insertion},
-    scamplers_schema::specimen,
-};
+use scamplers_schema::specimen;
+use valid_string::ValidString;
 
-#[cfg_attr(feature = "backend", backend_db_enum)]
-#[cfg_attr(feature = "typescript", frontend_enum)]
+use crate::model::specimen::common::NewSpecimenCommon;
+
+#[db_enum]
 #[derive(Default)]
 pub enum TissueType {
     #[default]
     Tissue,
 }
 
-#[cfg_attr(feature = "backend", backend_db_enum)]
+#[db_enum]
+#[derive(Default)]
 pub enum TissueFixative {
+    #[default]
     DithiobisSuccinimidylropionate,
 }
 
-#[cfg_attr(feature = "backend", backend_insertion(specimen))]
+#[db_insertion]
+#[cfg_attr(feature = "backend", diesel(table_name = specimen))]
 pub struct NewFixedTissue {
-    #[cfg_attr(feature = "backend", diesel(embed), serde(flatten), garde(dive))]
-    pub(super) common: NewSpecimenCommon,
-    #[cfg_attr(feature = "backend", serde(skip))]
-    type_: TissueType,
-    storage_buffer: Option<ValidString>,
-    fixative: TissueFixative,
+    #[serde(flatten)]
+    #[garde(dive)]
+    #[cfg_attr(feature = "backend", diesel(embed))]
+    pub inner: NewSpecimenCommon,
+    #[serde(skip)]
+    pub type_: TissueType,
+    #[garde(dive)]
+    pub storage_buffer: Option<ValidString>,
+    pub fixative: TissueFixative,
 }
 
-#[cfg_attr(feature = "backend", backend_insertion(specimen))]
+#[db_insertion]
+#[cfg_attr(feature = "backend", diesel(table_name = specimen))]
 pub struct NewFrozenTissue {
-    #[cfg_attr(feature = "backend", diesel(embed), serde(flatten), garde(dive))]
-    pub(super) common: NewSpecimenCommon,
-    #[cfg_attr(feature = "backend", serde(skip))]
-    type_: TissueType,
-    storage_buffer: Option<ValidString>,
-    #[cfg_attr(feature = "backend", garde(custom(is_true)))]
+    #[serde(flatten)]
+    #[garde(dive)]
+    #[cfg_attr(feature = "backend", diesel(embed))]
+    pub inner: NewSpecimenCommon,
+    #[serde(skip)]
+    pub type_: TissueType,
+    #[garde(dive)]
+    pub storage_buffer: Option<ValidString>,
+    #[garde(custom(super::common::is_true))]
     pub frozen: bool,
 }
 
-#[cfg_attr(feature = "backend", backend_insertion(specimen))]
+#[db_insertion]
+#[cfg_attr(feature = "backend", diesel(table_name = specimen))]
 pub struct NewCryoPreservedTissue {
-    #[cfg_attr(feature = "backend", diesel(embed), serde(flatten), garde(dive))]
-    pub(super) common: NewSpecimenCommon,
-    #[cfg_attr(feature = "backend", serde(skip))]
-    type_: TissueType,
-    storage_buffer: Option<ValidString>,
-    #[cfg_attr(feature = "backend", garde(custom(is_true)))]
+    #[serde(flatten)]
+    #[garde(dive)]
+    #[cfg_attr(feature = "backend", diesel(embed))]
+    pub inner: NewSpecimenCommon,
+    #[serde(skip)]
+    pub type_: TissueType,
+    #[garde(dive)]
+    pub storage_buffer: Option<ValidString>,
+    #[garde(custom(super::common::is_true))]
     pub cryopreserved: bool,
 }
 
-#[cfg_attr(
-    feature = "backend",
-    derive(serde::Deserialize, Debug, valuable::Valuable, garde::Validate)
-)]
-#[cfg_attr(
-    feature = "backend",
-    serde(rename_all = "snake_case", tag = "preservation")
-)]
+#[base_api_model]
+#[serde(tag = "preservation")]
 pub enum NewTissue {
-    Cryopreserved(#[cfg_attr(feature = "backend", garde(dive))] NewCryoPreservedTissue),
-    Fixed(#[cfg_attr(feature = "backend", garde(dive))] NewFixedTissue),
-    Frozen(#[cfg_attr(feature = "backend", garde(dive))] NewFrozenTissue),
+    Cryopreserved(#[garde(dive)] NewCryoPreservedTissue),
+    Fixed(#[garde(dive)] NewFixedTissue),
+    Frozen(#[garde(dive)] NewFrozenTissue),
 }

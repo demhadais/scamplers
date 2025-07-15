@@ -142,7 +142,7 @@ impl model::FetchById for Person {
 
 impl model::WriteToDb for NewPerson {
     type Returns = Person;
-    async fn write(self, db_conn: &mut AsyncPgConnection) -> Result<Self::Returns> {
+    async fn write_to_db(self, db_conn: &mut AsyncPgConnection) -> Result<Self::Returns> {
         let id = diesel::insert_into(person::table)
             .values(self)
             .returning(id_col)
@@ -153,25 +153,29 @@ impl model::WriteToDb for NewPerson {
     }
 }
 
-impl IsUpdate for PersonUpdateCore {
-    fn is_update(&self) -> bool {
-        matches!(
-            self,
-            Self {
-                name: Some(_),
-                email: Some(_),
-                ms_user_id: Some(_),
-                orcid: Some(_),
-                institution_id: Some(_),
-                ..
-            }
-        )
+impl IsUpdate<5> for PersonUpdateCore {
+    fn fields_are_some(&self) -> [bool; 5] {
+        let Self {
+            name,
+            email,
+            ms_user_id,
+            orcid,
+            institution_id,
+            ..
+        } = self;
+        [
+            name.is_some(),
+            email.is_some(),
+            ms_user_id.is_some(),
+            orcid.is_some(),
+            institution_id.is_some(),
+        ]
     }
 }
 
 impl model::WriteToDb for PersonUpdate {
     type Returns = Person;
-    async fn write(self, db_conn: &mut AsyncPgConnection) -> Result<Self::Returns> {
+    async fn write_to_db(self, db_conn: &mut AsyncPgConnection) -> Result<Self::Returns> {
         let Self {
             core,
             grant_roles,
@@ -197,17 +201,10 @@ impl model::WriteToDb for PersonUpdate {
     }
 }
 
-pub trait WriteLogin {
-    async fn write_ms_login(
-        self,
-        db_conn: &mut AsyncPgConnection,
-    ) -> crate::db::error::Result<CreatedUser>;
-}
-
 impl WriteToDb for NewMsLogin {
     type Returns = CreatedUser;
 
-    async fn write(
+    async fn write_to_db(
         self,
         db_conn: &mut AsyncPgConnection,
     ) -> crate::db::error::Result<Self::Returns> {
@@ -291,7 +288,7 @@ mod tests {
         db::{
             DbTransaction,
             error::Error,
-            model::{FetchByQuery, WriteToDb, person::WriteLogin},
+            model::{FetchByQuery, IsUpdate, WriteToDb},
             test_util::{DbConnection, N_PEOPLE, db_conn, test_query},
         },
     };
@@ -342,18 +339,20 @@ mod tests {
                     let id = people.get(0).unwrap().id();
 
                     let new_name = "Thomas Anderson";
-                    let new_email = "thomas.anderson@neo.com";
+                    let new_email = "neo@example.com";
 
                     let updated_person = PersonUpdateCore::builder()
                         .id(id)
                         .name(new_name)
                         .email(new_email)
                         .build();
+                    assert!(updated_person.is_update());
+
                     let updated_person = PersonUpdate {
                         core: updated_person,
                         ..Default::default()
                     }
-                    .write(tx)
+                    .write_to_db(tx)
                     .await
                     .unwrap();
 
@@ -395,12 +394,12 @@ mod tests {
                         .build()
                         .unwrap();
 
-                    let created_user = new_ms_login.clone().write(tx).await.unwrap();
+                    let created_user = new_ms_login.clone().write_to_db(tx).await.unwrap();
 
                     // The user logs out and changes their email address, then logs back in
                     let new_email = "spider.man@example.com".to_string();
                     new_ms_login.0.email = new_email.clone();
-                    let recreated_user = new_ms_login.write(tx).await.unwrap();
+                    let recreated_user = new_ms_login.write_to_db(tx).await.unwrap();
 
                     assert_eq!(created_user.id(), recreated_user.id());
                     assert_eq!(new_email, *recreated_user.email().as_ref().unwrap());
@@ -408,15 +407,13 @@ mod tests {
 
                     tx.set_transaction_user("postgres").await.unwrap();
 
-                    let id = created_user.id();
-
                     let core = PersonUpdateCore::builder().id(created_user.id()).build();
                     let person_with_granted_roles = PersonUpdate {
                         core: core.clone(),
                         grant_roles: vec![UserRole::AppAdmin],
                         ..Default::default()
                     }
-                    .write(tx)
+                    .write_to_db(tx)
                     .await
                     .unwrap();
 
@@ -427,7 +424,7 @@ mod tests {
                         revoke_roles: vec![UserRole::AppAdmin],
                         ..Default::default()
                     }
-                    .write(tx)
+                    .write_to_db(tx)
                     .await
                     .unwrap();
 

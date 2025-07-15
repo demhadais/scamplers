@@ -15,17 +15,20 @@ async fn prod_api() {
     let institution_id = Uuid::now_v7();
 
     let seed_data = json!({
-        "institution": {
+          "institution": {
             "id": institution_id,
             "name": "Hogwarts School for Witchcraft and Wizardry"
-        },
-        "app_admin": {
+          },
+          "app_admin": {
             "name": "Ahmed",
             "email": "ahmed.said@jax.org",
             "institution_id": institution_id
-        },
-        "index_set_urls": []
-    });
+          },
+          "index_set_urls": [],
+          "library_type_specifications": [],
+          "chemistries": []
+        }
+    );
 
     let db_root_password = container.password().unwrap();
     let db_login_user_password = Uuid::now_v7().to_string();

@@ -13,7 +13,9 @@ pub enum TissueType {
 }
 
 #[db_enum]
+#[derive(Default)]
 pub enum TissueFixative {
+    #[default]
     DithiobisSuccinimidylropionate,
 }
 

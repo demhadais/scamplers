@@ -11,12 +11,16 @@ pub enum BlockType {
 }
 
 #[db_enum]
+#[derive(Default)]
 pub enum FixedBlockEmbeddingMatrix {
+    #[default]
     Paraffin,
 }
 
 #[db_enum]
+#[derive(Default)]
 pub enum BlockFixative {
+    #[default]
     FormaldehydeDerivative,
 }
 
@@ -34,7 +38,9 @@ pub struct NewFixedBlock {
 }
 
 #[db_enum]
+#[derive(Default)]
 pub enum FrozenBlockEmbeddingMatrix {
+    #[default] // Honestly not sure why I need this :(
     CarboxymethylCellulose,
     OptimalCuttingTemperatureCompound,
 }

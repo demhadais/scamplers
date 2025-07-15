@@ -12,30 +12,28 @@ use scamplers_core::model::{
     person::PersonSummary,
 };
 use scamplers_schema::{
-    lab::{self, id as id_col, name as name_col, pi_id as pi_id_col},
+    lab::{self, id as id_col, name as name_col},
     lab_membership::{self, lab_id as lab_id_col, member_id as member_id_col},
     person,
 };
 use uuid::Uuid;
 
-impl IsUpdate for LabUpdateCore {
-    fn is_update(&self) -> bool {
-        matches!(
-            self,
-            Self {
-                name: Some(_),
-                pi_id: Some(_),
-                delivery_dir: Some(_),
-                ..
-            }
-        )
+impl IsUpdate<3> for LabUpdateCore {
+    fn fields_are_some(&self) -> [bool; 3] {
+        let Self {
+            name,
+            pi_id,
+            delivery_dir,
+            ..
+        } = self;
+        [name.is_some(), pi_id.is_some(), delivery_dir.is_some()]
     }
 }
 
 impl model::WriteToDb for LabUpdate {
     type Returns = Lab;
 
-    async fn write(
+    async fn write_to_db(
         self,
         db_conn: &mut diesel_async::AsyncPgConnection,
     ) -> super::error::Result<Self::Returns> {
@@ -81,7 +79,7 @@ impl model::WriteToDb for LabUpdate {
 impl model::WriteToDb for NewLab {
     type Returns = Lab;
 
-    async fn write(
+    async fn write_to_db(
         mut self,
         db_conn: &mut diesel_async::AsyncPgConnection,
     ) -> super::error::Result<Self::Returns> {
@@ -99,7 +97,7 @@ impl model::WriteToDb for NewLab {
             ..Default::default()
         };
 
-        update.write(db_conn).await
+        update.write_to_db(db_conn).await
     }
 }
 
@@ -252,7 +250,7 @@ mod tests {
                         .delivery_dir("rick_sanchez")
                         .build();
 
-                    let new_lab = new_lab.write(tx).await.unwrap();
+                    let new_lab = new_lab.write_to_db(tx).await.unwrap();
 
                     // We expect one member - the PI
                     assert_eq!(new_lab.members.len(), 1);
@@ -290,7 +288,7 @@ mod tests {
                         remove_members: vec![member_to_be_removed],
                         ..Default::default()
                     }
-                    .write(tx)
+                    .write_to_db(tx)
                     .await
                     .unwrap();
 

@@ -1,66 +1,48 @@
-use {crate::string::ValidString, time::OffsetDateTime, uuid::Uuid};
+use scamplers_macros::db_selection;
 #[cfg(feature = "backend")]
-use {
-    scamplers_macros::{backend_insertion, backend_with_getters},
-    scamplers_schema::{sequencing_run, sequencing_submissions},
-};
+use scamplers_schema::{sequencing_run, sequencing_submissions};
+use valid_string::ValidString;
+use {scamplers_macros::db_insertion, time::OffsetDateTime, uuid::Uuid};
 
-#[cfg_attr(feature = "backend", backend_insertion(sequencing_submissions))]
+#[db_insertion]
+#[cfg_attr(feature = "backend", diesel(table_name = sequencing_submissions))]
 pub struct NewSequencingSubmission {
-    #[cfg_attr(feature = "backend", serde(default))]
-    sequencing_run_id: Uuid,
-    library_id: Uuid,
-    fastq_paths: Vec<ValidString>,
-    #[cfg_attr(feature = "backend", valuable(skip))]
-    submitted_at: OffsetDateTime,
+    #[serde(default)]
+    pub sequencing_run_id: Uuid,
+    pub library_id: Uuid,
+    pub fastq_paths: Vec<ValidString>,
+    pub submitted_at: OffsetDateTime,
 }
 
-#[cfg_attr(feature = "backend", backend_insertion(sequencing_run))]
+#[db_insertion]
+#[cfg_attr(feature = "backend", diesel(table_name = sequencing_run))]
 pub struct NewSequencingRun {
-    #[cfg_attr(feature = "backend", garde(dive))]
-    readable_id: ValidString,
-    #[cfg_attr(feature = "backend", valuable(skip))]
-    begun_at: OffsetDateTime,
-    #[cfg_attr(feature = "backend", valuable(skip))]
-    finished_at: Option<OffsetDateTime>,
-    #[cfg_attr(feature = "backend", garde(dive))]
-    notes: Option<ValidString>,
-    #[cfg_attr(feature = "backend", garde(dive), diesel(skip_insertion))]
-    libraries: Vec<NewSequencingSubmission>,
-}
-impl NewSequencingRun {
-    pub fn libraries(&mut self, sequencing_run_id: Uuid) -> &[NewSequencingSubmission] {
-        for submission in &mut self.libraries {
-            submission.sequencing_run_id = sequencing_run_id;
-        }
-
-        &self.libraries
-    }
+    #[garde(dive)]
+    pub readable_id: ValidString,
+    pub begun_at: OffsetDateTime,
+    pub finished_at: Option<OffsetDateTime>,
+    #[garde(dive)]
+    pub notes: Option<ValidString>,
+    #[garde(dive)]
+    #[cfg_attr(feature = "backend", diesel(skip_insertion))]
+    pub libraries: Vec<NewSequencingSubmission>,
 }
 
-#[cfg_attr(feature = "backend", backend_with_getters)]
-mod with_getters {
-    use time::OffsetDateTime;
-    use uuid::Uuid;
-    #[cfg(feature = "backend")]
-    use {scamplers_macros::backend_selection, scamplers_schema::sequencing_run};
-
-    #[cfg_attr(feature = "backend", backend_selection(sequencing_run))]
-    pub struct SequencingRunHandle {
-        id: Uuid,
-        link: String,
-    }
-
-    #[cfg_attr(feature = "backend", backend_selection(sequencing_run))]
-    pub struct SequencingRunSummary {
-        #[cfg_attr(feature = "backend", diesel(embed), serde(flatten))]
-        handle: SequencingRunHandle,
-        readable_id: String,
-        #[cfg_attr(feature = "backend", valuable(skip))]
-        begun_at: OffsetDateTime,
-        #[cfg_attr(feature = "backend", valuable(skip))]
-        finished_at: OffsetDateTime,
-        notes: Option<String>,
-    }
+#[db_selection]
+#[cfg_attr(feature = "backend", diesel(table_name = sequencing_run))]
+pub struct SequencingRunHandle {
+    pub id: Uuid,
+    pub link: String,
 }
-pub use with_getters::*;
+
+#[db_selection]
+#[cfg_attr(feature = "backend", diesel(table_name = sequencing_run))]
+pub struct SequencingRunSummary {
+    #[serde(flatten)]
+    #[cfg_attr(feature = "backend", diesel(embed))]
+    pub handle: SequencingRunHandle,
+    pub readable_id: String,
+    pub begun_at: OffsetDateTime,
+    pub finished_at: OffsetDateTime,
+    pub notes: Option<String>,
+}

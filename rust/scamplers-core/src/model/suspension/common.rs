@@ -1,6 +1,9 @@
 use crate::model::units::{LengthUnit, VolumeUnit};
-use scamplers_macros::{db_enum, db_json};
+use scamplers_macros::{db_enum, db_insertion, db_json};
+#[cfg(feature = "backend")]
+use scamplers_schema::suspension_preparers;
 use time::OffsetDateTime;
+use uuid::Uuid;
 
 #[db_enum]
 pub enum CellCountingMethod {
@@ -44,4 +47,10 @@ pub enum MeasurementDataCore {
         value: f32,
         unit: (BiologicalMaterial, LengthUnit),
     },
+}
+
+#[db_insertion]
+pub struct SuspensionPreparer {
+    pub suspension_id: Uuid,
+    pub prepared_by: Uuid,
 }

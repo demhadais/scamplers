@@ -4,9 +4,7 @@ use crate::model::{
 
 use super::{lab::LabSummary, person::PersonSummary};
 use common::{MeasurementData, Species};
-use scamplers_macros::{
-    base_api_model, base_api_model_with_default, db_enum, db_query, db_selection,
-};
+use scamplers_macros::{base_api_model, db_enum, db_query, db_selection};
 #[cfg(feature = "backend")]
 use scamplers_schema::{specimen, specimen_measurement};
 use time::OffsetDateTime;
@@ -99,14 +97,14 @@ pub enum SpecimenType {
     Suspension(virtual_::SuspensionType),
 }
 
-#[base_api_model]
+#[db_enum]
 #[serde(untagged)]
 pub enum BlockEmbeddingMatrix {
     Fixed(block::FixedBlockEmbeddingMatrix),
     Frozen(block::FrozenBlockEmbeddingMatrix),
 }
 
-#[base_api_model]
+#[db_enum]
 #[serde(untagged)]
 pub enum Fixative {
     Block(block::BlockFixative),
@@ -114,7 +112,9 @@ pub enum Fixative {
     Suspension(virtual_::SuspensionFixative),
 }
 
-#[base_api_model_with_default]
+#[db_enum]
+#[derive(Default)]
+#[serde(untagged)]
 pub enum SpecimenOrdinalColumn {
     Name,
     #[default]

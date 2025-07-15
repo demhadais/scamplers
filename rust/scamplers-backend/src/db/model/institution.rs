@@ -14,7 +14,7 @@ use crate::{
 
 impl model::WriteToDb for NewInstitution {
     type Returns = Institution;
-    async fn write(
+    async fn write_to_db(
         self,
         db_conn: &mut diesel_async::AsyncPgConnection,
     ) -> super::error::Result<Self::Returns> {

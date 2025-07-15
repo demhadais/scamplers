@@ -1,78 +1,70 @@
-use crate::{model::Pagination, string::ValidString};
-#[cfg(feature = "typescript")]
+use crate::model::{Pagination, SortByGroup};
 use scamplers_macros::{
-    frontend_insertion, frontend_ordering, frontend_ordinal_columns_enum, frontend_query_request,
-    frontend_with_getters,
+    base_api_model_with_default, db_insertion, db_query, db_selection, getters_impl,
 };
-use uuid::Uuid;
 #[cfg(feature = "backend")]
-use {
-    scamplers_macros::{
-        backend_insertion, backend_ordering, backend_ordinal_columns_enum, backend_query_request,
-        backend_with_getters,
-    },
-    scamplers_schema::institution,
-};
+use scamplers_schema::institution;
+use uuid::Uuid;
+use valid_string::ValidString;
+#[cfg(target_arch = "wasm32")]
+use wasm_bindgen::prelude::*;
 
-#[cfg_attr(
-    feature = "backend",
-    backend_insertion(institution),
-    derive(Clone, bon::Builder)
-)]
-#[cfg_attr(feature = "backend", builder(on(ValidString, into)))]
-#[cfg_attr(feature = "typescript", frontend_insertion)]
+#[db_insertion]
+#[cfg_attr(feature = "backend", diesel(table_name = institution))]
 pub struct NewInstitution {
-    id: Uuid,
-    #[cfg_attr(feature = "backend", garde(dive))]
-    name: ValidString,
+    pub id: Uuid,
+    #[garde(dive)]
+    pub name: ValidString,
 }
 
-#[cfg_attr(feature = "backend", backend_with_getters)]
-#[cfg_attr(feature = "typescript", frontend_with_getters)]
-mod read {
-    #[cfg(feature = "typescript")]
-    use scamplers_macros::frontend_response;
-    use uuid::Uuid;
-    #[cfg(feature = "backend")]
-    use {scamplers_macros::backend_selection, scamplers_schema::institution};
+#[db_selection]
+#[cfg_attr(feature = "backend", diesel(table_name = institution))]
+pub struct InstitutionHandle {
+    #[cfg_attr(feature = "python", pyo3(get))]
+    pub id: Uuid,
+    #[cfg_attr(feature = "python", pyo3(get))]
+    pub link: String,
+}
 
-    #[cfg_attr(feature = "backend", backend_selection(institution))]
-    #[cfg_attr(feature = "typescript", frontend_response)]
-    pub struct InstitutionHandle {
-        id: Uuid,
-        link: String,
+#[db_selection]
+#[cfg_attr(feature = "backend", diesel(table_name = institution))]
+pub struct Institution {
+    #[serde(flatten)]
+    #[cfg_attr(feature = "backend", diesel(embed))]
+    pub handle: InstitutionHandle,
+    #[cfg_attr(feature = "python", pyo3(get))]
+    pub name: String,
+}
+
+#[getters_impl]
+impl Institution {
+    #[must_use]
+    pub fn id(&self) -> Uuid {
+        self.handle.id
     }
 
-    #[cfg_attr(feature = "backend", backend_selection(institution))]
-    #[cfg_attr(feature = "typescript", frontend_response)]
-    pub struct Institution {
-        #[serde(flatten)]
-        #[cfg_attr(feature = "backend", diesel(embed))]
-        handle: InstitutionHandle,
-        name: String,
+    #[must_use]
+    pub fn link(&self) -> String {
+        self.handle.link.to_string()
     }
 }
-pub use read::*;
 
-#[cfg_attr(feature = "backend", backend_ordinal_columns_enum)]
-#[cfg_attr(feature = "typescript", frontend_ordinal_columns_enum)]
+#[base_api_model_with_default]
 pub enum InstitutionOrdinalColumn {
     #[default]
     Name,
 }
 
-#[cfg_attr(feature = "backend", backend_ordering)]
-#[cfg_attr(feature = "typescript", frontend_ordering)]
-pub struct InstitutionOrdering {
-    pub by: InstitutionOrdinalColumn,
-    pub descending: bool,
-}
-
-#[cfg_attr(feature = "backend", backend_query_request)]
-#[cfg_attr(feature = "typescript", frontend_query_request)]
+#[db_query]
 pub struct InstitutionQuery {
+    #[builder(default)]
+    #[cfg_attr(feature = "python", pyo3(get, set))]
     pub ids: Vec<Uuid>,
+    #[cfg_attr(feature = "python", pyo3(get, set))]
     pub name: Option<String>,
-    pub order_by: Vec<InstitutionOrdering>,
+    #[cfg_attr(target_arch = "wasm32", wasm_bindgen(skip))]
+    pub order_by: SortByGroup<InstitutionOrdinalColumn>,
+    #[builder(default)]
+    #[cfg_attr(feature = "python", pyo3(get, set))]
     pub pagination: Pagination,
 }

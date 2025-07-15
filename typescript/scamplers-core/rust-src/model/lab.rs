@@ -1,193 +1,116 @@
-use crate::{model::Pagination, string::ValidString};
-#[cfg(feature = "typescript")]
+use crate::model::{Pagination, SortByGroup, person::PersonSummary};
 use scamplers_macros::{
-    frontend_insertion, frontend_ordering, frontend_ordinal_columns_enum, frontend_query_request,
-    frontend_with_getters,
+    base_api_model, base_api_model_with_default, db_insertion, db_query, db_selection, db_update,
+    getters_impl,
 };
-use uuid::Uuid;
 #[cfg(feature = "backend")]
-use {
-    scamplers_macros::{
-        backend_insertion, backend_ordering, backend_ordinal_columns_enum, backend_query_request,
-        backend_with_getters,
-    },
-    scamplers_schema::lab,
-};
+use scamplers_schema::lab;
+use uuid::Uuid;
+use valid_string::ValidString;
 
-#[cfg_attr(feature = "backend", backend_insertion(lab), derive(bon::Builder))]
-#[cfg_attr(feature = "backend", builder(on(ValidString, into)))]
-#[cfg_attr(feature = "typescript", frontend_insertion)]
+#[db_insertion]
+#[cfg_attr(feature = "backend", diesel(table_name = lab))]
 pub struct NewLab {
-    #[cfg_attr(feature = "backend", garde(dive))]
-    name: ValidString,
-    pi_id: Uuid,
-    #[cfg_attr(feature = "backend", garde(dive))]
-    delivery_dir: ValidString,
-    #[cfg_attr(feature = "backend", diesel(skip_insertion), builder(default))]
-    #[cfg_attr(feature = "typescript", builder(default))]
-    member_ids: Vec<Uuid>,
+    #[garde(dive)]
+    pub name: ValidString,
+    pub pi_id: Uuid,
+    #[garde(dive)]
+    pub delivery_dir: ValidString,
+    #[cfg_attr(feature = "backend", diesel(skip_insertion))]
+    #[builder(default)]
+    pub member_ids: Vec<Uuid>,
 }
-impl NewLab {
+
+#[db_selection]
+#[cfg_attr(feature = "backend", diesel(table_name = lab))]
+pub struct LabHandle {
+    pub id: Uuid,
+    pub link: String,
+}
+
+#[db_selection]
+#[cfg_attr(feature = "backend", diesel(table_name = lab))]
+pub struct LabSummary {
+    #[serde(flatten)]
+    #[cfg_attr(feature = "backend", diesel(embed))]
+    pub handle: LabHandle,
+    pub name: String,
+    pub delivery_dir: String,
+}
+
+#[getters_impl]
+impl LabSummary {
     #[must_use]
-    pub fn member_ids(&self) -> &[Uuid] {
-        &self.member_ids
+    pub fn id(&self) -> Uuid {
+        self.handle.id
+    }
+
+    #[must_use]
+    pub fn link(&self) -> String {
+        self.handle.link.to_string()
     }
 }
 
-#[cfg_attr(feature = "backend", backend_with_getters)]
-#[cfg_attr(feature = "typescript", frontend_with_getters)]
-mod with_getters {
-    use crate::{
-        model::{person::PersonSummary, IsUpdate},
-        string::ValidString,
-    };
-    #[cfg(feature = "typescript")]
-    use scamplers_macros::{frontend_response, frontend_update};
-    use uuid::Uuid;
-    #[cfg(feature = "backend")]
-    use {
-        scamplers_macros::{backend_selection, backend_update},
-        scamplers_schema::lab,
-    };
+#[db_selection]
+#[cfg_attr(feature = "backend", diesel(table_name = lab))]
+pub struct LabCore {
+    #[serde(flatten)]
+    #[cfg_attr(feature = "backend", diesel(embed))]
+    pub summary: LabSummary,
+    #[cfg_attr(feature = "backend", diesel(embed))]
+    pub pi: PersonSummary,
+}
 
-    #[cfg_attr(feature = "backend", backend_selection(lab))]
-    #[cfg_attr(feature = "typescript", frontend_response)]
-    pub struct LabHandle {
-        id: Uuid,
-        link: String,
-    }
+#[cfg_attr(
+    target_arch = "wasm32",
+    wasm_bindgen::prelude::wasm_bindgen(getter_with_clone)
+)]
+#[base_api_model]
+pub struct Lab {
+    #[serde(flatten)]
+    pub core: LabCore,
+    pub members: Vec<PersonSummary>,
+}
 
-    #[cfg_attr(feature = "backend", backend_selection(lab))]
-    #[cfg_attr(feature = "typescript", frontend_response)]
-    pub struct LabSummary {
-        #[serde(flatten)]
-        #[cfg_attr(feature = "backend", diesel(embed))]
-        handle: LabHandle,
-        name: String,
-        delivery_dir: String,
-    }
-
-    #[cfg_attr(feature = "backend", backend_selection(lab))]
-    #[cfg_attr(feature = "typescript", frontend_response)]
-    pub struct LabCore {
-        #[serde(flatten)]
-        #[cfg_attr(feature = "backend", diesel(embed))]
-        summary: LabSummary,
-        #[cfg_attr(feature = "backend", diesel(embed))]
-        pi: PersonSummary,
-    }
-
-    #[cfg_attr(feature = "backend", derive(serde::Serialize, bon::Builder))]
-    #[cfg_attr(feature = "typescript", frontend_response)]
-    pub struct Lab {
-        #[serde(flatten)]
-        core: LabCore,
-        members: Vec<PersonSummary>,
-    }
-
-    #[cfg_attr(feature = "backend", backend_update(lab))]
-    #[cfg_attr(feature = "typescript", frontend_update)]
-    pub struct LabUpdateCore {
-        id: Uuid,
-        #[cfg_attr(feature = "backend", garde(dive))]
-        name: Option<ValidString>,
-        pi_id: Option<Uuid>,
-        #[cfg_attr(feature = "backend", garde(dive))]
-        delivery_dir: Option<ValidString>,
-    }
-    impl IsUpdate for LabUpdateCore {
-        fn is_update(&self) -> bool {
-            !matches!(
-                self,
-                Self {
-                    name: None,
-                    pi_id: None,
-                    delivery_dir: None,
-                    ..
-                },
-            )
-        }
-    }
-
-    #[cfg_attr(
-        feature = "backend",
-        derive(serde::Deserialize, Default, garde::Validate),
-        serde(default)
-    )]
-    #[cfg_attr(feature = "backend", garde(allow_unvalidated))]
-    #[cfg_attr(feature = "typescript", frontend_update)]
-    pub struct LabUpdate {
-        #[serde(flatten)]
-        #[cfg_attr(feature = "backend", garde(dive))]
-        core: LabUpdateCore,
-        add_members: Vec<Uuid>,
-        remove_members: Vec<Uuid>,
-    }
-    impl LabUpdate {
-        #[must_use]
-        pub fn core(&self) -> &LabUpdateCore {
-            &self.core
-        }
-    }
-
-    #[cfg(feature = "backend")]
-    #[bon::bon]
-    impl LabUpdate {
-        #[builder(on(ValidString, into))]
-        pub fn new(
-            #[builder(field)] add_members: Vec<Uuid>,
-            #[builder(field)] remove_members: Vec<Uuid>,
-            id: Uuid,
-            name: Option<ValidString>,
-            pi_id: Option<Uuid>,
-            delivery_dir: Option<ValidString>,
-        ) -> Self {
-            Self {
-                core: LabUpdateCore {
-                    id,
-                    name,
-                    pi_id,
-                    delivery_dir,
-                },
-                add_members,
-                remove_members,
-            }
-        }
-    }
-
-    #[cfg(feature = "backend")]
-    impl<S: lab_update_builder::State> LabUpdateBuilder<S> {
-        pub fn add_member(mut self, member_id: Uuid) -> Self {
-            self.add_members.push(member_id);
-            self
-        }
-        pub fn remove_member(mut self, member_id: Uuid) -> Self {
-            self.remove_members.push(member_id);
-            self
-        }
+#[getters_impl]
+impl Lab {
+    #[must_use]
+    pub fn id(&self) -> Uuid {
+        self.core.summary.id()
     }
 }
-pub use with_getters::*;
 
-#[cfg_attr(feature = "backend", backend_ordinal_columns_enum)]
-#[cfg_attr(feature = "typescript", frontend_ordinal_columns_enum)]
+#[db_update]
+#[cfg_attr(feature = "backend", diesel(table_name = lab))]
+pub struct LabUpdateCore {
+    pub id: Uuid,
+    #[garde(dive)]
+    pub name: Option<ValidString>,
+    pub pi_id: Option<Uuid>,
+    #[garde(dive)]
+    pub delivery_dir: Option<ValidString>,
+}
+
+#[base_api_model_with_default]
+pub struct LabUpdate {
+    #[serde(flatten)]
+    #[garde(dive)]
+    pub core: LabUpdateCore,
+    pub add_members: Vec<Uuid>,
+    pub remove_members: Vec<Uuid>,
+}
+
+#[base_api_model_with_default]
 pub enum LabOrdinalColumn {
     #[default]
     Name,
 }
 
-#[cfg_attr(feature = "backend", backend_ordering)]
-#[cfg_attr(feature = "typescript", frontend_ordering)]
-pub struct LabOrdering {
-    pub by: LabOrdinalColumn,
-    pub descending: bool,
-}
-
-#[cfg_attr(feature = "backend", backend_query_request)]
-#[cfg_attr(feature = "typescript", frontend_query_request)]
+#[db_query]
 pub struct LabQuery {
     pub ids: Vec<Uuid>,
     pub name: Option<String>,
-    pub order_by: Vec<LabOrdering>,
+    #[cfg_attr(target_arch = "wasm32", wasm_bindgen(skip))]
+    pub order_by: SortByGroup<LabOrdinalColumn>,
     pub pagination: Pagination,
 }

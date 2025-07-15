@@ -42,7 +42,7 @@ backend = [
     "time/backend",
     "valid-string/backend",
 ]
-python = ["pyo3"]
+python = ["pyo3", "valid-string/python", "uuid/python", "time/python"]
 
 [lints]
 workspace = true

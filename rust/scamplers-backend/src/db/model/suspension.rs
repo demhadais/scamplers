@@ -8,6 +8,7 @@ use scamplers_core::model::{
     person::PersonHandle,
     suspension::{
         NewSuspension, NewSuspensionMeasurement, Suspension, SuspensionCore, SuspensionMeasurement,
+        SuspensionPreparer,
     },
 };
 use scamplers_schema::{
@@ -66,14 +67,6 @@ impl WriteToDbInternal for &[NewSuspensionMeasurement] {
         self,
         db_conn: &mut diesel_async::AsyncPgConnection,
     ) -> db::error::Result<Self::Returns> {
-        let Some(first_suspension) = self.get(0).map(|s| s.suspension_id) else {
-            return Ok(());
-        };
-
-        if self.iter().any(|m| m.suspension_id != first_suspension) {
-            return Err(db::error::Error::Other { message: "bug: inserting multiple suspension measurements should only occur when inserting a suspension".to_string() });
-        }
-
         diesel::insert_into(suspension_measurement::table)
             .values(self)
             .execute(db_conn)
@@ -90,10 +83,34 @@ fn core_from_clause() -> _ {
         .inner_join(multiplexing_tag::table)
 }
 
+trait NewSuspensionExt {
+    fn measurements(&mut self, self_id: Uuid) -> &[NewSuspensionMeasurement];
+    fn preparers(&mut self, self_id: Uuid) -> Vec<SuspensionPreparer>;
+}
+impl NewSuspensionExt for NewSuspension {
+    fn measurements(&mut self, self_id: Uuid) -> &[NewSuspensionMeasurement] {
+        for m in &mut self.measurements {
+            m.suspension_id = self_id;
+        }
+
+        self.measurements.as_slice()
+    }
+
+    fn preparers(&mut self, self_id: Uuid) -> Vec<SuspensionPreparer> {
+        self.preparer_ids
+            .iter()
+            .map(|p| SuspensionPreparer {
+                suspension_id: self_id,
+                prepared_by: *p,
+            })
+            .collect()
+    }
+}
+
 impl WriteToDb for NewSuspension {
     type Returns = Suspension;
 
-    async fn write(
+    async fn write_to_db(
         mut self,
         db_conn: &mut diesel_async::AsyncPgConnection,
     ) -> crate::db::error::Result<Self::Returns> {

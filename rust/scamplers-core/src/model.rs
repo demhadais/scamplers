@@ -92,6 +92,7 @@ impl<C> SortByGroup<C>
 where
     C: valuable::Valuable + Default,
 {
+    #[must_use]
     pub fn as_slice(&self) -> &[SortBy<C>] {
         self.0.as_slice()
     }

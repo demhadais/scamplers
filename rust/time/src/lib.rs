@@ -16,6 +16,7 @@ const OFFSET_DATETIME_AS_VALUE: &str = "OffsetDateTime";
 #[serde(transparent)]
 pub struct OffsetDateTime(_time::OffsetDateTime);
 impl OffsetDateTime {
+    #[must_use]
     pub fn now_utc() -> Self {
         Self(_time::OffsetDateTime::now_utc())
     }

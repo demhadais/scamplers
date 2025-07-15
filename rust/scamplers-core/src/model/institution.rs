@@ -38,10 +38,12 @@ pub struct Institution {
 
 #[getters_impl]
 impl Institution {
+    #[must_use]
     pub fn id(&self) -> Uuid {
         self.handle.id
     }
 
+    #[must_use]
     pub fn link(&self) -> String {
         self.handle.link.to_string()
     }

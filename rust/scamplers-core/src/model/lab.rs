@@ -40,10 +40,12 @@ pub struct LabSummary {
 
 #[getters_impl]
 impl LabSummary {
+    #[must_use]
     pub fn id(&self) -> Uuid {
         self.handle.id
     }
 
+    #[must_use]
     pub fn link(&self) -> String {
         self.handle.link.to_string()
     }
@@ -72,6 +74,7 @@ pub struct Lab {
 
 #[getters_impl]
 impl Lab {
+    #[must_use]
     pub fn id(&self) -> Uuid {
         self.core.summary.id()
     }

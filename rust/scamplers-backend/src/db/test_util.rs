@@ -14,11 +14,7 @@ use diesel_async::{
 use pretty_assertions::assert_eq;
 use rand::seq::IndexedRandom;
 use rstest::fixture;
-use scamplers_core::model::{
-    institution::NewInstitution,
-    lab::NewLab,
-    person::{NewPerson, Person},
-};
+use scamplers_core::model::{institution::NewInstitution, lab::NewLab, person::NewPerson};
 use std::fmt::Debug;
 use tokio::sync::OnceCell;
 use uuid::Uuid;
@@ -64,7 +60,7 @@ impl TestState {
                 .id(Uuid::now_v7())
                 .name(format!("institution{i}"))
                 .build()
-                .write(db_conn)
+                .write_to_db(db_conn)
                 .await
                 .unwrap();
 
@@ -75,14 +71,14 @@ impl TestState {
 
         let mut people = Vec::with_capacity(N_PEOPLE);
         for i in 0..N_PEOPLE {
-            let institution_id = *institutions.choose(rng).unwrap().id();
+            let institution_id = institutions.choose(rng).unwrap().id();
 
             let new_person = NewPerson::builder()
                 .name(format!("person{i}"))
                 .email(format!("person{i}@example.com"))
                 .institution_id(institution_id)
                 .build()
-                .write(db_conn)
+                .write_to_db(db_conn)
                 .await
                 .unwrap();
 
@@ -91,12 +87,12 @@ impl TestState {
 
         let mut labs = Vec::with_capacity(N_LABS);
         for i in 0..N_LABS {
-            let pi_id = *people.choose(rng).map(Person::id).unwrap();
+            let pi_id = people.choose(rng).unwrap().id();
             let name = format!("lab{i}");
             // Use `N_LAB_MEMBERS - 1` because we're expecting to add the PI, so using this constant later can be correct
-            let member_ids = people
+            let member_ids: Vec<_> = people
                 .choose_multiple(rng, N_LAB_MEMBERS - 1)
-                .map(|p| *p.id())
+                .map(scamplers_core::model::person::Person::id)
                 .collect();
 
             let new_lab = NewLab::builder()
@@ -105,7 +101,7 @@ impl TestState {
                 .delivery_dir(format!("{name}_dir"))
                 .member_ids(member_ids)
                 .build()
-                .write(db_conn)
+                .write_to_db(db_conn)
                 .await
                 .unwrap();
 
