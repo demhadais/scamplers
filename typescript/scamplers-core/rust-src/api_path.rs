@@ -1,12 +1,13 @@
 use uuid::Uuid;
 
 use crate::model::{
+    chromium_run::{ChromiumRun, NewChromiumRun},
     institution::{Institution, InstitutionQuery, NewInstitution},
     lab::{Lab, LabQuery, LabSummary, NewLab},
     person::{CreatedUser, NewMsLogin, NewPerson, Person, PersonQuery, PersonSummary},
     sequencing_run::NewSequencingRun,
     specimen::{NewSpecimen, Specimen, SpecimenQuery, SpecimenSummary},
-    suspension::{NewSuspension, Suspension},
+    suspension::{NewSuspension, NewSuspensionPool, Suspension, SuspensionPoolHandle},
 };
 
 const SEARCH_SUFFIX: &str = "search";
@@ -109,5 +110,19 @@ const SUSPENSIONS: &str = "/suspensions";
 impl ToApiPath for (NewSuspension, Suspension) {
     fn to_api_path() -> String {
         SUSPENSIONS.to_string()
+    }
+}
+
+const SUSPENSION_POOLS: &str = "/suspension-pools";
+impl ToApiPath for (NewSuspensionPool, SuspensionPoolHandle) {
+    fn to_api_path() -> String {
+        SUSPENSION_POOLS.to_string()
+    }
+}
+
+const CHROMIUM_RUNS: &str = "/chromium-runs";
+impl ToApiPath for (NewChromiumRun, ChromiumRun) {
+    fn to_api_path() -> String {
+        CHROMIUM_RUNS.to_string()
     }
 }
