@@ -13,7 +13,6 @@ create table gems (
     id uuid primary key default uuidv7(),
     link text generated always as ('/gems/' || id) stored not null,
     readable_id text unique not null,
-    n_samples integer not null,
     chemistry text references chemistry on delete restrict on update restrict,
     chromium_run_id uuid not null references chromium_run on delete restrict on update restrict
 );

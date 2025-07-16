@@ -108,7 +108,6 @@ diesel::table! {
         id -> Uuid,
         link -> Text,
         readable_id -> Text,
-        n_samples -> Int4,
         chemistry -> Nullable<Text>,
         chromium_run_id -> Uuid,
     }

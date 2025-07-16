@@ -15,6 +15,31 @@ export enum UserRole {
   ComputationalStaff = 1,
   BiologyStaff = 2,
 }
+export class ChromiumRun {
+  private constructor();
+  free(): void;
+  summary: ChromiumRunSummary;
+  gems: GemsHandle[];
+  readonly id: string;
+}
+export class ChromiumRunHandle {
+  private constructor();
+  free(): void;
+  id: string;
+  link: string;
+}
+export class ChromiumRunSummary {
+  private constructor();
+  free(): void;
+  handle: ChromiumRunHandle;
+  readable_id: string;
+  chip: string;
+  run_at: Date;
+  succeeded: boolean;
+  get notes(): string;
+  set notes(value: string | null | undefined);
+  readonly id: string;
+}
 export class Client {
   free(): void;
   constructor(backend_base_url: string, token: string, api_key?: string | null);
@@ -43,6 +68,12 @@ export class CreatedUser {
 export class EmptyStringError {
   private constructor();
   free(): void;
+}
+export class GemsHandle {
+  private constructor();
+  free(): void;
+  id: string;
+  link: string;
 }
 export class Institution {
   private constructor();

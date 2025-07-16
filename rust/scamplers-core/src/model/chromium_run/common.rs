@@ -14,8 +14,6 @@ pub(super) const MAX_GEMS_IN_NON_OCM_RUN: usize = 8;
 pub struct NewGemsCommon {
     #[garde(dive)]
     pub readable_id: ValidString,
-    #[serde(skip)]
-    pub n_samples: i32,
     #[garde(dive)]
     pub chemistry: ValidString,
     #[serde(skip)]
