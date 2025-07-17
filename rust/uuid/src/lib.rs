@@ -2,15 +2,6 @@
 use diesel::{deserialize::FromSqlRow, expression::AsExpression, sql_types};
 #[cfg(feature = "python")]
 use pyo3::prelude::*;
-#[cfg(target_arch = "wasm32")]
-use wasm_bindgen::{
-    JsValue,
-    convert::{
-        FromWasmAbi, IntoWasmAbi, OptionFromWasmAbi, OptionIntoWasmAbi, TryFromJsValue,
-        VectorFromWasmAbi, VectorIntoWasmAbi, js_value_vector_from_abi, js_value_vector_into_abi,
-    },
-    describe::{WasmDescribe, WasmDescribeVector},
-};
 use {
     _uuid::Bytes,
     serde::{Deserialize, Serialize},

@@ -21,6 +21,7 @@ use {
     tokio::runtime::Runtime,
 };
 
+#[allow(dead_code)]
 #[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
 #[cfg_attr(feature = "python", pyclass)]
 #[derive(Clone)]
@@ -85,6 +86,7 @@ impl Client {
 }
 
 impl Client {
+    #[allow(dead_code)]
     async fn send_request_with_body<Req, Resp>(
         &self,
         data: Req,
