@@ -1,9 +1,11 @@
-use diesel::SelectableHelper;
+use diesel::prelude::*;
 use diesel_async::RunQueryDsl;
 use scamplers_core::model::nucleic_acid::{
     CdnaHandle, NewCdna, NewCdnaMeasurement, NewCdnaPreparer,
 };
-use scamplers_schema::{cdna, cdna_measurement, cdna_preparers};
+use scamplers_schema::{
+    cdna, cdna_measurement, cdna_preparers, chemistry, gems, library_type_specification,
+};
 use uuid::Uuid;
 
 use crate::db::model::WriteToDb;
@@ -41,6 +43,31 @@ impl WriteToDb for NewCdna {
         mut self,
         db_conn: &mut diesel_async::AsyncPgConnection,
     ) -> crate::db::error::Result<Self::Returns> {
+        let chemistry: Option<String> = gems::table
+            .inner_join(chemistry::table)
+            .filter(gems::id.eq(&self.gems_id))
+            .select(gems::chemistry)
+            .first(db_conn)
+            .await?;
+
+        if let Some(chemistry) = chemistry {
+            let expected_library_types: Vec<String> = library_type_specification::table
+                .filter(library_type_specification::chemistry.eq(chemistry))
+                .select(library_type_specification::library_type)
+                .load(db_conn)
+                .await?;
+
+            let library_type = self.library_type.to_string();
+
+            if !expected_library_types.contains(&library_type) {
+                return Err(crate::db::error::Error::Other {
+                    message: format!(
+                        "invalid library type {library_type} - expected one of {expected_library_types:?}"
+                    ),
+                });
+            }
+        }
+
         let handle = diesel::insert_into(cdna::table)
             .values(&self)
             .returning(CdnaHandle::as_returning())

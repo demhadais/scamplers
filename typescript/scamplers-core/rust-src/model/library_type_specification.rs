@@ -3,6 +3,7 @@ use scamplers_macros::{db_enum, db_insertion};
 use scamplers_schema::library_type_specification;
 
 #[db_enum]
+#[derive(strum::Display)]
 pub enum LibraryType {
     #[serde(rename = "Antibody Capture")]
     #[strum(serialize = "Antibody Capture")]
