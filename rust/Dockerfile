@@ -15,6 +15,8 @@ RUN --mount=type=bind,source=rust/Cargo.toml,target=rust/Cargo.toml \
     --mount=type=bind,source=rust/scamplers-schema,target=rust/scamplers-schema \
     --mount=type=bind,source=rust/scamplers-macros,target=rust/scamplers-macros \
     --mount=type=bind,source=rust/uuid,target=rust/uuid \
+    --mount=type=bind,source=rust/time,target=rust/time \
+    --mount=type=bind,source=rust/valid-string,target=rust/valid-string \
     --mount=type=bind,source=rust/scamplers-core,target=rust/scamplers-core \
     --mount=type=bind,source=rust/scamplers-backend,target=rust/scamplers-backend \
     --mount=type=bind,source=db,target=db \

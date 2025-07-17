@@ -1,4 +1,6 @@
 use crate::model::{Pagination, SortByGroup};
+#[cfg(feature = "python")]
+use pyo3::prelude::*;
 use scamplers_macros::{
     base_api_model_with_default, db_insertion, db_query, db_selection, getters_impl,
 };
@@ -15,6 +17,15 @@ pub struct NewInstitution {
     pub id: Uuid,
     #[garde(dive)]
     pub name: ValidString,
+}
+
+#[cfg(feature = "python")]
+#[pymethods]
+impl NewInstitution {
+    #[new]
+    fn new(id: Uuid, name: ValidString) -> Self {
+        Self { id, name }
+    }
 }
 
 #[db_selection]

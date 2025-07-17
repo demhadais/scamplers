@@ -253,11 +253,11 @@ function __wbg_adapter_40(arg0, arg1) {
 }
 
 function __wbg_adapter_43(arg0, arg1, arg2) {
-    wasm.closure120_externref_shim(arg0, arg1, arg2);
+    wasm.closure121_externref_shim(arg0, arg1, arg2);
 }
 
-function __wbg_adapter_409(arg0, arg1, arg2, arg3) {
-    wasm.closure155_externref_shim(arg0, arg1, arg2, arg3);
+function __wbg_adapter_410(arg0, arg1, arg2, arg3) {
+    wasm.closure156_externref_shim(arg0, arg1, arg2, arg3);
 }
 
 /**
@@ -607,14 +607,14 @@ export class Client {
     }
     /**
      * @param {string} backend_base_url
-     * @param {string} token
+     * @param {string | null} [frontend_token]
      * @param {string | null} [api_key]
      */
-    constructor(backend_base_url, token, api_key) {
+    constructor(backend_base_url, frontend_token, api_key) {
         const ptr0 = passStringToWasm0(backend_base_url, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
         const len0 = WASM_VECTOR_LEN;
-        const ptr1 = passStringToWasm0(token, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
-        const len1 = WASM_VECTOR_LEN;
+        var ptr1 = isLikeNone(frontend_token) ? 0 : passStringToWasm0(frontend_token, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+        var len1 = WASM_VECTOR_LEN;
         var ptr2 = isLikeNone(api_key) ? 0 : passStringToWasm0(api_key, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
         var len2 = WASM_VECTOR_LEN;
         const ret = wasm.client_new(ptr0, len0, ptr1, len1, ptr2, len2);
@@ -628,7 +628,8 @@ export class Client {
      */
     ms_login(data) {
         _assertClass(data, NewMsLogin);
-        const ret = wasm.client_ms_login(this.__wbg_ptr, data.__wbg_ptr);
+        var ptr0 = data.__destroy_into_raw();
+        const ret = wasm.client_ms_login(this.__wbg_ptr, ptr0);
         return ret;
     }
 }
@@ -2445,6 +2446,15 @@ export class SequencingRunSummary {
         var len0 = WASM_VECTOR_LEN;
         wasm.__wbg_set_sequencingrunsummary_notes(this.__wbg_ptr, ptr0, len0);
     }
+    /**
+     * @returns {string}
+     */
+    get id() {
+        const ret = wasm.sequencingrunsummary_id(this.__wbg_ptr);
+        var v1 = getCachedStringFromWasm0(ret[0], ret[1]);
+        if (ret[0] !== 0) { wasm.__wbindgen_free(ret[0], ret[1], 1); }
+        return v1;
+    }
 }
 
 const SpecimenFinalization = (typeof FinalizationRegistry === 'undefined')
@@ -3675,7 +3685,7 @@ export function __wbg_new_23a2665fac83c611(arg0, arg1) {
             const a = state0.a;
             state0.a = 0;
             try {
-                return __wbg_adapter_409(a, state0.b, arg0, arg1);
+                return __wbg_adapter_410(a, state0.b, arg0, arg1);
             } finally {
                 state0.a = a;
             }
@@ -3903,13 +3913,13 @@ export function __wbindgen_cb_drop(arg0) {
     return ret;
 };
 
-export function __wbindgen_closure_wrapper771(arg0, arg1, arg2) {
-    const ret = makeMutClosure(arg0, arg1, 101, __wbg_adapter_40);
+export function __wbindgen_closure_wrapper764(arg0, arg1, arg2) {
+    const ret = makeMutClosure(arg0, arg1, 102, __wbg_adapter_40);
     return ret;
 };
 
-export function __wbindgen_closure_wrapper827(arg0, arg1, arg2) {
-    const ret = makeMutClosure(arg0, arg1, 121, __wbg_adapter_43);
+export function __wbindgen_closure_wrapper820(arg0, arg1, arg2) {
+    const ret = makeMutClosure(arg0, arg1, 122, __wbg_adapter_43);
     return ret;
 };
 

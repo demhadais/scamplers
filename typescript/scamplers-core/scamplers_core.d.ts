@@ -48,7 +48,7 @@ export class ChromiumRunSummary {
 }
 export class Client {
   free(): void;
-  constructor(backend_base_url: string, token: string, api_key?: string | null);
+  constructor(backend_base_url: string, frontend_token?: string | null, api_key?: string | null);
   ms_login(data: NewMsLogin): Promise<CreatedUser>;
 }
 export class CommitteeApproval {
@@ -246,6 +246,7 @@ export class SequencingRunSummary {
   finished_at: Date;
   get notes(): string;
   set notes(value: string | null | undefined);
+  readonly id: string;
 }
 export class Specimen {
   private constructor();

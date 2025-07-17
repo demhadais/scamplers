@@ -1,4 +1,16 @@
 from uuid import UUID
-# TODO: add type hints here
+
 class NewInstitution:
-    def __init__(self, name: str, ms_tenant_id: UUID) -> None: ...
+    id: UUID
+    name: str
+    def __new__(cls, id: UUID, name: str) -> None: ...
+
+class Institution:
+    id: UUID
+    name: str
+    ...
+
+class Client:
+    def __new__(cls, backend_base_url: str, api_key: str) -> None: ...
+
+    async def create_institution(self, institution: NewInstitution) -> Institution: ...

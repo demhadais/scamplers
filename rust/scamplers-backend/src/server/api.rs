@@ -5,12 +5,14 @@ use axum::{
 use scamplers_core::{
     api_path::ToApiPath,
     model::{
+        chromium_run::{ChromiumRun, NewChromiumRun},
         institution::{Institution, InstitutionQuery, NewInstitution},
         lab::{Lab, LabQuery, LabSummary, NewLab},
+        nucleic_acid::{CdnaHandle, NewCdna},
         person::{CreatedUser, NewMsLogin, NewPerson, Person, PersonQuery, PersonSummary},
-        sequencing_run::NewSequencingRun,
+        sequencing_run::{NewSequencingRun, SequencingRunSummary},
         specimen::{NewSpecimen, Specimen, SpecimenQuery, SpecimenSummary},
-        suspension::{NewSuspension, Suspension},
+        suspension::{NewSuspension, NewSuspensionPool, Suspension, SuspensionPoolHandle},
     },
 };
 use scamplers_schema::lab::dsl::lab;
@@ -68,11 +70,23 @@ pub(super) fn router() -> Router<AppState> {
             post(by_query::<SpecimenSummary>),
         )
         .route(
-            &<(NewSequencingRun, ())>::to_api_path(),
-            post(write::<NewSequencingRun>),
-        )
-        .route(
             &<(NewSuspension, Suspension)>::to_api_path(),
             post(write::<NewSuspension>),
+        )
+        .route(
+            &<(NewSuspensionPool, SuspensionPoolHandle)>::to_api_path(),
+            post(write::<NewSuspensionPool>),
+        )
+        .route(
+            &<(NewChromiumRun, ChromiumRun)>::to_api_path(),
+            post(write::<NewChromiumRun>),
+        )
+        .route(
+            &<(NewCdna, CdnaHandle)>::to_api_path(),
+            post(write::<NewCdna>),
+        )
+        .route(
+            &<(NewSequencingRun, SequencingRunSummary)>::to_api_path(),
+            post(write::<NewSequencingRun>),
         )
 }

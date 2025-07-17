@@ -1,4 +1,4 @@
-use scamplers_macros::db_selection;
+use scamplers_macros::{db_selection, getters_impl};
 #[cfg(feature = "backend")]
 use scamplers_schema::{sequencing_run, sequencing_submissions};
 use valid_string::ValidString;
@@ -45,4 +45,12 @@ pub struct SequencingRunSummary {
     pub begun_at: OffsetDateTime,
     pub finished_at: OffsetDateTime,
     pub notes: Option<String>,
+}
+
+#[getters_impl]
+impl SequencingRunSummary {
+    #[must_use]
+    pub fn id(&self) -> Uuid {
+        self.handle.id
+    }
 }

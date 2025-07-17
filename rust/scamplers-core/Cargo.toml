@@ -25,6 +25,7 @@ reqwest = { workspace = true }
 valid-string = { path = "../valid-string" }
 pyo3 = { workspace = true, optional = true }
 bon = { workspace = true }
+tokio = { workspace = true, optional = true }
 
 [target.'cfg(target_arch = "wasm32")'.dependencies]
 wasm-bindgen = { workspace = true }
@@ -42,7 +43,7 @@ backend = [
     "time/backend",
     "valid-string/backend",
 ]
-python = ["pyo3", "valid-string/python", "uuid/python", "time/python"]
+python = ["pyo3", "valid-string/python", "uuid/python", "time/python", "tokio"]
 
 [lints]
 workspace = true

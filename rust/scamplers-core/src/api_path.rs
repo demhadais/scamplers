@@ -4,8 +4,9 @@ use crate::model::{
     chromium_run::{ChromiumRun, NewChromiumRun},
     institution::{Institution, InstitutionQuery, NewInstitution},
     lab::{Lab, LabQuery, LabSummary, NewLab},
+    nucleic_acid::{CdnaHandle, NewCdna},
     person::{CreatedUser, NewMsLogin, NewPerson, Person, PersonQuery, PersonSummary},
-    sequencing_run::NewSequencingRun,
+    sequencing_run::{NewSequencingRun, SequencingRunSummary},
     specimen::{NewSpecimen, Specimen, SpecimenQuery, SpecimenSummary},
     suspension::{NewSuspension, NewSuspensionPool, Suspension, SuspensionPoolHandle},
 };
@@ -99,8 +100,8 @@ impl ToApiPath for (SpecimenQuery, SpecimenSummary) {
     }
 }
 
-const SEQUENCING_RUNS: &str = "/sequencing_runs";
-impl ToApiPath for (NewSequencingRun, ()) {
+const SEQUENCING_RUNS: &str = "/sequencing-runs";
+impl ToApiPath for (NewSequencingRun, SequencingRunSummary) {
     fn to_api_path() -> String {
         SEQUENCING_RUNS.to_string()
     }
@@ -124,5 +125,12 @@ const CHROMIUM_RUNS: &str = "/chromium-runs";
 impl ToApiPath for (NewChromiumRun, ChromiumRun) {
     fn to_api_path() -> String {
         CHROMIUM_RUNS.to_string()
+    }
+}
+
+const CDNA: &str = "/cdna";
+impl ToApiPath for (NewCdna, CdnaHandle) {
+    fn to_api_path() -> String {
+        CDNA.to_string()
     }
 }

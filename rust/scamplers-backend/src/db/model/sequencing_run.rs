@@ -1,7 +1,7 @@
 use diesel::SelectableHelper;
 use diesel_async::RunQueryDsl;
 use scamplers_core::model::sequencing_run::{
-    NewSequencingRun, NewSequencingSubmission, SequencingRunHandle,
+    NewSequencingRun, NewSequencingSubmission, SequencingRunSummary,
 };
 use scamplers_schema::{sequencing_run, sequencing_submissions};
 use uuid::Uuid;
@@ -23,23 +23,23 @@ impl SequencingRunExt for NewSequencingRun {
 }
 
 impl WriteToDb for NewSequencingRun {
-    type Returns = SequencingRunHandle;
+    type Returns = SequencingRunSummary;
 
     async fn write_to_db(
         mut self,
         db_conn: &mut diesel_async::AsyncPgConnection,
     ) -> db::error::Result<Self::Returns> {
-        let handle = diesel::insert_into(sequencing_run::table)
+        let summary = diesel::insert_into(sequencing_run::table)
             .values(&self)
-            .returning(SequencingRunHandle::as_select())
+            .returning(SequencingRunSummary::as_select())
             .get_result(db_conn)
             .await?;
 
         diesel::insert_into(sequencing_submissions::table)
-            .values(self.libraries(handle.id))
+            .values(self.libraries(summary.id()))
             .execute(db_conn)
             .await?;
 
-        Ok(handle)
+        Ok(summary)
     }
 }
