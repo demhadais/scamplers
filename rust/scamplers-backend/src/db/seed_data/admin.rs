@@ -1,6 +1,5 @@
 use super::WriteToDb;
 use crate::db::model::person::grant_roles_to_user;
-use diesel::prelude::*;
 use diesel_async::{AsyncPgConnection, RunQueryDsl};
 use garde::Validate;
 use scamplers_core::model::person::{NewMsLogin, UserRole};

@@ -1,5 +1,4 @@
 use crate::db::{self, model::WriteToDb};
-use diesel::prelude::*;
 use diesel_async::RunQueryDsl;
 use scamplers_core::model::library_type_specification::NewLibraryTypeSpecification;
 use scamplers_schema::library_type_specification;

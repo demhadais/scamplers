@@ -1,4 +1,4 @@
-use diesel::SelectableHelper;
+use diesel::prelude::*;
 use diesel_async::{AsyncPgConnection, RunQueryDsl};
 use scamplers_core::model::{
     chromium_run::{

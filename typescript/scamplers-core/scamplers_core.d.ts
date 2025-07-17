@@ -15,6 +15,12 @@ export enum UserRole {
   ComputationalStaff = 1,
   BiologyStaff = 2,
 }
+export class CdnaHandle {
+  private constructor();
+  free(): void;
+  id: string;
+  link: string;
+}
 export class ChromiumRun {
   private constructor();
   free(): void;

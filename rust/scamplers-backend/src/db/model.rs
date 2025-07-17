@@ -2,6 +2,7 @@ use super::error;
 use crate::db::util::{BoxedDieselExpression, NewBoxedDieselExpression};
 use diesel_async::AsyncPgConnection;
 
+pub mod cdna;
 pub mod chromium_run;
 pub mod institution;
 pub mod lab;

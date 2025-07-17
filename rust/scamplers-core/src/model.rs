@@ -10,6 +10,7 @@ pub mod index_sets;
 pub mod institution;
 pub mod lab;
 pub mod library_type_specification;
+pub mod nucleic_acid;
 pub mod person;
 pub mod sequencing_run;
 pub mod specimen;
