@@ -92,6 +92,20 @@ dependencies = [
 ]
 
 [[package]]
+name = "any-value"
+version = "0.1.0"
+dependencies = [
+ "diesel",
+ "diesel-async",
+ "pyo3",
+ "serde",
+ "serde-wasm-bindgen",
+ "serde_json",
+ "valuable",
+ "wasm-bindgen",
+]
+
+[[package]]
 name = "anyhow"
 version = "1.0.98"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -564,6 +578,27 @@ checksum = "13b588ba4ac1a99f7f2964d24b3d896ddc6bf847ee3855dbd4366f058cfcd331"
 dependencies = [
  "quote",
  "syn",
+]
+
+[[package]]
+name = "csv"
+version = "1.3.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "acdc4883a9c96732e4733212c01447ebd805833b7275a73ca3ee080fd77afdaf"
+dependencies = [
+ "csv-core",
+ "itoa",
+ "ryu",
+ "serde",
+]
+
+[[package]]
+name = "csv-core"
+version = "0.1.12"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "7d02f3b0da4c6504f86e9cd789d8dbafab48c2321be74e9987593de5a894d93d"
+dependencies = [
+ "memchr",
 ]
 
 [[package]]
@@ -2008,6 +2043,7 @@ dependencies = [
  "pyo3-build-config",
  "pyo3-ffi",
  "pyo3-macros",
+ "serde",
  "time 0.3.41",
  "unindent",
  "uuid 1.17.0",
@@ -2451,11 +2487,15 @@ dependencies = [
 name = "scamplers-core"
 version = "0.1.0"
 dependencies = [
+ "any-value",
  "bon",
+ "csv",
  "diesel",
  "garde",
+ "heck",
  "pretty_assertions",
  "pyo3",
+ "regex",
  "reqwest",
  "scamplers-macros",
  "scamplers-schema",

@@ -2,7 +2,8 @@ use crate::{
     db::{
         self,
         model::{
-            AsDieselFilter, AsDieselQueryBase, FetchById, FetchByQuery, FetchRelatives, WriteToDb,
+            AsDieselFilter, AsDieselQueryBase, FetchById, FetchByQuery, FetchRelatives,
+            HasMeasurements, SetParentId, WriteToDb,
         },
         util::{AsIlike, BoxedDieselExpression, NewBoxedDieselExpression},
     },
@@ -78,11 +79,16 @@ impl WriteToDb for &[NewSpecimenMeasurement] {
     }
 }
 
-trait NewSpecimenExt {
-    fn measurements(&mut self, id: Uuid) -> &[NewSpecimenMeasurement];
+impl SetParentId for NewSpecimenMeasurement {
+    fn parent_id_mut(&mut self) -> &mut Uuid {
+        &mut self.specimen_id
+    }
 }
-impl NewSpecimenExt for NewSpecimen {
-    fn measurements(&mut self, self_id: Uuid) -> &[NewSpecimenMeasurement] {
+
+impl HasMeasurements for NewSpecimen {
+    type Measurement = NewSpecimenMeasurement;
+
+    fn measurements(&mut self) -> &mut [Self::Measurement] {
         let inner = match self {
             Self::Block(block) => match block {
                 NewBlock::Fixed(b) => &mut b.inner,
@@ -96,11 +102,7 @@ impl NewSpecimenExt for NewSpecimen {
             },
         };
 
-        for m in &mut inner.measurements {
-            m.specimen_id = self_id;
-        }
-
-        &inner.measurements
+        &mut inner.measurements
     }
 }
 
@@ -125,7 +127,7 @@ impl WriteToDb for NewSpecimen {
         };
 
         // TODO: technically we can get away with one less query here by building the Specimen rather than fetching it again
-        let new_measurements = self.measurements(id);
+        let new_measurements = self.measurements_with_self_id(id);
         new_measurements.write_to_db(db_conn).await?;
 
         Specimen::fetch_by_id(&id, db_conn).await

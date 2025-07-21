@@ -1,11 +1,14 @@
 use super::error;
 use crate::db::util::{BoxedDieselExpression, NewBoxedDieselExpression};
 use diesel_async::AsyncPgConnection;
+use uuid::Uuid;
 
 pub mod cdna;
 pub mod chromium_run;
+pub mod dataset;
 pub mod institution;
 pub mod lab;
+pub mod library;
 pub mod person;
 pub mod sequencing_run;
 pub mod specimen;
@@ -127,4 +130,46 @@ macro_rules! fetch_by_query {
 
         Ok(statement.load($db_conn).await?)
     }};
+}
+
+trait SetParentId {
+    fn parent_id_mut(&mut self) -> &mut Uuid;
+
+    fn set_parent_id(&mut self, id: Uuid) {
+        let entity_id = self.parent_id_mut();
+        *entity_id = id;
+    }
+}
+
+trait Mappping {
+    fn new(parent_id: Uuid, child_id: Uuid) -> Self;
+}
+
+trait HasPreparers {
+    type Preparers: Mappping;
+
+    fn children(&self) -> &[Uuid];
+
+    fn preparers(&self, self_id: Uuid) -> Vec<Self::Preparers> {
+        self.children()
+            .iter()
+            .map(|child_id| Self::Preparers::new(self_id, *child_id))
+            .collect()
+    }
+}
+
+trait HasMeasurements {
+    type Measurement: SetParentId;
+
+    fn measurements(&mut self) -> &mut [Self::Measurement];
+
+    fn measurements_with_self_id(&mut self, self_id: Uuid) -> &[Self::Measurement] {
+        let measurements = self.measurements();
+
+        for m in &mut *measurements {
+            m.set_parent_id(self_id);
+        }
+
+        measurements
+    }
 }

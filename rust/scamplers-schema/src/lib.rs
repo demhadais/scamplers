@@ -87,7 +87,7 @@ diesel::table! {
         data_path -> Text,
         delivered_at -> Timestamptz,
         gems_id -> Nullable<Uuid>,
-        metrics -> Nullable<Array<Nullable<Jsonb>>>,
+        metrics -> Nullable<Jsonb>,
         web_summary -> Nullable<Text>,
     }
 }

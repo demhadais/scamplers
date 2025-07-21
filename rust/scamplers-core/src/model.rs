@@ -6,6 +6,7 @@ use wasm_bindgen::prelude::*;
 
 pub mod chemistry;
 pub mod chromium_run;
+pub mod dataset;
 pub mod index_sets;
 pub mod institution;
 pub mod lab;

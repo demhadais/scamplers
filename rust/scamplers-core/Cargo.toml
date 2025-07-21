@@ -9,6 +9,10 @@ name = "scamplers_core"
 crate-type = ["lib", "cdylib"]
 
 [dependencies]
+any-value = { path = "../any-value" }
+heck = { workspace = true }
+regex = { workspace = true }
+csv = { workspace = true }
 thiserror = { workspace = true }
 serde = { workspace = true }
 serde_json = { workspace = true }
@@ -42,8 +46,16 @@ backend = [
     "uuid/backend",
     "time/backend",
     "valid-string/backend",
+    "any-value/backend",
 ]
-python = ["pyo3", "valid-string/python", "uuid/python", "time/python", "tokio"]
+python = [
+    "pyo3",
+    "valid-string/python",
+    "uuid/python",
+    "time/python",
+    "tokio",
+    "any-value/python",
+]
 
 [lints]
 workspace = true

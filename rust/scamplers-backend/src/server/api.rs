@@ -8,7 +8,7 @@ use scamplers_core::{
         chromium_run::{ChromiumRun, NewChromiumRun},
         institution::{Institution, InstitutionQuery, NewInstitution},
         lab::{Lab, LabQuery, LabSummary, NewLab},
-        nucleic_acid::{CdnaHandle, NewCdna},
+        nucleic_acid::{CdnaHandle, LibraryHandle, NewCdnaGroup, NewLibrary},
         person::{CreatedUser, NewMsLogin, NewPerson, Person, PersonQuery, PersonSummary},
         sequencing_run::{NewSequencingRun, SequencingRunSummary},
         specimen::{NewSpecimen, Specimen, SpecimenQuery, SpecimenSummary},
@@ -18,12 +18,33 @@ use scamplers_core::{
 use scamplers_schema::lab::dsl::lab;
 use uuid::Uuid;
 
-use crate::server::api::handler::{by_id, by_query, new_user, relatives, write};
+use crate::server::api::handler::{by_id, by_query, relatives, write};
 
 use super::AppState;
 
 mod error;
 mod handler;
+
+// trait RouterExt {
+//     fn post_to_db_route<Req>(self) -> Self
+//     where
+//         Req: WriteToDb + Send + Valuable,
+//         Req::Returns: Send,
+//         (Req, Req::Returns): ToApiPath;
+//     fn fetch_by_id_route<Req, Resp>(self) -> Self;
+//     fn fetch_by_query_route<Req, Resp>(self) -> Self;
+// }
+
+// impl RouterExt for Router {
+//     fn post_to_db_route<Req>(self) -> Self
+//     where
+//         Req: WriteToDb + Send + Valuable,
+//         Req::Returns: Send,
+//         (Req, Req::Returns): ToApiPath,
+//     {
+//         self.route(&<(Req, Req::Returns)>::to_api_path(), post(write::<Req>))
+//     }
+// }
 
 pub(super) fn router() -> Router<AppState> {
     Router::new()
@@ -44,7 +65,10 @@ pub(super) fn router() -> Router<AppState> {
             &<(NewPerson, Person)>::to_api_path(),
             post(write::<NewPerson>),
         )
-        .route(&<(NewMsLogin, CreatedUser)>::to_api_path(), post(new_user))
+        .route(
+            &<(NewMsLogin, CreatedUser)>::to_api_path(),
+            post(write::<NewMsLogin>),
+        )
         .route(&<(Uuid, Person)>::to_api_path(), get(by_id::<Person>))
         .route(
             &<(PersonQuery, PersonSummary)>::to_api_path(),
@@ -82,8 +106,12 @@ pub(super) fn router() -> Router<AppState> {
             post(write::<NewChromiumRun>),
         )
         .route(
-            &<(NewCdna, CdnaHandle)>::to_api_path(),
-            post(write::<NewCdna>),
+            &<(NewCdnaGroup, Vec<CdnaHandle>)>::to_api_path(),
+            post(write::<NewCdnaGroup>),
+        )
+        .route(
+            &<(NewLibrary, LibraryHandle)>::to_api_path(),
+            post(write::<NewLibrary>),
         )
         .route(
             &<(NewSequencingRun, SequencingRunSummary)>::to_api_path(),

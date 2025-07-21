@@ -71,6 +71,27 @@ export class CreatedUser {
   readonly roles: any[];
   readonly institution: Institution;
 }
+export class DatasetCore {
+  private constructor();
+  free(): void;
+  summary: DatasetSummary;
+  lab: LabHandle;
+}
+export class DatasetHandle {
+  private constructor();
+  free(): void;
+  id: string;
+  link: string;
+}
+export class DatasetSummary {
+  private constructor();
+  free(): void;
+  handle: DatasetHandle;
+  data_path: string;
+  delivered_at: Date;
+  get web_summary(): string;
+  set web_summary(value: string | null | undefined);
+}
 export class EmptyStringError {
   private constructor();
   free(): void;
@@ -137,6 +158,12 @@ export class LabSummary {
   name: string;
   delivery_dir: string;
   readonly id: string;
+}
+export class LibraryHandle {
+  private constructor();
+  free(): void;
+  id: string;
+  link: string;
 }
 export class MultiplexingTag {
   private constructor();

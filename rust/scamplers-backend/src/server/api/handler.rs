@@ -5,7 +5,6 @@ use axum::{
 };
 use diesel_async::{AsyncConnection, scoped_futures::ScopedFutureExt};
 use garde::Validate;
-use scamplers_core::model::person::{CreatedUser, NewMsLogin};
 use serde::{Serialize, de::DeserializeOwned};
 use valuable::Valuable;
 
@@ -16,11 +15,11 @@ use crate::{
     },
     server::{
         AppState,
-        auth::{Frontend, User},
+        auth::User,
     },
 };
 
-use super::error::{Error, Result};
+use super::error::Error;
 
 #[derive(Default)]
 pub(super) struct ValidJson<T>(T);
@@ -74,20 +73,6 @@ impl<T: Serialize> IntoResponse for ValidJson<T> {
 
         axum::Json(inner).into_response()
     }
-}
-
-pub(super) async fn new_user(
-    _auth: Frontend,
-    State(app_state): State<AppState>,
-    ValidJson(new_login): ValidJson<NewMsLogin>,
-) -> Result<Json<CreatedUser>> {
-    tracing::info!(deserialized_new_user = new_login.as_value());
-
-    let mut db_conn = app_state.db_conn().await?;
-
-    let created_user = new_login.write_to_db(&mut db_conn).await?;
-
-    Ok(Json(created_user))
 }
 
 pub async fn write<Data>(

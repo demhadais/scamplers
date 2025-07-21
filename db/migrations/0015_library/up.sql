@@ -5,7 +5,7 @@ create table library (
     cdna_id uuid references cdna on delete restrict on update restrict not null,
     single_index_set_name text references single_index_set on delete restrict on update restrict,
     dual_index_set_name text references dual_index_set on delete restrict on update restrict,
-    number_of_sample_index_pcr_cycles integer not null, -- validated on Rust side
+    number_of_sample_index_pcr_cycles integer not null,
     target_reads_per_cell integer not null,
     prepared_at timestamptz not null,
     notes text,

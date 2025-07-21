@@ -1,4 +1,4 @@
-use scamplers_macros::{db_insertion, db_selection};
+use scamplers_macros::{base_api_model, db_insertion, db_selection};
 use time::OffsetDateTime;
 use uuid::Uuid;
 use valid_string::ValidString;
@@ -41,6 +41,14 @@ pub struct NewCdna {
     #[garde(length(min = 1))]
     #[cfg_attr(feature = "backend", diesel(skip_insertion))]
     pub preparer_ids: Vec<Uuid>,
+}
+
+#[base_api_model]
+#[serde(tag = "group_type")]
+pub enum NewCdnaGroup {
+    Single(#[garde(dive)] NewCdna),
+    Multiple(#[garde(dive)] Vec<NewCdna>),
+    Ocm(#[garde(length(min = 1, max = 4))] Vec<NewCdna>),
 }
 
 #[db_insertion]

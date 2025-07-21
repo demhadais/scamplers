@@ -29,16 +29,3 @@ pub struct ElectrophoreticMeasurementData {
     #[garde(dive)]
     pub concentration: Concentration,
 }
-
-#[db_json]
-#[serde(tag = "type")]
-pub enum MeasurementData {
-    Electrophoretic(ElectrophoreticMeasurementData),
-    Fluorometric {
-        measured_at: OffsetDateTime,
-        #[garde(dive)]
-        instrument_name: ValidString,
-        #[garde(dive)]
-        concentration: Concentration,
-    },
-}

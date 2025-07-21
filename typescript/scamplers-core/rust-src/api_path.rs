@@ -2,9 +2,10 @@ use uuid::Uuid;
 
 use crate::model::{
     chromium_run::{ChromiumRun, NewChromiumRun},
+    dataset::NewDataset,
     institution::{Institution, InstitutionQuery, NewInstitution},
     lab::{Lab, LabQuery, LabSummary, NewLab},
-    nucleic_acid::{CdnaHandle, NewCdna},
+    nucleic_acid::{CdnaHandle, LibraryHandle, NewCdnaGroup, NewLibrary},
     person::{CreatedUser, NewMsLogin, NewPerson, Person, PersonQuery, PersonSummary},
     sequencing_run::{NewSequencingRun, SequencingRunSummary},
     specimen::{NewSpecimen, Specimen, SpecimenQuery, SpecimenSummary},
@@ -129,8 +130,22 @@ impl ToApiPath for (NewChromiumRun, ChromiumRun) {
 }
 
 const CDNA: &str = "/cdna";
-impl ToApiPath for (NewCdna, CdnaHandle) {
+impl ToApiPath for (NewCdnaGroup, Vec<CdnaHandle>) {
     fn to_api_path() -> String {
         CDNA.to_string()
+    }
+}
+
+const LIBRARIES: &str = "/libraries";
+impl ToApiPath for (NewLibrary, LibraryHandle) {
+    fn to_api_path() -> String {
+        LIBRARIES.to_string()
+    }
+}
+
+const DATASETS: &str = "/datasets";
+impl ToApiPath for (NewDataset, ()) {
+    fn to_api_path() -> String {
+        DATASETS.to_string()
     }
 }
