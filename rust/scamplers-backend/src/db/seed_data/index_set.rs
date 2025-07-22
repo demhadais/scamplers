@@ -4,11 +4,11 @@ use diesel::{expression::AsExpression, prelude::*, sql_types};
 use diesel_async::{AsyncPgConnection, RunQueryDsl};
 use garde::{Validate, error::PathComponentKind};
 use regex::Regex;
+use scamplers_schema::{dual_index_set, index_kit, single_index_set};
 use serde::{Deserialize, Serialize};
 use url::Url;
 
 use super::WriteToDb;
-use scamplers_schema::{dual_index_set, index_kit, single_index_set};
 
 #[derive(Deserialize, Validate, Clone, Serialize, Debug)]
 #[serde(transparent)]

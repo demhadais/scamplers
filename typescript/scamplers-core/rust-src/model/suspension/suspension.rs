@@ -3,15 +3,14 @@ use scamplers_macros::{db_enum, db_insertion, db_json, db_selection};
 use scamplers_schema::{
     multiplexing_tag, suspension, suspension_measurement, suspension_preparers,
 };
+use time::OffsetDateTime;
+use uuid::Uuid;
 use valid_string::ValidString;
-use {
-    crate::model::{
-        person::PersonHandle,
-        specimen::SpecimenSummary,
-        suspension::common::{BiologicalMaterial, MeasurementDataCore},
-    },
-    time::OffsetDateTime,
-    uuid::Uuid,
+
+use crate::model::{
+    person::PersonHandle,
+    specimen::SpecimenSummary,
+    suspension::common::{BiologicalMaterial, MeasurementDataCore},
 };
 
 #[db_enum]

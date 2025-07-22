@@ -1,10 +1,3 @@
-use crate::{
-    db::{
-        model::{self, AsDieselQueryBase, FetchById, FetchRelatives, IsUpdate},
-        util::{AsIlike, BoxedDieselExpression, NewBoxedDieselExpression},
-    },
-    fetch_by_query,
-};
 use diesel::{dsl::InnerJoin, prelude::*};
 use diesel_async::RunQueryDsl;
 use scamplers_core::model::{
@@ -17,6 +10,14 @@ use scamplers_schema::{
     person,
 };
 use uuid::Uuid;
+
+use crate::{
+    db::{
+        model::{self, AsDieselQueryBase, FetchById, FetchRelatives, IsUpdate},
+        util::{AsIlike, BoxedDieselExpression, NewBoxedDieselExpression},
+    },
+    fetch_by_query,
+};
 
 impl IsUpdate<3> for LabUpdateCore {
     fn fields_are_some(&self) -> [bool; 3] {
@@ -144,6 +145,7 @@ impl model::FetchByQuery for LabSummary {
 
 impl AsDieselQueryBase for LabCore {
     type QueryBase = InnerJoin<lab::table, person::table>;
+
     fn as_diesel_query_base() -> Self::QueryBase {
         LabSummary::as_diesel_query_base().inner_join(person::table)
     }
@@ -184,6 +186,7 @@ impl model::FetchRelatives<PersonSummary> for lab::table {
 
 impl model::FetchById for Lab {
     type Id = Uuid;
+
     async fn fetch_by_id(
         id: &Self::Id,
         db_conn: &mut diesel_async::AsyncPgConnection,

@@ -14,6 +14,7 @@ use crate::{
 
 impl model::WriteToDb for NewInstitution {
     type Returns = Institution;
+
     async fn write_to_db(
         self,
         db_conn: &mut diesel_async::AsyncPgConnection,
@@ -87,10 +88,10 @@ impl model::FetchByQuery for Institution {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
     use rstest::rstest;
     use scamplers_core::model::institution::*;
 
+    use super::*;
     use crate::db::test_util::{DbConnection, N_INSTITUTIONS, db_conn, test_query};
 
     fn comparison_fn(i: &Institution) -> String {

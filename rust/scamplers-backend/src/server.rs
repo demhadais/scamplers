@@ -1,7 +1,6 @@
 #![allow(async_fn_in_trait)]
 use std::sync::Arc;
 
-use crate::{config::Config, db};
 use anyhow::Context;
 use axum::{Router, routing::get};
 use camino::Utf8PathBuf;
@@ -15,6 +14,8 @@ use tokio::{net::TcpListener, signal};
 use tower_http::trace::TraceLayer;
 use util::DevContainer;
 use uuid::Uuid;
+
+use crate::{config::Config, db};
 mod api;
 pub mod auth;
 pub mod util;
@@ -193,9 +194,10 @@ impl AppState {
         Ok(db_root_pool.get().await?)
     }
 
-    // In theory, this should be two separate functions - one that actually does the password setting, and one that
-    // constructs the arguments. This is the only time this sequence of events happens, so we can keep it as is.
-    // Also, this shouldn't be a method of `AppState`
+    // In theory, this should be two separate functions - one that actually does the
+    // password setting, and one that constructs the arguments. This is the only
+    // time this sequence of events happens, so we can keep it as is. Also, this
+    // shouldn't be a method of `AppState`
     async fn set_login_user_password(&self) -> anyhow::Result<()> {
         const LOGIN_USER: &str = "login_user";
 

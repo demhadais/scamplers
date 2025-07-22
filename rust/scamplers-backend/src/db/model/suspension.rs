@@ -1,7 +1,3 @@
-use crate::db::{
-    self,
-    model::{FetchById, WriteToDb, WriteToDbInternal},
-};
 use diesel::prelude::*;
 use diesel_async::RunQueryDsl;
 use scamplers_core::model::{
@@ -20,6 +16,11 @@ use scamplers_schema::{
     suspension_preparers,
 };
 use uuid::Uuid;
+
+use crate::db::{
+    self,
+    model::{FetchById, WriteToDb, WriteToDbInternal},
+};
 
 #[diesel::dsl::auto_type]
 fn suspension_measurement_from_clause() -> _ {

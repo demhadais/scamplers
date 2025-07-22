@@ -1,8 +1,9 @@
+use std::fmt::Display;
+
 #[cfg(feature = "backend")]
 use diesel::{deserialize::FromSqlRow, expression::AsExpression, sql_types};
 #[cfg(feature = "python")]
 use pyo3::prelude::*;
-use std::fmt::Display;
 
 const OFFSET_DATETIME_AS_VALUE: &str = "OffsetDateTime";
 
@@ -41,7 +42,6 @@ impl valuable::Valuable for OffsetDateTime {
 
 #[cfg(target_arch = "wasm32")]
 mod wasm32 {
-    use super::OffsetDateTime;
     use wasm_bindgen::{
         JsValue,
         convert::{
@@ -51,6 +51,8 @@ mod wasm32 {
         },
         describe::{WasmDescribe, WasmDescribeVector},
     };
+
+    use super::OffsetDateTime;
 
     impl WasmDescribe for OffsetDateTime {
         fn describe() {
@@ -130,16 +132,15 @@ mod wasm32 {
 
 #[cfg(feature = "backend")]
 mod backend {
-    use {
-        super::OffsetDateTime,
-        diesel::{
-            backend::Backend,
-            deserialize::FromSql,
-            pg::Pg,
-            serialize::{Output, ToSql},
-            sql_types,
-        },
+    use diesel::{
+        backend::Backend,
+        deserialize::FromSql,
+        pg::Pg,
+        serialize::{Output, ToSql},
+        sql_types,
     };
+
+    use super::OffsetDateTime;
 
     impl FromSql<sql_types::Timestamptz, Pg> for OffsetDateTime {
         fn from_sql(bytes: <Pg as Backend>::RawValue<'_>) -> diesel::deserialize::Result<Self> {

@@ -1,10 +1,11 @@
-use crate::model::institution::InstitutionHandle;
 use scamplers_macros::{db_enum, db_insertion, db_json, db_selection};
 #[cfg(feature = "backend")]
 use scamplers_schema::{committee_approval, specimen, specimen_measurement};
 use time::OffsetDateTime;
 use uuid::Uuid;
 use valid_string::ValidString;
+
+use crate::model::institution::InstitutionHandle;
 
 #[db_enum]
 #[cfg_attr(target_arch = "wasm32", wasm_bindgen::prelude::wasm_bindgen)]

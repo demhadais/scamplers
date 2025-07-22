@@ -1,19 +1,8 @@
-use crate::{
-    db::{
-        error::Result,
-        model::{self, AsDieselQueryBase, FetchById, IsUpdate, WriteToDb},
-        util::{AsIlike, BoxedDieselExpression, NewBoxedDieselExpression},
-    },
-    fetch_by_query,
-    server::auth::{ApiKey, HashedApiKey},
-};
 use diesel::{
     define_sql_function,
-    sql_types::{Array, Text},
-};
-use diesel::{
     dsl::{AssumeNotNull, InnerJoin},
     prelude::*,
+    sql_types::{Array, Text},
 };
 use diesel_async::{AsyncPgConnection, RunQueryDsl};
 use scamplers_core::model::person::{
@@ -32,6 +21,16 @@ use scamplers_schema::{
 };
 use uuid::Uuid;
 use valid_string::ValidString;
+
+use crate::{
+    db::{
+        error::Result,
+        model::{self, AsDieselQueryBase, FetchById, IsUpdate, WriteToDb},
+        util::{AsIlike, BoxedDieselExpression, NewBoxedDieselExpression},
+    },
+    fetch_by_query,
+    server::auth::{ApiKey, HashedApiKey},
+};
 
 define_sql_function! {fn grant_roles_to_user(user_id: Text, roles: Array<Text>)}
 define_sql_function! {fn revoke_roles_from_user(user_id: Text, roles: Array<Text>)}
@@ -142,6 +141,7 @@ impl model::FetchById for Person {
 
 impl model::WriteToDb for NewPerson {
     type Returns = Person;
+
     async fn write_to_db(self, db_conn: &mut AsyncPgConnection) -> Result<Self::Returns> {
         let id = diesel::insert_into(person::table)
             .values(self)
@@ -175,6 +175,7 @@ impl IsUpdate<5> for PersonUpdateCore {
 
 impl model::WriteToDb for PersonUpdate {
     type Returns = Person;
+
     async fn write_to_db(self, db_conn: &mut AsyncPgConnection) -> Result<Self::Returns> {
         let Self {
             core,
@@ -238,7 +239,8 @@ impl WriteToDb for NewMsLogin {
             institution_id,
         };
 
-        // We know that whoever just logged in is the actual owner of this email address. Anyone else that has this email should have it removed from them
+        // We know that whoever just logged in is the actual owner of this email
+        // address. Anyone else that has this email should have it removed from them
         diesel::update(person::table)
             .filter(email_col.eq(email))
             .set(email_col.eq(None::<String>))

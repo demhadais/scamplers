@@ -71,12 +71,6 @@ export class CreatedUser {
   readonly roles: any[];
   readonly institution: Institution;
 }
-export class DatasetCore {
-  private constructor();
-  free(): void;
-  summary: DatasetSummary;
-  lab: LabHandle;
-}
 export class DatasetHandle {
   private constructor();
   free(): void;
@@ -91,6 +85,7 @@ export class DatasetSummary {
   delivered_at: Date;
   get web_summary(): string;
   set web_summary(value: string | null | undefined);
+  readonly metrics: any | undefined;
 }
 export class EmptyStringError {
   private constructor();

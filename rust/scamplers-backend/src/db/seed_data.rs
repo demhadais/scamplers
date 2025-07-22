@@ -1,4 +1,3 @@
-use super::model::WriteToDb;
 use admin::NewAdmin;
 use anyhow::Context;
 use diesel_async::AsyncPgConnection;
@@ -9,6 +8,8 @@ use scamplers_core::model::{
     library_type_specification::NewLibraryTypeSpecification,
 };
 use serde::Deserialize;
+
+use super::model::WriteToDb;
 mod admin;
 mod chemistry;
 mod index_set;

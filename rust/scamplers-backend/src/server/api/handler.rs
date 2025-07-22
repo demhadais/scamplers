@@ -8,18 +8,14 @@ use garde::Validate;
 use serde::{Serialize, de::DeserializeOwned};
 use valuable::Valuable;
 
+use super::error::Error;
 use crate::{
     db::{
         DbTransaction,
         model::{self, FetchRelatives, WriteToDb},
     },
-    server::{
-        AppState,
-        auth::User,
-    },
+    server::{AppState, auth::User},
 };
-
-use super::error::Error;
 
 #[derive(Default)]
 pub(super) struct ValidJson<T>(T);

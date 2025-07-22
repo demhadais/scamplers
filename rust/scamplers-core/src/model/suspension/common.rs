@@ -1,9 +1,10 @@
-use crate::model::units::{LengthUnit, VolumeUnit};
 use scamplers_macros::{db_enum, db_insertion, db_json};
 #[cfg(feature = "backend")]
 use scamplers_schema::suspension_preparers;
 use time::OffsetDateTime;
 use uuid::Uuid;
+
+use crate::model::units::{LengthUnit, VolumeUnit};
 
 #[db_enum]
 pub enum CellCountingMethod {

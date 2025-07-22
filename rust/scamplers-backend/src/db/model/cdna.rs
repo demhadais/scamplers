@@ -22,6 +22,7 @@ impl NewCdnaGroupExt for NewCdnaGroup {
             Self::Ocm(_) => true,
         }
     }
+
     fn to_vec(self) -> Vec<NewCdna> {
         match self {
             Self::Single(c) => vec![c],
@@ -70,9 +71,9 @@ impl NewCdnaVecExt for Vec<NewCdna> {
         let Some(chemistry) = chemistry else {
             if library_types != [LibraryType::ChromatinAccessibility] {
                 return Err(Error::Other {
-                    message:
-                        "GEMs without chemistry must produce one chromatin accessibility library"
-                            .to_string(),
+                    message: "GEMs without chemistry must produce one chromatin accessibility \
+                              library"
+                        .to_string(),
                 });
             }
 
@@ -88,7 +89,8 @@ impl NewCdnaVecExt for Vec<NewCdna> {
 
         let err = Err(Error::Other {
             message: format!(
-                "invalid library types {library_types:?} - expected one of {expected_library_types:?}"
+                "invalid library types {library_types:?} - expected one of \
+                 {expected_library_types:?}"
             ),
         });
 

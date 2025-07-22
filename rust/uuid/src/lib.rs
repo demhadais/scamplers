@@ -1,12 +1,11 @@
+use std::{fmt::Display, str::FromStr};
+
+use _uuid::Bytes;
 #[cfg(feature = "backend")]
 use diesel::{deserialize::FromSqlRow, expression::AsExpression, sql_types};
 #[cfg(feature = "python")]
 use pyo3::prelude::*;
-use {
-    _uuid::Bytes,
-    serde::{Deserialize, Serialize},
-    std::{fmt::Display, str::FromStr},
-};
+use serde::{Deserialize, Serialize};
 
 #[derive(
     Clone, Copy, Eq, Ord, PartialEq, PartialOrd, Debug, Hash, Default, Deserialize, Serialize,
@@ -58,7 +57,6 @@ impl valuable::Valuable for Uuid {
 
 #[cfg(target_arch = "wasm32")]
 mod wasm32 {
-    use super::Uuid;
     use std::str::FromStr;
 
     use wasm_bindgen::{
@@ -70,6 +68,8 @@ mod wasm32 {
         },
         describe::{WasmDescribe, WasmDescribeVector},
     };
+
+    use super::Uuid;
 
     impl WasmDescribe for Uuid {
         fn describe() {
@@ -144,16 +144,15 @@ mod wasm32 {
 
 #[cfg(feature = "backend")]
 mod backend {
-    use {
-        super::Uuid,
-        diesel::{
-            backend::Backend,
-            deserialize::FromSql,
-            pg::Pg,
-            serialize::{Output, ToSql},
-            sql_types,
-        },
+    use diesel::{
+        backend::Backend,
+        deserialize::FromSql,
+        pg::Pg,
+        serialize::{Output, ToSql},
+        sql_types,
     };
+
+    use super::Uuid;
 
     impl FromSql<sql_types::Uuid, Pg> for Uuid {
         fn from_sql(bytes: <Pg as Backend>::RawValue<'_>) -> diesel::deserialize::Result<Self> {

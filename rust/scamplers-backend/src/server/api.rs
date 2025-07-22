@@ -18,9 +18,8 @@ use scamplers_core::{
 use scamplers_schema::lab::dsl::lab;
 use uuid::Uuid;
 
-use crate::server::api::handler::{by_id, by_query, relatives, write};
-
 use super::AppState;
+use crate::server::api::handler::{by_id, by_query, relatives, write};
 
 mod error;
 mod handler;

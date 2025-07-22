@@ -97,8 +97,8 @@ impl PartialEq<ValidString> for String {
 
 #[cfg(target_arch = "wasm32")]
 mod wasm32 {
-    use super::{EmptyStringError, ValidString};
     use std::str::FromStr;
+
     use wasm_bindgen::{
         JsValue,
         convert::{
@@ -108,6 +108,8 @@ mod wasm32 {
         },
         describe::{WasmDescribe, WasmDescribeVector},
     };
+
+    use super::{EmptyStringError, ValidString};
 
     impl WasmDescribe for ValidString {
         fn describe() {
@@ -183,16 +185,15 @@ mod wasm32 {
 
 #[cfg(feature = "backend")]
 mod backend {
-    use {
-        super::ValidString,
-        diesel::{
-            backend::Backend,
-            deserialize::FromSql,
-            pg::Pg,
-            serialize::{Output, ToSql},
-            sql_types,
-        },
+    use diesel::{
+        backend::Backend,
+        deserialize::FromSql,
+        pg::Pg,
+        serialize::{Output, ToSql},
+        sql_types,
     };
+
+    use super::ValidString;
 
     impl FromSql<sql_types::Text, Pg> for ValidString {
         fn from_sql(bytes: <Pg as Backend>::RawValue<'_>) -> diesel::deserialize::Result<Self> {

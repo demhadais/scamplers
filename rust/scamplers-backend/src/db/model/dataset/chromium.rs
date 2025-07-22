@@ -64,7 +64,8 @@ impl NewChromiumDatasetExt for NewChromiumDataset {
         if expected_cmdline != self.cmdline() {
             return Err(Error::Other {
                 message: format!(
-                    "expected 'cmdline' {expected_cmdline} for {gems_id} based on chemistry, found {cmdline}"
+                    "expected 'cmdline' {expected_cmdline} for {gems_id} based on chemistry, \
+                     found {cmdline}"
                 ),
             });
         }
@@ -86,7 +87,8 @@ impl NewChromiumDatasetExt for NewChromiumDataset {
         let err = |expected_n_metrics_files| {
             Err(Error::Other {
                 message: format!(
-                    "expected {expected_n_metrics_files} metrics files for dataset derived from gems {gems_id}"
+                    "expected {expected_n_metrics_files} metrics files for dataset derived from \
+                     gems {gems_id}"
                 ),
             })
         };

@@ -1,20 +1,8 @@
-use crate::{
-    db::{
-        self,
-        model::{
-            AsDieselFilter, AsDieselQueryBase, FetchById, FetchByQuery, FetchRelatives,
-            HasMeasurements, SetParentId, WriteToDb,
-        },
-        util::{AsIlike, BoxedDieselExpression, NewBoxedDieselExpression},
-    },
-    fetch_by_query,
-};
 use diesel::{dsl::AssumeNotNull, prelude::*};
 use diesel_async::{AsyncPgConnection, RunQueryDsl};
-use scamplers_core::model::specimen::{NewBlock, NewTissue};
 use scamplers_core::model::specimen::{
-    NewSpecimen, NewSpecimenMeasurement, Specimen, SpecimenCore, SpecimenMeasurement,
-    SpecimenQuery, SpecimenSummary,
+    NewBlock, NewSpecimen, NewSpecimenMeasurement, NewTissue, Specimen, SpecimenCore,
+    SpecimenMeasurement, SpecimenQuery, SpecimenSummary,
 };
 use scamplers_schema::{
     lab, person,
@@ -27,6 +15,18 @@ use scamplers_schema::{
     specimen_measurement,
 };
 use uuid::Uuid;
+
+use crate::{
+    db::{
+        self,
+        model::{
+            AsDieselFilter, AsDieselQueryBase, FetchById, FetchByQuery, FetchRelatives,
+            HasMeasurements, SetParentId, WriteToDb,
+        },
+        util::{AsIlike, BoxedDieselExpression, NewBoxedDieselExpression},
+    },
+    fetch_by_query,
+};
 
 macro_rules! write_specimen_variant {
     ($specimen_variant:ident, $db_conn:ident) => {{
@@ -126,7 +126,8 @@ impl WriteToDb for NewSpecimen {
             },
         };
 
-        // TODO: technically we can get away with one less query here by building the Specimen rather than fetching it again
+        // TODO: technically we can get away with one less query here by building the
+        // Specimen rather than fetching it again
         let new_measurements = self.measurements_with_self_id(id);
         new_measurements.write_to_db(db_conn).await?;
 
@@ -151,6 +152,7 @@ fn core_query_base() -> _ {
 
 impl FetchById for Specimen {
     type Id = Uuid;
+
     async fn fetch_by_id(
         id: &Self::Id,
         db_conn: &mut AsyncPgConnection,

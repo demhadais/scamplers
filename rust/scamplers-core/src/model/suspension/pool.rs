@@ -1,11 +1,11 @@
 use scamplers_macros::{db_insertion, db_json, db_selection};
+#[cfg(feature = "backend")]
+use scamplers_schema::{suspension_pool, suspension_pool_measurement, suspension_pool_preparers};
 use time::OffsetDateTime;
 use uuid::Uuid;
 use valid_string::ValidString;
 
 use crate::model::suspension::{common::MeasurementDataCore, suspension::NewSuspension};
-#[cfg(feature = "backend")]
-use scamplers_schema::{suspension_pool, suspension_pool_measurement, suspension_pool_preparers};
 
 #[db_json]
 pub struct SuspensionPoolMeasurementData {

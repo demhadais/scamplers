@@ -1,4 +1,3 @@
-use crate::model::{Pagination, SortByGroup};
 #[cfg(feature = "python")]
 use pyo3::prelude::*;
 use scamplers_macros::{
@@ -10,6 +9,8 @@ use uuid::Uuid;
 use valid_string::ValidString;
 #[cfg(target_arch = "wasm32")]
 use wasm_bindgen::prelude::*;
+
+use crate::model::{Pagination, SortByGroup};
 
 #[db_insertion]
 #[cfg_attr(feature = "backend", diesel(table_name = institution))]

@@ -1,8 +1,9 @@
-use scamplers_macros::{db_selection, getters_impl};
+use scamplers_macros::{db_insertion, db_selection, getters_impl};
 #[cfg(feature = "backend")]
 use scamplers_schema::{sequencing_run, sequencing_submissions};
+use time::OffsetDateTime;
+use uuid::Uuid;
 use valid_string::ValidString;
-use {scamplers_macros::db_insertion, time::OffsetDateTime, uuid::Uuid};
 
 #[db_insertion]
 #[cfg_attr(feature = "backend", diesel(table_name = sequencing_submissions))]

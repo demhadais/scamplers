@@ -1,8 +1,5 @@
-use crate::db::model::WriteToDb;
-use crate::{
-    db::model::FetchByQuery,
-    server::{run_migrations, util::DevContainer},
-};
+use std::fmt::Debug;
+
 use diesel_async::{
     AsyncConnection, AsyncPgConnection,
     pooled_connection::{
@@ -15,9 +12,13 @@ use pretty_assertions::assert_eq;
 use rand::seq::IndexedRandom;
 use rstest::fixture;
 use scamplers_core::model::{institution::NewInstitution, lab::NewLab, person::NewPerson};
-use std::fmt::Debug;
 use tokio::sync::OnceCell;
 use uuid::Uuid;
+
+use crate::{
+    db::model::{FetchByQuery, WriteToDb},
+    server::{run_migrations, util::DevContainer},
+};
 
 pub const N_INSTITUTIONS: usize = 20;
 pub const N_PEOPLE: usize = 100;
@@ -89,7 +90,8 @@ impl TestState {
         for i in 0..N_LABS {
             let pi_id = people.choose(rng).unwrap().id();
             let name = format!("lab{i}");
-            // Use `N_LAB_MEMBERS - 1` because we're expecting to add the PI, so using this constant later can be correct
+            // Use `N_LAB_MEMBERS - 1` because we're expecting to add the PI, so using this
+            // constant later can be correct
             let member_ids: Vec<_> = people
                 .choose_multiple(rng, N_LAB_MEMBERS - 1)
                 .map(scamplers_core::model::person::Person::id)

@@ -27,14 +27,12 @@ use rand::{
     distr::Alphanumeric,
     rngs::{OsRng, StdRng},
 };
-
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 use valuable::Valuable;
 
-use crate::db;
-
 use super::AppState;
+use crate::db;
 
 const KEY_PREFIX_LENGTH: usize = 8;
 const KEY_LENGTH: usize = 32;
@@ -308,8 +306,9 @@ impl IntoResponse for Error {
 
 #[cfg(test)]
 mod tests {
-    use super::ApiKey;
     use pretty_assertions::assert_eq;
+
+    use super::ApiKey;
     #[test]
     fn api_key_prefix_matches_hash_prefix() {
         let api_key = ApiKey::new();

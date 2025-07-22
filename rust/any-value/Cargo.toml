@@ -7,7 +7,7 @@ edition.workspace = true
 crate-type = ["cdylib", "lib"]
 
 [dependencies]
-serde_json = { workspace = true, optional = true }
+serde_json = { workspace = true }
 serde = { workspace = true }
 diesel-async = { workspace = true, optional = true }
 diesel = { workspace = true, optional = true }
@@ -22,5 +22,5 @@ wasm-bindgen = { workspace = true }
 serde-wasm-bindgen = { workspace = true }
 
 [features]
-backend = ["serde_json", "diesel"]
-python = ["pyo3", "serde_json"]
+backend = ["diesel"]
+python = ["pyo3"]

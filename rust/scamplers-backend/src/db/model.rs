@@ -1,7 +1,8 @@
-use super::error;
-use crate::db::util::{BoxedDieselExpression, NewBoxedDieselExpression};
 use diesel_async::AsyncPgConnection;
 use uuid::Uuid;
+
+use super::error;
+use crate::db::util::{BoxedDieselExpression, NewBoxedDieselExpression};
 
 pub mod cdna;
 pub mod chromium_run;

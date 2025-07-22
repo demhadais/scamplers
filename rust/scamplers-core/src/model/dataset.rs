@@ -6,8 +6,6 @@ use scamplers_schema::dataset;
 use time::OffsetDateTime;
 use uuid::Uuid;
 
-use crate::model::lab::LabHandle;
-
 mod chromium;
 mod common;
 
@@ -32,17 +30,18 @@ pub struct DatasetSummary {
     pub handle: DatasetHandle,
     pub data_path: String,
     pub delivered_at: OffsetDateTime,
+    pub web_summary: Option<String>,
     #[cfg_attr(target_arch = "wasm32", wasm_bindgen(readonly))]
     pub metrics: Option<AnyValue>,
-    pub web_summary: Option<String>,
 }
 
-#[db_selection]
-#[cfg_attr(feature = "backend", diesel(table_name = dataset))]
-pub struct DatasetCore {
-    #[serde(flatten)]
-    #[cfg_attr(feature = "backend", diesel(embed))]
-    pub summary: DatasetSummary,
-    #[cfg_attr(feature = "backend", diesel(embed))]
-    pub lab: LabHandle,
-}
+// #[cfg(feature = "backend")]
+// #[db_selection]
+// #[cfg_attr(feature = "backend", diesel(table_name = dataset))]
+// pub struct DatasetCore {
+//     #[serde(flatten)]
+//     #[cfg_attr(feature = "backend", diesel(embed))]
+//     pub summary: DatasetSummary,
+//     #[cfg_attr(feature = "backend", diesel(embed))]
+//     pub lab: LabHandle,
+// }

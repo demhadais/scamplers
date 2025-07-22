@@ -1,4 +1,3 @@
-use crate::model::{Pagination, SortByGroup, person::PersonSummary};
 use scamplers_macros::{
     base_api_model, base_api_model_with_default, db_insertion, db_query, db_selection, db_update,
 };
@@ -8,6 +7,8 @@ use uuid::Uuid;
 use valid_string::ValidString;
 #[cfg(target_arch = "wasm32")]
 use wasm_bindgen::prelude::*;
+
+use crate::model::{Pagination, SortByGroup, person::PersonSummary};
 
 #[db_insertion]
 #[cfg_attr(feature = "backend", diesel(table_name = lab))]

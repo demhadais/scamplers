@@ -1,15 +1,10 @@
-use {
-    crate::api_path::ToApiPath,
-    reqwest::Method,
-    serde::{Serialize, de::DeserializeOwned},
-};
-
+use reqwest::Method;
+use serde::{Serialize, de::DeserializeOwned};
 #[cfg(target_arch = "wasm32")]
 use {
     crate::model::person::{CreatedUser, NewMsLogin},
     wasm_bindgen::prelude::*,
 };
-
 #[cfg(feature = "python")]
 use {
     crate::model::{
@@ -20,6 +15,8 @@ use {
     std::sync::Arc,
     tokio::runtime::Runtime,
 };
+
+use crate::api_path::ToApiPath;
 
 #[allow(dead_code)]
 #[cfg_attr(target_arch = "wasm32", wasm_bindgen)]

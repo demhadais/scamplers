@@ -1,4 +1,3 @@
-use crate::model::{Pagination, SortByGroup, institution::Institution};
 #[cfg(feature = "python")]
 use pyo3::prelude::*;
 use scamplers_macros::{
@@ -11,6 +10,8 @@ use uuid::Uuid;
 use valid_string::ValidString;
 #[cfg(target_arch = "wasm32")]
 use wasm_bindgen::prelude::*;
+
+use crate::model::{Pagination, SortByGroup, institution::Institution};
 
 #[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
 #[db_enum]

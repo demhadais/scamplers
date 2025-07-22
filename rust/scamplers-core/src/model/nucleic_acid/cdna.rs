@@ -1,4 +1,6 @@
 use scamplers_macros::{base_api_model, db_insertion, db_selection};
+#[cfg(feature = "backend")]
+use scamplers_schema::{cdna, cdna_measurement, cdna_preparers};
 use time::OffsetDateTime;
 use uuid::Uuid;
 use valid_string::ValidString;
@@ -6,9 +8,6 @@ use valid_string::ValidString;
 use crate::model::{
     library_type_specification::LibraryType, nucleic_acid::common::ElectrophoreticMeasurementData,
 };
-
-#[cfg(feature = "backend")]
-use scamplers_schema::{cdna, cdna_measurement, cdna_preparers};
 
 #[db_insertion]
 #[cfg_attr(feature = "backend", diesel(table_name = cdna_measurement))]

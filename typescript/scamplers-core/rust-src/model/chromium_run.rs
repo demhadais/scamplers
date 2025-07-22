@@ -1,4 +1,10 @@
+pub use common::NewChipLoadingCommon;
+pub use ocm::NewOcmGems;
+pub use pool_multiplex::{NewPoolMultiplexChipLoading, NewPoolMultiplexGems};
 use scamplers_macros::{base_api_model, db_selection, getters_impl};
+#[cfg(feature = "backend")]
+use scamplers_schema::{chromium_run, gems};
+pub use singleplex::{NewSingleplexChipLoading, NewSingleplexGems};
 use time::OffsetDateTime;
 use uuid::Uuid;
 #[cfg(target_arch = "wasm32")]
@@ -7,14 +13,6 @@ use wasm_bindgen::prelude::*;
 use crate::model::chromium_run::{
     ocm::NewOcmChromiumRun, pool_multiplex::NewPoolMultiplexChromiumRun,
     singleplex::NewSingleplexChromiumRun,
-};
-#[cfg(feature = "backend")]
-use scamplers_schema::{chromium_run, gems};
-pub use {
-    common::NewChipLoadingCommon,
-    ocm::NewOcmGems,
-    pool_multiplex::{NewPoolMultiplexChipLoading, NewPoolMultiplexGems},
-    singleplex::{NewSingleplexChipLoading, NewSingleplexGems},
 };
 
 mod common;

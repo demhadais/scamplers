@@ -1,7 +1,8 @@
-use super::common::NewSpecimenCommon;
 use scamplers_macros::{base_api_model, db_enum, db_insertion};
 #[cfg(feature = "backend")]
 use scamplers_schema::specimen;
+
+use super::common::NewSpecimenCommon;
 
 #[db_enum]
 #[derive(Default)]
