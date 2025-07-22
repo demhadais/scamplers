@@ -85,7 +85,6 @@ export class DatasetSummary {
   delivered_at: Date;
   get web_summary(): string;
   set web_summary(value: string | null | undefined);
-  readonly metrics: any | undefined;
 }
 export class EmptyStringError {
   private constructor();
@@ -124,6 +123,10 @@ export class Lab {
   free(): void;
   core: LabCore;
   members: PersonSummary[];
+  readonly id: string;
+  readonly link: string;
+  readonly name: string;
+  readonly delivery_dir: string;
 }
 export class LabCore {
   private constructor();

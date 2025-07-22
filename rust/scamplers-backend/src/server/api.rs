@@ -6,6 +6,7 @@ use scamplers_core::{
     api_path::ToApiPath,
     model::{
         chromium_run::{ChromiumRun, NewChromiumRun},
+        dataset::{DatasetSummary, NewDataset},
         institution::{Institution, InstitutionQuery, NewInstitution},
         lab::{Lab, LabQuery, LabSummary, NewLab},
         nucleic_acid::{CdnaHandle, LibraryHandle, NewCdnaGroup, NewLibrary},
@@ -115,5 +116,9 @@ pub(super) fn router() -> Router<AppState> {
         .route(
             &<(NewSequencingRun, SequencingRunSummary)>::to_api_path(),
             post(write::<NewSequencingRun>),
+        )
+        .route(
+            &<(NewDataset, DatasetSummary)>::to_api_path(),
+            post(write::<NewDataset>),
         )
 }

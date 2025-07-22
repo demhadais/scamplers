@@ -5,6 +5,9 @@ edition.workspace = true
 
 [dependencies]
 axum = { workspace = true }
+any-value = { path = "../any-value" }
+heck = { workspace = true }
+csv = { workspace = true }
 scamplers-core = { path = "../scamplers-core", features = ["backend"] }
 scamplers-schema = { path = "../scamplers-schema" }
 anyhow = { workspace = true }

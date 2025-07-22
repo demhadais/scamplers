@@ -1,18 +1,24 @@
-pub use block::NewBlock;
+pub(crate) use block::{NewFixedBlock, NewFrozenBlock};
+use common::MeasurementData;
 pub use common::NewSpecimenMeasurement;
-use common::{MeasurementData, Species};
+pub(crate) use common::Species;
+#[cfg(feature = "python")]
+use pyo3::{FromPyObject, prelude::*};
 use scamplers_macros::{base_api_model, db_enum, db_query, db_selection};
 #[cfg(feature = "backend")]
 use scamplers_schema::{specimen, specimen_measurement};
 use time::OffsetDateTime;
-pub use tissue::NewTissue;
+pub(crate) use tissue::{NewCryoPreservedTissue, NewFixedTissue, NewFrozenTissue};
 use uuid::Uuid;
-pub use virtual_::NewVirtualSpecimen;
+pub(crate) use virtual_::NewVirtualSpecimen;
+#[cfg(feature = "python")]
+pub(crate) use {
+    block::{BlockFixative, FixedBlockEmbeddingMatrix},
+    common::NewCommitteeApproval,
+};
 
 use super::{lab::LabSummary, person::PersonSummary};
-use crate::model::{
-    Pagination, SortByGroup, person::PersonHandle, specimen::common::NewSpecimenCommon,
-};
+use crate::model::{Pagination, SortByGroup, person::PersonHandle};
 
 mod block;
 mod common;
@@ -21,10 +27,14 @@ mod virtual_;
 
 #[base_api_model]
 #[serde(tag = "type")]
+#[cfg_attr(feature = "python", derive(FromPyObject))]
 pub enum NewSpecimen {
-    Block(#[garde(dive)] NewBlock),
+    FixedBlock(#[garde(dive)] NewFixedBlock),
+    FrozenBlock(#[garde(dive)] NewFrozenBlock),
     Suspension(#[garde(dive)] NewVirtualSpecimen),
-    Tissue(#[garde(dive)] NewTissue),
+    CryopreservedTissue(#[garde(dive)] NewCryoPreservedTissue),
+    FixedTissue(#[garde(dive)] NewFixedTissue),
+    FrozenTissue(#[garde(dive)] NewFrozenTissue),
 }
 
 #[db_selection]
@@ -84,6 +94,7 @@ pub struct SpecimenCore {
     target_arch = "wasm32",
     ::wasm_bindgen::prelude::wasm_bindgen(getter_with_clone)
 )]
+#[cfg_attr(feature = "python", pyclass)]
 pub struct Specimen {
     pub core: SpecimenCore,
     pub measurements: Vec<SpecimenMeasurement>,
@@ -153,7 +164,7 @@ mod tests {
     use serde_json::{Value, json};
     use uuid::Uuid;
 
-    use crate::model::specimen::{NewSpecimen, block::NewBlock};
+    use crate::model::specimen::NewSpecimen;
 
     #[test]
     fn deserialize_new_specimen() {
@@ -181,7 +192,7 @@ mod tests {
 
         incorrectly_embedded_block["embedded_in"] = Value::String("paraffin".to_string());
         let specimen = deserialize(incorrectly_embedded_block.clone()).unwrap();
-        let NewSpecimen::Block(NewBlock::Fixed(_)) = specimen else {
+        let NewSpecimen::FixedBlock(_) = specimen else {
             panic!("expected frozen block, got {specimen:?}");
         };
 
@@ -191,7 +202,7 @@ mod tests {
         frozen_block["fixative"] = Value::Null;
         frozen_block["frozen"] = Value::Bool(true);
         let specimen = deserialize(frozen_block.clone()).unwrap();
-        let NewSpecimen::Block(NewBlock::Frozen(_)) = specimen else {
+        let NewSpecimen::FrozenBlock(_) = specimen else {
             panic!("expected frozen block, got {specimen:?}");
         };
 

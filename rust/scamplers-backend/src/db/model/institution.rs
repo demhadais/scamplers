@@ -91,7 +91,6 @@ mod tests {
     use rstest::rstest;
     use scamplers_core::model::institution::*;
 
-    use super::*;
     use crate::db::test_util::{DbConnection, N_INSTITUTIONS, db_conn, test_query};
 
     fn comparison_fn(i: &Institution) -> String {

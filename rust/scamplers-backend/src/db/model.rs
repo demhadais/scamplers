@@ -64,7 +64,7 @@ pub trait WriteToDb {
 trait WriteToDbInternal {
     type Returns;
 
-    async fn write(self, db_conn: &mut AsyncPgConnection) -> error::Result<Self::Returns>;
+    async fn write_to_db(self, db_conn: &mut AsyncPgConnection) -> error::Result<Self::Returns>;
 }
 
 trait IsUpdate<const N: usize> {

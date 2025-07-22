@@ -12,7 +12,7 @@ use super::error::Error;
 use crate::{
     db::{
         DbTransaction,
-        model::{self, FetchRelatives, WriteToDb},
+        model::{self, FetchRelatives},
     },
     server::{AppState, auth::User},
 };

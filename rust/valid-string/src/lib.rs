@@ -35,6 +35,13 @@ impl Display for ValidString {
     }
 }
 
+impl ValidString {
+    #[must_use]
+    pub fn as_bytes(&self) -> &[u8] {
+        self.0.as_bytes()
+    }
+}
+
 #[cfg_attr(target_arch = "wasm32", wasm_bindgen::prelude::wasm_bindgen)]
 #[derive(Debug, thiserror::Error)]
 #[error("cannot construct `ValidString` from empty string")]

@@ -95,8 +95,8 @@ pub struct NewSpecimenCommon {
     pub committee_approvals: Vec<NewCommitteeApproval>,
     #[garde(dive)]
     pub notes: Option<ValidString>,
-    returned_at: Option<OffsetDateTime>,
-    returned_by: Option<Uuid>,
+    pub returned_at: Option<OffsetDateTime>,
+    pub returned_by: Option<Uuid>,
     #[serde(default)]
     #[garde(dive)]
     #[cfg_attr(feature = "backend", diesel(skip_insertion))]

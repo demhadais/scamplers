@@ -2,7 +2,7 @@ use uuid::Uuid;
 
 use crate::model::{
     chromium_run::{ChromiumRun, NewChromiumRun},
-    dataset::NewDataset,
+    dataset::{DatasetSummary, NewDataset},
     institution::{Institution, InstitutionQuery, NewInstitution},
     lab::{Lab, LabQuery, LabSummary, NewLab},
     nucleic_acid::{CdnaHandle, LibraryHandle, NewCdnaGroup, NewLibrary},
@@ -144,7 +144,7 @@ impl ToApiPath for (NewLibrary, LibraryHandle) {
 }
 
 const DATASETS: &str = "/datasets";
-impl ToApiPath for (NewDataset, ()) {
+impl ToApiPath for (NewDataset, DatasetSummary) {
     fn to_api_path() -> String {
         DATASETS.to_string()
     }

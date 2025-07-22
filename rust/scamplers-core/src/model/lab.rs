@@ -1,5 +1,8 @@
+#[cfg(feature = "python")]
+use pyo3::prelude::*;
 use scamplers_macros::{
     base_api_model, base_api_model_with_default, db_insertion, db_query, db_selection, db_update,
+    getters_impl,
 };
 #[cfg(feature = "backend")]
 use scamplers_schema::lab;
@@ -21,6 +24,25 @@ pub struct NewLab {
     #[cfg_attr(feature = "backend", diesel(skip_insertion))]
     #[builder(default)]
     pub member_ids: Vec<Uuid>,
+}
+
+#[cfg(feature = "python")]
+#[pymethods]
+impl NewLab {
+    #[new]
+    fn new(
+        name: ValidString,
+        pi_id: Uuid,
+        delivery_dir: ValidString,
+        member_ids: Vec<Uuid>,
+    ) -> Self {
+        Self {
+            name,
+            pi_id,
+            delivery_dir,
+            member_ids,
+        }
+    }
 }
 
 #[db_selection]
@@ -68,6 +90,7 @@ pub struct LabCore {
     target_arch = "wasm32",
     wasm_bindgen::prelude::wasm_bindgen(getter_with_clone)
 )]
+#[cfg_attr(feature = "python", pyclass)]
 #[base_api_model]
 pub struct Lab {
     #[serde(flatten)]
@@ -75,10 +98,35 @@ pub struct Lab {
     pub members: Vec<PersonSummary>,
 }
 
+#[cfg(feature = "python")]
+#[pymethods]
+impl Lab {
+    #[getter]
+    fn example_getter(&self) -> &str {
+        &self.core.summary.handle.link
+    }
+}
+
+#[getters_impl]
 impl Lab {
     #[must_use]
     pub fn id(&self) -> Uuid {
         self.core.summary.id()
+    }
+
+    #[must_use]
+    pub fn link(&self) -> String {
+        self.core.summary.delivery_dir.clone()
+    }
+
+    #[must_use]
+    pub fn name(&self) -> String {
+        self.core.summary.name.clone()
+    }
+
+    #[must_use]
+    pub fn delivery_dir(&self) -> String {
+        self.core.summary.delivery_dir.clone()
     }
 }
 

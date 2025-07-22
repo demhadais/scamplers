@@ -1,8 +1,18 @@
-use scamplers_macros::{base_api_model, db_enum, db_insertion};
+#[cfg(feature = "python")]
+use pyo3::prelude::*;
+use scamplers_macros::{db_enum, db_insertion};
 #[cfg(feature = "backend")]
 use scamplers_schema::specimen;
+#[cfg(feature = "python")]
+use uuid::Uuid;
+#[cfg(feature = "python")]
+use valid_string::ValidString;
+#[cfg(feature = "python")]
+use {super::common::NewSpecimenMeasurement, time::OffsetDateTime};
 
 use super::common::NewSpecimenCommon;
+#[cfg(feature = "python")]
+use crate::model::specimen::common::{NewCommitteeApproval, Species};
 
 #[db_enum]
 #[derive(Default)]
@@ -38,6 +48,46 @@ pub struct NewFixedBlock {
     pub fixative: BlockFixative,
 }
 
+#[cfg(feature = "python")]
+#[pymethods]
+impl NewFixedBlock {
+    #[new]
+    fn new(
+        readable_id: ValidString,
+        name: ValidString,
+        submitted_by: Uuid,
+        lab_id: Uuid,
+        received_at: OffsetDateTime,
+        species: Vec<Species>,
+        measurements: Vec<NewSpecimenMeasurement>,
+        committee_approvals: Vec<NewCommitteeApproval>,
+        embedded_in: FixedBlockEmbeddingMatrix,
+        fixative: BlockFixative,
+        notes: Option<ValidString>,
+        returned_at: Option<OffsetDateTime>,
+        returned_by: Option<Uuid>,
+    ) -> Self {
+        Self {
+            inner: NewSpecimenCommon {
+                readable_id,
+                name,
+                submitted_by,
+                lab_id,
+                received_at,
+                species,
+                committee_approvals,
+                notes,
+                returned_at,
+                returned_by,
+                measurements,
+            },
+            embedded_in,
+            fixative,
+            type_: BlockType::Block,
+        }
+    }
+}
+
 #[db_enum]
 #[derive(Default)]
 pub enum FrozenBlockEmbeddingMatrix {
@@ -59,11 +109,4 @@ pub struct NewFrozenBlock {
     pub fixative: Option<BlockFixative>,
     #[garde(custom(super::common::is_true))]
     pub frozen: bool,
-}
-
-#[base_api_model]
-#[serde(tag = "preservation")]
-pub enum NewBlock {
-    Fixed(#[garde(dive)] NewFixedBlock),
-    Frozen(#[garde(dive)] NewFrozenBlock),
 }

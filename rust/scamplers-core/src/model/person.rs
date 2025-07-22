@@ -39,6 +39,22 @@ pub struct NewPerson {
     pub roles: Vec<UserRole>,
 }
 
+#[cfg(feature = "python")]
+#[pymethods]
+impl NewPerson {
+    #[new]
+    fn new(name: ValidString, email: String, institution_id: Uuid, roles: Vec<UserRole>) -> Self {
+        Self {
+            name,
+            email,
+            institution_id,
+            roles,
+            ms_user_id: None,
+            orcid: None,
+        }
+    }
+}
+
 #[base_api_model]
 #[cfg_attr(target_arch = "wasm32", wasm_bindgen::prelude::wasm_bindgen)]
 #[serde(transparent)]

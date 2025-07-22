@@ -2,7 +2,7 @@ use scamplers_macros::{db_enum, db_insertion};
 #[cfg(feature = "backend")]
 use scamplers_schema::specimen;
 
-use crate::model::specimen::NewSpecimenCommon;
+use super::common::NewSpecimenCommon;
 
 #[db_enum]
 #[derive(Default)]

@@ -17,6 +17,11 @@ use {
 };
 
 use crate::api_path::ToApiPath;
+#[cfg(feature = "python")]
+use crate::model::{
+    lab::{Lab, NewLab},
+    specimen::{NewSpecimen, Specimen},
+};
 
 #[allow(dead_code)]
 #[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
@@ -192,6 +197,16 @@ impl Client {
     }
 
     async fn create_person(&self, data: NewPerson) -> PyResult<Person> {
+        let client = self.clone();
+        client.send_request_python(data, Method::POST).await
+    }
+
+    async fn create_lab(&self, data: NewLab) -> PyResult<Lab> {
+        let client = self.clone();
+        client.send_request_python(data, Method::POST).await
+    }
+
+    async fn create_specimen(&self, data: NewSpecimen) -> PyResult<Specimen> {
         let client = self.clone();
         client.send_request_python(data, Method::POST).await
     }

@@ -10,7 +10,7 @@ use valid_string::ValidString;
 use crate::model::dataset::common::NewDatasetCommon;
 
 #[db_json]
-pub struct SingleRowCsv {
+pub struct SingleRowCsvMetricsFile {
     #[garde(pattern(r#"^[0-9A-Za-z_-]*summary\.csv$"#))]
     pub filename: String,
     #[garde(dive)]
@@ -20,7 +20,7 @@ pub struct SingleRowCsv {
 }
 
 #[db_json]
-pub struct MultiRowCsv {
+pub struct MultiRowCsvMetricsFile {
     #[garde(pattern(r#"^[0-9A-Za-z_-]+/[[:alnum:]]+summary\.csv$"#))]
     pub filename: String,
     #[garde(dive)]
@@ -32,15 +32,20 @@ pub struct MultiRowCsv {
 #[db_json]
 #[serde(transparent)]
 #[garde(transparent)]
-pub struct MultiRowCsvGroup(#[garde(dive, length(min = 1))] Vec<MultiRowCsv>);
-impl MultiRowCsvGroup {
+pub struct MultiRowCsvMetricsFileGroup(#[garde(dive, length(min = 1))] Vec<MultiRowCsvMetricsFile>);
+impl MultiRowCsvMetricsFileGroup {
+    #[must_use]
     pub fn len(&self) -> usize {
         self.0.len()
+    }
+
+    pub fn as_mut_slice(&mut self) -> &mut [MultiRowCsvMetricsFile] {
+        self.0.as_mut_slice()
     }
 }
 
 #[db_json]
-pub struct Json {
+pub struct JsonMetricsFile {
     #[garde(pattern(r#"^[0-9A-Za-z_-]*summary\.json$"#))]
     pub filename: String,
     #[garde(dive)]
@@ -61,36 +66,30 @@ pub struct NewChromiumDatasetCore {
     pub web_summary: String,
 }
 
-#[db_insertion]
-#[cfg_attr(feature = "backend", diesel(table_name = dataset))]
+#[base_api_model]
 pub struct CellrangerarcvdjCountDataset {
     #[serde(flatten)]
     #[garde(dive)]
-    #[cfg_attr(feature = "backend", diesel(embed))]
     pub core: NewChromiumDatasetCore,
-    pub metrics: SingleRowCsv,
+    pub metrics: SingleRowCsvMetricsFile,
 }
 
-#[db_insertion]
-#[cfg_attr(feature = "backend", diesel(table_name = dataset))]
+#[base_api_model]
 pub struct CellrangerMultiDataset {
     #[serde(flatten)]
     #[garde(dive)]
-    #[cfg_attr(feature = "backend", diesel(embed))]
     pub core: NewChromiumDatasetCore,
     #[garde(dive)]
-    pub metrics: MultiRowCsvGroup,
+    pub metrics: MultiRowCsvMetricsFileGroup,
 }
 
-#[db_insertion]
-#[cfg_attr(feature = "backend", diesel(table_name = dataset))]
+#[base_api_model]
 pub struct CellrangeratacCountDataset {
     #[serde(flatten)]
     #[garde(dive)]
-    #[cfg_attr(feature = "backend", diesel(embed))]
     pub core: NewChromiumDatasetCore,
     #[garde(dive)]
-    pub metrics: Json,
+    pub metrics: JsonMetricsFile,
 }
 
 #[base_api_model]
@@ -117,107 +116,6 @@ pub enum NewChromiumDataset {
     #[strum(serialize = "cellranger vdj")]
     CellrangerVdj(CellrangerarcvdjCountDataset),
 }
-
-// fn deserialize_csv<'de, D>(deserializer: D) -> Result<Vec<HashMap<String,
-// AnyValue>>, D::Error> where
-//     D: Deserializer<'de>,
-// {
-//     let raw = String::deserialize(deserializer)?;
-//     let rdr = csv::Reader::from_reader(raw.as_bytes());
-//     let records = rdr.into_deserialize();
-//     let records: csv::Result<Vec<HashMap<String, AnyValue>>> =
-// records.collect();
-
-//     records.map_err(serde::de::Error::custom)
-// }
-
-// fn deserialize_10x_single_row_csv<'de, D>(
-//     deserializer: D,
-// ) -> Result<HashMap<String, AnyValue>, D::Error>
-// where
-//     D: Deserializer<'de>,
-// {
-//     let mut records = deserialize_csv(deserializer)?;
-
-//     if records.len() != 1 {
-//         return Err(serde::de::Error::custom(
-//             "expected CSV with exactly one row",
-//         ));
-//     }
-
-//     let map = records.remove(0);
-
-//     Ok(map.parse())
-// }
-
-// fn deserialize_10x_multi_row_csv<'de, D>(
-//     deserializer: D,
-// ) -> Result<Vec<HashMap<String, AnyValue>>, D::Error>
-// where
-//     D: Deserializer<'de>,
-// {
-//     let records = deserialize_csv(deserializer)?;
-//     Ok(records.into_iter().map(TenxCsv::parse).collect())
-// }
-
-// fn deserialize_10x_json<'de, D>(deserializer: D) -> Result<AnyValue,
-// D::Error> where
-//     D: Deserializer<'de>,
-// {
-//     let raw_data = String::deserialize(deserializer)?;
-//     serde_json::from_str(&raw_data).map_err(serde::de::Error::custom)
-// }
-
-// #[cfg(feature = "backend")]
-// trait TenxCsv {
-//     fn parse(self) -> HashMap<String, AnyValue>;
-// }
-
-// #[cfg(feature = "backend")]
-// impl TenxCsv for HashMap<String, AnyValue> {
-//     fn parse(self) -> HashMap<String, AnyValue> {
-//         let mut new_map = HashMap::with_capacity(self.len());
-
-//         let number_regex = Regex::new(r"^(\d+)\s\(\d{1,3}\.\d+\)$").unwrap();
-
-//         for (key, mut value) in self {
-//             let key = heck::AsSnakeCase(key).to_string();
-
-//             // if we were able to parse it as a non-string, return that
-//             if !value.is_string() {
-//                 new_map.insert(key, value);
-//                 continue;
-//             }
-
-//             // if not, convert it to a string and remove the comma
-//             let value_as_string = value.to_string();
-//             let formatted = value_as_string.replace([',', '%', '"'], "");
-
-//             let matches = number_regex.captures(&formatted);
-
-//             let extracted_number = match matches {
-//                 Some(capture_group) => {
-//                     let (_, [number]) = capture_group.extract();
-//                     number
-//                 }
-//                 None => &formatted,
-//             };
-
-//             if let Ok(n) = serde_json::Number::from_str(extracted_number) {
-//                 // if the original string had a '%' in it, we want to divide
-// by 100                 if value_as_string.contains('%') && extracted_number
-// == formatted {                     value = AnyValue::from(n.as_f64().unwrap()
-// / 100.0);                 } else {
-//                     value = AnyValue::from(n.as_f64().unwrap());
-//                 }
-//             }
-
-//             new_map.insert(key, value);
-//         }
-
-//         new_map
-//     }
-// }
 
 fn validate_html(document: &str, _: &()) -> garde::Result {
     let result = scraper::Html::parse_document(document);

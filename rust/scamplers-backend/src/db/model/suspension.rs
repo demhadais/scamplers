@@ -64,7 +64,7 @@ impl FetchById for Suspension {
 impl WriteToDbInternal for &[NewSuspensionMeasurement] {
     type Returns = ();
 
-    async fn write(
+    async fn write_to_db(
         self,
         db_conn: &mut diesel_async::AsyncPgConnection,
     ) -> db::error::Result<Self::Returns> {
@@ -126,7 +126,7 @@ impl WriteToDb for NewSuspension {
             .execute(db_conn)
             .await?;
 
-        self.measurements(id).write(db_conn).await?;
+        self.measurements(id).write_to_db(db_conn).await?;
 
         Suspension::fetch_by_id(&id, db_conn).await
     }

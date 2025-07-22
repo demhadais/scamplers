@@ -1,8 +1,8 @@
 use diesel::{dsl::AssumeNotNull, prelude::*};
 use diesel_async::{AsyncPgConnection, RunQueryDsl};
 use scamplers_core::model::specimen::{
-    NewBlock, NewSpecimen, NewSpecimenMeasurement, NewTissue, Specimen, SpecimenCore,
-    SpecimenMeasurement, SpecimenQuery, SpecimenSummary,
+    NewSpecimen, NewSpecimenMeasurement, Specimen, SpecimenCore, SpecimenMeasurement,
+    SpecimenQuery, SpecimenSummary,
 };
 use scamplers_schema::{
     lab, person,
@@ -90,16 +90,12 @@ impl HasMeasurements for NewSpecimen {
 
     fn measurements(&mut self) -> &mut [Self::Measurement] {
         let inner = match self {
-            Self::Block(block) => match block {
-                NewBlock::Fixed(b) => &mut b.inner,
-                NewBlock::Frozen(b) => &mut b.inner,
-            },
-            Self::Suspension(susp) => &mut susp.inner,
-            Self::Tissue(tissue) => match tissue {
-                NewTissue::Cryopreserved(t) => &mut t.inner,
-                NewTissue::Fixed(t) => &mut t.inner,
-                NewTissue::Frozen(t) => &mut t.inner,
-            },
+            Self::FixedBlock(b) => &mut b.inner,
+            Self::FrozenBlock(b) => &mut b.inner,
+            Self::CryopreservedTissue(t) => &mut t.inner,
+            Self::FixedTissue(t) => &mut t.inner,
+            Self::FrozenTissue(t) => &mut t.inner,
+            Self::Suspension(s) => &mut s.inner,
         };
 
         &mut inner.measurements
@@ -114,16 +110,12 @@ impl WriteToDb for NewSpecimen {
         db_conn: &mut diesel_async::AsyncPgConnection,
     ) -> crate::db::error::Result<Self::Returns> {
         let id = match &self {
-            Self::Block(block) => match block {
-                NewBlock::Fixed(block) => write_specimen_variant!(block, db_conn),
-                NewBlock::Frozen(block) => write_specimen_variant!(block, db_conn),
-            },
-            Self::Suspension(suspension) => write_specimen_variant!(suspension, db_conn),
-            Self::Tissue(tissue) => match tissue {
-                NewTissue::Cryopreserved(tissue) => write_specimen_variant!(tissue, db_conn),
-                NewTissue::Fixed(tissue) => write_specimen_variant!(tissue, db_conn),
-                NewTissue::Frozen(tissue) => write_specimen_variant!(tissue, db_conn),
-            },
+            Self::FixedBlock(s) => write_specimen_variant!(s, db_conn),
+            Self::FrozenBlock(s) => write_specimen_variant!(s, db_conn),
+            Self::CryopreservedTissue(s) => write_specimen_variant!(s, db_conn),
+            Self::FixedTissue(s) => write_specimen_variant!(s, db_conn),
+            Self::FrozenTissue(s) => write_specimen_variant!(s, db_conn),
+            Self::Suspension(s) => write_specimen_variant!(s, db_conn),
         };
 
         // TODO: technically we can get away with one less query here by building the
