@@ -139,8 +139,8 @@ mod wasm32 {
 
 #[cfg(feature = "python")]
 mod python {
-    use super::{ClientError, DuplicateResourceError, InvalidDataError, InvalidReferenceError, PermissionDeniedError, PyDictMethods, PyErr, PyFloatMethods, PyMappingMethods, PyMappingProxyMethods, ResourceNotFoundError, ScamplersCoreError, ScamplersErrorResponse, ServerError, Uuid, pymethods};
-    use pyo3::{PyErrArguments, PyTypeInfo};
+    use super::{ScamplersErrorResponse, ScamplersCoreError};
+    use pyo3::prelude::*;
 
     #[pymethods]
     impl ScamplersErrorResponse {
