@@ -80,7 +80,8 @@ async fn prod_api() {
 
     let invalid_api_key_response = json!({
         "error": {
-            "type":"invalid_api_key"
+            "message": "invalid API key",
+            "type": "permission_denied"
         },
         "status":401});
 

@@ -23,7 +23,7 @@ use crate::model::{
 };
 use crate::{
     api_path::ToApiPath,
-    result::{ClientError, ScamplersCoreError, ScamplersErrorResponse, ServerError},
+    result::{ClientError, ScamplersCoreError, ScamplersCoreErrorResponse, ServerError},
 };
 
 #[allow(dead_code)]
@@ -96,7 +96,7 @@ impl ScamplersClient {
         &self,
         data: Req,
         method: Method,
-    ) -> Result<Resp, ScamplersErrorResponse>
+    ) -> Result<Resp, ScamplersCoreErrorResponse>
     where
         Req: Serialize,
         Resp: DeserializeOwned,
@@ -116,7 +116,7 @@ impl ScamplersClient {
                 .post(format!("{backend_base_url}{route}"))
                 .json(&data),
             _ => {
-                return Err(ScamplersErrorResponse {
+                return Err(ScamplersCoreErrorResponse {
                     status: None,
                     error: ScamplersCoreError::Client(ClientError {
                         message: format!("unexpected HTTP method {method}"),
@@ -146,13 +146,16 @@ impl ScamplersClient {
         };
 
         let inner_error = ServerError {
-            message: format!("failed to deserialize response body as success and as failure:\n\t{deserialization_failure1}\n\t{deserialization_failure2}"),
-            raw_response_body: String::from_utf8(raw_response.to_vec()).unwrap_or_default()
+            message: format!(
+                "failed to deserialize response body as success and as \
+                 failure:\n\t{deserialization_failure1}\n\t{deserialization_failure2}"
+            ),
+            raw_response_body: String::from_utf8(raw_response.to_vec()).unwrap_or_default(),
         };
 
-        Err(ScamplersErrorResponse {
+        Err(ScamplersCoreErrorResponse {
             status,
-            error: ScamplersCoreError::Server(inner_error)
+            error: ScamplersCoreError::Server(inner_error),
         })
     }
 
@@ -161,7 +164,7 @@ impl ScamplersClient {
         &self,
         data: Req,
         method: Method,
-    ) -> Result<Resp, ScamplersErrorResponse>
+    ) -> Result<Resp, ScamplersCoreErrorResponse>
     where
         Req: Serialize,
         Resp: DeserializeOwned,
@@ -175,7 +178,7 @@ impl ScamplersClient {
         self,
         data: Req,
         method: Method,
-    ) -> Result<Resp, ScamplersErrorResponse>
+    ) -> Result<Resp, ScamplersCoreErrorResponse>
     where
         Req: Serialize + Send + 'static,
         Resp: DeserializeOwned + Send + 'static,
@@ -194,7 +197,10 @@ impl ScamplersClient {
 #[wasm_bindgen]
 impl ScamplersClient {
     #[wasm_bindgen]
-    pub async fn ms_login(&self, data: NewMsLogin) -> Result<CreatedUser, ScamplersErrorResponse> {
+    pub async fn ms_login(
+        &self,
+        data: NewMsLogin,
+    ) -> Result<CreatedUser, ScamplersCoreErrorResponse> {
         self.send_request_wasm(data, Method::POST).await
     }
 }
@@ -202,22 +208,28 @@ impl ScamplersClient {
 #[cfg(feature = "python")]
 #[pymethods]
 impl ScamplersClient {
-    async fn create_institution(&self, data: NewInstitution) -> Result<Institution, ScamplersErrorResponse> {
+    async fn create_institution(
+        &self,
+        data: NewInstitution,
+    ) -> Result<Institution, ScamplersCoreErrorResponse> {
         let client = self.clone();
         client.send_request_python(data, Method::POST).await
     }
 
-    async fn create_person(&self, data: NewPerson) -> Result<Person, ScamplersErrorResponse> {
+    async fn create_person(&self, data: NewPerson) -> Result<Person, ScamplersCoreErrorResponse> {
         let client = self.clone();
         client.send_request_python(data, Method::POST).await
     }
 
-    async fn create_lab(&self, data: NewLab) -> Result<Lab, ScamplersErrorResponse> {
+    async fn create_lab(&self, data: NewLab) -> Result<Lab, ScamplersCoreErrorResponse> {
         let client = self.clone();
         client.send_request_python(data, Method::POST).await
     }
 
-    async fn create_specimen(&self, data: NewSpecimen) -> Result<Specimen, ScamplersErrorResponse> {
+    async fn create_specimen(
+        &self,
+        data: NewSpecimen,
+    ) -> Result<Specimen, ScamplersCoreErrorResponse> {
         let client = self.clone();
         client.send_request_python(data, Method::POST).await
     }

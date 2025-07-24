@@ -17,6 +17,7 @@ use uuid::Uuid;
 
 use crate::{
     db::model::{FetchByQuery, WriteToDb},
+    result::ScamplersError,
     server::{run_migrations, util::DevContainer},
 };
 
@@ -72,7 +73,7 @@ impl TestState {
 
         let mut people = Vec::with_capacity(N_PEOPLE);
         for i in 0..N_PEOPLE {
-            let institution_id = institutions.choose(rng).unwrap().id();
+            let institution_id = institutions.choose(rng).unwrap().handle.id;
 
             let new_person = NewPerson::builder()
                 .name(format!("person{i}"))
@@ -88,13 +89,13 @@ impl TestState {
 
         let mut labs = Vec::with_capacity(N_LABS);
         for i in 0..N_LABS {
-            let pi_id = people.choose(rng).unwrap().id();
+            let pi_id = people.choose(rng).unwrap().core.summary.handle.id;
             let name = format!("lab{i}");
             // Use `N_LAB_MEMBERS - 1` because we're expecting to add the PI, so using this
             // constant later can be correct
             let member_ids: Vec<_> = people
                 .choose_multiple(rng, N_LAB_MEMBERS - 1)
-                .map(scamplers_core::model::person::Person::id)
+                .map(|p| p.core.summary.handle.id)
                 .collect();
 
             let new_lab = NewLab::builder()
@@ -135,7 +136,7 @@ pub async fn test_query<Record, Value1, Value2>(
     Value2: Debug + PartialEq<Value1> + Sync,
 {
     db_conn
-        .test_transaction::<_, crate::db::error::Error, _>(|conn| {
+        .test_transaction::<_, ScamplersError, _>(|conn| {
             async move {
                 let records = Record::fetch_by_query(&query, conn).await.unwrap();
                 assert_eq!(records.len(), expected_len);

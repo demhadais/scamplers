@@ -22,7 +22,6 @@ use uuid::Uuid;
 use super::AppState;
 use crate::server::api::handler::{by_id, by_query, relatives, write};
 
-mod error;
 mod handler;
 
 // trait RouterExt {

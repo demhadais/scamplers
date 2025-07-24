@@ -4,16 +4,19 @@ use any_value::AnyValue;
 use diesel::prelude::*;
 use diesel_async::{AsyncPgConnection, RunQueryDsl};
 use regex::Regex;
-use scamplers_core::model::dataset::{
-    DatasetSummary, NewChromiumDataset, NewChromiumDatasetCore, ParsedMetricsFile, chromium,
+use scamplers_core::{
+    model::dataset::{
+        DatasetSummary, NewChromiumDataset, NewChromiumDatasetCore, ParsedMetricsFile, chromium,
+    },
+    result::{DatasetCmdlineError, DatasetMetricsFileParseError, DatasetNMetricsFilesError},
 };
 use scamplers_schema::{chemistry, chip_loading, dataset, gems, suspension, suspension_pool};
 use uuid::Uuid;
 use valid_string::ValidString;
 
-use crate::db::{
-    error::{Error, Result},
-    model::WriteToDbInternal,
+use crate::{
+    db::model::WriteToDbInternal,
+    result::{ScamplersError, ScamplersResult},
 };
 
 #[derive(Insertable)]
@@ -25,16 +28,18 @@ struct NewParsedChromiumDataset {
 }
 
 trait ParseMetricsFile {
-    fn parse(self) -> crate::db::error::Result<ParsedMetricsFile>;
+    fn parse(self) -> ScamplersResult<ParsedMetricsFile>;
 }
 
-fn read_csv(raw: &ValidString) -> crate::db::error::Result<Vec<HashMap<String, AnyValue>>> {
+fn read_csv(raw: &ValidString) -> ScamplersResult<Vec<HashMap<String, AnyValue>>> {
     let rdr = csv::Reader::from_reader(raw.as_bytes());
     let records = rdr.into_deserialize();
     let records: csv::Result<Vec<HashMap<String, AnyValue>>> = records.collect();
 
-    records.map_err(|e| crate::db::error::Error::Other {
-        message: format!("failed to parse 10x csv:\n {e}"),
+    records.map_err(|err| {
+        ScamplersError::new_unprocessable_entity_error(DatasetMetricsFileParseError {
+            message: format!("failed to parse 10x csv:\n{err}"),
+        })
     })
 }
 
@@ -81,13 +86,15 @@ fn parse_tenx_record(csv: HashMap<String, AnyValue>) -> HashMap<String, AnyValue
 }
 
 impl ParseMetricsFile for chromium::SingleRowCsvMetricsFile {
-    fn parse(mut self) -> crate::db::error::Result<ParsedMetricsFile> {
+    fn parse(mut self) -> ScamplersResult<ParsedMetricsFile> {
         let mut csv = read_csv(&self.raw_contents)?;
 
         if csv.len() != 1 {
-            return Err(crate::db::error::Error::Other {
-                message: "expected CSV with exactly one row".to_string(),
-            });
+            return Err(ScamplersError::new_unprocessable_entity_error(
+                DatasetMetricsFileParseError {
+                    message: "expected csv with exactly 1 row".to_string(),
+                },
+            ));
         }
 
         self.contents = parse_tenx_record(csv.remove(0));
@@ -97,7 +104,7 @@ impl ParseMetricsFile for chromium::SingleRowCsvMetricsFile {
 }
 
 impl ParseMetricsFile for chromium::MultiRowCsvMetricsFileGroup {
-    fn parse(mut self) -> crate::db::error::Result<ParsedMetricsFile> {
+    fn parse(mut self) -> ScamplersResult<ParsedMetricsFile> {
         for file in self.as_mut_slice() {
             let csv = read_csv(&file.raw_contents)?;
 
@@ -109,11 +116,11 @@ impl ParseMetricsFile for chromium::MultiRowCsvMetricsFileGroup {
 }
 
 impl ParseMetricsFile for chromium::JsonMetricsFile {
-    fn parse(mut self) -> crate::db::error::Result<ParsedMetricsFile> {
-        self.contents = serde_json::from_slice(self.raw_contents.as_bytes()).map_err(|e| {
-            crate::db::error::Error::Other {
-                message: format!("failed to parse 10x json:\n{e}"),
-            }
+    fn parse(mut self) -> ScamplersResult<ParsedMetricsFile> {
+        self.contents = serde_json::from_slice(self.raw_contents.as_bytes()).map_err(|err| {
+            ScamplersError::new_unprocessable_entity_error(DatasetMetricsFileParseError {
+                message: format!("failed to parse 10x json:\n{err}"),
+            })
         })?;
 
         Ok(ParsedMetricsFile::TenxJson(self))
@@ -122,11 +129,11 @@ impl ParseMetricsFile for chromium::JsonMetricsFile {
 
 trait NewChromiumDatasetExt {
     fn cmdline(&self) -> &str;
-    fn n_metrics_files(&self) -> usize;
+    fn n_metrics_files(&self) -> u64;
     fn core(&self) -> &NewChromiumDatasetCore;
-    async fn validate_chemistry(&self, db_conn: &mut AsyncPgConnection) -> Result<()>;
-    async fn validate_n_samples(&self, db_conn: &mut AsyncPgConnection) -> Result<()>;
-    fn parse(self) -> crate::db::error::Result<NewParsedChromiumDataset>;
+    async fn validate_chemistry(&self, db_conn: &mut AsyncPgConnection) -> ScamplersResult<()>;
+    async fn validate_n_samples(&self, db_conn: &mut AsyncPgConnection) -> ScamplersResult<()>;
+    fn parse(self) -> ScamplersResult<NewParsedChromiumDataset>;
 }
 
 impl NewChromiumDatasetExt for NewChromiumDataset {
@@ -134,7 +141,7 @@ impl NewChromiumDatasetExt for NewChromiumDataset {
         self.into()
     }
 
-    fn n_metrics_files(&self) -> usize {
+    fn n_metrics_files(&self) -> u64 {
         use NewChromiumDataset::{
             CellrangerCount, CellrangerMulti, CellrangerVdj, CellrangerarcCount,
             CellrangeratacCount,
@@ -145,7 +152,7 @@ impl NewChromiumDatasetExt for NewChromiumDataset {
             | CellrangerVdj(_)
             | CellrangerarcCount(_)
             | CellrangeratacCount(_) => 1,
-            CellrangerMulti(d) => d.metrics.len(),
+            CellrangerMulti(d) => d.metrics.len() as u64,
         }
     }
 
@@ -162,13 +169,13 @@ impl NewChromiumDatasetExt for NewChromiumDataset {
         }
     }
 
-    async fn validate_chemistry(&self, db_conn: &mut AsyncPgConnection) -> Result<()> {
+    async fn validate_chemistry(&self, db_conn: &mut AsyncPgConnection) -> ScamplersResult<()> {
         let gems_id = &self.core().gems_id;
 
-        let expected_cmdline: Option<String> = gems::table
+        let (stored_chemistry, expected_cmdline): (Option<String>, Option<String>) = gems::table
             .left_join(chemistry::table)
             .filter(gems::id.eq(gems_id))
-            .select(chemistry::cmdline.nullable())
+            .select((gems::chemistry, chemistry::cmdline.nullable()))
             .first(db_conn)
             .await?;
 
@@ -177,18 +184,19 @@ impl NewChromiumDatasetExt for NewChromiumDataset {
         let cmdline = self.cmdline();
 
         if expected_cmdline != self.cmdline() {
-            return Err(Error::Other {
-                message: format!(
-                    "expected 'cmdline' {expected_cmdline} for {gems_id} based on chemistry, \
-                     found {cmdline}"
-                ),
-            });
+            return Err(ScamplersError::new_unprocessable_entity_error(
+                DatasetCmdlineError {
+                    chemistry: stored_chemistry,
+                    found_cmdline: cmdline.to_string(),
+                    expected_cmdline,
+                },
+            ));
         }
 
         Ok(())
     }
 
-    async fn validate_n_samples(&self, db_conn: &mut AsyncPgConnection) -> Result<()> {
+    async fn validate_n_samples(&self, db_conn: &mut AsyncPgConnection) -> ScamplersResult<()> {
         let gems_id = self.core().gems_id;
 
         let samples: Vec<(Option<Uuid>, Option<Uuid>)> = chip_loading::table
@@ -200,17 +208,15 @@ impl NewChromiumDatasetExt for NewChromiumDataset {
             .await?;
 
         let err = |expected_n_metrics_files| {
-            Err(Error::Other {
-                message: format!(
-                    "expected {expected_n_metrics_files} metrics files for dataset derived from \
-                     gems {gems_id}"
-                ),
+            ScamplersError::new_unprocessable_entity_error(DatasetNMetricsFilesError {
+                found_n_metrics_files: self.n_metrics_files(),
+                expected_n_metrics_files,
             })
         };
 
         let Some(suspension_pool_id) = samples[0].1 else {
             if samples.len() != 1 {
-                return err(1);
+                return Err(err(1));
             }
 
             return Ok(());
@@ -221,15 +227,16 @@ impl NewChromiumDatasetExt for NewChromiumDataset {
             .count()
             .get_result(db_conn)
             .await?;
+        let n_suspensions = n_suspensions as u64;
 
-        if n_suspensions as usize != self.n_metrics_files() {
-            return err(n_suspensions);
+        if n_suspensions != self.n_metrics_files() {
+            return Err(err(n_suspensions));
         }
 
         Ok(())
     }
 
-    fn parse(self) -> crate::db::error::Result<NewParsedChromiumDataset> {
+    fn parse(self) -> ScamplersResult<NewParsedChromiumDataset> {
         let (core, parsed_metrics) = match self {
             Self::CellrangerarcCount(ds) | Self::CellrangerCount(ds) | Self::CellrangerVdj(ds) => {
                 (ds.core, ds.metrics.parse())
@@ -248,10 +255,7 @@ impl NewChromiumDatasetExt for NewChromiumDataset {
 impl WriteToDbInternal for NewChromiumDataset {
     type Returns = DatasetSummary;
 
-    async fn write_to_db(
-        self,
-        db_conn: &mut AsyncPgConnection,
-    ) -> crate::db::error::Result<Self::Returns> {
+    async fn write_to_db(self, db_conn: &mut AsyncPgConnection) -> ScamplersResult<Self::Returns> {
         self.validate_chemistry(db_conn).await?;
         self.validate_n_samples(db_conn).await?;
 

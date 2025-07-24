@@ -12,6 +12,7 @@ use crate::model::institution::InstitutionHandle;
 pub enum Species {
     AmbystomaMexicanum,
     CanisFamiliaris,
+    CallithrixJacchus,
     DrosophilaMelanogaster,
     GasterosteusAculeatus,
     HomoSapiens,

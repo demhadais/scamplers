@@ -1,3 +1,5 @@
+use std::fmt::Debug;
+
 #[cfg(feature = "python")]
 use pyo3::prelude::*;
 use scamplers_macros::{base_api_model, base_api_model_with_default};
@@ -40,7 +42,7 @@ impl Default for Pagination {
 #[derive(PartialEq)]
 pub struct SortBy<C>
 where
-    C: valuable::Valuable + Default,
+    C: valuable::Valuable + Default + Debug,
 {
     pub by: C,
     pub descending: bool,
@@ -52,11 +54,11 @@ where
 #[derive(PartialEq)]
 pub struct SortByGroup<C>(Vec<SortBy<C>>)
 where
-    C: valuable::Valuable + Default;
+    C: valuable::Valuable + Default + Debug;
 
 impl<C> Default for SortByGroup<C>
 where
-    C: valuable::Valuable + Default,
+    C: valuable::Valuable + Default + Debug,
 {
     fn default() -> Self {
         Self(vec![SortBy::<C>::default()])
@@ -65,7 +67,7 @@ where
 
 impl<C> From<SortBy<C>> for SortByGroup<C>
 where
-    C: valuable::Valuable + Default,
+    C: valuable::Valuable + Default + Debug,
 {
     fn from(value: SortBy<C>) -> Self {
         Self(vec![value])
@@ -74,7 +76,7 @@ where
 
 impl<C> From<(C, bool)> for SortBy<C>
 where
-    C: valuable::Valuable + Default,
+    C: valuable::Valuable + Default + Debug,
 {
     fn from((by, descending): (C, bool)) -> Self {
         Self { by, descending }
@@ -83,7 +85,7 @@ where
 
 impl<C> From<(C, bool)> for SortByGroup<C>
 where
-    C: valuable::Valuable + Default,
+    C: valuable::Valuable + Default + Debug,
 {
     fn from(value: (C, bool)) -> Self {
         SortByGroup(vec![value.into()])
@@ -92,7 +94,7 @@ where
 
 impl<C> SortByGroup<C>
 where
-    C: valuable::Valuable + Default,
+    C: valuable::Valuable + Default + Debug,
 {
     #[must_use]
     pub fn as_slice(&self) -> &[SortBy<C>] {

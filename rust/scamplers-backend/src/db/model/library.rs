@@ -5,7 +5,10 @@ use scamplers_core::model::nucleic_acid::{
 };
 use scamplers_schema::{library, library_measurement, library_preparers};
 
-use crate::db::model::{HasMeasurements, HasPreparers, Mappping, SetParentId, WriteToDb};
+use crate::{
+    db::model::{HasMeasurements, HasPreparers, Mappping, SetParentId, WriteToDb},
+    result::ScamplersResult,
+};
 
 impl SetParentId for NewLibraryMeasurement {
     fn parent_id_mut(&mut self) -> &mut uuid::Uuid {
@@ -44,7 +47,7 @@ impl WriteToDb for &[NewLibraryMeasurement] {
     async fn write_to_db(
         self,
         db_conn: &mut diesel_async::AsyncPgConnection,
-    ) -> crate::db::error::Result<Self::Returns> {
+    ) -> ScamplersResult<Self::Returns> {
         diesel::insert_into(library_measurement::table)
             .values(self)
             .execute(db_conn)
@@ -60,7 +63,7 @@ impl WriteToDb for NewLibrary {
     async fn write_to_db(
         mut self,
         db_conn: &mut diesel_async::AsyncPgConnection,
-    ) -> crate::db::error::Result<Self::Returns> {
+    ) -> ScamplersResult<Self::Returns> {
         let handle = diesel::insert_into(library::table)
             .values(&self)
             .returning(LibraryHandle::as_select())

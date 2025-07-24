@@ -3,9 +3,12 @@ use anyhow::Context;
 use diesel_async::AsyncPgConnection;
 use garde::Validate;
 use index_set::IndexSetFileUrl;
-use scamplers_core::model::{
-    chemistry::Chemistry, institution::NewInstitution,
-    library_type_specification::NewLibraryTypeSpecification,
+use scamplers_core::{
+    model::{
+        chemistry::Chemistry, institution::NewInstitution,
+        library_type_specification::NewLibraryTypeSpecification,
+    },
+    result::ScamplersCoreError,
 };
 use serde::Deserialize;
 
@@ -46,12 +49,12 @@ impl SeedData {
             library_type_specifications,
         } = self;
 
-        let institutions_result = institution.write_to_db(db_conn).await;
-        if !matches!(
-            institutions_result,
-            Err(super::error::Error::DuplicateRecord { .. }) | Ok(_)
-        ) {
-            institutions_result?;
+        let institution_result = institution.write_to_db(db_conn).await;
+        if let Err(error) = &institution_result
+            && matches!(error.inner(), ScamplersCoreError::DuplicateResource(_))
+        {
+        } else {
+            institution_result?;
         }
 
         app_admin.write(db_conn).await?;

@@ -6,15 +6,15 @@ use pyo3::prelude::*;
 pub mod api_path;
 pub mod client;
 pub mod model;
+pub mod result;
 
 #[cfg(feature = "python")]
 #[pymodule]
 fn scamplers_core(m: &Bound<'_, PyModule>) -> PyResult<()> {
-    use client::Client;
-    use model::institution::NewInstitution;
-
-    use crate::model::{
+    use client::ScamplersClient;
+    use model::{
         dataset::DatasetSummary,
+        institution::NewInstitution,
         lab::NewLab,
         person::{NewPerson, UserRole},
         specimen::{
@@ -23,6 +23,34 @@ fn scamplers_core(m: &Bound<'_, PyModule>) -> PyResult<()> {
             NewVirtualSpecimen, Species,
         },
     };
+
+    use crate::{
+        model::suspension::{NewSuspension, NewSuspensionPool},
+        result::{
+            CdnaGemsError, CdnaLibraryTypeError, ClientError, DatasetCmdlineError,
+            DatasetMetricsFileParseError, DatasetNMetricsFilesError, DuplicateResourceError,
+            InvalidDataError, InvalidMeasurementError, InvalidReferenceError,
+            MalformedRequestError, PermissionDeniedError, ResourceNotFoundError,
+            ScamplersCoreErrorResponse, ServerError,
+        },
+    };
+
+    m.add_class::<ClientError>()?;
+    m.add_class::<DuplicateResourceError>()?;
+    m.add_class::<InvalidReferenceError>()?;
+    m.add_class::<ResourceNotFoundError>()?;
+    m.add_class::<InvalidDataError>()?;
+    m.add_class::<MalformedRequestError>()?;
+    m.add_class::<PermissionDeniedError>()?;
+    m.add_class::<ServerError>()?;
+    m.add_class::<CdnaGemsError>()?;
+    m.add_class::<CdnaLibraryTypeError>()?;
+    m.add_class::<DatasetCmdlineError>()?;
+    m.add_class::<DatasetNMetricsFilesError>()?;
+    m.add_class::<DatasetMetricsFileParseError>()?;
+    m.add_class::<InvalidMeasurementError>()?;
+
+    m.add_class::<ScamplersCoreErrorResponse>()?;
 
     m.add_class::<NewInstitution>()?;
 
@@ -46,8 +74,12 @@ fn scamplers_core(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_class::<NewSpecimenMeasurement>()?;
     m.add_class::<NewCommitteeApproval>()?;
 
+    m.add_class::<NewSuspension>()?;
+    m.add_class::<NewSuspensionPool>()?;
+
     m.add_class::<DatasetSummary>()?;
-    m.add_class::<Client>()?;
+
+    m.add_class::<ScamplersClient>()?;
 
     Ok(())
 }

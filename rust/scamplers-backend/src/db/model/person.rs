@@ -24,11 +24,11 @@ use valid_string::ValidString;
 
 use crate::{
     db::{
-        error::Result,
         model::{self, AsDieselQueryBase, FetchById, IsUpdate, WriteToDb},
         util::{AsIlike, BoxedDieselExpression, NewBoxedDieselExpression},
     },
     fetch_by_query,
+    result::ScamplersResult,
     server::auth::{ApiKey, HashedApiKey},
 };
 
@@ -91,7 +91,7 @@ impl AsDieselQueryBase for PersonSummary {
 impl model::FetchById for PersonSummary {
     type Id = Uuid;
 
-    async fn fetch_by_id(id: &Self::Id, db_conn: &mut AsyncPgConnection) -> Result<Self> {
+    async fn fetch_by_id(id: &Self::Id, db_conn: &mut AsyncPgConnection) -> ScamplersResult<Self> {
         Ok(Self::as_diesel_query_base()
             .find(id)
             .select(Self::as_select())
@@ -106,7 +106,7 @@ impl model::FetchByQuery for PersonSummary {
     async fn fetch_by_query(
         query: &Self::QueryParams,
         db_conn: &mut AsyncPgConnection,
-    ) -> Result<Vec<Self>> {
+    ) -> ScamplersResult<Vec<Self>> {
         use scamplers_core::model::person::PersonOrdinalColumn::{Email, Name};
 
         fetch_by_query!(query, [(Name, name_col), (Email, email_col)], db_conn)
@@ -124,16 +124,17 @@ impl AsDieselQueryBase for Person {
 impl model::FetchById for Person {
     type Id = Uuid;
 
-    async fn fetch_by_id(id: &Self::Id, db_conn: &mut AsyncPgConnection) -> Result<Self> {
+    async fn fetch_by_id(id: &Self::Id, db_conn: &mut AsyncPgConnection) -> ScamplersResult<Self> {
         let core = Self::as_diesel_query_base()
             .select(PersonCore::as_select())
             .filter(id_col.eq(id))
             .get_result(db_conn)
             .await?;
 
-        let roles: Vec<UserRole> = diesel::select(get_user_roles(core.summary.id().to_string()))
-            .get_result(db_conn)
-            .await?;
+        let roles: Vec<UserRole> =
+            diesel::select(get_user_roles(core.summary.handle.id.to_string()))
+                .get_result(db_conn)
+                .await?;
 
         Ok(Person { core, roles })
     }
@@ -142,7 +143,7 @@ impl model::FetchById for Person {
 impl model::WriteToDb for NewPerson {
     type Returns = Person;
 
-    async fn write_to_db(self, db_conn: &mut AsyncPgConnection) -> Result<Self::Returns> {
+    async fn write_to_db(self, db_conn: &mut AsyncPgConnection) -> ScamplersResult<Self::Returns> {
         let id = diesel::insert_into(person::table)
             .values(self)
             .returning(id_col)
@@ -176,7 +177,7 @@ impl IsUpdate<5> for PersonUpdateCore {
 impl model::WriteToDb for PersonUpdate {
     type Returns = Person;
 
-    async fn write_to_db(self, db_conn: &mut AsyncPgConnection) -> Result<Self::Returns> {
+    async fn write_to_db(self, db_conn: &mut AsyncPgConnection) -> ScamplersResult<Self::Returns> {
         let Self {
             core,
             grant_roles,
@@ -205,10 +206,7 @@ impl model::WriteToDb for PersonUpdate {
 impl WriteToDb for NewMsLogin {
     type Returns = CreatedUser;
 
-    async fn write_to_db(
-        self,
-        db_conn: &mut AsyncPgConnection,
-    ) -> crate::db::error::Result<Self::Returns> {
+    async fn write_to_db(self, db_conn: &mut AsyncPgConnection) -> ScamplersResult<Self::Returns> {
         #[derive(Insertable, AsChangeset, Clone, Copy)]
         #[diesel(table_name = person, primary_key(ms_user_id))]
         struct Upsert<'a> {
@@ -289,10 +287,10 @@ mod tests {
         config::LOGIN_USER,
         db::{
             DbTransaction,
-            error::Error,
             model::{FetchByQuery, IsUpdate, WriteToDb},
             test_util::{DbConnection, N_PEOPLE, db_conn, test_query},
         },
+        result::ScamplersError,
     };
 
     fn comparison_fn(p: &PersonSummary) -> String {
@@ -332,13 +330,13 @@ mod tests {
     #[tokio::test]
     async fn update_user_info(#[future] mut db_conn: DbConnection) {
         db_conn
-            .test_transaction::<_, Error, _>(|tx| {
+            .test_transaction::<_, ScamplersError, _>(|tx| {
                 async move {
                     let people = PersonSummary::fetch_by_query(&PersonQuery::default(), tx)
                         .await
                         .unwrap();
 
-                    let id = people.get(0).unwrap().id();
+                    let id = people.get(0).unwrap().handle.id;
 
                     let new_name = "Thomas Anderson";
                     let new_email = "neo@example.com";
@@ -358,8 +356,8 @@ mod tests {
                     .await
                     .unwrap();
 
-                    assert_eq!(new_name, updated_person.name());
-                    assert_eq!(new_email, updated_person.email().unwrap());
+                    assert_eq!(new_name, updated_person.core.summary.name);
+                    assert_eq!(new_email, updated_person.core.summary.email.unwrap());
 
                     Ok(())
                 }
@@ -373,7 +371,7 @@ mod tests {
     #[tokio::test]
     async fn ms_login_with_roles_update(#[future] mut db_conn: DbConnection) {
         db_conn
-            .test_transaction::<_, Error, _>(|tx| {
+            .test_transaction::<_, ScamplersError, _>(|tx| {
                 async move {
                     tx.set_transaction_user(LOGIN_USER).await.unwrap();
 
@@ -383,7 +381,8 @@ mod tests {
                             .unwrap()
                             .get(0)
                             .unwrap()
-                            .id();
+                            .handle
+                            .id;
 
                     // First, write a new user to the db as a login from the frontend
                     let ms_user_id = Uuid::now_v7();
@@ -403,13 +402,21 @@ mod tests {
                     new_ms_login.0.email = new_email.clone();
                     let recreated_user = new_ms_login.write_to_db(tx).await.unwrap();
 
-                    assert_eq!(created_user.id(), recreated_user.id());
-                    assert_eq!(new_email, *recreated_user.email().as_ref().unwrap());
-                    assert_eq!(recreated_user.roles(), &[]);
+                    assert_eq!(
+                        created_user.person.core.summary.handle.id,
+                        recreated_user.person.core.summary.handle.id
+                    );
+                    assert_eq!(
+                        new_email,
+                        *recreated_user.person.core.summary.email.as_ref().unwrap()
+                    );
+                    assert_eq!(recreated_user.person.roles, &[]);
 
                     tx.set_transaction_user("postgres").await.unwrap();
 
-                    let core = PersonUpdateCore::builder().id(created_user.id()).build();
+                    let core = PersonUpdateCore::builder()
+                        .id(created_user.person.core.summary.handle.id)
+                        .build();
                     let person_with_granted_roles = PersonUpdate {
                         core: core.clone(),
                         grant_roles: vec![UserRole::AppAdmin],

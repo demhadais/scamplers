@@ -6,7 +6,7 @@ use scamplers_core::model::sequencing_run::{
 use scamplers_schema::{sequencing_run, sequencing_submissions};
 use uuid::Uuid;
 
-use crate::db::{self, model::WriteToDb};
+use crate::{db::model::WriteToDb, result::ScamplersResult};
 
 trait SequencingRunExt {
     fn libraries(&mut self, self_id: Uuid) -> &[NewSequencingSubmission];
@@ -28,7 +28,7 @@ impl WriteToDb for NewSequencingRun {
     async fn write_to_db(
         mut self,
         db_conn: &mut diesel_async::AsyncPgConnection,
-    ) -> db::error::Result<Self::Returns> {
+    ) -> ScamplersResult<Self::Returns> {
         let summary = diesel::insert_into(sequencing_run::table)
             .values(&self)
             .returning(SequencingRunSummary::as_select())
@@ -36,7 +36,7 @@ impl WriteToDb for NewSequencingRun {
             .await?;
 
         diesel::insert_into(sequencing_submissions::table)
-            .values(self.libraries(summary.id()))
+            .values(self.libraries(summary.handle.id))
             .execute(db_conn)
             .await?;
 

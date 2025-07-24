@@ -8,12 +8,12 @@ use garde::Validate;
 use serde::{Serialize, de::DeserializeOwned};
 use valuable::Valuable;
 
-use super::error::Error;
 use crate::{
     db::{
         DbTransaction,
         model::{self, FetchRelatives},
     },
+    result::{ScamplersError, ScamplersResult},
     server::{AppState, auth::User},
 };
 
@@ -26,7 +26,7 @@ where
     T: Validate + DeserializeOwned,
     T::Context: std::default::Default,
 {
-    type Rejection = Error;
+    type Rejection = ScamplersError;
 
     async fn from_request(
         req: axum::extract::Request,
@@ -45,7 +45,7 @@ where
     T: Validate + DeserializeOwned,
     T::Context: std::default::Default,
 {
-    type Rejection = Error;
+    type Rejection = ScamplersError;
 
     async fn from_request(
         req: axum::extract::Request,
@@ -75,7 +75,7 @@ pub async fn write<Data>(
     User(user_id): User,
     State(app_state): State<AppState>,
     ValidJson(data): ValidJson<Data>,
-) -> super::error::Result<Json<Data::Returns>>
+) -> ScamplersResult<Json<Data::Returns>>
 where
     Data: model::WriteToDb + Send + valuable::Valuable,
     Data::Returns: Send,
@@ -102,7 +102,7 @@ pub async fn by_id<Resource>(
     User(user_id): User,
     State(app_state): State<AppState>,
     Path(resource_id): Path<Resource::Id>,
-) -> super::error::Result<Json<Resource>>
+) -> ScamplersResult<Json<Resource>>
 where
     Resource: model::FetchById + Send,
     Resource::Id: Send + Sync + valuable::Valuable,
@@ -129,7 +129,7 @@ pub async fn by_query<Resource>(
     User(user_id): User,
     State(app_state): State<AppState>,
     query: Option<ValidJson<Resource::QueryParams>>,
-) -> super::error::Result<Json<Vec<Resource>>>
+) -> ScamplersResult<Json<Vec<Resource>>>
 where
     Resource: model::FetchByQuery + Send,
     Resource::QueryParams: Send + valuable::Valuable + Default,
@@ -157,7 +157,7 @@ pub(super) async fn relatives<Table, Relative>(
     User(user_id): User,
     State(app_state): State<AppState>,
     Path(id): Path<Table::Id>,
-) -> super::error::Result<Json<Vec<Relative>>>
+) -> ScamplersResult<Json<Vec<Relative>>>
 where
     Table: FetchRelatives<Relative>,
     Table::Id: Valuable + Send,

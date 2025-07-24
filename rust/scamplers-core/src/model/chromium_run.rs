@@ -1,7 +1,7 @@
 pub use common::NewChipLoadingCommon;
 pub use ocm::NewOcmGems;
 pub use pool_multiplex::{NewPoolMultiplexChipLoading, NewPoolMultiplexGems};
-use scamplers_macros::{base_api_model, db_selection, getters_impl};
+use scamplers_macros::{base_api_model, db_selection};
 #[cfg(feature = "backend")]
 use scamplers_schema::{chromium_run, gems};
 pub use singleplex::{NewSingleplexChipLoading, NewSingleplexGems};
@@ -48,14 +48,6 @@ pub struct ChromiumRunSummary {
     pub notes: Option<String>,
 }
 
-#[getters_impl]
-impl ChromiumRunSummary {
-    #[must_use]
-    pub fn id(&self) -> Uuid {
-        self.handle.id
-    }
-}
-
 #[db_selection]
 #[cfg_attr(feature = "backend", diesel(table_name = gems))]
 pub struct GemsHandle {
@@ -70,12 +62,4 @@ pub struct ChromiumRun {
     #[serde(flatten)]
     pub summary: ChromiumRunSummary,
     pub gems: Vec<GemsHandle>,
-}
-
-#[getters_impl]
-impl ChromiumRun {
-    #[must_use]
-    pub fn id(&self) -> Uuid {
-        self.summary.id()
-    }
 }

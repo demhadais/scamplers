@@ -1,12 +1,15 @@
 use diesel::prelude::*;
 use diesel_async::{AsyncPgConnection, RunQueryDsl};
-use scamplers_core::model::{
-    chromium_run::{
-        ChromiumRun, ChromiumRunSummary, GemsHandle, NewChipLoadingCommon, NewChromiumRun,
-        NewOcmGems, NewPoolMultiplexChipLoading, NewPoolMultiplexGems, NewSingleplexChipLoading,
-        NewSingleplexGems,
+use scamplers_core::{
+    model::{
+        chromium_run::{
+            ChromiumRun, ChromiumRunSummary, GemsHandle, NewChipLoadingCommon, NewChromiumRun,
+            NewOcmGems, NewPoolMultiplexChipLoading, NewPoolMultiplexGems,
+            NewSingleplexChipLoading, NewSingleplexGems,
+        },
+        suspension::MeasurementDataCore,
     },
-    suspension::MeasurementDataCore,
+    result::InvalidMeasurementError,
 };
 use scamplers_schema::{
     chip_loading,
@@ -15,18 +18,23 @@ use scamplers_schema::{
 };
 use uuid::Uuid;
 
-use crate::db::model::WriteToDb;
+use crate::{
+    db::model::WriteToDb,
+    result::{ScamplersError, ScamplersResult},
+};
 
 trait MeasurementDataCoreExt {
-    fn validate_volume(&self) -> crate::db::error::Result<()>;
+    fn validate_volume(&self) -> ScamplersResult<()>;
 }
 
 impl MeasurementDataCoreExt for MeasurementDataCore {
-    fn validate_volume(&self) -> crate::db::error::Result<()> {
+    fn validate_volume(&self) -> ScamplersResult<()> {
         if !matches!(self, Self::Volume { .. }) {
-            return Err(crate::db::error::Error::Other {
-                message: "invalid chip loading volume".to_string(),
-            });
+            return Err(ScamplersError::new_unprocessable_entity_error(
+                InvalidMeasurementError {
+                    message: "invalid chip-loading volume".to_string(),
+                },
+            ));
         }
 
         Ok(())
@@ -38,7 +46,7 @@ enum NewChipLoadingWrapper {
     PoolMultiplex(Vec<NewPoolMultiplexChipLoading>),
 }
 impl NewChipLoadingWrapper {
-    async fn write_to_db(&self, db_conn: &mut AsyncPgConnection) -> crate::db::error::Result<()> {
+    async fn write_to_db(&self, db_conn: &mut AsyncPgConnection) -> ScamplersResult<()> {
         match self {
             Self::SingleplexOcm(l) => {
                 diesel::insert_into(chip_loading::table)
@@ -64,7 +72,7 @@ enum NewGemsWrapper {
     PoolMultiplex(Vec<NewPoolMultiplexGems>),
 }
 impl NewGemsWrapper {
-    fn loadings(mut self, self_ids: Vec<Uuid>) -> crate::db::error::Result<NewChipLoadingWrapper> {
+    fn loadings(mut self, self_ids: Vec<Uuid>) -> ScamplersResult<NewChipLoadingWrapper> {
         let inner_loadings: Vec<&mut NewChipLoadingCommon> = match &mut self {
             Self::Singleplex(gems) => gems.iter_mut().map(|g| &mut g.loading.inner).collect(),
             Self::Ocm(gems) => gems
@@ -99,7 +107,7 @@ impl NewGemsWrapper {
     async fn write_to_db(
         &self,
         db_conn: &mut AsyncPgConnection,
-    ) -> crate::db::error::Result<Vec<GemsHandle>> {
+    ) -> ScamplersResult<Vec<GemsHandle>> {
         let handles = match self {
             NewGemsWrapper::Singleplex(g) => {
                 diesel::insert_into(gems::table)
@@ -166,7 +174,7 @@ impl WriteToDb for NewChromiumRun {
     async fn write_to_db(
         self,
         db_conn: &mut diesel_async::AsyncPgConnection,
-    ) -> crate::db::error::Result<Self::Returns> {
+    ) -> ScamplersResult<Self::Returns> {
         let summary = match &self {
             NewChromiumRun::Singleplex(singleplex) => {
                 diesel::insert_into(chromium_run::table)
@@ -191,7 +199,7 @@ impl WriteToDb for NewChromiumRun {
             }
         };
 
-        let new_gems = self.gems(summary.id());
+        let new_gems = self.gems(summary.handle.id);
         let gems_handles = new_gems.write_to_db(db_conn).await?;
 
         let loadings = new_gems.loadings(gems_handles.iter().map(|g| g.id).collect())?;

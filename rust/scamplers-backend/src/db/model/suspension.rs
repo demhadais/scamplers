@@ -17,9 +17,9 @@ use scamplers_schema::{
 };
 use uuid::Uuid;
 
-use crate::db::{
-    self,
-    model::{FetchById, WriteToDb, WriteToDbInternal},
+use crate::{
+    db::model::{FetchById, WriteToDb, WriteToDbInternal},
+    result::ScamplersResult,
 };
 
 #[diesel::dsl::auto_type]
@@ -33,7 +33,7 @@ impl FetchById for Suspension {
     async fn fetch_by_id(
         id: &Self::Id,
         db_conn: &mut diesel_async::AsyncPgConnection,
-    ) -> db::error::Result<Self> {
+    ) -> ScamplersResult<Self> {
         let core = core_from_clause()
             .filter(id_col.eq(id))
             .select(SuspensionCore::as_select())
@@ -67,7 +67,7 @@ impl WriteToDbInternal for &[NewSuspensionMeasurement] {
     async fn write_to_db(
         self,
         db_conn: &mut diesel_async::AsyncPgConnection,
-    ) -> db::error::Result<Self::Returns> {
+    ) -> ScamplersResult<Self::Returns> {
         diesel::insert_into(suspension_measurement::table)
             .values(self)
             .execute(db_conn)
@@ -114,7 +114,7 @@ impl WriteToDb for NewSuspension {
     async fn write_to_db(
         mut self,
         db_conn: &mut diesel_async::AsyncPgConnection,
-    ) -> crate::db::error::Result<Self::Returns> {
+    ) -> ScamplersResult<Self::Returns> {
         let id = diesel::insert_into(suspension::table)
             .values(&self)
             .returning(id_col)

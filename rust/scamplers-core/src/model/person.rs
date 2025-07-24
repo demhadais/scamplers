@@ -185,21 +185,6 @@ pub struct PersonSummary {
     pub orcid: Option<String>,
 }
 
-#[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
-impl PersonSummary {
-    #[must_use]
-    #[cfg_attr(target_arch = "wasm32", wasm_bindgen(getter))]
-    pub fn id(&self) -> Uuid {
-        self.handle.id
-    }
-
-    #[must_use]
-    #[cfg_attr(target_arch = "wasm32", wasm_bindgen(getter))]
-    pub fn link(&self) -> String {
-        self.handle.link.to_string()
-    }
-}
-
 #[db_selection]
 #[cfg_attr(feature = "backend", diesel(table_name = person))]
 pub struct PersonCore {
@@ -219,97 +204,12 @@ pub struct Person {
     pub roles: Vec<UserRole>,
 }
 
-#[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
-impl Person {
-    #[must_use]
-    #[cfg_attr(target_arch = "wasm32", wasm_bindgen(getter))]
-    pub fn id(&self) -> Uuid {
-        self.core.summary.id()
-    }
-
-    #[must_use]
-    #[cfg_attr(target_arch = "wasm32", wasm_bindgen(getter))]
-    pub fn link(&self) -> String {
-        self.core.summary.link()
-    }
-
-    #[must_use]
-    #[cfg_attr(target_arch = "wasm32", wasm_bindgen(getter))]
-    pub fn name(&self) -> String {
-        self.core.summary.name.clone()
-    }
-
-    #[must_use]
-    #[cfg_attr(target_arch = "wasm32", wasm_bindgen(getter))]
-    pub fn email(&self) -> Option<String> {
-        self.core.summary.email.clone()
-    }
-
-    #[must_use]
-    #[cfg_attr(target_arch = "wasm32", wasm_bindgen(getter))]
-    pub fn orcid(&self) -> Option<String> {
-        self.core.summary.orcid.clone()
-    }
-
-    #[must_use]
-    #[cfg_attr(target_arch = "wasm32", wasm_bindgen(getter))]
-    pub fn institution(&self) -> Institution {
-        self.core.institution.clone()
-    }
-}
-
 #[cfg_attr(target_arch = "wasm32", wasm_bindgen(getter_with_clone))]
 #[base_api_model]
-#[cfg_attr(feature = "python", pyclass)]
 pub struct CreatedUser {
     #[serde(flatten)]
     pub person: Person,
     pub api_key: String,
-}
-
-#[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
-impl CreatedUser {
-    #[must_use]
-    #[cfg_attr(target_arch = "wasm32", wasm_bindgen(getter))]
-    pub fn id(&self) -> Uuid {
-        self.person.id()
-    }
-
-    #[must_use]
-    #[cfg_attr(target_arch = "wasm32", wasm_bindgen(getter))]
-    pub fn link(&self) -> String {
-        self.person.link()
-    }
-
-    #[must_use]
-    #[cfg_attr(target_arch = "wasm32", wasm_bindgen(getter))]
-    pub fn name(&self) -> String {
-        self.person.name()
-    }
-
-    #[must_use]
-    #[cfg_attr(target_arch = "wasm32", wasm_bindgen(getter))]
-    pub fn email(&self) -> Option<String> {
-        self.person.email()
-    }
-
-    #[must_use]
-    #[cfg_attr(target_arch = "wasm32", wasm_bindgen(getter))]
-    pub fn orcid(&self) -> Option<String> {
-        self.person.orcid()
-    }
-
-    #[must_use]
-    #[cfg_attr(target_arch = "wasm32", wasm_bindgen(getter))]
-    pub fn roles(&self) -> Vec<UserRole> {
-        self.person.roles.clone()
-    }
-
-    #[must_use]
-    #[cfg_attr(target_arch = "wasm32", wasm_bindgen(getter))]
-    pub fn institution(&self) -> Institution {
-        self.person.institution()
-    }
 }
 
 #[db_update]

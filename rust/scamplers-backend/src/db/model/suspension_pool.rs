@@ -6,7 +6,7 @@ use scamplers_core::model::suspension::{
 use scamplers_schema::{suspension_pool, suspension_pool_measurement, suspension_pool_preparers};
 use uuid::Uuid;
 
-use crate::db::model::WriteToDb;
+use crate::{db::model::WriteToDb, result::ScamplersResult};
 
 trait SuspensionPoolExt {
     fn measurements(&mut self, self_id: Uuid) -> &[NewSuspensionPoolMeasurement];
@@ -40,7 +40,7 @@ impl WriteToDb for NewSuspensionPool {
     async fn write_to_db(
         mut self,
         db_conn: &mut diesel_async::AsyncPgConnection,
-    ) -> crate::db::error::Result<Self::Returns> {
+    ) -> ScamplersResult<Self::Returns> {
         let handle = diesel::insert_into(suspension_pool::table)
             .values(&self)
             .returning(SuspensionPoolHandle::as_select())

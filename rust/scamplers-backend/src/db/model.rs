@@ -1,8 +1,10 @@
 use diesel_async::AsyncPgConnection;
 use uuid::Uuid;
 
-use super::error;
-use crate::db::util::{BoxedDieselExpression, NewBoxedDieselExpression};
+use crate::{
+    db::util::{BoxedDieselExpression, NewBoxedDieselExpression},
+    result::ScamplersResult,
+};
 
 pub mod cdna;
 pub mod chromium_run;
@@ -58,13 +60,13 @@ pub trait WriteToDb {
     fn write_to_db(
         self,
         db_conn: &mut AsyncPgConnection,
-    ) -> impl Future<Output = error::Result<Self::Returns>> + Send;
+    ) -> impl Future<Output = ScamplersResult<Self::Returns>> + Send;
 }
 
-trait WriteToDbInternal {
+pub trait WriteToDbInternal {
     type Returns;
 
-    async fn write_to_db(self, db_conn: &mut AsyncPgConnection) -> error::Result<Self::Returns>;
+    async fn write_to_db(self, db_conn: &mut AsyncPgConnection) -> ScamplersResult<Self::Returns>;
 }
 
 trait IsUpdate<const N: usize> {
@@ -80,7 +82,7 @@ pub trait FetchById: Sized {
     fn fetch_by_id(
         id: &Self::Id,
         db_conn: &mut AsyncPgConnection,
-    ) -> impl Future<Output = error::Result<Self>> + Send;
+    ) -> impl Future<Output = ScamplersResult<Self>> + Send;
 }
 
 pub trait FetchByQuery: Sized {
@@ -89,7 +91,7 @@ pub trait FetchByQuery: Sized {
     fn fetch_by_query(
         query: &Self::QueryParams,
         db_conn: &mut AsyncPgConnection,
-    ) -> impl Future<Output = error::Result<Vec<Self>>> + Send;
+    ) -> impl Future<Output = ScamplersResult<Vec<Self>>> + Send;
 }
 
 pub trait FetchRelatives<R>: diesel::Table {
@@ -98,7 +100,7 @@ pub trait FetchRelatives<R>: diesel::Table {
     fn fetch_relatives(
         id: &Self::Id,
         db_conn: &mut AsyncPgConnection,
-    ) -> impl Future<Output = error::Result<Vec<R>>> + Send;
+    ) -> impl Future<Output = ScamplersResult<Vec<R>>> + Send;
 }
 
 #[macro_export]

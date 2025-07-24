@@ -17,6 +17,7 @@ use crate::{
         util::{AsIlike, BoxedDieselExpression, NewBoxedDieselExpression},
     },
     fetch_by_query,
+    result::ScamplersResult,
 };
 
 impl IsUpdate<3> for LabUpdateCore {
@@ -37,7 +38,7 @@ impl model::WriteToDb for LabUpdate {
     async fn write_to_db(
         self,
         db_conn: &mut diesel_async::AsyncPgConnection,
-    ) -> super::error::Result<Self::Returns> {
+    ) -> ScamplersResult<Self::Returns> {
         let Self {
             core,
             add_members,
@@ -50,7 +51,7 @@ impl model::WriteToDb for LabUpdate {
 
         let member_additions: Vec<_> = add_members
             .iter()
-            .map(|m_id| (lab_id_col.eq(core.id()), member_id_col.eq(m_id)))
+            .map(|m_id| (lab_id_col.eq(core.id), member_id_col.eq(m_id)))
             .collect();
 
         diesel::insert_into(lab_membership::table)
@@ -62,7 +63,7 @@ impl model::WriteToDb for LabUpdate {
         let mut member_removal_filter = BoxedDieselExpression::new_expression();
         for member_id in remove_members {
             member_removal_filter = member_removal_filter
-                .or_condition(lab_id_col.eq(core.id()).and(member_id_col.eq(member_id)));
+                .or_condition(lab_id_col.eq(core.id).and(member_id_col.eq(member_id)));
         }
 
         let member_removal_filter = member_removal_filter.build();
@@ -83,7 +84,7 @@ impl model::WriteToDb for NewLab {
     async fn write_to_db(
         mut self,
         db_conn: &mut diesel_async::AsyncPgConnection,
-    ) -> super::error::Result<Self::Returns> {
+    ) -> ScamplersResult<Self::Returns> {
         let id: Uuid = diesel::insert_into(lab::table)
             .values(&self)
             .returning(id_col)
@@ -136,7 +137,7 @@ impl model::FetchByQuery for LabSummary {
     async fn fetch_by_query(
         query: &Self::QueryParams,
         db_conn: &mut diesel_async::AsyncPgConnection,
-    ) -> crate::db::error::Result<Vec<Self>> {
+    ) -> ScamplersResult<Vec<Self>> {
         use scamplers_core::model::lab::LabOrdinalColumn::Name;
 
         fetch_by_query!(query, [(Name, name_col)], db_conn)
@@ -157,7 +158,7 @@ impl model::FetchById for LabCore {
     async fn fetch_by_id(
         id: &Self::Id,
         db_conn: &mut diesel_async::AsyncPgConnection,
-    ) -> crate::db::error::Result<Self> {
+    ) -> ScamplersResult<Self> {
         Ok(Self::as_diesel_query_base()
             .select(Self::as_select())
             .filter(id_col.eq(id))
@@ -172,7 +173,7 @@ impl model::FetchRelatives<PersonSummary> for lab::table {
     async fn fetch_relatives(
         lab_id: &Self::Id,
         db_conn: &mut diesel_async::AsyncPgConnection,
-    ) -> crate::db::error::Result<Vec<PersonSummary>> {
+    ) -> ScamplersResult<Vec<PersonSummary>> {
         let members = lab_membership::table
             .filter(lab_id_col.eq(lab_id))
             .inner_join(PersonSummary::as_diesel_query_base())
@@ -190,7 +191,7 @@ impl model::FetchById for Lab {
     async fn fetch_by_id(
         id: &Self::Id,
         db_conn: &mut diesel_async::AsyncPgConnection,
-    ) -> crate::db::error::Result<Self> {
+    ) -> ScamplersResult<Self> {
         let core = LabCore::fetch_by_id(id, db_conn).await?;
         let members = lab::table::fetch_relatives(id, db_conn).await?;
 
@@ -211,9 +212,12 @@ mod tests {
     };
     use scamplers_schema::lab;
 
-    use crate::db::{
-        model::{FetchByQuery, FetchRelatives, WriteToDb},
-        test_util::{DbConnection, N_LAB_MEMBERS, N_LABS, db_conn, test_query},
+    use crate::{
+        db::{
+            model::{FetchByQuery, FetchRelatives, WriteToDb},
+            test_util::{DbConnection, N_LAB_MEMBERS, N_LABS, db_conn, test_query},
+        },
+        result::ScamplersError,
     };
 
     fn comparison_fn(l: &LabSummary) -> String {
@@ -240,7 +244,7 @@ mod tests {
     #[tokio::test]
     async fn new_lab_without_members(#[future] mut db_conn: DbConnection) {
         db_conn
-            .test_transaction::<_, crate::db::error::Error, _>(|tx| {
+            .test_transaction::<_, ScamplersError, _>(|tx| {
                 async move {
                     let pi = PersonSummary::fetch_by_query(&PersonQuery::default(), tx)
                         .await
@@ -249,7 +253,7 @@ mod tests {
 
                     let new_lab = NewLab::builder()
                         .name("Rick Sanchez Lab")
-                        .pi_id(pi.id())
+                        .pi_id(pi.handle.id)
                         .delivery_dir("rick_sanchez")
                         .build();
 
@@ -257,7 +261,7 @@ mod tests {
 
                     // We expect one member - the PI
                     assert_eq!(new_lab.members.len(), 1);
-                    assert_eq!(new_lab.members[0].id(), pi.id());
+                    assert_eq!(new_lab.members[0].handle.id, pi.handle.id);
 
                     Ok(())
                 }
@@ -271,21 +275,22 @@ mod tests {
     #[tokio::test]
     async fn remove_lab_members(#[future] mut db_conn: DbConnection) {
         db_conn
-            .test_transaction::<_, crate::db::error::Error, _>(|tx| {
+            .test_transaction::<_, ScamplersError, _>(|tx| {
                 async move {
                     let lab = LabSummary::fetch_by_query(&LabQuery::default(), tx)
                         .await
                         .unwrap()
                         .swap_remove(1);
 
-                    let original_members =
-                        lab::table::fetch_relatives(&lab.id(), tx).await.unwrap();
+                    let original_members = lab::table::fetch_relatives(&lab.handle.id, tx)
+                        .await
+                        .unwrap();
                     assert_eq!(original_members.len(), N_LAB_MEMBERS);
 
-                    let member_to_be_removed = original_members[0].id();
+                    let member_to_be_removed = original_members[0].handle.id;
                     let updated_lab = LabUpdate {
                         core: LabUpdateCore {
-                            id: lab.id(),
+                            id: lab.handle.id,
                             ..Default::default()
                         },
                         remove_members: vec![member_to_be_removed],
@@ -295,11 +300,11 @@ mod tests {
                     .await
                     .unwrap();
 
-                    assert_eq!(updated_lab.id(), lab.id());
+                    assert_eq!(updated_lab.core.summary.handle.id, lab.handle.id);
                     assert_eq!(updated_lab.members.len(), N_LAB_MEMBERS - 1);
 
                     let extract_ids = |people: &[PersonSummary]| {
-                        people.iter().map(PersonSummary::id).collect::<HashSet<_>>()
+                        people.iter().map(|p| p.handle.id).collect::<HashSet<_>>()
                     };
 
                     assert_eq!(

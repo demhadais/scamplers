@@ -1,14 +1,20 @@
 use diesel::prelude::*;
 use diesel_async::{AsyncPgConnection, RunQueryDsl};
-use scamplers_core::model::{
-    library_type_specification::LibraryType,
-    nucleic_acid::{CdnaHandle, NewCdna, NewCdnaGroup, NewCdnaMeasurement, NewCdnaPreparer},
+use scamplers_core::{
+    model::{
+        library_type_specification::LibraryType,
+        nucleic_acid::{CdnaHandle, NewCdna, NewCdnaGroup, NewCdnaMeasurement, NewCdnaPreparer},
+    },
+    result::{CdnaGemsError, CdnaLibraryTypeError},
 };
 use scamplers_schema::{
     cdna, cdna_measurement, cdna_preparers, chemistry, gems, library_type_specification,
 };
 
-use crate::db::{error::Error, model::WriteToDb};
+use crate::{
+    db::model::WriteToDb,
+    result::{ScamplersError, ScamplersResult},
+};
 
 trait NewCdnaGroupExt {
     fn should_have_same_library_type(&self) -> bool;
@@ -32,22 +38,24 @@ impl NewCdnaGroupExt for NewCdnaGroup {
 }
 
 trait NewCdnaVecExt {
-    fn validate_gems_id(&self) -> crate::db::error::Result<()>;
+    fn validate_gems_id(&self) -> ScamplersResult<()>;
     async fn validate_library_types(
         &self,
         should_have_same_library_type: bool,
         db_conn: &mut AsyncPgConnection,
-    ) -> crate::db::error::Result<()>;
+    ) -> ScamplersResult<()>;
     fn preparers(&self, self_ids: &[CdnaHandle]) -> Vec<NewCdnaPreparer>;
     fn measurements_with_self_ids(self, self_ids: &[CdnaHandle]) -> Vec<NewCdnaMeasurement>;
 }
 
 impl NewCdnaVecExt for Vec<NewCdna> {
-    fn validate_gems_id(&self) -> crate::db::error::Result<()> {
+    fn validate_gems_id(&self) -> ScamplersResult<()> {
         if self.iter().any(|c| c.gems_id != self[0].gems_id) {
-            return Err(crate::db::error::Error::Other {
-                message: "all cDNA in a group must derive from the same GEMs".to_string(),
-            });
+            return Err(ScamplersError::new_unprocessable_entity_error(
+                CdnaGemsError {
+                    message: "all cDNA in a group must come from the same GEMs".to_string(),
+                },
+            ));
         }
 
         Ok(())
@@ -57,7 +65,7 @@ impl NewCdnaVecExt for Vec<NewCdna> {
         &self,
         should_have_same_library_type: bool,
         db_conn: &mut AsyncPgConnection,
-    ) -> crate::db::error::Result<()> {
+    ) -> ScamplersResult<()> {
         let chemistry: Option<String> = gems::table
             .inner_join(chemistry::table)
             .filter(gems::id.eq(&self[0].gems_id))
@@ -65,16 +73,22 @@ impl NewCdnaVecExt for Vec<NewCdna> {
             .first(db_conn)
             .await?;
 
-        let mut library_types: Vec<_> = self.iter().map(|c| c.library_type).collect();
-        library_types.sort();
+        let mut found_library_types: Vec<_> = self.iter().map(|c| c.library_type).collect();
+        found_library_types.sort();
+
+        let err = |expected_library_types| {
+            Err(ScamplersError::new_unprocessable_entity_error(
+                CdnaLibraryTypeError {
+                    expected_library_types,
+                    found_library_types: found_library_types.clone(),
+                },
+            ))
+        };
 
         let Some(chemistry) = chemistry else {
-            if library_types != [LibraryType::ChromatinAccessibility] {
-                return Err(Error::Other {
-                    message: "GEMs without chemistry must produce one chromatin accessibility \
-                              library"
-                        .to_string(),
-                });
+            let expected_library_types = vec![LibraryType::ChromatinAccessibility];
+            if found_library_types != expected_library_types {
+                return err(expected_library_types);
             }
 
             return Ok(());
@@ -87,17 +101,10 @@ impl NewCdnaVecExt for Vec<NewCdna> {
             .load(db_conn)
             .await?;
 
-        let err = Err(Error::Other {
-            message: format!(
-                "invalid library types {library_types:?} - expected one of \
-                 {expected_library_types:?}"
-            ),
-        });
-
-        if should_have_same_library_type && expected_library_types[0] != library_types[0] {
-            return err;
-        } else if !should_have_same_library_type && expected_library_types != library_types {
-            return err;
+        if should_have_same_library_type && expected_library_types[0] != found_library_types[0] {
+            return err(expected_library_types);
+        } else if !should_have_same_library_type && expected_library_types != found_library_types {
+            return err(expected_library_types);
         }
 
         Ok(())
@@ -135,7 +142,7 @@ impl WriteToDb for NewCdnaGroup {
     async fn write_to_db(
         self,
         db_conn: &mut diesel_async::AsyncPgConnection,
-    ) -> crate::db::error::Result<Self::Returns> {
+    ) -> ScamplersResult<Self::Returns> {
         let cdnas_should_have_same_library_type = self.should_have_same_library_type();
 
         let cdnas = self.to_vec();

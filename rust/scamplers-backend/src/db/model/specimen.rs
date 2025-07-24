@@ -26,6 +26,7 @@ use crate::{
         util::{AsIlike, BoxedDieselExpression, NewBoxedDieselExpression},
     },
     fetch_by_query,
+    result::ScamplersResult,
 };
 
 macro_rules! write_specimen_variant {
@@ -49,7 +50,7 @@ impl FetchRelatives<SpecimenMeasurement> for specimen::table {
     async fn fetch_relatives(
         specimen_ids: &Self::Id,
         db_conn: &mut AsyncPgConnection,
-    ) -> db::error::Result<Vec<SpecimenMeasurement>> {
+    ) -> ScamplersResult<Vec<SpecimenMeasurement>> {
         Ok(specimen_measurement_query_base()
             .filter(specimen_measurement::specimen_id.eq_any(specimen_ids))
             .select(SpecimenMeasurement::as_select())
@@ -61,10 +62,7 @@ impl FetchRelatives<SpecimenMeasurement> for specimen::table {
 impl WriteToDb for &[NewSpecimenMeasurement] {
     type Returns = Vec<SpecimenMeasurement>;
 
-    async fn write_to_db(
-        self,
-        db_conn: &mut AsyncPgConnection,
-    ) -> db::error::Result<Self::Returns> {
+    async fn write_to_db(self, db_conn: &mut AsyncPgConnection) -> ScamplersResult<Self::Returns> {
         let specimen_ids: Vec<Uuid> = diesel::insert_into(specimen_measurement::table)
             .values(self)
             .returning(specimen_measurement::specimen_id)
@@ -108,7 +106,7 @@ impl WriteToDb for NewSpecimen {
     async fn write_to_db(
         mut self,
         db_conn: &mut diesel_async::AsyncPgConnection,
-    ) -> crate::db::error::Result<Self::Returns> {
+    ) -> ScamplersResult<Self::Returns> {
         let id = match &self {
             Self::FixedBlock(s) => write_specimen_variant!(s, db_conn),
             Self::FrozenBlock(s) => write_specimen_variant!(s, db_conn),
@@ -145,10 +143,7 @@ fn core_query_base() -> _ {
 impl FetchById for Specimen {
     type Id = Uuid;
 
-    async fn fetch_by_id(
-        id: &Self::Id,
-        db_conn: &mut AsyncPgConnection,
-    ) -> db::error::Result<Self> {
+    async fn fetch_by_id(id: &Self::Id, db_conn: &mut AsyncPgConnection) -> ScamplersResult<Self> {
         let core: SpecimenCore = core_query_base()
             .select(SpecimenCore::as_select())
             .filter(id_col.eq(id))
@@ -261,7 +256,7 @@ impl FetchByQuery for SpecimenSummary {
     async fn fetch_by_query(
         query: &Self::QueryParams,
         db_conn: &mut AsyncPgConnection,
-    ) -> db::error::Result<Vec<Self>> {
+    ) -> ScamplersResult<Vec<Self>> {
         use scamplers_core::model::specimen::SpecimenOrdinalColumn::{Name, ReceivedAt};
         fetch_by_query!(
             query,

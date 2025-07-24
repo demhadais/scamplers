@@ -10,6 +10,7 @@ use crate::{
         util::{AsIlike, BoxedDieselExpression, NewBoxedDieselExpression},
     },
     fetch_by_query,
+    result::ScamplersResult,
 };
 
 impl model::WriteToDb for NewInstitution {
@@ -18,7 +19,7 @@ impl model::WriteToDb for NewInstitution {
     async fn write_to_db(
         self,
         db_conn: &mut diesel_async::AsyncPgConnection,
-    ) -> super::error::Result<Self::Returns> {
+    ) -> ScamplersResult<Self::Returns> {
         let inserted = diesel::insert_into(institution)
             .values(self)
             .returning(Institution::as_returning())
@@ -43,7 +44,7 @@ impl model::FetchById for Institution {
     async fn fetch_by_id(
         id: &Self::Id,
         db_conn: &mut diesel_async::AsyncPgConnection,
-    ) -> super::error::Result<Self> {
+    ) -> ScamplersResult<Self> {
         let query_base = Self::as_diesel_query_base();
         Ok(query_base
             .find(id)
@@ -79,7 +80,7 @@ impl model::FetchByQuery for Institution {
     async fn fetch_by_query(
         query: &Self::QueryParams,
         db_conn: &mut diesel_async::AsyncPgConnection,
-    ) -> super::error::Result<Vec<Self>> {
+    ) -> ScamplersResult<Vec<Self>> {
         use scamplers_core::model::institution::InstitutionOrdinalColumn::Name;
 
         fetch_by_query!(query, [(Name, name_col)], db_conn)

@@ -9,6 +9,10 @@ use serde::{Deserialize, Serialize};
 use url::Url;
 
 use super::WriteToDb;
+use crate::{
+    db::model::WriteToDbInternal,
+    result::{ScamplersError, ScamplersResult},
+};
 
 #[derive(Deserialize, Validate, Clone, Serialize, Debug)]
 #[serde(transparent)]
@@ -46,10 +50,7 @@ pub(super) enum IndexSets {
 impl WriteToDb for IndexSets {
     type Returns = ();
 
-    async fn write_to_db(
-        self,
-        db_conn: &mut AsyncPgConnection,
-    ) -> crate::db::error::Result<Self::Returns> {
+    async fn write_to_db(self, db_conn: &mut AsyncPgConnection) -> ScamplersResult<Self::Returns> {
         match self {
             Self::Single(sets) => sets.write_to_db(db_conn).await?,
             Self::Dual(sets) => sets.write_to_db(db_conn).await?,
@@ -76,16 +77,16 @@ impl Display for IndexSetName {
 const INDEX_SET_NAME_ERROR_MESSAGE: &str = "malformed index set name";
 
 impl IndexSetName {
-    fn kit_name(&self) -> crate::db::error::Result<&str> {
-        self.0.get(3..5).ok_or(crate::db::error::Error::Other {
-            message: INDEX_SET_NAME_ERROR_MESSAGE.to_string(),
-        })
+    fn kit_name(&self) -> ScamplersResult<&str> {
+        self.0.get(3..5).ok_or(ScamplersError::new_server_error(
+            INDEX_SET_NAME_ERROR_MESSAGE,
+        ))
     }
 
-    fn well_name(&self) -> super::super::error::Result<&str> {
-        self.0.get(6..8).ok_or(super::super::error::Error::Other {
-            message: INDEX_SET_NAME_ERROR_MESSAGE.to_string(),
-        })
+    fn well_name(&self) -> ScamplersResult<&str> {
+        self.0.get(6..8).ok_or(ScamplersError::new_server_error(
+            INDEX_SET_NAME_ERROR_MESSAGE,
+        ))
     }
 }
 
@@ -96,10 +97,7 @@ impl PathComponentKind for IndexSetName {
     }
 }
 
-async fn insert_kit_name(
-    kit_name: &str,
-    conn: &mut AsyncPgConnection,
-) -> super::super::error::Result<()> {
+async fn insert_kit_name(kit_name: &str, conn: &mut AsyncPgConnection) -> ScamplersResult<()> {
     diesel::insert_into(index_kit::table)
         .values(index_kit::name.eq(kit_name))
         .on_conflict_do_nothing()
@@ -118,7 +116,7 @@ pub struct NewSingleIndexSet(#[garde(dive)] IndexSetName, #[garde(dive)] [DnaSeq
 
 // It's expected that one sample index set is a Vec<NewSampleIndex>, so we can
 // bake in some validation and do a bunch of things at once
-impl WriteToDb for Vec<NewSingleIndexSet> {
+impl WriteToDbInternal for Vec<NewSingleIndexSet> {
     type Returns = ();
 
     // We should technically validate the fact that this whole set has the same kit,
@@ -127,7 +125,7 @@ impl WriteToDb for Vec<NewSingleIndexSet> {
     async fn write_to_db(
         self,
         conn: &mut diesel_async::AsyncPgConnection,
-    ) -> super::super::error::Result<Self::Returns> {
+    ) -> ScamplersResult<Self::Returns> {
         // This one clone is necessary :/
         #[allow(clippy::get_first)]
         let Some(NewSingleIndexSet(index_set_name, ..)) = self.get(0).cloned() else {
@@ -221,7 +219,7 @@ impl WriteToDb for HashMap<IndexSetName, NewDualIndexSet> {
     async fn write_to_db(
         self,
         conn: &mut diesel_async::AsyncPgConnection,
-    ) -> crate::db::error::Result<Self::Returns> {
+    ) -> ScamplersResult<Self::Returns> {
         let Some(index_set_name) = self.keys().next().cloned() else {
             return Ok(());
         };

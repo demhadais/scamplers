@@ -11,23 +11,26 @@ use {
         institution::{Institution, NewInstitution},
         person::{NewPerson, Person},
     },
-    pyo3::{exceptions::PyException, prelude::*},
+    pyo3::prelude::*,
     std::sync::Arc,
     tokio::runtime::Runtime,
 };
 
-use crate::api_path::ToApiPath;
 #[cfg(feature = "python")]
 use crate::model::{
     lab::{Lab, NewLab},
     specimen::{NewSpecimen, Specimen},
+};
+use crate::{
+    api_path::ToApiPath,
+    result::{ClientError, ScamplersCoreError, ScamplersCoreErrorResponse, ServerError},
 };
 
 #[allow(dead_code)]
 #[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
 #[cfg_attr(feature = "python", pyclass)]
 #[derive(Clone)]
-pub struct Client {
+pub struct ScamplersClient {
     backend_base_url: String,
     client: reqwest::Client,
     api_key: Option<String>,
@@ -37,7 +40,7 @@ pub struct Client {
 
 #[cfg(feature = "python")]
 #[pymethods]
-impl Client {
+impl ScamplersClient {
     #[new]
     fn py_new(backend_base_url: String, api_key: Option<String>) -> Self {
         Self::new(backend_base_url, Some(String::new()), api_key)
@@ -45,7 +48,7 @@ impl Client {
 }
 
 #[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
-impl Client {
+impl ScamplersClient {
     #[cfg_attr(target_arch = "wasm32", wasm_bindgen(constructor))]
     #[must_use]
     pub fn new(
@@ -87,13 +90,13 @@ impl Client {
     }
 }
 
-impl Client {
+impl ScamplersClient {
     #[allow(dead_code)]
     async fn send_request_with_body<Req, Resp>(
         &self,
         data: Req,
         method: Method,
-    ) -> Result<Resp, Vec<u8>>
+    ) -> Result<Resp, ScamplersCoreErrorResponse>
     where
         Req: Serialize,
         Resp: DeserializeOwned,
@@ -112,20 +115,48 @@ impl Client {
             Method::POST => client
                 .post(format!("{backend_base_url}{route}"))
                 .json(&data),
-            _ => return Err(vec![]),
+            _ => {
+                return Err(ScamplersCoreErrorResponse {
+                    status: None,
+                    error: ScamplersCoreError::Client(ClientError {
+                        message: format!("unexpected HTTP method {method}"),
+                    }),
+                });
+            }
         };
 
         if let Some(api_key) = api_key {
             request = request.header("X-API-Key", api_key);
         }
 
-        let response = request.send().await.unwrap().bytes().await.unwrap();
+        let response = request.send().await.unwrap();
+        let status = Some(response.status().as_u16());
+        let raw_response = response.bytes().await.unwrap();
 
-        let Ok(response) = serde_json::from_slice(&response) else {
-            return Err(response.to_vec());
+        let deserialized_success_response = serde_json::from_slice(&raw_response);
+
+        let Err(deserialization_failure1) = deserialized_success_response else {
+            return Ok(deserialized_success_response.unwrap());
         };
 
-        Ok(response)
+        let deserialized_failure_response = serde_json::from_slice(&raw_response);
+
+        let Err(deserialization_failure2) = deserialized_failure_response else {
+            return Err(deserialized_failure_response.unwrap());
+        };
+
+        let inner_error = ServerError {
+            message: format!(
+                "failed to deserialize response body as success and as \
+                 failure:\n\t{deserialization_failure1}\n\t{deserialization_failure2}"
+            ),
+            raw_response_body: String::from_utf8(raw_response.to_vec()).unwrap_or_default(),
+        };
+
+        Err(ScamplersCoreErrorResponse {
+            status,
+            error: ScamplersCoreError::Server(inner_error),
+        })
     }
 
     #[cfg(target_arch = "wasm32")]
@@ -133,80 +164,72 @@ impl Client {
         &self,
         data: Req,
         method: Method,
-    ) -> Result<Resp, wasm_bindgen::JsValue>
+    ) -> Result<Resp, ScamplersCoreErrorResponse>
     where
         Req: Serialize,
         Resp: DeserializeOwned,
         (Req, Resp): ToApiPath,
     {
-        fn bytes_to_wasm_value(bytes: Vec<u8>) -> wasm_bindgen::JsValue {
-            let as_json: serde_json::Value = serde_json::from_slice(&bytes).unwrap_throw();
-            serde_wasm_bindgen::to_value(&as_json).unwrap_throw()
-        }
-
-        self.send_request_with_body(data, method)
-            .await
-            .map_err(bytes_to_wasm_value)
+        self.send_request_with_body(data, method).await
     }
 
     #[cfg(feature = "python")]
-    async fn send_request_python<Req, Resp>(self, data: Req, method: Method) -> PyResult<Resp>
+    async fn send_request_python<Req, Resp>(
+        self,
+        data: Req,
+        method: Method,
+    ) -> Result<Resp, ScamplersCoreErrorResponse>
     where
         Req: Serialize + Send + 'static,
         Resp: DeserializeOwned + Send + 'static,
         (Req, Resp): ToApiPath,
     {
-        fn bytes_to_python_exception(bytes: Vec<u8>) -> PyErr {
-            let result: Result<serde_json::Value, _> = serde_json::from_slice(&bytes);
-
-            let Ok(as_json) = result else {
-                return PyException::new_err(format!(
-                    "received invalid JSON:\n{}",
-                    String::from_utf8(bytes).unwrap()
-                ));
-            };
-
-            PyException::new_err(serde_json::to_string(&as_json).unwrap())
-        }
-
         let runtime = self.runtime.clone();
 
         runtime
             .spawn(async move { self.send_request_with_body(data, method).await })
             .await
             .unwrap()
-            .map_err(bytes_to_python_exception)
     }
 }
 
 #[cfg(target_arch = "wasm32")]
 #[wasm_bindgen]
-impl Client {
+impl ScamplersClient {
     #[wasm_bindgen]
-    pub async fn ms_login(&self, data: NewMsLogin) -> Result<CreatedUser, wasm_bindgen::JsValue> {
+    pub async fn ms_login(
+        &self,
+        data: NewMsLogin,
+    ) -> Result<CreatedUser, ScamplersCoreErrorResponse> {
         self.send_request_wasm(data, Method::POST).await
     }
 }
 
 #[cfg(feature = "python")]
 #[pymethods]
-impl Client {
-    async fn create_institution(&self, data: NewInstitution) -> PyResult<Institution> {
+impl ScamplersClient {
+    async fn create_institution(
+        &self,
+        data: NewInstitution,
+    ) -> Result<Institution, ScamplersCoreErrorResponse> {
         let client = self.clone();
         client.send_request_python(data, Method::POST).await
     }
 
-    async fn create_person(&self, data: NewPerson) -> PyResult<Person> {
+    async fn create_person(&self, data: NewPerson) -> Result<Person, ScamplersCoreErrorResponse> {
         let client = self.clone();
         client.send_request_python(data, Method::POST).await
     }
 
-    async fn create_lab(&self, data: NewLab) -> PyResult<Lab> {
+    async fn create_lab(&self, data: NewLab) -> Result<Lab, ScamplersCoreErrorResponse> {
         let client = self.clone();
         client.send_request_python(data, Method::POST).await
     }
 
-    async fn create_specimen(&self, data: NewSpecimen) -> PyResult<Specimen> {
+    async fn create_specimen(
+        &self,
+        data: NewSpecimen,
+    ) -> Result<Specimen, ScamplersCoreErrorResponse> {
         let client = self.clone();
         client.send_request_python(data, Method::POST).await
     }

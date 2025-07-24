@@ -2,7 +2,6 @@
 use pyo3::prelude::*;
 use scamplers_macros::{
     base_api_model, base_api_model_with_default, db_insertion, db_query, db_selection, db_update,
-    getters_impl,
 };
 #[cfg(feature = "backend")]
 use scamplers_schema::lab;
@@ -62,20 +61,6 @@ pub struct LabSummary {
     pub delivery_dir: String,
 }
 
-#[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
-impl LabSummary {
-    #[must_use]
-    #[cfg_attr(target_arch = "wasm32", wasm_bindgen(getter))]
-    pub fn id(&self) -> Uuid {
-        self.handle.id
-    }
-
-    #[must_use]
-    pub fn link(&self) -> String {
-        self.handle.link.to_string()
-    }
-}
-
 #[db_selection]
 #[cfg_attr(feature = "backend", diesel(table_name = lab))]
 pub struct LabCore {
@@ -96,38 +81,6 @@ pub struct Lab {
     #[serde(flatten)]
     pub core: LabCore,
     pub members: Vec<PersonSummary>,
-}
-
-#[cfg(feature = "python")]
-#[pymethods]
-impl Lab {
-    #[getter]
-    fn example_getter(&self) -> &str {
-        &self.core.summary.handle.link
-    }
-}
-
-#[getters_impl]
-impl Lab {
-    #[must_use]
-    pub fn id(&self) -> Uuid {
-        self.core.summary.id()
-    }
-
-    #[must_use]
-    pub fn link(&self) -> String {
-        self.core.summary.delivery_dir.clone()
-    }
-
-    #[must_use]
-    pub fn name(&self) -> String {
-        self.core.summary.name.clone()
-    }
-
-    #[must_use]
-    pub fn delivery_dir(&self) -> String {
-        self.core.summary.delivery_dir.clone()
-    }
 }
 
 #[db_update]

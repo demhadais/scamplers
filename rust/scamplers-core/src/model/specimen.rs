@@ -179,8 +179,7 @@ mod tests {
           "submitted_by": uuid,
           "received_at": received_at,
           "species": ["homo_sapiens"],
-          "type": "block",
-          "preservation": "fixed",
+          "type": "fixed_block",
           "embedded_in": frozen_embedding_matrix,
           "fixative": "formaldehyde_derivative"
         });
@@ -193,22 +192,21 @@ mod tests {
         incorrectly_embedded_block["embedded_in"] = Value::String("paraffin".to_string());
         let specimen = deserialize(incorrectly_embedded_block.clone()).unwrap();
         let NewSpecimen::FixedBlock(_) = specimen else {
-            panic!("expected frozen block, got {specimen:?}");
+            panic!("expected frozen block, got {specimen:#?}");
         };
 
         let mut frozen_block = incorrectly_embedded_block;
-        frozen_block["preservation"] = Value::String("frozen".to_string());
+        frozen_block["type"] = Value::String("frozen_block".to_string());
         frozen_block["embedded_in"] = Value::String(frozen_embedding_matrix.to_string());
-        frozen_block["fixative"] = Value::Null;
+        frozen_block["fixative"].take();
         frozen_block["frozen"] = Value::Bool(true);
         let specimen = deserialize(frozen_block.clone()).unwrap();
         let NewSpecimen::FrozenBlock(_) = specimen else {
-            panic!("expected frozen block, got {specimen:?}");
+            panic!("expected frozen block, got {specimen:#?}");
         };
 
         let mut tissue = frozen_block;
-        tissue["preservation"] = Value::String("fixed".to_string());
-        tissue["type"] = Value::String("tissue".to_string());
+        tissue["type"] = Value::String("fixed_tissue".to_string());
         let err = deserialize(tissue.clone()).unwrap_err();
         assert_eq!(err.classify(), serde_json::error::Category::Data);
     }

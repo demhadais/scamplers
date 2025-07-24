@@ -1,4 +1,4 @@
-use scamplers_macros::{db_insertion, db_selection, getters_impl};
+use scamplers_macros::{db_insertion, db_selection};
 #[cfg(feature = "backend")]
 use scamplers_schema::{sequencing_run, sequencing_submissions};
 use time::OffsetDateTime;
@@ -46,12 +46,4 @@ pub struct SequencingRunSummary {
     pub begun_at: OffsetDateTime,
     pub finished_at: OffsetDateTime,
     pub notes: Option<String>,
-}
-
-#[getters_impl]
-impl SequencingRunSummary {
-    #[must_use]
-    pub fn id(&self) -> Uuid {
-        self.handle.id
-    }
 }

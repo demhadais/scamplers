@@ -1,8 +1,6 @@
 #[cfg(feature = "python")]
 use pyo3::prelude::*;
-use scamplers_macros::{
-    base_api_model_with_default, db_insertion, db_query, db_selection, getters_impl,
-};
+use scamplers_macros::{base_api_model_with_default, db_insertion, db_query, db_selection};
 #[cfg(feature = "backend")]
 use scamplers_schema::institution;
 use uuid::Uuid;
@@ -43,19 +41,6 @@ pub struct Institution {
     #[cfg_attr(feature = "backend", diesel(embed))]
     pub handle: InstitutionHandle,
     pub name: String,
-}
-
-#[getters_impl]
-impl Institution {
-    #[must_use]
-    pub fn id(&self) -> Uuid {
-        self.handle.id
-    }
-
-    #[must_use]
-    pub fn link(&self) -> String {
-        self.handle.link.to_string()
-    }
 }
 
 #[base_api_model_with_default]

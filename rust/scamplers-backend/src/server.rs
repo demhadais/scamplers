@@ -1,7 +1,7 @@
 #![allow(async_fn_in_trait)]
 use std::sync::Arc;
 
-use anyhow::Context;
+use anyhow::{Context, bail};
 use axum::{Router, routing::get};
 use camino::Utf8PathBuf;
 use diesel_async::{
@@ -15,7 +15,7 @@ use tower_http::trace::TraceLayer;
 use util::DevContainer;
 use uuid::Uuid;
 
-use crate::{config::Config, db};
+use crate::{config::Config, result::ScamplersResult};
 mod api;
 pub mod auth;
 pub mod util;
@@ -165,8 +165,7 @@ impl AppState {
 
     pub async fn db_conn(
         &self,
-    ) -> db::error::Result<diesel_async::pooled_connection::deadpool::Object<AsyncPgConnection>>
-    {
+    ) -> ScamplersResult<diesel_async::pooled_connection::deadpool::Object<AsyncPgConnection>> {
         use AppState::{Dev, Prod};
 
         match self {
@@ -176,19 +175,15 @@ impl AppState {
 
     async fn db_root_conn(
         &self,
-    ) -> db::error::Result<diesel_async::pooled_connection::deadpool::Object<AsyncPgConnection>>
-    {
+    ) -> anyhow::Result<diesel_async::pooled_connection::deadpool::Object<AsyncPgConnection>> {
         use AppState::Prod;
 
         let Prod { db_root_pool, .. } = self else {
-            return self.db_conn().await;
+            return Ok(self.db_conn().await?);
         };
 
         let Some(db_root_pool) = db_root_pool else {
-            return Err(db::error::Error::Other {
-                message: "root user connection to database should not be required at this stage"
-                    .to_string(),
-            });
+            bail!("root user connection to database should not be required at this stage");
         };
 
         Ok(db_root_pool.get().await?)
