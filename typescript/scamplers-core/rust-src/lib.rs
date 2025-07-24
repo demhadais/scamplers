@@ -20,7 +20,7 @@ fn scamplers_core(m: &Bound<'_, PyModule>) -> PyResult<()> {
         specimen::{
             BlockFixative, FixedBlockEmbeddingMatrix, NewCommitteeApproval, NewCryoPreservedTissue,
             NewFixedBlock, NewFixedTissue, NewFrozenBlock, NewFrozenTissue, NewSpecimenMeasurement,
-            NewVirtualSpecimen, Species,
+            NewVirtualSpecimen, Species, TissueFixative,
         },
     };
 
@@ -67,6 +67,7 @@ fn scamplers_core(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_class::<NewCryoPreservedTissue>()?;
     m.add_class::<NewFixedTissue>()?;
     m.add_class::<NewFrozenTissue>()?;
+    m.add_class::<TissueFixative>()?;
 
     m.add_class::<NewVirtualSpecimen>()?;
 

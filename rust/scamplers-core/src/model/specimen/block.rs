@@ -4,15 +4,18 @@ use scamplers_macros::{db_enum, db_insertion};
 #[cfg(feature = "backend")]
 use scamplers_schema::specimen;
 #[cfg(feature = "python")]
+use time::OffsetDateTime;
+#[cfg(feature = "python")]
 use uuid::Uuid;
 #[cfg(feature = "python")]
 use valid_string::ValidString;
-#[cfg(feature = "python")]
-use {super::common::NewSpecimenMeasurement, time::OffsetDateTime};
 
 use super::common::NewSpecimenCommon;
 #[cfg(feature = "python")]
-use crate::model::specimen::common::{NewCommitteeApproval, Species};
+use crate::model::specimen::{
+    NewSpecimenMeasurement,
+    common::{NewCommitteeApproval, Species},
+};
 
 #[db_enum]
 #[derive(Default)]
@@ -61,11 +64,11 @@ impl NewFixedBlock {
         species: Vec<Species>,
         measurements: Vec<NewSpecimenMeasurement>,
         committee_approvals: Vec<NewCommitteeApproval>,
-        embedded_in: FixedBlockEmbeddingMatrix,
-        fixative: BlockFixative,
         notes: Option<ValidString>,
         returned_at: Option<OffsetDateTime>,
         returned_by: Option<Uuid>,
+        embedded_in: FixedBlockEmbeddingMatrix,
+        fixative: BlockFixative,
     ) -> Self {
         Self {
             inner: NewSpecimenCommon {
@@ -109,4 +112,45 @@ pub struct NewFrozenBlock {
     pub fixative: Option<BlockFixative>,
     #[garde(custom(super::common::is_true))]
     pub frozen: bool,
+}
+
+#[cfg(feature = "python")]
+#[pymethods]
+impl NewFrozenBlock {
+    #[new]
+    fn new(
+        readable_id: ValidString,
+        name: ValidString,
+        submitted_by: Uuid,
+        lab_id: Uuid,
+        received_at: OffsetDateTime,
+        species: Vec<Species>,
+        measurements: Vec<NewSpecimenMeasurement>,
+        committee_approvals: Vec<NewCommitteeApproval>,
+        notes: Option<ValidString>,
+        returned_at: Option<OffsetDateTime>,
+        returned_by: Option<Uuid>,
+        embedded_in: FrozenBlockEmbeddingMatrix,
+        fixative: Option<BlockFixative>,
+    ) -> Self {
+        Self {
+            inner: NewSpecimenCommon {
+                readable_id,
+                name,
+                submitted_by,
+                lab_id,
+                received_at,
+                species,
+                committee_approvals,
+                notes,
+                returned_at,
+                returned_by,
+                measurements,
+            },
+            embedded_in,
+            fixative,
+            type_: BlockType::Block,
+            frozen: true,
+        }
+    }
 }

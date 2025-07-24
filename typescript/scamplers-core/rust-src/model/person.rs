@@ -2,7 +2,7 @@
 use pyo3::prelude::*;
 use scamplers_macros::{
     base_api_model, base_api_model_with_default, db_enum, db_insertion, db_query, db_selection,
-    db_update,
+    db_update, to_json,
 };
 #[cfg(feature = "backend")]
 use scamplers_schema::person;
@@ -22,6 +22,7 @@ pub enum UserRole {
     BiologyStaff,
 }
 
+#[to_json(python)]
 #[db_insertion]
 #[cfg_attr(feature = "backend", diesel(table_name = person))]
 pub struct NewPerson {
@@ -167,6 +168,7 @@ impl NewPersonInstitutionId {
     }
 }
 
+#[to_json(python)]
 #[db_selection]
 #[cfg_attr(feature = "backend", diesel(table_name = person))]
 pub struct PersonHandle {
@@ -174,6 +176,7 @@ pub struct PersonHandle {
     pub link: String,
 }
 
+#[to_json(python)]
 #[db_selection]
 #[cfg_attr(feature = "backend", diesel(table_name = person))]
 pub struct PersonSummary {
@@ -195,8 +198,9 @@ pub struct PersonCore {
     pub institution: Institution,
 }
 
+#[to_json(python)]
 #[cfg_attr(target_arch = "wasm32", wasm_bindgen(getter_with_clone))]
-#[cfg_attr(feature = "python", pyclass)]
+#[cfg_attr(feature = "python", pyclass(get_all, str))]
 #[base_api_model]
 pub struct Person {
     #[serde(flatten)]
@@ -226,6 +230,8 @@ pub struct PersonUpdateCore {
     pub institution_id: Option<Uuid>,
 }
 
+#[to_json(python)]
+#[cfg_attr(feature = "python", pyclass(get_all, set_all, str))]
 #[base_api_model_with_default]
 pub struct PersonUpdate {
     pub grant_roles: Vec<UserRole>,
@@ -242,6 +248,7 @@ pub enum PersonOrdinalColumn {
     Email,
 }
 
+#[to_json(python)]
 #[db_query]
 pub struct PersonQuery {
     #[builder(default)]

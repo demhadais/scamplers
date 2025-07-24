@@ -4,7 +4,7 @@ pub use common::NewSpecimenMeasurement;
 pub(crate) use common::Species;
 #[cfg(feature = "python")]
 use pyo3::{FromPyObject, prelude::*};
-use scamplers_macros::{base_api_model, db_enum, db_query, db_selection};
+use scamplers_macros::{base_api_model, db_enum, db_query, db_selection, to_json};
 #[cfg(feature = "backend")]
 use scamplers_schema::{specimen, specimen_measurement};
 use time::OffsetDateTime;
@@ -15,6 +15,7 @@ pub(crate) use virtual_::NewVirtualSpecimen;
 pub(crate) use {
     block::{BlockFixative, FixedBlockEmbeddingMatrix},
     common::NewCommitteeApproval,
+    tissue::TissueFixative,
 };
 
 use super::{lab::LabSummary, person::PersonSummary};
@@ -37,6 +38,7 @@ pub enum NewSpecimen {
     FrozenTissue(#[garde(dive)] NewFrozenTissue),
 }
 
+#[to_json(python)]
 #[db_selection]
 #[cfg_attr(feature = "backend", diesel(table_name = specimen))]
 pub struct SpecimenHandle {
@@ -44,6 +46,7 @@ pub struct SpecimenHandle {
     pub link: String,
 }
 
+#[to_json(python)]
 #[db_selection]
 #[cfg_attr(feature = "backend", diesel(table_name = specimen))]
 pub struct SpecimenSummary {
@@ -65,6 +68,7 @@ pub struct SpecimenSummary {
     pub storage_buffer: Option<String>,
 }
 
+#[to_json(python)]
 #[db_selection]
 #[cfg_attr(feature = "backend", diesel(table_name = specimen_measurement))]
 pub struct SpecimenMeasurement {
@@ -89,13 +93,15 @@ pub struct SpecimenCore {
     pub returned_by: PersonSummary,
 }
 
+#[to_json(python)]
 #[base_api_model]
 #[cfg_attr(
     target_arch = "wasm32",
     ::wasm_bindgen::prelude::wasm_bindgen(getter_with_clone)
 )]
-#[cfg_attr(feature = "python", pyclass)]
+#[cfg_attr(feature = "python", pyclass(get_all, str))]
 pub struct Specimen {
+    #[serde(flatten)]
     pub core: SpecimenCore,
     pub measurements: Vec<SpecimenMeasurement>,
 }
@@ -132,6 +138,7 @@ pub enum SpecimenOrdinalColumn {
     ReceivedAt,
 }
 
+#[to_json(python)]
 #[db_query]
 pub struct SpecimenQuery {
     pub ids: Vec<Uuid>,

@@ -1,9 +1,17 @@
+#[cfg(feature = "python")]
+use pyo3::prelude::*;
 use scamplers_macros::{base_api_model, db_enum, db_insertion};
 #[cfg(feature = "backend")]
 use scamplers_schema::specimen;
+#[cfg(feature = "python")]
+use time::OffsetDateTime;
+#[cfg(feature = "python")]
+use uuid::Uuid;
 use valid_string::ValidString;
 
 use crate::model::specimen::common::NewSpecimenCommon;
+#[cfg(feature = "python")]
+use crate::model::specimen::{NewSpecimenMeasurement, Species, common::NewCommitteeApproval};
 
 #[db_enum]
 #[derive(Default)]
@@ -33,6 +41,46 @@ pub struct NewFixedTissue {
     pub fixative: TissueFixative,
 }
 
+#[cfg(feature = "python")]
+#[pymethods]
+impl NewFixedTissue {
+    #[new]
+    fn new(
+        readable_id: ValidString,
+        name: ValidString,
+        submitted_by: Uuid,
+        lab_id: Uuid,
+        received_at: OffsetDateTime,
+        species: Vec<Species>,
+        measurements: Vec<NewSpecimenMeasurement>,
+        committee_approvals: Vec<NewCommitteeApproval>,
+        fixative: TissueFixative,
+        notes: Option<ValidString>,
+        returned_at: Option<OffsetDateTime>,
+        returned_by: Option<Uuid>,
+        storage_buffer: Option<ValidString>,
+    ) -> Self {
+        Self {
+            inner: NewSpecimenCommon {
+                readable_id,
+                name,
+                submitted_by,
+                lab_id,
+                received_at,
+                species,
+                committee_approvals,
+                notes,
+                returned_at,
+                returned_by,
+                measurements,
+            },
+            fixative,
+            type_: TissueType::Tissue,
+            storage_buffer,
+        }
+    }
+}
+
 #[db_insertion]
 #[cfg_attr(feature = "backend", diesel(table_name = specimen))]
 pub struct NewFrozenTissue {
@@ -48,6 +96,45 @@ pub struct NewFrozenTissue {
     pub frozen: bool,
 }
 
+#[cfg(feature = "python")]
+#[pymethods]
+impl NewFrozenTissue {
+    #[new]
+    fn new(
+        readable_id: ValidString,
+        name: ValidString,
+        submitted_by: Uuid,
+        lab_id: Uuid,
+        received_at: OffsetDateTime,
+        species: Vec<Species>,
+        measurements: Vec<NewSpecimenMeasurement>,
+        committee_approvals: Vec<NewCommitteeApproval>,
+        notes: Option<ValidString>,
+        returned_at: Option<OffsetDateTime>,
+        returned_by: Option<Uuid>,
+        storage_buffer: Option<ValidString>,
+    ) -> Self {
+        Self {
+            inner: NewSpecimenCommon {
+                readable_id,
+                name,
+                submitted_by,
+                lab_id,
+                received_at,
+                species,
+                committee_approvals,
+                notes,
+                returned_at,
+                returned_by,
+                measurements,
+            },
+            type_: TissueType::Tissue,
+            frozen: true,
+            storage_buffer,
+        }
+    }
+}
+
 #[db_insertion]
 #[cfg_attr(feature = "backend", diesel(table_name = specimen))]
 pub struct NewCryoPreservedTissue {
@@ -61,6 +148,45 @@ pub struct NewCryoPreservedTissue {
     pub storage_buffer: Option<ValidString>,
     #[garde(custom(super::common::is_true))]
     pub cryopreserved: bool,
+}
+
+#[cfg(feature = "python")]
+#[pymethods]
+impl NewCryoPreservedTissue {
+    #[new]
+    fn new(
+        readable_id: ValidString,
+        name: ValidString,
+        submitted_by: Uuid,
+        lab_id: Uuid,
+        received_at: OffsetDateTime,
+        species: Vec<Species>,
+        measurements: Vec<NewSpecimenMeasurement>,
+        committee_approvals: Vec<NewCommitteeApproval>,
+        notes: Option<ValidString>,
+        returned_at: Option<OffsetDateTime>,
+        returned_by: Option<Uuid>,
+        storage_buffer: Option<ValidString>,
+    ) -> Self {
+        Self {
+            inner: NewSpecimenCommon {
+                readable_id,
+                name,
+                submitted_by,
+                lab_id,
+                received_at,
+                species,
+                committee_approvals,
+                notes,
+                returned_at,
+                returned_by,
+                measurements,
+            },
+            type_: TissueType::Tissue,
+            cryopreserved: true,
+            storage_buffer,
+        }
+    }
 }
 
 #[base_api_model]
