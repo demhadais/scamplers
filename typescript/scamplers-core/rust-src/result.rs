@@ -87,7 +87,7 @@ pub struct InvalidMeasurementError {
     pub message: String,
 }
 
-#[cfg_attr(feature = "python", pyclass(name = "ScamplersError"))]
+#[cfg_attr(feature = "python", pyclass(get_all, name = "ScamplersError", str))]
 #[derive(Clone, Deserialize, Serialize, Debug, thiserror::Error, valuable::Valuable)]
 #[serde(tag = "type", rename_all = "snake_case")]
 #[error(transparent)]
@@ -106,6 +106,14 @@ pub enum ScamplersCoreError {
     CdnaLibraryType(#[from] CdnaLibraryTypeError),
     CdnaGems(#[from] CdnaGemsError),
     InvalidMeasurement(#[from] InvalidMeasurementError),
+}
+
+#[cfg_attr(feature = "python", pymethods)]
+impl ScamplersCoreError {
+    #[must_use]
+    pub fn to_json(&self) -> String {
+        serde_json::to_string(self).unwrap()
+    }
 }
 
 #[scamplers_error]
