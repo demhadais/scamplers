@@ -1,4 +1,6 @@
-use scamplers_macros::{db_enum, db_insertion, db_json, db_selection};
+#[cfg(feature = "python")]
+use pyo3::prelude::*;
+use scamplers_macros::{db_enum, db_insertion, db_json, db_selection, to_json};
 #[cfg(feature = "backend")]
 use scamplers_schema::{
     multiplexing_tag, suspension, suspension_measurement, suspension_preparers,
@@ -25,6 +27,7 @@ pub enum MultiplexingTagType {
     TotalSeqC,
 }
 
+#[to_json(python)]
 #[db_insertion]
 #[cfg_attr(feature = "backend", diesel(table_name = multiplexing_tag))]
 pub struct NewMultiplexingTag {
@@ -40,6 +43,7 @@ pub struct SuspensionMeasurementData {
     pub is_post_hybridization: bool,
 }
 
+#[to_json(python)]
 #[db_insertion]
 #[cfg_attr(feature = "backend", diesel(table_name = suspension_measurement))]
 pub struct NewSuspensionMeasurement {
@@ -51,6 +55,7 @@ pub struct NewSuspensionMeasurement {
     pub data: SuspensionMeasurementData,
 }
 
+#[to_json(python)]
 #[db_insertion]
 #[cfg_attr(feature = "backend", diesel(table_name = suspension))]
 pub struct NewSuspension {
@@ -83,6 +88,7 @@ pub struct SuspensionPreparer {
     pub prepared_by: Uuid,
 }
 
+#[to_json(python)]
 #[db_selection]
 #[cfg_attr(feature = "backend", diesel(table_name = suspension))]
 pub struct SuspensionHandle {
@@ -90,6 +96,7 @@ pub struct SuspensionHandle {
     pub link: String,
 }
 
+#[to_json(python)]
 #[db_selection]
 #[cfg_attr(feature = "backend", diesel(table_name = suspension))]
 pub struct SuspensionSummary {
@@ -135,6 +142,8 @@ pub struct SuspensionMeasurement {
     pub data: SuspensionMeasurementData,
 }
 
+#[cfg_attr(feature = "python", pyclass)]
+#[to_json(python)]
 #[derive(serde::Serialize)]
 pub struct Suspension {
     #[serde(flatten)]

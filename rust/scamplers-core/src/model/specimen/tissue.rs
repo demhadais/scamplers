@@ -1,6 +1,6 @@
 #[cfg(feature = "python")]
 use pyo3::prelude::*;
-use scamplers_macros::{base_api_model, db_enum, db_insertion};
+use scamplers_macros::{db_enum, db_insertion, to_json};
 #[cfg(feature = "backend")]
 use scamplers_schema::specimen;
 #[cfg(feature = "python")]
@@ -27,6 +27,7 @@ pub enum TissueFixative {
     DithiobisSuccinimidylropionate,
 }
 
+#[to_json(python)]
 #[db_insertion]
 #[cfg_attr(feature = "backend", diesel(table_name = specimen))]
 pub struct NewFixedTissue {
@@ -81,6 +82,7 @@ impl NewFixedTissue {
     }
 }
 
+#[to_json(python)]
 #[db_insertion]
 #[cfg_attr(feature = "backend", diesel(table_name = specimen))]
 pub struct NewFrozenTissue {
@@ -135,6 +137,7 @@ impl NewFrozenTissue {
     }
 }
 
+#[to_json(python)]
 #[db_insertion]
 #[cfg_attr(feature = "backend", diesel(table_name = specimen))]
 pub struct NewCryoPreservedTissue {
@@ -187,12 +190,4 @@ impl NewCryoPreservedTissue {
             storage_buffer,
         }
     }
-}
-
-#[base_api_model]
-#[serde(tag = "preservation")]
-pub enum NewTissue {
-    Cryopreserved(#[garde(dive)] NewCryoPreservedTissue),
-    Fixed(#[garde(dive)] NewFixedTissue),
-    Frozen(#[garde(dive)] NewFrozenTissue),
 }

@@ -208,7 +208,7 @@ pub struct Person {
     pub roles: Vec<UserRole>,
 }
 
-#[cfg_attr(target_arch = "wasm32", wasm_bindgen(getter_with_clone))]
+#[cfg_attr(target_arch = "wasm32", wasm_bindgen(inspectable, getter_with_clone))]
 #[base_api_model]
 pub struct CreatedUser {
     #[serde(flatten)]

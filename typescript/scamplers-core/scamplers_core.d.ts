@@ -139,6 +139,14 @@ export class CommitteeApproval {
 }
 export class CreatedUser {
   private constructor();
+/**
+** Return copy of self without private attributes.
+*/
+  toJSON(): Object;
+/**
+* Return stringified version of self.
+*/
+  toString(): string;
   free(): void;
   person: Person;
   api_key: string;

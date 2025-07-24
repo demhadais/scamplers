@@ -253,11 +253,11 @@ function __wbg_adapter_32(arg0, arg1) {
 }
 
 function __wbg_adapter_35(arg0, arg1, arg2) {
-    wasm.closure137_externref_shim(arg0, arg1, arg2);
+    wasm.closure138_externref_shim(arg0, arg1, arg2);
 }
 
 function __wbg_adapter_435(arg0, arg1, arg2, arg3) {
-    wasm.closure172_externref_shim(arg0, arg1, arg2, arg3);
+    wasm.closure173_externref_shim(arg0, arg1, arg2, arg3);
 }
 
 /**
@@ -596,7 +596,7 @@ export class ChromiumRunHandle {
     set link(arg0) {
         const ptr0 = passStringToWasm0(arg0, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
         const len0 = WASM_VECTOR_LEN;
-        wasm.__wbg_set_chromiumrunhandle_link(this.__wbg_ptr, ptr0, len0);
+        wasm.__wbg_set_cdnagemserror_message(this.__wbg_ptr, ptr0, len0);
     }
 }
 
@@ -872,6 +872,17 @@ export class CreatedUser {
         obj.__wbg_ptr = ptr;
         CreatedUserFinalization.register(obj, obj.__wbg_ptr, obj);
         return obj;
+    }
+
+    toJSON() {
+        return {
+            person: this.person,
+            api_key: this.api_key,
+        };
+    }
+
+    toString() {
+        return JSON.stringify(this);
     }
 
     __destroy_into_raw() {
@@ -1453,7 +1464,7 @@ export class GemsHandle {
     set link(arg0) {
         const ptr0 = passStringToWasm0(arg0, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
         const len0 = WASM_VECTOR_LEN;
-        wasm.__wbg_set_chromiumrunhandle_link(this.__wbg_ptr, ptr0, len0);
+        wasm.__wbg_set_cdnagemserror_message(this.__wbg_ptr, ptr0, len0);
     }
 }
 
@@ -1497,7 +1508,7 @@ export class Institution {
      * @returns {InstitutionHandle}
      */
     get handle() {
-        const ret = wasm.__wbg_get_institution_handle(this.__wbg_ptr);
+        const ret = wasm.__wbg_get_committeeapproval_institution(this.__wbg_ptr);
         return InstitutionHandle.__wrap(ret);
     }
     /**
@@ -1506,7 +1517,7 @@ export class Institution {
     set handle(arg0) {
         _assertClass(arg0, InstitutionHandle);
         var ptr0 = arg0.__destroy_into_raw();
-        wasm.__wbg_set_institution_handle(this.__wbg_ptr, ptr0);
+        wasm.__wbg_set_committeeapproval_institution(this.__wbg_ptr, ptr0);
     }
     /**
      * @returns {string}
@@ -1523,7 +1534,7 @@ export class Institution {
     set name(arg0) {
         const ptr0 = passStringToWasm0(arg0, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
         const len0 = WASM_VECTOR_LEN;
-        wasm.__wbg_set_institution_name(this.__wbg_ptr, ptr0, len0);
+        wasm.__wbg_set_committeeapproval_committee_type(this.__wbg_ptr, ptr0, len0);
     }
 }
 
@@ -1578,7 +1589,7 @@ export class InstitutionHandle {
     set id(arg0) {
         const ptr0 = passStringToWasm0(arg0, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
         const len0 = WASM_VECTOR_LEN;
-        wasm.__wbg_set_cdnahandle_id(this.__wbg_ptr, ptr0, len0);
+        wasm.__wbg_set_institutionhandle_id(this.__wbg_ptr, ptr0, len0);
     }
     /**
      * @returns {string}
@@ -2267,7 +2278,7 @@ export class LibraryHandle {
     set id(arg0) {
         const ptr0 = passStringToWasm0(arg0, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
         const len0 = WASM_VECTOR_LEN;
-        wasm.__wbg_set_chromiumrunhandle_id(this.__wbg_ptr, ptr0, len0);
+        wasm.__wbg_set_libraryhandle_id(this.__wbg_ptr, ptr0, len0);
     }
     /**
      * @returns {string}
@@ -2284,7 +2295,7 @@ export class LibraryHandle {
     set link(arg0) {
         const ptr0 = passStringToWasm0(arg0, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
         const len0 = WASM_VECTOR_LEN;
-        wasm.__wbg_set_chromiumrunhandle_link(this.__wbg_ptr, ptr0, len0);
+        wasm.__wbg_set_libraryhandle_link(this.__wbg_ptr, ptr0, len0);
     }
 }
 
@@ -2403,7 +2414,7 @@ export class MultiplexingTag {
     set tag_id(arg0) {
         const ptr0 = passStringToWasm0(arg0, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
         const len0 = WASM_VECTOR_LEN;
-        wasm.__wbg_set_multiplexingtag_tag_id(this.__wbg_ptr, ptr0, len0);
+        wasm.__wbg_set_datasethandle_link(this.__wbg_ptr, ptr0, len0);
     }
     /**
      * @returns {string}
@@ -3417,7 +3428,7 @@ export class SequencingRunHandle {
     set link(arg0) {
         const ptr0 = passStringToWasm0(arg0, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
         const len0 = WASM_VECTOR_LEN;
-        wasm.__wbg_set_multiplexingtag_tag_id(this.__wbg_ptr, ptr0, len0);
+        wasm.__wbg_set_sequencingrunhandle_link(this.__wbg_ptr, ptr0, len0);
     }
 }
 
@@ -4452,7 +4463,7 @@ export class SuspensionHandle {
     set id(arg0) {
         const ptr0 = passStringToWasm0(arg0, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
         const len0 = WASM_VECTOR_LEN;
-        wasm.__wbg_set_sequencingrunhandle_id(this.__wbg_ptr, ptr0, len0);
+        wasm.__wbg_set_datasethandle_id(this.__wbg_ptr, ptr0, len0);
     }
     /**
      * @returns {string}
@@ -4469,7 +4480,7 @@ export class SuspensionHandle {
     set link(arg0) {
         const ptr0 = passStringToWasm0(arg0, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
         const len0 = WASM_VECTOR_LEN;
-        wasm.__wbg_set_multiplexingtag_tag_id(this.__wbg_ptr, ptr0, len0);
+        wasm.__wbg_set_datasethandle_link(this.__wbg_ptr, ptr0, len0);
     }
 }
 
@@ -5154,13 +5165,13 @@ export function __wbindgen_cb_drop(arg0) {
     return ret;
 };
 
-export function __wbindgen_closure_wrapper883(arg0, arg1, arg2) {
-    const ret = makeMutClosure(arg0, arg1, 120, __wbg_adapter_32);
+export function __wbindgen_closure_wrapper894(arg0, arg1, arg2) {
+    const ret = makeMutClosure(arg0, arg1, 121, __wbg_adapter_32);
     return ret;
 };
 
-export function __wbindgen_closure_wrapper906(arg0, arg1, arg2) {
-    const ret = makeMutClosure(arg0, arg1, 138, __wbg_adapter_35);
+export function __wbindgen_closure_wrapper917(arg0, arg1, arg2) {
+    const ret = makeMutClosure(arg0, arg1, 139, __wbg_adapter_35);
     return ret;
 };
 

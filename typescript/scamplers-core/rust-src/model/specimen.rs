@@ -68,7 +68,6 @@ pub struct SpecimenSummary {
     pub storage_buffer: Option<String>,
 }
 
-#[to_json(python)]
 #[db_selection]
 #[cfg_attr(feature = "backend", diesel(table_name = specimen_measurement))]
 pub struct SpecimenMeasurement {

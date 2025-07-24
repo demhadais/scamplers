@@ -1,7 +1,9 @@
 use std::collections::HashMap;
 
 use any_value::AnyValue;
-use scamplers_macros::{base_api_model, db_insertion, db_json};
+#[cfg(feature = "python")]
+use pyo3::prelude::*;
+use scamplers_macros::{base_api_model, db_insertion, db_json, to_json};
 #[cfg(feature = "backend")]
 use scamplers_schema::dataset;
 use uuid::Uuid;
@@ -66,6 +68,8 @@ pub struct NewChromiumDatasetCore {
     pub web_summary: String,
 }
 
+#[cfg_attr(feature = "python", pyclass)]
+#[to_json(python)]
 #[base_api_model]
 pub struct CellrangerarcvdjCountDataset {
     #[serde(flatten)]
@@ -74,6 +78,8 @@ pub struct CellrangerarcvdjCountDataset {
     pub metrics: SingleRowCsvMetricsFile,
 }
 
+#[cfg_attr(feature = "python", pyclass)]
+#[to_json(python)]
 #[base_api_model]
 pub struct CellrangerMultiDataset {
     #[serde(flatten)]
@@ -82,7 +88,8 @@ pub struct CellrangerMultiDataset {
     #[garde(dive)]
     pub metrics: MultiRowCsvMetricsFileGroup,
 }
-
+#[cfg_attr(feature = "python", pyclass)]
+#[to_json(python)]
 #[base_api_model]
 pub struct CellrangeratacCountDataset {
     #[serde(flatten)]

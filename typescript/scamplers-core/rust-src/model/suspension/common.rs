@@ -1,8 +1,5 @@
-use scamplers_macros::{db_enum, db_insertion, db_json};
-#[cfg(feature = "backend")]
-use scamplers_schema::suspension_preparers;
+use scamplers_macros::{db_enum, db_json};
 use time::OffsetDateTime;
-use uuid::Uuid;
 
 use crate::model::units::{LengthUnit, VolumeUnit};
 
@@ -48,10 +45,4 @@ pub enum MeasurementDataCore {
         value: f32,
         unit: (BiologicalMaterial, LengthUnit),
     },
-}
-
-#[db_insertion]
-pub struct SuspensionPreparer {
-    pub suspension_id: Uuid,
-    pub prepared_by: Uuid,
 }
