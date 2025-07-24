@@ -89,8 +89,8 @@ pub struct SpecimenCore {
     pub lab: LabSummary,
     #[cfg_attr(feature = "backend", diesel(embed))]
     pub submitted_by: PersonSummary,
-    #[cfg_attr(feature = "backend", diesel(embed))]
-    pub returned_by: PersonSummary,
+    // #[cfg_attr(feature = "backend", diesel(embed))]
+    // pub returned_by: PersonSummary,
 }
 
 #[to_json(python)]

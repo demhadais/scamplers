@@ -256,7 +256,7 @@ function __wbg_adapter_35(arg0, arg1, arg2) {
     wasm.closure137_externref_shim(arg0, arg1, arg2);
 }
 
-function __wbg_adapter_437(arg0, arg1, arg2, arg3) {
+function __wbg_adapter_435(arg0, arg1, arg2, arg3) {
     wasm.closure172_externref_shim(arg0, arg1, arg2, arg3);
 }
 
@@ -3663,7 +3663,6 @@ export class SpecimenCore {
             summary: this.summary,
             lab: this.lab,
             submitted_by: this.submitted_by,
-            returned_by: this.returned_by,
         };
     }
 
@@ -3726,21 +3725,6 @@ export class SpecimenCore {
         _assertClass(arg0, PersonSummary);
         var ptr0 = arg0.__destroy_into_raw();
         wasm.__wbg_set_specimencore_submitted_by(this.__wbg_ptr, ptr0);
-    }
-    /**
-     * @returns {PersonSummary}
-     */
-    get returned_by() {
-        const ret = wasm.__wbg_get_specimencore_returned_by(this.__wbg_ptr);
-        return PersonSummary.__wrap(ret);
-    }
-    /**
-     * @param {PersonSummary} arg0
-     */
-    set returned_by(arg0) {
-        _assertClass(arg0, PersonSummary);
-        var ptr0 = arg0.__destroy_into_raw();
-        wasm.__wbg_set_specimencore_returned_by(this.__wbg_ptr, ptr0);
     }
 }
 
@@ -4970,7 +4954,7 @@ export function __wbg_new_23a2665fac83c611(arg0, arg1) {
             const a = state0.a;
             state0.a = 0;
             try {
-                return __wbg_adapter_437(a, state0.b, arg0, arg1);
+                return __wbg_adapter_435(a, state0.b, arg0, arg1);
             } finally {
                 state0.a = a;
             }
@@ -5170,12 +5154,12 @@ export function __wbindgen_cb_drop(arg0) {
     return ret;
 };
 
-export function __wbindgen_closure_wrapper885(arg0, arg1, arg2) {
+export function __wbindgen_closure_wrapper883(arg0, arg1, arg2) {
     const ret = makeMutClosure(arg0, arg1, 120, __wbg_adapter_32);
     return ret;
 };
 
-export function __wbindgen_closure_wrapper908(arg0, arg1, arg2) {
+export function __wbindgen_closure_wrapper906(arg0, arg1, arg2) {
     const ret = makeMutClosure(arg0, arg1, 138, __wbg_adapter_35);
     return ret;
 };

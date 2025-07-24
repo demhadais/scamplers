@@ -665,7 +665,6 @@ export class SpecimenCore {
   summary: SpecimenSummary;
   lab: LabSummary;
   submitted_by: PersonSummary;
-  returned_by: PersonSummary;
 }
 export class SpecimenHandle {
   private constructor();

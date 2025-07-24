@@ -136,7 +136,7 @@ fn core_query_base() -> _ {
 
     summary_query_base()
         .inner_join(person::table.on(submitter_join_condition))
-        .left_join(returned_by.on(returner_join_condition))
+        // .left_join(returned_by.on(returner_join_condition))
         .inner_join(lab::table)
 }
 
