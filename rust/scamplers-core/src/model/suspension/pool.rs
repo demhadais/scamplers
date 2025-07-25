@@ -1,3 +1,5 @@
+#[cfg(feature = "python")]
+use pyo3::prelude::*;
 use scamplers_macros::{db_insertion, db_json, db_selection, to_from_json};
 #[cfg(feature = "backend")]
 use scamplers_schema::{suspension_pool, suspension_pool_measurement, suspension_pool_preparers};
@@ -8,6 +10,7 @@ use valid_string::ValidString;
 use crate::model::suspension::{common::MeasurementDataCore, suspension::NewSuspension};
 
 #[db_json]
+#[cfg_attr(feature = "python", pyo3(name = "_SuspensionPoolMeasurementData"))]
 pub struct SuspensionPoolMeasurementData {
     #[serde(flatten)]
     #[garde(dive)]
@@ -25,6 +28,28 @@ pub struct NewSuspensionPoolMeasurement {
     #[serde(flatten)]
     #[garde(dive)]
     pub data: SuspensionPoolMeasurementData,
+}
+
+#[cfg(feature = "python")]
+#[pymethods]
+impl NewSuspensionPoolMeasurement {
+    #[new]
+    #[pyo3(signature = (measured_by, data, is_post_storage, pool_id=Uuid::default()))]
+    fn new(
+        measured_by: Uuid,
+        data: MeasurementDataCore,
+        is_post_storage: bool,
+        pool_id: Uuid,
+    ) -> Self {
+        Self {
+            pool_id,
+            measured_by,
+            data: SuspensionPoolMeasurementData {
+                data,
+                is_post_storage,
+            },
+        }
+    }
 }
 
 #[to_from_json(python)]

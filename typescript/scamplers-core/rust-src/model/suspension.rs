@@ -1,4 +1,4 @@
-pub use common::MeasurementDataCore;
+pub use common::{BiologicalMaterial, CellCountingMethod, MeasurementDataCore};
 pub use pool::{
     NewSuspensionPool, NewSuspensionPoolMeasurement, SuspensionPoolHandle, SuspensionPoolPreparer,
 };

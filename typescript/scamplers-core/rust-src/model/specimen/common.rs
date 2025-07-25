@@ -1,3 +1,5 @@
+#[cfg(feature = "python")]
+use pyo3::prelude::*;
 use scamplers_macros::{db_enum, db_insertion, db_json, db_selection, to_from_json};
 #[cfg(feature = "backend")]
 use scamplers_schema::{committee_approval, specimen, specimen_measurement};
@@ -49,7 +51,11 @@ pub struct CommitteeApproval {
     pub compliance_identifier: String,
 }
 
+#[to_from_json(python)]
 #[db_json]
+#[cfg_attr(feature = "python", pyo3(get_all, set_all))]
+#[serde(tag = "type")]
+#[cfg_attr(feature = "python", pyo3(name = "SpecimenMeasurementData"))]
 pub enum MeasurementData {
     Rin {
         measured_at: OffsetDateTime,
@@ -78,6 +84,20 @@ pub struct NewSpecimenMeasurement {
     #[garde(dive)]
     #[cfg_attr(feature = "backend", diesel(skip_insertion))]
     pub data: MeasurementData,
+}
+
+#[cfg(feature = "python")]
+#[pymethods]
+impl NewSpecimenMeasurement {
+    #[new]
+    #[pyo3(signature = (measured_by, data, specimen_id=Uuid::default()))]
+    fn new(measured_by: Uuid, data: MeasurementData, specimen_id: Uuid) -> Self {
+        Self {
+            specimen_id,
+            measured_by,
+            data,
+        }
+    }
 }
 
 #[db_insertion]

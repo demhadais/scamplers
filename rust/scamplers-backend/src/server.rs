@@ -61,7 +61,7 @@ pub async fn serve(mut config: Config, log_dir: Option<Utf8PathBuf>) -> anyhow::
 
     let listener = TcpListener::bind(&app_addr)
         .await
-        .context(format!("failed ot listen on {app_addr}"))?;
+        .context(format!("failed to listen on {app_addr}"))?;
     tracing::info!("scamplers listening on {app_addr}");
 
     axum::serve(listener, app)

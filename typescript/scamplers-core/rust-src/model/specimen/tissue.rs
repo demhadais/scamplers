@@ -140,7 +140,7 @@ impl NewFrozenTissue {
 #[to_from_json(python)]
 #[db_insertion]
 #[cfg_attr(feature = "backend", diesel(table_name = specimen))]
-pub struct NewCryoPreservedTissue {
+pub struct NewCryopreservedTissue {
     #[serde(flatten)]
     #[garde(dive)]
     #[cfg_attr(feature = "backend", diesel(embed))]
@@ -155,7 +155,7 @@ pub struct NewCryoPreservedTissue {
 
 #[cfg(feature = "python")]
 #[pymethods]
-impl NewCryoPreservedTissue {
+impl NewCryopreservedTissue {
     #[new]
     fn new(
         readable_id: ValidString,

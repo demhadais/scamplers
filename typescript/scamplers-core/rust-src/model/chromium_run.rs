@@ -1,10 +1,12 @@
 pub use common::NewChipLoadingCommon;
 pub use ocm::NewOcmGems;
 pub use pool_multiplex::{NewPoolMultiplexChipLoading, NewPoolMultiplexGems};
+#[cfg(feature = "python")]
+use pyo3::prelude::*;
 use scamplers_macros::{base_api_model, db_selection};
 #[cfg(feature = "backend")]
 use scamplers_schema::{chromium_run, gems};
-pub use singleplex::{NewSingleplexChipLoading, NewSingleplexGems};
+pub use singleplex::{NewSingleplexChipLoading, NewSingleplexChromiumRun, NewSingleplexGems};
 use time::OffsetDateTime;
 use uuid::Uuid;
 #[cfg(target_arch = "wasm32")]
@@ -12,7 +14,6 @@ use wasm_bindgen::prelude::*;
 
 use crate::model::chromium_run::{
     ocm::NewOcmChromiumRun, pool_multiplex::NewPoolMultiplexChromiumRun,
-    singleplex::NewSingleplexChromiumRun,
 };
 
 mod common;
@@ -22,6 +23,7 @@ mod singleplex;
 
 #[base_api_model]
 #[serde(tag = "plexy")]
+#[cfg_attr(feature = "python", derive(FromPyObject))]
 pub enum NewChromiumRun {
     Singleplex(#[garde(dive)] NewSingleplexChromiumRun),
     Ocm(#[garde(dive)] NewOcmChromiumRun),

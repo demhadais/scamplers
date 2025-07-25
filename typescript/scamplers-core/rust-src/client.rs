@@ -9,7 +9,10 @@ use {
 use {
     crate::model::{
         institution::{Institution, NewInstitution},
+        lab::{Lab, NewLab},
         person::{NewPerson, Person},
+        specimen::{NewSpecimen, Specimen},
+        suspension::NewSuspension,
     },
     pyo3::prelude::*,
     std::sync::Arc,
@@ -18,8 +21,8 @@ use {
 
 #[cfg(feature = "python")]
 use crate::model::{
-    lab::{Lab, NewLab},
-    specimen::{NewSpecimen, Specimen},
+    chromium_run::{ChromiumRun, NewChromiumRun},
+    suspension::Suspension,
 };
 use crate::{
     api_path::ToApiPath,
@@ -42,8 +45,8 @@ pub struct ScamplersClient {
 #[pymethods]
 impl ScamplersClient {
     #[new]
-    fn py_new(backend_base_url: String, api_key: Option<String>) -> Self {
-        Self::new(backend_base_url, Some(String::new()), api_key)
+    fn py_new(api_base_url: String, api_key: Option<String>) -> Self {
+        Self::new(api_base_url, Some(String::new()), api_key)
     }
 }
 
@@ -116,12 +119,11 @@ impl ScamplersClient {
                 .post(format!("{backend_base_url}{route}"))
                 .json(&data),
             _ => {
-                return Err(ScamplersCoreErrorResponse {
-                    status: None,
-                    error: ScamplersCoreError::Client(ClientError {
+                return Err(ScamplersCoreErrorResponse::builder()
+                    .error(ClientError {
                         message: format!("unexpected HTTP method {method}"),
-                    }),
-                });
+                    })
+                    .build());
             }
         };
 
@@ -230,6 +232,22 @@ impl ScamplersClient {
         &self,
         data: NewSpecimen,
     ) -> Result<Specimen, ScamplersCoreErrorResponse> {
+        let client = self.clone();
+        client.send_request_python(data, Method::POST).await
+    }
+
+    async fn create_suspension(
+        &self,
+        data: NewSuspension,
+    ) -> Result<Suspension, ScamplersCoreErrorResponse> {
+        let client = self.clone();
+        client.send_request_python(data, Method::POST).await
+    }
+
+    async fn create_chromium_run(
+        &self,
+        data: NewChromiumRun,
+    ) -> Result<ChromiumRun, ScamplersCoreErrorResponse> {
         let client = self.clone();
         client.send_request_python(data, Method::POST).await
     }

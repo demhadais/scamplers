@@ -131,8 +131,8 @@ diesel::alias!(person as returned_by: ReturnedByAlias);
 #[must_use]
 fn core_query_base() -> _ {
     let submitter_join_condition = specimen::submitted_by.eq(person::id);
-    let returner_join_condition =
-        specimen::returned_by.eq(returned_by.field(person::id).nullable());
+    // let returner_join_condition =
+    //     specimen::returned_by.eq(returned_by.field(person::id).nullable());
 
     summary_query_base()
         .inner_join(person::table.on(submitter_join_condition))

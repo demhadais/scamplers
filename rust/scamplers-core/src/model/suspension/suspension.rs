@@ -31,11 +31,12 @@ pub enum MultiplexingTagType {
 #[db_insertion]
 #[cfg_attr(feature = "backend", diesel(table_name = multiplexing_tag))]
 pub struct NewMultiplexingTag {
-    pub tag_id: String,
+    pub tag_id: ValidString,
     pub type_: MultiplexingTagType,
 }
 
 #[db_json]
+#[cfg_attr(feature = "python", pyo3(name = "_SuspensionMeasurementData"))]
 pub struct SuspensionMeasurementData {
     #[serde(flatten)]
     #[garde(dive)]
@@ -53,6 +54,28 @@ pub struct NewSuspensionMeasurement {
     #[serde(flatten)]
     #[garde(dive)]
     pub data: SuspensionMeasurementData,
+}
+
+#[cfg(feature = "python")]
+#[pymethods]
+impl NewSuspensionMeasurement {
+    #[new]
+    #[pyo3(signature = (measured_by, data, is_post_hybridization, suspension_id=Uuid::default()))]
+    fn new(
+        measured_by: Uuid,
+        data: MeasurementDataCore,
+        is_post_hybridization: bool,
+        suspension_id: Uuid,
+    ) -> Self {
+        Self {
+            suspension_id,
+            measured_by,
+            data: SuspensionMeasurementData {
+                core: data,
+                is_post_hybridization,
+            },
+        }
+    }
 }
 
 #[to_from_json(python)]
@@ -79,6 +102,41 @@ pub struct NewSuspension {
     #[serde(default)]
     #[cfg_attr(feature = "backend", diesel(skip_insertion))]
     pub measurements: Vec<NewSuspensionMeasurement>,
+}
+
+#[cfg(feature = "python")]
+#[pymethods]
+impl NewSuspension {
+    #[new]
+    fn new(
+        readable_id: ValidString,
+        parent_specimen_id: Uuid,
+        biological_material: BiologicalMaterial,
+        created_at: Option<OffsetDateTime>,
+        pooled_into_id: Option<Uuid>,
+        multiplexing_tag_id: Option<Uuid>,
+        lysis_duration_minutes: Option<f32>,
+        target_cell_recovery: f32,
+        target_reads_per_cell: i32,
+        notes: Option<ValidString>,
+        preparer_ids: Vec<Uuid>,
+        measurements: Vec<NewSuspensionMeasurement>,
+    ) -> Self {
+        Self {
+            readable_id,
+            parent_specimen_id,
+            biological_material,
+            created_at,
+            pooled_into_id,
+            multiplexing_tag_id,
+            lysis_duration_minutes,
+            target_cell_recovery,
+            target_reads_per_cell,
+            notes,
+            preparer_ids,
+            measurements,
+        }
+    }
 }
 
 #[db_insertion]

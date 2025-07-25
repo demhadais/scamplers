@@ -1,14 +1,13 @@
 pub(crate) use block::{NewFixedBlock, NewFrozenBlock};
-use common::MeasurementData;
-pub use common::NewSpecimenMeasurement;
 pub(crate) use common::Species;
+pub use common::{MeasurementData, NewSpecimenMeasurement};
 #[cfg(feature = "python")]
 use pyo3::{FromPyObject, prelude::*};
 use scamplers_macros::{base_api_model, db_enum, db_query, db_selection, to_from_json};
 #[cfg(feature = "backend")]
 use scamplers_schema::{specimen, specimen_measurement};
 use time::OffsetDateTime;
-pub(crate) use tissue::{NewCryoPreservedTissue, NewFixedTissue, NewFrozenTissue};
+pub(crate) use tissue::{NewCryopreservedTissue, NewFixedTissue, NewFrozenTissue};
 use uuid::Uuid;
 pub(crate) use virtual_::NewVirtualSpecimen;
 #[cfg(feature = "python")]
@@ -33,7 +32,7 @@ pub enum NewSpecimen {
     FixedBlock(#[garde(dive)] NewFixedBlock),
     FrozenBlock(#[garde(dive)] NewFrozenBlock),
     Suspension(#[garde(dive)] NewVirtualSpecimen),
-    CryopreservedTissue(#[garde(dive)] NewCryoPreservedTissue),
+    CryopreservedTissue(#[garde(dive)] NewCryopreservedTissue),
     FixedTissue(#[garde(dive)] NewFixedTissue),
     FrozenTissue(#[garde(dive)] NewFrozenTissue),
 }

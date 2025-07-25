@@ -13,28 +13,28 @@ pub mod result;
 fn scamplers_core(m: &Bound<'_, PyModule>) -> PyResult<()> {
     use client::ScamplersClient;
     use model::{
+        chromium_run::{NewSingleplexChromiumRun, NewSingleplexGems},
         dataset::DatasetSummary,
         institution::NewInstitution,
         lab::NewLab,
         person::{NewPerson, UserRole},
         specimen::{
-            BlockFixative, FixedBlockEmbeddingMatrix, NewCommitteeApproval, NewCryoPreservedTissue,
-            NewFixedBlock, NewFixedTissue, NewFrozenBlock, NewFrozenTissue, NewSpecimenMeasurement,
-            NewVirtualSpecimen, Species, TissueFixative,
+            self, BlockFixative, FixedBlockEmbeddingMatrix, NewCommitteeApproval,
+            NewCryopreservedTissue, NewFixedBlock, NewFixedTissue, NewFrozenBlock, NewFrozenTissue,
+            NewSpecimenMeasurement, NewVirtualSpecimen, Species, TissueFixative,
+        },
+        suspension::{
+            self, BiologicalMaterial, CellCountingMethod, NewSuspension, NewSuspensionPool,
         },
     };
-
-    use crate::{
-        model::suspension::{NewSuspension, NewSuspensionPool},
-        result::{
-            CdnaGemsError, CdnaLibraryTypeError, ClientError, DatasetCmdlineError,
-            DatasetMetricsFileParseError, DatasetNMetricsFilesError, DuplicateResourceError,
-            InvalidDataError, InvalidMeasurementError, InvalidReferenceError,
-            MalformedRequestError, PermissionDeniedError, ResourceNotFoundError,
-            ScamplersCoreErrorResponse, ServerError,
-        },
+    use result::{
+        CdnaGemsError, CdnaLibraryTypeError, ClientError, DatasetCmdlineError,
+        DatasetMetricsFileParseError, DatasetNMetricsFilesError, DuplicateResourceError,
+        InvalidDataError, InvalidMeasurementError, InvalidReferenceError, MalformedRequestError,
+        PermissionDeniedError, ResourceNotFoundError, ScamplersCoreErrorResponse, ServerError,
     };
 
+    // Error types
     m.add_class::<ClientError>()?;
     m.add_class::<DuplicateResourceError>()?;
     m.add_class::<InvalidReferenceError>()?;
@@ -50,8 +50,10 @@ fn scamplers_core(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_class::<DatasetMetricsFileParseError>()?;
     m.add_class::<InvalidMeasurementError>()?;
 
+    // The error type that wraps them all
     m.add_class::<ScamplersCoreErrorResponse>()?;
 
+    // All the models, grouped by domain
     m.add_class::<NewInstitution>()?;
 
     m.add_class::<UserRole>()?;
@@ -64,7 +66,7 @@ fn scamplers_core(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_class::<NewFrozenBlock>()?;
     m.add_class::<BlockFixative>()?;
 
-    m.add_class::<NewCryoPreservedTissue>()?;
+    m.add_class::<NewCryopreservedTissue>()?;
     m.add_class::<NewFixedTissue>()?;
     m.add_class::<NewFrozenTissue>()?;
     m.add_class::<TissueFixative>()?;
@@ -72,11 +74,19 @@ fn scamplers_core(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_class::<NewVirtualSpecimen>()?;
 
     m.add_class::<Species>()?;
+    m.add_class::<specimen::MeasurementData>()?;
     m.add_class::<NewSpecimenMeasurement>()?;
     m.add_class::<NewCommitteeApproval>()?;
 
+    m.add_class::<suspension::MeasurementDataCore>()?;
+    m.add_class::<BiologicalMaterial>()?;
+    m.add_class::<CellCountingMethod>()?;
+
     m.add_class::<NewSuspension>()?;
     m.add_class::<NewSuspensionPool>()?;
+
+    m.add_class::<NewSingleplexChromiumRun>()?;
+    m.add_class::<NewSingleplexGems>()?;
 
     m.add_class::<DatasetSummary>()?;
 

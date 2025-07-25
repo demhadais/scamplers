@@ -83,7 +83,8 @@ async fn prod_api() {
             "message": "invalid API key",
             "type": "permission_denied"
         },
-        "status":401});
+        "status":401
+    });
 
     assert_eq!(invalid_api_key_response, response);
 

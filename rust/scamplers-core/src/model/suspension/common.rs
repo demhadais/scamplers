@@ -17,6 +17,10 @@ pub enum BiologicalMaterial {
 }
 
 #[db_json]
+#[cfg_attr(
+    feature = "python",
+    pyo3(get_all, set_all, name = "SuspensionMeasurementData")
+)]
 pub enum MeasurementDataCore {
     Concentration {
         measured_at: OffsetDateTime,

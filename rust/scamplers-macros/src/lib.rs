@@ -80,7 +80,7 @@ pub fn to_from_json(attr: TokenStream, input: TokenStream) -> TokenStream {
         impl #ident {
             #from_json_method
 
-            pub fn to_from_json(&self) -> String {
+            pub fn to_json(&self) -> String {
                 ::serde_json::to_string(self).unwrap()
             }
         }
