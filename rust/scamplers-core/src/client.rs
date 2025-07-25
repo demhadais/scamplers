@@ -147,8 +147,8 @@ impl ScamplersClient {
 
         let inner_error = ServerError {
             message: format!(
-                "failed to deserialize response body as success and as \
-                 failure:\n\t{deserialization_failure1}\n\t{deserialization_failure2}"
+                "failed to deserialize response body as success and as failure: \
+                 {deserialization_failure1} / {deserialization_failure2}"
             ),
             raw_response_body: String::from_utf8(raw_response.to_vec()).unwrap_or_default(),
         };

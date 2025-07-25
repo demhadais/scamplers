@@ -40,37 +40,68 @@ fn base_api_model_derives(input: TokenStream) -> proc_macro2::TokenStream {
 }
 
 #[proc_macro_attribute]
-pub fn to_json(attr: TokenStream, input: TokenStream) -> TokenStream {
+pub fn to_from_json(attr: TokenStream, input: TokenStream) -> TokenStream {
     let item = parse_macro_input!(input as Item);
     let ident = item.get_ident();
 
     let attr = attr.to_string();
-    if attr == "python" {
-        quote! {
-            #item
-
-            #[cfg_attr(feature = "python", ::pyo3::pymethods)]
-            impl #ident {
-                pub fn to_json(&self) -> String {
-                    ::serde_json::to_string(self).unwrap()
-                }
-            }
-        }
-        .into()
+    let python = if attr == "python" {
+        true
     } else if attr.is_empty() {
-        quote! {
-            #item
+        false
+    } else {
+        panic!("unexpected proc macro attribute {attr}")
+    };
 
-            impl #ident {
-                pub fn to_json(&self) -> String {
-                    ::serde_json::to_string(self).unwrap()
-                }
+    let mut from_json_method = quote! {
+        pub fn from_json(
+            json: &str,
+        ) -> ::std::result::Result<Self, crate::result::ScamplersCoreErrorResponse> {
+            let error = |err| {
+                let inner = crate::result::ClientError {
+                    message: format!("failed to deserialize provided json string: {err}")
+                };
+
+                crate::result::ScamplersCoreErrorResponse::builder().error(inner).build()
+            };
+
+            ::serde_json::from_str(json).map_err(error)
+        }
+    };
+
+    if python {
+        from_json_method = quote! {
+            #[staticmethod]
+            #from_json_method
+        };
+    }
+
+    let implementation = quote! {
+        impl #ident {
+            #from_json_method
+
+            pub fn to_from_json(&self) -> String {
+                ::serde_json::to_string(self).unwrap()
             }
         }
-        .into()
+    };
+
+    let result = if python {
+        quote! {
+            #item
+            #[cfg(feature = "python")]
+            #[::pyo3::pymethods]
+            #implementation
+        }
     } else {
-        panic!("unexpected proc macro attribute {attr}");
-    }
+        quote! {
+            #item
+            #[cfg(not(feature = "python"))]
+            #implementation
+        }
+    };
+
+    result.into()
 }
 
 #[proc_macro_attribute]

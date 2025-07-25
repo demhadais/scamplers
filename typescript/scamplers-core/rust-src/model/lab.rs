@@ -2,7 +2,7 @@
 use pyo3::prelude::*;
 use scamplers_macros::{
     base_api_model, base_api_model_with_default, db_insertion, db_query, db_selection, db_update,
-    to_json,
+    to_from_json,
 };
 #[cfg(feature = "backend")]
 use scamplers_schema::lab;
@@ -13,7 +13,7 @@ use wasm_bindgen::prelude::*;
 
 use crate::model::{Pagination, SortByGroup, person::PersonSummary};
 
-#[to_json(python)]
+#[to_from_json(python)]
 #[db_insertion]
 #[cfg_attr(feature = "backend", diesel(table_name = lab))]
 pub struct NewLab {
@@ -46,7 +46,7 @@ impl NewLab {
     }
 }
 
-#[to_json(python)]
+#[to_from_json(python)]
 #[db_selection]
 #[cfg_attr(feature = "backend", diesel(table_name = lab))]
 pub struct LabHandle {
@@ -54,7 +54,7 @@ pub struct LabHandle {
     pub link: String,
 }
 
-#[to_json(python)]
+#[to_from_json(python)]
 #[db_selection]
 #[cfg_attr(feature = "backend", diesel(table_name = lab))]
 pub struct LabSummary {
@@ -75,7 +75,7 @@ pub struct LabCore {
     pub pi: PersonSummary,
 }
 
-#[to_json(python)]
+#[to_from_json(python)]
 #[cfg_attr(
     target_arch = "wasm32",
     wasm_bindgen::prelude::wasm_bindgen(getter_with_clone)
@@ -99,7 +99,7 @@ pub struct LabUpdateCore {
     pub delivery_dir: Option<ValidString>,
 }
 
-#[to_json(python)]
+#[to_from_json(python)]
 #[cfg_attr(feature = "python", pyclass(get_all, set_all, str))]
 #[base_api_model_with_default]
 pub struct LabUpdate {
@@ -116,7 +116,7 @@ pub enum LabOrdinalColumn {
     Name,
 }
 
-#[to_json(python)]
+#[to_from_json(python)]
 #[db_query]
 pub struct LabQuery {
     pub ids: Vec<Uuid>,

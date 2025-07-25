@@ -180,7 +180,7 @@ impl From<PathRejection> for ScamplersError {
 
 impl From<deadpool::PoolError> for ScamplersError {
     fn from(err: deadpool::PoolError) -> Self {
-        Self::new_server_error(&format!("Database connection error:\n{err}"))
+        Self::new_server_error(&format!("Database connection error: {err}"))
     }
 }
 

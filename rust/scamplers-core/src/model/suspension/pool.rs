@@ -1,4 +1,4 @@
-use scamplers_macros::{db_insertion, db_json, db_selection, to_json};
+use scamplers_macros::{db_insertion, db_json, db_selection, to_from_json};
 #[cfg(feature = "backend")]
 use scamplers_schema::{suspension_pool, suspension_pool_measurement, suspension_pool_preparers};
 use time::OffsetDateTime;
@@ -15,7 +15,7 @@ pub struct SuspensionPoolMeasurementData {
     pub is_post_storage: bool,
 }
 
-#[to_json(python)]
+#[to_from_json(python)]
 #[db_insertion]
 #[cfg_attr(feature = "backend", diesel(table_name = suspension_pool_measurement))]
 pub struct NewSuspensionPoolMeasurement {
@@ -27,7 +27,7 @@ pub struct NewSuspensionPoolMeasurement {
     pub data: SuspensionPoolMeasurementData,
 }
 
-#[to_json(python)]
+#[to_from_json(python)]
 #[db_insertion]
 #[cfg_attr(feature = "backend", diesel(table_name = suspension_pool))]
 pub struct NewSuspensionPool {
@@ -53,7 +53,7 @@ pub struct SuspensionPoolPreparer {
     pub prepared_by: Uuid,
 }
 
-#[to_json(python)]
+#[to_from_json(python)]
 #[db_selection]
 #[cfg_attr(feature = "backend", diesel(table_name = suspension_pool))]
 pub struct SuspensionPoolHandle {
@@ -61,7 +61,7 @@ pub struct SuspensionPoolHandle {
     pub link: String,
 }
 
-#[to_json(python)]
+#[to_from_json(python)]
 #[db_selection]
 #[cfg_attr(feature = "backend", diesel(table_name = suspension_pool))]
 pub struct SuspensionPoolSummary {

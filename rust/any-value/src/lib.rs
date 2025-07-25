@@ -122,63 +122,14 @@ mod python {
             Ok(ret)
         }
     }
-
-    // fn json_value_to_py_object(py: Python<'_>, json_value: JsonValue) ->
-    // PyObject {     match json_value {
-    //         JsonValue::Array(a) => {
-    //             PyList::new(py, a.into_iter().map(|v|
-    // json_value_to_py_object(py, v)))                 .unwrap()
-    //                 .into_any()
-    //                 .unbind()
-    //         }
-    //         JsonValue::Bool(b) => PyBool::new(py, b).into_any().unbind(),
-    //         JsonValue::Null => PyNone::get(py).into_any().unbind(),
-    //         JsonValue::Number(n) => PyFloat::new(py,
-    // n.as_f64().unwrap()).into_any().unbind(),
-    //         JsonValue::Object(o) => {
-    //             let dict = PyDict::new(py);
-    //             for (key, val) in o {
-    //                 dict.set_item(key, json_value_to_py_object(py, val))
-    //                     .unwrap();
-    //             }
-
-    //             dict.into_any().unbind()
-    //         }
-    //         JsonValue::String(s) => PyString::new(py,
-    // &s).into_any().unbind(),     }
-    // }
-
-    // pub fn serialize<S>(data: &PyObject, serializer: S) -> Result<S::Ok,
-    // S::Error> where
-    //     S: Serializer,
-    // {
-    //     "PyObject".serialize(serializer)
-    // }
-
-    // pub fn deserialize<'de, D>(deserializer: D) -> Result<PyObject, D::Error>
-    // where
-    //     D: Deserializer<'de>,
-    // {
-    //     let json_value = serde_json::Value::deserialize(deserializer)?;
-
-    //     Ok(Python::with_gil(|py| {
-    //         json_value_to_py_object(py, json_value)
-    //     }))
-    // }
 }
 
 #[cfg(target_arch = "wasm32")]
 mod wasm32 {
-    use std::str::FromStr;
-
     use wasm_bindgen::{
         JsValue,
-        convert::{
-            FromWasmAbi, IntoWasmAbi, OptionFromWasmAbi, OptionIntoWasmAbi, TryFromJsValue,
-            VectorFromWasmAbi, VectorIntoWasmAbi, js_value_vector_from_abi,
-            js_value_vector_into_abi,
-        },
-        describe::{WasmDescribe, WasmDescribeVector},
+        convert::{IntoWasmAbi, OptionIntoWasmAbi},
+        describe::WasmDescribe,
     };
 
     use super::AnyValue;

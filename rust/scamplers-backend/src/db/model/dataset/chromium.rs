@@ -38,7 +38,7 @@ fn read_csv(raw: &ValidString) -> ScamplersResult<Vec<HashMap<String, AnyValue>>
 
     records.map_err(|err| {
         ScamplersError::new_unprocessable_entity_error(DatasetMetricsFileParseError {
-            message: format!("failed to parse 10x csv:\n{err}"),
+            message: format!("failed to parse 10x csv: {err}"),
         })
     })
 }
@@ -119,7 +119,7 @@ impl ParseMetricsFile for chromium::JsonMetricsFile {
     fn parse(mut self) -> ScamplersResult<ParsedMetricsFile> {
         self.contents = serde_json::from_slice(self.raw_contents.as_bytes()).map_err(|err| {
             ScamplersError::new_unprocessable_entity_error(DatasetMetricsFileParseError {
-                message: format!("failed to parse 10x json:\n{err}"),
+                message: format!("failed to parse 10x json: {err}"),
             })
         })?;
 

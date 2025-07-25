@@ -1,4 +1,4 @@
-use scamplers_macros::{db_insertion, db_json, db_selection, to_json};
+use scamplers_macros::{db_insertion, db_json, db_selection, to_from_json};
 #[cfg(feature = "backend")]
 use scamplers_schema::{library, library_measurement, library_preparers};
 use time::OffsetDateTime;
@@ -20,7 +20,7 @@ pub enum MeasurementData {
     },
 }
 
-#[to_json(python)]
+#[to_from_json(python)]
 #[db_insertion]
 #[cfg_attr(feature = "backend", diesel(table_name = library_measurement))]
 pub struct NewLibraryMeasurement {
@@ -32,7 +32,7 @@ pub struct NewLibraryMeasurement {
     pub data: MeasurementData,
 }
 
-#[to_json(python)]
+#[to_from_json(python)]
 #[db_insertion]
 #[cfg_attr(feature = "backend", diesel(table_name = library))]
 pub struct NewLibrary {
@@ -64,7 +64,7 @@ pub struct NewLibraryPreparer {
     pub prepared_by: Uuid,
 }
 
-#[to_json(python)]
+#[to_from_json(python)]
 #[db_selection]
 #[cfg_attr(feature = "backend", diesel(table_name = library))]
 pub struct LibraryHandle {

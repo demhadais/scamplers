@@ -1,6 +1,6 @@
 use chromium::{JsonMetricsFile, MultiRowCsvMetricsFileGroup, SingleRowCsvMetricsFile};
 pub use chromium::{NewChromiumDataset, NewChromiumDatasetCore};
-use scamplers_macros::{base_api_model, db_json, db_selection, to_json};
+use scamplers_macros::{base_api_model, db_json, db_selection, to_from_json};
 #[cfg(feature = "backend")]
 use scamplers_schema::dataset;
 use time::OffsetDateTime;
@@ -26,7 +26,7 @@ pub enum ParsedMetricsFile {
     TenxJson(JsonMetricsFile),
 }
 
-#[to_json(python)]
+#[to_from_json(python)]
 #[db_selection]
 #[cfg_attr(feature = "backend", diesel(table_name = dataset))]
 pub struct DatasetHandle {
@@ -34,7 +34,7 @@ pub struct DatasetHandle {
     pub link: String,
 }
 
-#[to_json(python)]
+#[to_from_json(python)]
 #[db_selection]
 #[cfg_attr(feature = "backend", diesel(table_name = dataset))]
 pub struct DatasetSummary {

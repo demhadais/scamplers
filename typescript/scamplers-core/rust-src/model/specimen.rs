@@ -4,7 +4,7 @@ pub use common::NewSpecimenMeasurement;
 pub(crate) use common::Species;
 #[cfg(feature = "python")]
 use pyo3::{FromPyObject, prelude::*};
-use scamplers_macros::{base_api_model, db_enum, db_query, db_selection, to_json};
+use scamplers_macros::{base_api_model, db_enum, db_query, db_selection, to_from_json};
 #[cfg(feature = "backend")]
 use scamplers_schema::{specimen, specimen_measurement};
 use time::OffsetDateTime;
@@ -38,7 +38,7 @@ pub enum NewSpecimen {
     FrozenTissue(#[garde(dive)] NewFrozenTissue),
 }
 
-#[to_json(python)]
+#[to_from_json(python)]
 #[db_selection]
 #[cfg_attr(feature = "backend", diesel(table_name = specimen))]
 pub struct SpecimenHandle {
@@ -46,7 +46,7 @@ pub struct SpecimenHandle {
     pub link: String,
 }
 
-#[to_json(python)]
+#[to_from_json(python)]
 #[db_selection]
 #[cfg_attr(feature = "backend", diesel(table_name = specimen))]
 pub struct SpecimenSummary {
@@ -92,7 +92,7 @@ pub struct SpecimenCore {
     // pub returned_by: PersonSummary,
 }
 
-#[to_json(python)]
+#[to_from_json(python)]
 #[base_api_model]
 #[cfg_attr(
     target_arch = "wasm32",
@@ -137,7 +137,7 @@ pub enum SpecimenOrdinalColumn {
     ReceivedAt,
 }
 
-#[to_json(python)]
+#[to_from_json(python)]
 #[db_query]
 pub struct SpecimenQuery {
     pub ids: Vec<Uuid>,

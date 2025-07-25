@@ -1,6 +1,6 @@
 #[cfg(feature = "python")]
 use pyo3::prelude::*;
-use scamplers_macros::{db_enum, db_insertion, to_json};
+use scamplers_macros::{db_enum, db_insertion, to_from_json};
 #[cfg(feature = "backend")]
 use scamplers_schema::specimen;
 #[cfg(feature = "python")]
@@ -38,7 +38,7 @@ pub enum BlockFixative {
     FormaldehydeDerivative,
 }
 
-#[to_json(python)]
+#[to_from_json(python)]
 #[db_insertion]
 #[cfg_attr(feature = "backend", diesel(table_name = specimen))]
 pub struct NewFixedBlock {
@@ -100,7 +100,7 @@ pub enum FrozenBlockEmbeddingMatrix {
     OptimalCuttingTemperatureCompound,
 }
 
-#[to_json(python)]
+#[to_from_json(python)]
 #[db_insertion]
 #[cfg_attr(feature = "backend", diesel(table_name = specimen))]
 pub struct NewFrozenBlock {

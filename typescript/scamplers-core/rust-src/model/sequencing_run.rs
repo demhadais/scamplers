@@ -1,4 +1,4 @@
-use scamplers_macros::{db_insertion, db_selection, to_json};
+use scamplers_macros::{db_insertion, db_selection, to_from_json};
 #[cfg(feature = "backend")]
 use scamplers_schema::{sequencing_run, sequencing_submissions};
 use time::OffsetDateTime;
@@ -15,7 +15,7 @@ pub struct NewSequencingSubmission {
     pub submitted_at: OffsetDateTime,
 }
 
-#[to_json(python)]
+#[to_from_json(python)]
 #[db_insertion]
 #[cfg_attr(feature = "backend", diesel(table_name = sequencing_run))]
 pub struct NewSequencingRun {
@@ -30,7 +30,7 @@ pub struct NewSequencingRun {
     pub libraries: Vec<NewSequencingSubmission>,
 }
 
-#[to_json(python)]
+#[to_from_json(python)]
 #[db_selection]
 #[cfg_attr(feature = "backend", diesel(table_name = sequencing_run))]
 pub struct SequencingRunHandle {
@@ -38,7 +38,7 @@ pub struct SequencingRunHandle {
     pub link: String,
 }
 
-#[to_json(python)]
+#[to_from_json(python)]
 #[db_selection]
 #[cfg_attr(feature = "backend", diesel(table_name = sequencing_run))]
 pub struct SequencingRunSummary {

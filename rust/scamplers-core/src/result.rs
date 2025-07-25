@@ -1,6 +1,6 @@
 #[cfg(feature = "python")]
 use pyo3::{exceptions::PyException, prelude::*};
-use scamplers_macros::scamplers_error;
+use scamplers_macros::{scamplers_error, to_from_json};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 #[cfg(target_arch = "wasm32")]
@@ -87,6 +87,7 @@ pub struct InvalidMeasurementError {
     pub message: String,
 }
 
+#[to_from_json(python)]
 #[cfg_attr(feature = "python", pyclass(get_all, name = "ScamplersError", str))]
 #[derive(Clone, Deserialize, Serialize, Debug, thiserror::Error, valuable::Valuable)]
 #[serde(tag = "type", rename_all = "snake_case")]
@@ -108,16 +109,8 @@ pub enum ScamplersCoreError {
     InvalidMeasurement(#[from] InvalidMeasurementError),
 }
 
-#[cfg_attr(feature = "python", pymethods)]
-impl ScamplersCoreError {
-    #[must_use]
-    pub fn to_json(&self) -> String {
-        serde_json::to_string(self).unwrap()
-    }
-}
-
 #[scamplers_error]
-#[cfg_attr(feature = "python", pyo3(extends = PyException, name = "ScamplersErrorResponse"))]
+#[cfg_attr(feature = "python", pyo3(extends = PyException, name = "ScamplersApiErrorResponse"))]
 pub struct ScamplersCoreErrorResponse {
     pub status: Option<u16>,
     #[source]

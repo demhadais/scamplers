@@ -1,4 +1,4 @@
-use scamplers_macros::{db_enum, db_insertion, to_json};
+use scamplers_macros::{db_enum, db_insertion, to_from_json};
 #[cfg(feature = "backend")]
 use scamplers_schema::{chip_loading, chromium_run, gems};
 use uuid::Uuid;
@@ -47,7 +47,7 @@ pub enum SingleplexChromiumChip {
     Gemx5p,
 }
 
-#[to_json(python)]
+#[to_from_json(python)]
 #[db_insertion]
 #[cfg_attr(feature = "backend", diesel(table_name = chromium_run))]
 pub struct NewSingleplexChromiumRun {

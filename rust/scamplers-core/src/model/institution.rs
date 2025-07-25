@@ -1,7 +1,7 @@
 #[cfg(feature = "python")]
 use pyo3::prelude::*;
 use scamplers_macros::{
-    base_api_model_with_default, db_insertion, db_query, db_selection, to_json,
+    base_api_model_with_default, db_insertion, db_query, db_selection, to_from_json,
 };
 #[cfg(feature = "backend")]
 use scamplers_schema::institution;
@@ -12,7 +12,7 @@ use wasm_bindgen::prelude::*;
 
 use crate::model::{Pagination, SortByGroup};
 
-#[to_json(python)]
+#[to_from_json(python)]
 #[db_insertion]
 #[cfg_attr(feature = "backend", diesel(table_name = institution))]
 pub struct NewInstitution {
@@ -30,7 +30,7 @@ impl NewInstitution {
     }
 }
 
-#[to_json(python)]
+#[to_from_json(python)]
 #[db_selection]
 #[cfg_attr(feature = "backend", diesel(table_name = institution))]
 pub struct InstitutionHandle {
@@ -38,7 +38,7 @@ pub struct InstitutionHandle {
     pub link: String,
 }
 
-#[to_json(python)]
+#[to_from_json(python)]
 #[db_selection]
 #[cfg_attr(feature = "backend", diesel(table_name = institution))]
 pub struct Institution {
@@ -54,7 +54,7 @@ pub enum InstitutionOrdinalColumn {
     Name,
 }
 
-#[to_json(python)]
+#[to_from_json(python)]
 #[db_query]
 pub struct InstitutionQuery {
     #[builder(default)]

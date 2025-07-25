@@ -1,4 +1,4 @@
-use scamplers_macros::{base_api_model, db_insertion, db_selection, to_json};
+use scamplers_macros::{base_api_model, db_insertion, db_selection, to_from_json};
 #[cfg(feature = "backend")]
 use scamplers_schema::{cdna, cdna_measurement, cdna_preparers};
 use time::OffsetDateTime;
@@ -9,7 +9,7 @@ use crate::model::{
     library_type_specification::LibraryType, nucleic_acid::common::ElectrophoreticMeasurementData,
 };
 
-#[to_json(python)]
+#[to_from_json(python)]
 #[db_insertion]
 #[cfg_attr(feature = "backend", diesel(table_name = cdna_measurement))]
 pub struct NewCdnaMeasurement {
@@ -22,7 +22,7 @@ pub struct NewCdnaMeasurement {
     pub data: ElectrophoreticMeasurementData,
 }
 
-#[to_json(python)]
+#[to_from_json(python)]
 #[db_insertion]
 #[cfg_attr(feature = "backend", diesel(table_name = cdna))]
 pub struct NewCdna {
@@ -59,7 +59,7 @@ pub struct NewCdnaPreparer {
     pub prepared_by: Uuid,
 }
 
-#[to_json(python)]
+#[to_from_json(python)]
 #[db_selection]
 #[cfg_attr(feature = "backend", diesel(table_name = cdna))]
 pub struct CdnaHandle {

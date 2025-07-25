@@ -1,4 +1,4 @@
-use scamplers_macros::{db_enum, db_insertion, db_json, db_selection, to_json};
+use scamplers_macros::{db_enum, db_insertion, db_json, db_selection, to_from_json};
 #[cfg(feature = "backend")]
 use scamplers_schema::{committee_approval, specimen, specimen_measurement};
 use time::OffsetDateTime;
@@ -28,7 +28,7 @@ pub enum ComplianceCommitteeType {
     Iacuc,
 }
 
-#[to_json(python)]
+#[to_from_json(python)]
 #[db_insertion]
 #[cfg_attr(feature = "backend", diesel(table_name = committee_approval))]
 pub struct NewCommitteeApproval {
@@ -67,7 +67,7 @@ pub enum MeasurementData {
     },
 }
 
-#[to_json(python)]
+#[to_from_json(python)]
 #[db_insertion]
 #[cfg_attr(feature = "backend", diesel(table_name = specimen_measurement))]
 pub struct NewSpecimenMeasurement {
