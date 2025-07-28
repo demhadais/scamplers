@@ -34,6 +34,10 @@ fn scamplers_core(m: &Bound<'_, PyModule>) -> PyResult<()> {
         PermissionDeniedError, ResourceNotFoundError, ScamplersCoreErrorResponse, ServerError,
     };
 
+    use crate::model::chromium_run::{
+        NewOcmChipLoading, NewOcmChromiumRun, NewOcmGems, NewSingleplexChipLoading,
+    };
+
     // Error types
     m.add_class::<ClientError>()?;
     m.add_class::<DuplicateResourceError>()?;
@@ -87,6 +91,11 @@ fn scamplers_core(m: &Bound<'_, PyModule>) -> PyResult<()> {
 
     m.add_class::<NewSingleplexChromiumRun>()?;
     m.add_class::<NewSingleplexGems>()?;
+    m.add_class::<NewSingleplexChipLoading>()?;
+
+    m.add_class::<NewOcmChromiumRun>()?;
+    m.add_class::<NewOcmGems>()?;
+    m.add_class::<NewOcmChipLoading>()?;
 
     m.add_class::<DatasetSummary>()?;
 

@@ -1,16 +1,19 @@
+#[cfg(feature = "python")]
+use pyo3::prelude::*;
 use scamplers_macros::{db_enum, db_insertion, to_from_json};
 #[cfg(feature = "backend")]
 use scamplers_schema::{chip_loading, chromium_run, gems};
+#[cfg(feature = "python")]
 use time::OffsetDateTime;
 use uuid::Uuid;
+#[cfg(feature = "python")]
 use valid_string::ValidString;
 
-use crate::model::{
-    chromium_run::common::{
-        MAX_GEMS_IN_NON_OCM_RUN, NewChipLoadingCommon, NewChromiumRunCommon, NewGemsCommon,
-    },
-    suspension::MeasurementDataCore,
+use crate::model::chromium_run::common::{
+    MAX_GEMS_IN_NON_OCM_RUN, NewChipLoadingCommon, NewChromiumRunCommon, NewGemsCommon,
 };
+#[cfg(feature = "python")]
+use crate::model::suspension::MeasurementDataCore;
 
 #[db_insertion]
 #[cfg_attr(feature = "backend", diesel(table_name = chip_loading))]
@@ -20,6 +23,28 @@ pub struct NewSingleplexChipLoading {
     #[garde(dive)]
     #[cfg_attr(feature = "backend", diesel(embed))]
     pub inner: NewChipLoadingCommon,
+}
+
+#[cfg(feature = "python")]
+#[pymethods]
+impl NewSingleplexChipLoading {
+    #[new]
+    fn new(
+        suspension_id: Uuid,
+        suspension_volume_loaded: MeasurementDataCore,
+        buffer_volume_loaded: MeasurementDataCore,
+        notes: Option<ValidString>,
+    ) -> Self {
+        Self {
+            suspension_id,
+            inner: NewChipLoadingCommon {
+                gems_id: Uuid::default(),
+                suspension_volume_loaded,
+                buffer_volume_loaded,
+                notes,
+            },
+        }
+    }
 }
 
 #[db_insertion]
@@ -33,14 +58,14 @@ pub struct NewSingleplexGems {
     pub loading: NewSingleplexChipLoading,
 }
 
+#[cfg(feature = "python")]
+#[pymethods]
 impl NewSingleplexGems {
+    #[new]
     fn new(
         readable_id: ValidString,
         chemistry: ValidString,
-        suspension_id: Uuid,
-        suspension_volume_loaded: MeasurementDataCore,
-        buffer_volume_loaded: MeasurementDataCore,
-        notes: Option<ValidString>,
+        loading: NewSingleplexChipLoading,
     ) -> Self {
         Self {
             inner: NewGemsCommon {
@@ -48,15 +73,7 @@ impl NewSingleplexGems {
                 chemistry,
                 chromium_run_id: Uuid::default(),
             },
-            loading: NewSingleplexChipLoading {
-                suspension_id,
-                inner: NewChipLoadingCommon {
-                    gems_id: Uuid::default(),
-                    suspension_volume_loaded,
-                    buffer_volume_loaded,
-                    notes,
-                },
-            },
+            loading,
         }
     }
 }
@@ -94,7 +111,10 @@ pub struct NewSingleplexChromiumRun {
     pub gems: Vec<NewSingleplexGems>,
 }
 
+#[cfg(feature = "python")]
+#[pymethods]
 impl NewSingleplexChromiumRun {
+    #[new]
     fn new(
         readable_id: ValidString,
         run_at: OffsetDateTime,

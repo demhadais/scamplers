@@ -77,7 +77,7 @@ impl NewGemsWrapper {
             Self::Singleplex(gems) => gems.iter_mut().map(|g| &mut g.loading.inner).collect(),
             Self::Ocm(gems) => gems
                 .iter_mut()
-                .flat_map(|g| g.loading.iter_mut().map(|l| &mut l.inner))
+                .flat_map(|g| g.loading.iter_mut().map(|l| &mut l.0.inner))
                 .collect(),
             Self::PoolMultiplex(gems) => gems.iter_mut().map(|g| &mut g.loading.inner).collect(),
         };
@@ -94,7 +94,9 @@ impl NewGemsWrapper {
                 NewChipLoadingWrapper::SingleplexOcm(gems.into_iter().map(|g| g.loading).collect())
             }
             Self::Ocm(gems) => NewChipLoadingWrapper::SingleplexOcm(
-                gems.into_iter().flat_map(|g| g.loading).collect(),
+                gems.into_iter()
+                    .flat_map(|g| g.loading.into_iter().map(|l| l.0))
+                    .collect(),
             ),
             Self::PoolMultiplex(gems) => {
                 NewChipLoadingWrapper::PoolMultiplex(gems.into_iter().map(|g| g.loading).collect())

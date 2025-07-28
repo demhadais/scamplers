@@ -1,6 +1,8 @@
 pub use common::NewChipLoadingCommon;
-pub use ocm::NewOcmGems;
-pub use pool_multiplex::{NewPoolMultiplexChipLoading, NewPoolMultiplexGems};
+pub use ocm::{NewOcmChipLoading, NewOcmChromiumRun, NewOcmGems};
+pub use pool_multiplex::{
+    NewPoolMultiplexChipLoading, NewPoolMultiplexChromiumRun, NewPoolMultiplexGems,
+};
 #[cfg(feature = "python")]
 use pyo3::prelude::*;
 use scamplers_macros::{base_api_model, db_selection};
@@ -11,10 +13,6 @@ use time::OffsetDateTime;
 use uuid::Uuid;
 #[cfg(target_arch = "wasm32")]
 use wasm_bindgen::prelude::*;
-
-use crate::model::chromium_run::{
-    ocm::NewOcmChromiumRun, pool_multiplex::NewPoolMultiplexChromiumRun,
-};
 
 mod common;
 mod ocm;
