@@ -2,7 +2,9 @@ from uuid import UUID
 from enum import Enum
 
 class NewInstitution:
-    def __new__(cls, id: UUID, name: str): ...
+    id: UUID
+    name: str
+    def __init__(self, id: UUID, name: str): ...
 
 class UserRole(Enum):
     AppAdmin = ...
@@ -10,6 +12,6 @@ class UserRole(Enum):
     ComputationalStaff = ...
 
 class NewPerson:
-    def __new__(
-        cls, name: str, email: str, institution_id: UUID, roles: list[UserRole]
+    def __init__(
+        self, name: str, email: str, institution_id: UUID, roles: list[UserRole]
     ): ...
