@@ -6,8 +6,8 @@ use crate::model::units::{MassUnit, VolumeUnit};
 
 #[db_json]
 pub struct ElectrophoreticSizingRange(
-    #[garde(range(min = 0, max = self.1))] i32,
-    #[garde(range(min = self.0, max = 10_000))] i32,
+    #[garde(range(min = 0, max = self.1))] pub(crate) i32,
+    #[garde(range(min = self.0, max = 10_000))] pub(crate) i32,
 );
 
 #[db_json]

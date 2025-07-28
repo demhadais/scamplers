@@ -13,28 +13,33 @@ pub mod result;
 fn scamplers_core(m: &Bound<'_, PyModule>) -> PyResult<()> {
     use client::ScamplersClient;
     use model::{
-        chromium_run::{NewSingleplexChromiumRun, NewSingleplexGems},
+        chromium_run::{
+            NewOcmChipLoading, NewOcmChromiumRun, NewOcmGems, NewPoolMultiplexChipLoading,
+            NewPoolMultiplexChromiumRun, NewPoolMultiplexGems, NewSingleplexChipLoading,
+            NewSingleplexChromiumRun, NewSingleplexGems,
+        },
         institution::{Institution, NewInstitution},
         lab::NewLab,
+        library_type_specification::LibraryType,
+        nucleic_acid::{NewCdna, NewCdnaMeasurement},
         person::{NewPerson, UserRole},
         specimen::{
             self, BlockFixative, FixedBlockEmbeddingMatrix, NewCommitteeApproval,
             NewCryopreservedTissue, NewFixedBlock, NewFixedTissue, NewFrozenBlock, NewFrozenTissue,
-            NewSpecimenMeasurement, NewVirtualSpecimen, Species, TissueFixative,
+            NewSpecimenMeasurement, NewVirtualSpecimen, Species, SuspensionFixative,
+            TissueFixative,
         },
         suspension::{
-            self, BiologicalMaterial, CellCountingMethod, NewSuspension, NewSuspensionPool,
+            self, BiologicalMaterial, CellCountingMethod, NewSuspension, NewSuspensionMeasurement,
+            NewSuspensionPool,
         },
+        units::{LengthUnit, MassUnit, VolumeUnit},
     };
     use result::{
         CdnaGemsError, CdnaLibraryTypeError, ClientError, DatasetCmdlineError,
         DatasetMetricsFileParseError, DatasetNMetricsFilesError, DuplicateResourceError,
         InvalidDataError, InvalidMeasurementError, InvalidReferenceError, MalformedRequestError,
         PermissionDeniedError, ResourceNotFoundError, ScamplersCoreErrorResponse, ServerError,
-    };
-
-    use crate::model::chromium_run::{
-        NewOcmChipLoading, NewOcmChromiumRun, NewOcmGems, NewSingleplexChipLoading,
     };
 
     m.add_class::<ScamplersClient>()?;
@@ -60,10 +65,12 @@ fn scamplers_core(m: &Bound<'_, PyModule>) -> PyResult<()> {
     errors.add_class::<InvalidMeasurementError>()?;
     // The error type that wraps them all
     errors.add_class::<ScamplersCoreErrorResponse>()?;
+
     m.add_submodule(&errors)?;
 
     // All the request models, grouped by domain
     let requests = PyModule::new(m.py(), requests_module)?;
+
     requests.add_class::<NewInstitution>()?;
 
     requests.add_class::<UserRole>()?;
@@ -82,6 +89,11 @@ fn scamplers_core(m: &Bound<'_, PyModule>) -> PyResult<()> {
     requests.add_class::<TissueFixative>()?;
 
     requests.add_class::<NewVirtualSpecimen>()?;
+    requests.add_class::<SuspensionFixative>()?;
+
+    requests.add_class::<MassUnit>()?;
+    requests.add_class::<VolumeUnit>()?;
+    requests.add_class::<LengthUnit>()?;
 
     requests.add_class::<Species>()?;
     requests.add_class::<specimen::MeasurementData>()?;
@@ -93,6 +105,7 @@ fn scamplers_core(m: &Bound<'_, PyModule>) -> PyResult<()> {
     requests.add_class::<CellCountingMethod>()?;
 
     requests.add_class::<NewSuspension>()?;
+    requests.add_class::<NewSuspensionMeasurement>()?;
     requests.add_class::<NewSuspensionPool>()?;
 
     requests.add_class::<NewSingleplexChromiumRun>()?;
@@ -102,6 +115,15 @@ fn scamplers_core(m: &Bound<'_, PyModule>) -> PyResult<()> {
     requests.add_class::<NewOcmChromiumRun>()?;
     requests.add_class::<NewOcmGems>()?;
     requests.add_class::<NewOcmChipLoading>()?;
+
+    requests.add_class::<NewPoolMultiplexChromiumRun>()?;
+    requests.add_class::<NewPoolMultiplexGems>()?;
+    requests.add_class::<NewPoolMultiplexChipLoading>()?;
+
+    requests.add_class::<LibraryType>()?;
+    requests.add_class::<NewCdnaMeasurement>()?;
+    requests.add_class::<NewCdna>()?;
+
     m.add_submodule(&requests)?;
 
     // All the response types, grouped by domain

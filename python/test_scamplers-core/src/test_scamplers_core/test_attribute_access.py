@@ -1,3 +1,6 @@
+import maturin_import_hook
+
+maturin_import_hook.install()
 import pytest
 from scamplers_core.requests import NewInstitution
 from scamplers_core.responses import Institution

@@ -1,13 +1,11 @@
 [project]
 name = "test-scamplers-core"
 version = "0.1.0"
-description = "Add your description here"
 readme = "README.md"
-authors = [
-    { name = "Ahmed Said", email = "ahmed.said@jax.org" }
-]
+authors = [{ name = "Ahmed Said", email = "ahmed.said@jax.org" }]
 requires-python = ">=3.13"
 dependencies = [
+    "maturin>=1.9.2",
     "maturin-import-hook>=0.3.0",
     "pytest>=8.4.1",
     "scamplers-core",

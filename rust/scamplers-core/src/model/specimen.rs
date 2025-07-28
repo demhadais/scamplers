@@ -15,6 +15,7 @@ pub(crate) use {
     block::{BlockFixative, FixedBlockEmbeddingMatrix},
     common::NewCommitteeApproval,
     tissue::TissueFixative,
+    virtual_::SuspensionFixative,
 };
 
 use super::{lab::LabSummary, person::PersonSummary};
