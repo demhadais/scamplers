@@ -1,0 +1,21 @@
+name: Check scamplers-core Python Library
+on:
+  push:
+    paths:
+      - rust/**
+      - python/**
+
+jobs:
+  check-python:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v4
+
+      - name: Install the latest version of uv
+        uses: astral-sh/setup-uv@v6
+
+      - name: Run tests
+        working-directory: python/test_scamplers-core
+        run: uv run --module pytest

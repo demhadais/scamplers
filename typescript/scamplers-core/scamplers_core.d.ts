@@ -26,8 +26,8 @@ export enum Species {
 }
 export enum UserRole {
   AppAdmin = 0,
-  ComputationalStaff = 1,
-  BiologyStaff = 2,
+  BiologyStaff = 1,
+  ComputationalStaff = 2,
 }
 export class CdnaGemsError {
   private constructor();

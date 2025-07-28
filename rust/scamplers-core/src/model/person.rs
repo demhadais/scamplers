@@ -18,8 +18,8 @@ use crate::model::{Pagination, SortByGroup, institution::Institution};
 #[derive(PartialEq)]
 pub enum UserRole {
     AppAdmin,
-    ComputationalStaff,
     BiologyStaff,
+    ComputationalStaff,
 }
 
 #[to_from_json(python)]

@@ -166,12 +166,13 @@ pub struct SpecimenQuery {
 mod tests {
 
     use pretty_assertions::assert_eq;
+    use rstest::rstest;
     use serde_json::{Value, json};
     use uuid::Uuid;
 
     use crate::model::specimen::NewSpecimen;
 
-    #[test]
+    #[rstest]
     fn deserialize_new_specimen() {
         let uuid = Uuid::now_v7();
         let received_at = "1999-01-01 00:00:00.0 +00:00:00";

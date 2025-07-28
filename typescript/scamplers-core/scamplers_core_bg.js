@@ -295,8 +295,8 @@ export const Species = Object.freeze({
  */
 export const UserRole = Object.freeze({
     AppAdmin: 0, "0": "AppAdmin",
-    ComputationalStaff: 1, "1": "ComputationalStaff",
-    BiologyStaff: 2, "2": "BiologyStaff",
+    BiologyStaff: 1, "1": "BiologyStaff",
+    ComputationalStaff: 2, "2": "ComputationalStaff",
 });
 
 const __wbindgen_enum_RequestCredentials = ["omit", "same-origin", "include"];

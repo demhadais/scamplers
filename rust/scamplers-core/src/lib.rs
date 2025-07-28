@@ -14,8 +14,7 @@ fn scamplers_core(m: &Bound<'_, PyModule>) -> PyResult<()> {
     use client::ScamplersClient;
     use model::{
         chromium_run::{NewSingleplexChromiumRun, NewSingleplexGems},
-        dataset::DatasetSummary,
-        institution::NewInstitution,
+        institution::{Institution, NewInstitution},
         lab::NewLab,
         person::{NewPerson, UserRole},
         specimen::{
@@ -38,68 +37,85 @@ fn scamplers_core(m: &Bound<'_, PyModule>) -> PyResult<()> {
         NewOcmChipLoading, NewOcmChromiumRun, NewOcmGems, NewSingleplexChipLoading,
     };
 
-    // Error types
-    m.add_class::<ClientError>()?;
-    m.add_class::<DuplicateResourceError>()?;
-    m.add_class::<InvalidReferenceError>()?;
-    m.add_class::<ResourceNotFoundError>()?;
-    m.add_class::<InvalidDataError>()?;
-    m.add_class::<MalformedRequestError>()?;
-    m.add_class::<PermissionDeniedError>()?;
-    m.add_class::<ServerError>()?;
-    m.add_class::<CdnaGemsError>()?;
-    m.add_class::<CdnaLibraryTypeError>()?;
-    m.add_class::<DatasetCmdlineError>()?;
-    m.add_class::<DatasetNMetricsFilesError>()?;
-    m.add_class::<DatasetMetricsFileParseError>()?;
-    m.add_class::<InvalidMeasurementError>()?;
-
-    // The error type that wraps them all
-    m.add_class::<ScamplersCoreErrorResponse>()?;
-
-    // All the models, grouped by domain
-    m.add_class::<NewInstitution>()?;
-
-    m.add_class::<UserRole>()?;
-    m.add_class::<NewPerson>()?;
-
-    m.add_class::<NewLab>()?;
-
-    m.add_class::<NewFixedBlock>()?;
-    m.add_class::<FixedBlockEmbeddingMatrix>()?;
-    m.add_class::<NewFrozenBlock>()?;
-    m.add_class::<BlockFixative>()?;
-
-    m.add_class::<NewCryopreservedTissue>()?;
-    m.add_class::<NewFixedTissue>()?;
-    m.add_class::<NewFrozenTissue>()?;
-    m.add_class::<TissueFixative>()?;
-
-    m.add_class::<NewVirtualSpecimen>()?;
-
-    m.add_class::<Species>()?;
-    m.add_class::<specimen::MeasurementData>()?;
-    m.add_class::<NewSpecimenMeasurement>()?;
-    m.add_class::<NewCommitteeApproval>()?;
-
-    m.add_class::<suspension::MeasurementDataCore>()?;
-    m.add_class::<BiologicalMaterial>()?;
-    m.add_class::<CellCountingMethod>()?;
-
-    m.add_class::<NewSuspension>()?;
-    m.add_class::<NewSuspensionPool>()?;
-
-    m.add_class::<NewSingleplexChromiumRun>()?;
-    m.add_class::<NewSingleplexGems>()?;
-    m.add_class::<NewSingleplexChipLoading>()?;
-
-    m.add_class::<NewOcmChromiumRun>()?;
-    m.add_class::<NewOcmGems>()?;
-    m.add_class::<NewOcmChipLoading>()?;
-
-    m.add_class::<DatasetSummary>()?;
-
     m.add_class::<ScamplersClient>()?;
+
+    let submodule_names = ["errors", "requests", "responses"];
+    let [errors_module, requests_module, responses_module] = submodule_names;
+
+    // All the error types
+    let errors = PyModule::new(m.py(), errors_module)?;
+    errors.add_class::<ClientError>()?;
+    errors.add_class::<DuplicateResourceError>()?;
+    errors.add_class::<InvalidReferenceError>()?;
+    errors.add_class::<ResourceNotFoundError>()?;
+    errors.add_class::<InvalidDataError>()?;
+    errors.add_class::<MalformedRequestError>()?;
+    errors.add_class::<PermissionDeniedError>()?;
+    errors.add_class::<ServerError>()?;
+    errors.add_class::<CdnaGemsError>()?;
+    errors.add_class::<CdnaLibraryTypeError>()?;
+    errors.add_class::<DatasetCmdlineError>()?;
+    errors.add_class::<DatasetNMetricsFilesError>()?;
+    errors.add_class::<DatasetMetricsFileParseError>()?;
+    errors.add_class::<InvalidMeasurementError>()?;
+    // The error type that wraps them all
+    errors.add_class::<ScamplersCoreErrorResponse>()?;
+    m.add_submodule(&errors)?;
+
+    // All the request models, grouped by domain
+    let requests = PyModule::new(m.py(), requests_module)?;
+    requests.add_class::<NewInstitution>()?;
+
+    requests.add_class::<UserRole>()?;
+    requests.add_class::<NewPerson>()?;
+
+    requests.add_class::<NewLab>()?;
+
+    requests.add_class::<NewFixedBlock>()?;
+    requests.add_class::<FixedBlockEmbeddingMatrix>()?;
+    requests.add_class::<NewFrozenBlock>()?;
+    requests.add_class::<BlockFixative>()?;
+
+    requests.add_class::<NewCryopreservedTissue>()?;
+    requests.add_class::<NewFixedTissue>()?;
+    requests.add_class::<NewFrozenTissue>()?;
+    requests.add_class::<TissueFixative>()?;
+
+    requests.add_class::<NewVirtualSpecimen>()?;
+
+    requests.add_class::<Species>()?;
+    requests.add_class::<specimen::MeasurementData>()?;
+    requests.add_class::<NewSpecimenMeasurement>()?;
+    requests.add_class::<NewCommitteeApproval>()?;
+
+    requests.add_class::<suspension::MeasurementDataCore>()?;
+    requests.add_class::<BiologicalMaterial>()?;
+    requests.add_class::<CellCountingMethod>()?;
+
+    requests.add_class::<NewSuspension>()?;
+    requests.add_class::<NewSuspensionPool>()?;
+
+    requests.add_class::<NewSingleplexChromiumRun>()?;
+    requests.add_class::<NewSingleplexGems>()?;
+    requests.add_class::<NewSingleplexChipLoading>()?;
+
+    requests.add_class::<NewOcmChromiumRun>()?;
+    requests.add_class::<NewOcmGems>()?;
+    requests.add_class::<NewOcmChipLoading>()?;
+    m.add_submodule(&requests)?;
+
+    // All the response types, grouped by domain
+    let responses = PyModule::new(m.py(), responses_module)?;
+    responses.add_class::<Institution>()?;
+    m.add_submodule(&responses)?;
+
+    let python = m.py();
+    let sys_modules = python.import("sys")?.getattr("modules")?;
+
+    let submodules = [errors, requests, responses];
+    for (module_name, submodule) in submodule_names.iter().zip(&submodules) {
+        sys_modules.set_item(format!("scamplers_core.{module_name}"), submodule)?;
+    }
 
     Ok(())
 }

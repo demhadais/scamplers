@@ -2500,6 +2500,7 @@ dependencies = [
  "pyo3",
  "regex",
  "reqwest",
+ "rstest",
  "scamplers-macros",
  "scamplers-schema",
  "scraper",
