@@ -47,7 +47,7 @@ impl ScamplersClient {
     #[new]
     #[pyo3(signature = (*, api_base_url, api_key=None))]
     fn py_new(api_base_url: String, api_key: Option<String>) -> Self {
-        Self::new(api_base_url, Some(String::new()), api_key)
+        Self::new(api_base_url, None, api_key)
     }
 }
 
@@ -56,7 +56,7 @@ impl ScamplersClient {
     #[cfg_attr(target_arch = "wasm32", wasm_bindgen(constructor))]
     #[must_use]
     pub fn new(
-        backend_base_url: String,
+        api_base_url: String,
         frontend_token: Option<String>,
         api_key: Option<String>,
     ) -> Self {
@@ -79,14 +79,14 @@ impl ScamplersClient {
 
         #[cfg(not(feature = "python"))]
         return Self {
-            backend_base_url,
+            backend_base_url: api_base_url,
             client,
             api_key,
         };
 
         #[cfg(feature = "python")]
         return Self {
-            backend_base_url,
+            backend_base_url: api_base_url,
             client,
             api_key,
             runtime: Arc::new(Runtime::new().unwrap()),
