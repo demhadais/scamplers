@@ -5,7 +5,13 @@ from .requests import (
     CellrangerMultiDataset,
     CellrangerarcvdjCountDataset,
     CellrangeratacCountDataset,
+    NewCryopreservedTissue,
+    NewFixedBlock,
+    NewFixedTissue,
+    NewFrozenBlock,
+    NewFrozenTissue,
     NewInstitution,
+    NewVirtualSpecimen,
 )
 
 @dataclass(kw_only=True)
@@ -14,6 +20,15 @@ class ScamplersClient:
     api_key: str | None = ...
 
     async def create_institution(self, data: NewInstitution) -> Institution: ...
+    async def create_specimen(
+        self,
+        data: NewFixedBlock
+        | NewFrozenBlock
+        | NewCryopreservedTissue
+        | NewFixedTissue
+        | NewFrozenTissue
+        | NewVirtualSpecimen,
+    ) -> None: ...
     async def create_cellrangerarc_count_dataset(
         self, data: CellrangerarcvdjCountDataset
     ) -> DatasetSummary: ...
