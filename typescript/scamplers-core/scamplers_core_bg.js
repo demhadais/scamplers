@@ -2617,6 +2617,7 @@ export class NewPersonInstitutionId {
         wasm.__wbg_newpersoninstitutionid_free(ptr, 0);
     }
     /**
+     * # Errors
      * @returns {NewMsLogin}
      */
     build() {
@@ -3337,6 +3338,7 @@ export class ScamplersClient {
         return this;
     }
     /**
+     * # Errors
      * @param {NewMsLogin} data
      * @returns {Promise<CreatedUser>}
      */

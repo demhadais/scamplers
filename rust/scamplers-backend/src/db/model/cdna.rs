@@ -101,9 +101,12 @@ impl NewCdnaVecExt for Vec<NewCdna> {
             .load(db_conn)
             .await?;
 
-        if should_have_same_library_type && expected_library_types[0] != found_library_types[0] {
-            return err(expected_library_types);
-        } else if !should_have_same_library_type && expected_library_types != found_library_types {
+        let mismatching_library_types1 =
+            should_have_same_library_type && expected_library_types[0] != found_library_types[0];
+        let mistmatching_library_types2 =
+            !(should_have_same_library_type || expected_library_types == found_library_types);
+
+        if mismatching_library_types1 || mistmatching_library_types2 {
             return err(expected_library_types);
         }
 

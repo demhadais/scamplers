@@ -65,6 +65,7 @@ pub struct NewMsLogin(#[cfg_attr(target_arch = "wasm32", wasm_bindgen(skip))] pu
 #[cfg(target_arch = "wasm32")]
 #[wasm_bindgen]
 impl NewMsLogin {
+    #[allow(clippy::new_ret_no_self)]
     #[wasm_bindgen]
     #[must_use]
     pub fn new() -> NewPersonEmpty {
@@ -152,6 +153,7 @@ pub struct NewPersonInstitutionId {
 #[cfg(target_arch = "wasm32")]
 #[wasm_bindgen]
 impl NewPersonInstitutionId {
+    /// # Errors
     #[wasm_bindgen]
     pub fn build(self) -> std::result::Result<NewMsLogin, valid_string::EmptyStringError> {
         use std::str::FromStr;

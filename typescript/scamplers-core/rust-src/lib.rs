@@ -9,6 +9,7 @@ pub mod model;
 pub mod result;
 
 #[cfg(feature = "python")]
+#[allow(clippy::too_many_lines)]
 #[pymodule]
 fn scamplers_core(m: &Bound<'_, PyModule>) -> PyResult<()> {
     use client::ScamplersClient;

@@ -227,6 +227,7 @@ impl NewChromiumDatasetExt for NewChromiumDataset {
             .count()
             .get_result(db_conn)
             .await?;
+        #[allow(clippy::cast_sign_loss)]
         let n_suspensions = n_suspensions as u64;
 
         if n_suspensions != self.n_metrics_files() {

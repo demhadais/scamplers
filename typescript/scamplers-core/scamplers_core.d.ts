@@ -482,6 +482,9 @@ export class NewPersonEmpty {
 export class NewPersonInstitutionId {
   private constructor();
   free(): void;
+  /**
+   * # Errors
+   */
   build(): NewMsLogin;
 }
 export class NewPersonMsUserId {
@@ -603,6 +606,9 @@ export class ResourceNotFoundError {
 export class ScamplersClient {
   free(): void;
   constructor(backend_base_url: string, frontend_token?: string | null, api_key?: string | null);
+  /**
+   * # Errors
+   */
   ms_login(data: NewMsLogin): Promise<CreatedUser>;
 }
 export class ScamplersCoreErrorResponse {

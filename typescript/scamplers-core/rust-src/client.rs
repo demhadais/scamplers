@@ -199,6 +199,7 @@ impl ScamplersClient {
 #[cfg(target_arch = "wasm32")]
 #[wasm_bindgen]
 impl ScamplersClient {
+    /// # Errors
     #[wasm_bindgen]
     pub async fn ms_login(
         &self,
