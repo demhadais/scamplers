@@ -7,7 +7,10 @@ use valid_string::ValidString;
 use crate::model::units::{MassUnit, VolumeUnit};
 
 #[db_json]
-#[cfg_attr(feature = "python", pyo3(name = "NucleicAcidConcentration"))]
+#[cfg_attr(
+    feature = "python",
+    pyo3(name = "NucleicAcidConcentration", get_all, set_all)
+)]
 pub struct Concentration {
     #[garde(range(min = 0.0))]
     pub value: f32,
@@ -38,6 +41,7 @@ fn electrophoretic_sizing_range((min, max): &(u16, u16), _: &()) -> garde::Resul
 
 #[to_from_json(python)]
 #[db_json]
+#[cfg_attr(feature = "python", pyo3(get_all, set_all))]
 pub struct ElectrophoreticMeasurementData {
     pub measured_at: OffsetDateTime,
     #[garde(dive)]

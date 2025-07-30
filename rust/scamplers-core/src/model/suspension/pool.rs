@@ -10,7 +10,10 @@ use valid_string::ValidString;
 use crate::model::suspension::{common::MeasurementDataCore, suspension::NewSuspension};
 
 #[db_json]
-#[cfg_attr(feature = "python", pyo3(name = "_SuspensionPoolMeasurementData"))]
+#[cfg_attr(
+    feature = "python",
+    pyo3(name = "_SuspensionPoolMeasurementData", get_all, set_all)
+)]
 pub struct SuspensionPoolMeasurementData {
     #[serde(flatten)]
     #[garde(dive)]

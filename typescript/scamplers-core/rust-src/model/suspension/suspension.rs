@@ -36,7 +36,10 @@ pub struct NewMultiplexingTag {
 }
 
 #[db_json]
-#[cfg_attr(feature = "python", pyo3(name = "_SuspensionMeasurementData"))]
+#[cfg_attr(
+    feature = "python",
+    pyo3(name = "_SuspensionMeasurementData", get_all, set_all)
+)]
 pub struct SuspensionMeasurementData {
     #[serde(flatten)]
     #[garde(dive)]
