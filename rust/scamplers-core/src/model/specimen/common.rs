@@ -42,6 +42,26 @@ pub struct NewCommitteeApproval {
     pub compliance_identifier: ValidString,
 }
 
+#[cfg(feature = "python")]
+#[pymethods]
+impl NewCommitteeApproval {
+    #[new]
+    #[pyo3(signature = (*, institution_id, committee_type, compliance_identifier, specimen_id=Uuid::default()))]
+    fn new(
+        institution_id: Uuid,
+        committee_type: ComplianceCommitteeType,
+        compliance_identifier: ValidString,
+        specimen_id: Uuid,
+    ) -> Self {
+        Self {
+            specimen_id,
+            institution_id,
+            committee_type,
+            compliance_identifier,
+        }
+    }
+}
+
 #[db_selection]
 #[cfg_attr(feature = "backend", diesel(table_name = committee_approval))]
 pub struct CommitteeApproval {
@@ -90,7 +110,7 @@ pub struct NewSpecimenMeasurement {
 #[pymethods]
 impl NewSpecimenMeasurement {
     #[new]
-    #[pyo3(signature = (measured_by, data, specimen_id=Uuid::default()))]
+    #[pyo3(signature = (*, measured_by, data, specimen_id=Uuid::default()))]
     fn new(measured_by: Uuid, data: MeasurementData, specimen_id: Uuid) -> Self {
         Self {
             specimen_id,
@@ -102,6 +122,7 @@ impl NewSpecimenMeasurement {
 
 #[db_insertion]
 #[cfg_attr(feature = "backend", diesel(table_name = specimen))]
+#[cfg_attr(feature = "python", pyo3(name = "_NewSpecimenCommon"))]
 pub struct NewSpecimenCommon {
     #[garde(dive)]
     pub readable_id: ValidString,

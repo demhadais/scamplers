@@ -216,6 +216,12 @@ function debugString(val) {
     return className;
 }
 
+function _assertClass(instance, klass) {
+    if (!(instance instanceof klass)) {
+        throw new Error(`expected instance of ${klass.name}`);
+    }
+}
+
 function getArrayJsValueFromWasm0(ptr, len) {
     ptr = ptr >>> 0;
     const mem = getDataViewMemory0();
@@ -237,12 +243,6 @@ function passArrayJsValueToWasm0(array, malloc) {
     return ptr;
 }
 
-function _assertClass(instance, klass) {
-    if (!(instance instanceof klass)) {
-        throw new Error(`expected instance of ${klass.name}`);
-    }
-}
-
 function takeFromExternrefTable0(idx) {
     const value = wasm.__wbindgen_export_0.get(idx);
     wasm.__externref_table_dealloc(idx);
@@ -253,11 +253,11 @@ function __wbg_adapter_32(arg0, arg1) {
 }
 
 function __wbg_adapter_35(arg0, arg1, arg2) {
-    wasm.closure136_externref_shim(arg0, arg1, arg2);
+    wasm.closure137_externref_shim(arg0, arg1, arg2);
 }
 
-function __wbg_adapter_435(arg0, arg1, arg2, arg3) {
-    wasm.closure171_externref_shim(arg0, arg1, arg2, arg3);
+function __wbg_adapter_437(arg0, arg1, arg2, arg3) {
+    wasm.closure172_externref_shim(arg0, arg1, arg2, arg3);
 }
 
 /**
@@ -2278,7 +2278,7 @@ export class LibraryHandle {
     set id(arg0) {
         const ptr0 = passStringToWasm0(arg0, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
         const len0 = WASM_VECTOR_LEN;
-        wasm.__wbg_set_chromiumrunhandle_id(this.__wbg_ptr, ptr0, len0);
+        wasm.__wbg_set_cdnahandle_id(this.__wbg_ptr, ptr0, len0);
     }
     /**
      * @returns {string}
@@ -2295,7 +2295,53 @@ export class LibraryHandle {
     set link(arg0) {
         const ptr0 = passStringToWasm0(arg0, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
         const len0 = WASM_VECTOR_LEN;
-        wasm.__wbg_set_chromiumrunhandle_link(this.__wbg_ptr, ptr0, len0);
+        wasm.__wbg_set_libraryhandle_link(this.__wbg_ptr, ptr0, len0);
+    }
+}
+
+const LibraryIndexSetErrorFinalization = (typeof FinalizationRegistry === 'undefined')
+    ? { register: () => {}, unregister: () => {} }
+    : new FinalizationRegistry(ptr => wasm.__wbg_libraryindexseterror_free(ptr >>> 0, 1));
+
+export class LibraryIndexSetError {
+
+    toJSON() {
+        return {
+            message: this.message,
+        };
+    }
+
+    toString() {
+        return JSON.stringify(this);
+    }
+
+    __destroy_into_raw() {
+        const ptr = this.__wbg_ptr;
+        this.__wbg_ptr = 0;
+        LibraryIndexSetErrorFinalization.unregister(this);
+        return ptr;
+    }
+
+    free() {
+        const ptr = this.__destroy_into_raw();
+        wasm.__wbg_libraryindexseterror_free(ptr, 0);
+    }
+    /**
+     * @returns {string}
+     */
+    get message() {
+        const ret = wasm.__wbg_get_libraryindexseterror_message(this.__wbg_ptr);
+        var v1 = getCachedStringFromWasm0(ret[0], ret[1]);
+        if (ret[0] !== 0) { wasm.__wbindgen_free(ret[0], ret[1], 1); }
+        return v1;
+    }
+    /**
+     * @param {string} arg0
+     */
+    set message(arg0) {
+        const ptr0 = passStringToWasm0(arg0, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+        const len0 = WASM_VECTOR_LEN;
+        wasm.__wbg_set_cdnagemserror_message(this.__wbg_ptr, ptr0, len0);
     }
 }
 
@@ -4579,7 +4625,7 @@ export class SuspensionPoolHandle {
     set id(arg0) {
         const ptr0 = passStringToWasm0(arg0, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
         const len0 = WASM_VECTOR_LEN;
-        wasm.__wbg_set_chromiumrunhandle_id(this.__wbg_ptr, ptr0, len0);
+        wasm.__wbg_set_cdnahandle_id(this.__wbg_ptr, ptr0, len0);
     }
     /**
      * @returns {string}
@@ -4596,7 +4642,7 @@ export class SuspensionPoolHandle {
     set link(arg0) {
         const ptr0 = passStringToWasm0(arg0, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
         const len0 = WASM_VECTOR_LEN;
-        wasm.__wbg_set_chromiumrunhandle_link(this.__wbg_ptr, ptr0, len0);
+        wasm.__wbg_set_libraryhandle_link(this.__wbg_ptr, ptr0, len0);
     }
 }
 
@@ -4633,7 +4679,7 @@ export class SuspensionPoolSummary {
      * @returns {SuspensionPoolHandle}
      */
     get handle() {
-        const ret = wasm.__wbg_get_chromiumrunsummary_handle(this.__wbg_ptr);
+        const ret = wasm.__wbg_get_suspensionpoolsummary_handle(this.__wbg_ptr);
         return SuspensionPoolHandle.__wrap(ret);
     }
     /**
@@ -4642,7 +4688,7 @@ export class SuspensionPoolSummary {
     set handle(arg0) {
         _assertClass(arg0, SuspensionPoolHandle);
         var ptr0 = arg0.__destroy_into_raw();
-        wasm.__wbg_set_chromiumrunsummary_handle(this.__wbg_ptr, ptr0);
+        wasm.__wbg_set_suspensionpoolsummary_handle(this.__wbg_ptr, ptr0);
     }
     /**
      * @returns {string}
@@ -4659,7 +4705,7 @@ export class SuspensionPoolSummary {
     set readable_id(arg0) {
         const ptr0 = passStringToWasm0(arg0, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
         const len0 = WASM_VECTOR_LEN;
-        wasm.__wbg_set_chromiumrunsummary_readable_id(this.__wbg_ptr, ptr0, len0);
+        wasm.__wbg_set_suspensionpoolsummary_readable_id(this.__wbg_ptr, ptr0, len0);
     }
     /**
      * @returns {Date}
@@ -4965,7 +5011,7 @@ export function __wbg_new_23a2665fac83c611(arg0, arg1) {
             const a = state0.a;
             state0.a = 0;
             try {
-                return __wbg_adapter_435(a, state0.b, arg0, arg1);
+                return __wbg_adapter_437(a, state0.b, arg0, arg1);
             } finally {
                 state0.a = a;
             }
@@ -5165,13 +5211,13 @@ export function __wbindgen_cb_drop(arg0) {
     return ret;
 };
 
-export function __wbindgen_closure_wrapper869(arg0, arg1, arg2) {
-    const ret = makeMutClosure(arg0, arg1, 119, __wbg_adapter_32);
+export function __wbindgen_closure_wrapper875(arg0, arg1, arg2) {
+    const ret = makeMutClosure(arg0, arg1, 120, __wbg_adapter_32);
     return ret;
 };
 
-export function __wbindgen_closure_wrapper892(arg0, arg1, arg2) {
-    const ret = makeMutClosure(arg0, arg1, 137, __wbg_adapter_35);
+export function __wbindgen_closure_wrapper898(arg0, arg1, arg2) {
+    const ret = makeMutClosure(arg0, arg1, 138, __wbg_adapter_35);
     return ret;
 };
 

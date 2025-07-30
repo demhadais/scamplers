@@ -423,6 +423,19 @@ export class LibraryHandle {
   id: string;
   link: string;
 }
+export class LibraryIndexSetError {
+  private constructor();
+/**
+** Return copy of self without private attributes.
+*/
+  toJSON(): Object;
+/**
+* Return stringified version of self.
+*/
+  toString(): string;
+  free(): void;
+  message: string;
+}
 export class MalformedRequestError {
   private constructor();
 /**

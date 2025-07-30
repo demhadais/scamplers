@@ -44,6 +44,7 @@ pub struct NewPerson {
 #[pymethods]
 impl NewPerson {
     #[new]
+    #[pyo3(signature = (*, name, email, institution_id, roles=Vec::new()))]
     fn new(name: ValidString, email: String, institution_id: Uuid, roles: Vec<UserRole>) -> Self {
         Self {
             name,
@@ -61,50 +62,57 @@ impl NewPerson {
 #[serde(transparent)]
 pub struct NewMsLogin(#[cfg_attr(target_arch = "wasm32", wasm_bindgen(skip))] pub NewPerson);
 
-#[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
+#[cfg(target_arch = "wasm32")]
+#[wasm_bindgen]
 impl NewMsLogin {
-    #[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
+    #[wasm_bindgen]
     #[must_use]
     pub fn new() -> NewPersonEmpty {
         NewPersonEmpty
     }
 }
 
-#[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
+#[cfg(target_arch = "wasm32")]
+#[wasm_bindgen]
 pub struct NewPersonEmpty;
 
-#[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
+#[cfg(target_arch = "wasm32")]
+#[wasm_bindgen]
 impl NewPersonEmpty {
-    #[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
+    #[wasm_bindgen]
     #[must_use]
     pub fn name(self, name: String) -> NewPersonName {
         NewPersonName { name }
     }
 }
 
-#[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
+#[cfg(target_arch = "wasm32")]
+#[wasm_bindgen]
 pub struct NewPersonName {
     name: String,
 }
 
-#[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
+#[cfg(target_arch = "wasm32")]
+#[wasm_bindgen]
 impl NewPersonName {
-    #[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
+    #[wasm_bindgen]
     #[must_use]
     pub fn email(self, email: String) -> NewPersonEmail {
         NewPersonEmail { inner: self, email }
     }
 }
 
-#[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
+#[cfg(target_arch = "wasm32")]
+#[wasm_bindgen]
 pub struct NewPersonEmail {
     inner: NewPersonName,
     email: String,
 }
 
-#[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
+#[cfg(target_arch = "wasm32")]
+#[wasm_bindgen]
 impl NewPersonEmail {
-    #[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
+    #[wasm_bindgen]
     #[must_use]
     pub fn ms_user_id(self, ms_user_id: Uuid) -> NewPersonMsUserId {
         NewPersonMsUserId {
@@ -114,15 +122,17 @@ impl NewPersonEmail {
     }
 }
 
-#[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
+#[cfg(target_arch = "wasm32")]
+#[wasm_bindgen]
 pub struct NewPersonMsUserId {
     inner: NewPersonEmail,
     ms_user_id: Uuid,
 }
 
-#[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
+#[cfg(target_arch = "wasm32")]
+#[wasm_bindgen]
 impl NewPersonMsUserId {
-    #[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
+    #[wasm_bindgen]
     #[must_use]
     pub fn institution_id(self, institution_id: Uuid) -> NewPersonInstitutionId {
         NewPersonInstitutionId {
@@ -132,15 +142,17 @@ impl NewPersonMsUserId {
     }
 }
 
-#[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
+#[cfg(target_arch = "wasm32")]
+#[wasm_bindgen]
 pub struct NewPersonInstitutionId {
     inner: NewPersonMsUserId,
     institution_id: Uuid,
 }
 
-#[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
+#[cfg(target_arch = "wasm32")]
+#[wasm_bindgen]
 impl NewPersonInstitutionId {
-    #[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
+    #[wasm_bindgen]
     pub fn build(self) -> std::result::Result<NewMsLogin, valid_string::EmptyStringError> {
         use std::str::FromStr;
 

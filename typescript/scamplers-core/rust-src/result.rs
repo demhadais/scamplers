@@ -87,6 +87,11 @@ pub struct InvalidMeasurementError {
     pub message: String,
 }
 
+#[scamplers_error]
+pub struct LibraryIndexSetError {
+    pub message: String,
+}
+
 #[to_from_json(python)]
 #[cfg_attr(feature = "python", pyclass(get_all, name = "ScamplersError", str))]
 #[derive(Clone, Deserialize, Serialize, Debug, thiserror::Error, valuable::Valuable)]
@@ -107,6 +112,7 @@ pub enum ScamplersCoreError {
     CdnaLibraryType(#[from] CdnaLibraryTypeError),
     CdnaGems(#[from] CdnaGemsError),
     InvalidMeasurement(#[from] InvalidMeasurementError),
+    LibraryIndexSet(#[from] LibraryIndexSetError),
 }
 
 #[scamplers_error]
@@ -149,6 +155,7 @@ mod wasm32 {
                 Self::CdnaLibraryType(e) => e.into_abi(),
                 Self::CdnaGems(e) => e.into_abi(),
                 Self::InvalidMeasurement(e) => e.into_abi(),
+                Self::LibraryIndexSet(e) => e.into_abi(),
             }
         }
     }

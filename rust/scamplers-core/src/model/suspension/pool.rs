@@ -34,7 +34,7 @@ pub struct NewSuspensionPoolMeasurement {
 #[pymethods]
 impl NewSuspensionPoolMeasurement {
     #[new]
-    #[pyo3(signature = (measured_by, data, is_post_storage, pool_id=Uuid::default()))]
+    #[pyo3(signature = (*, measured_by, data, is_post_storage, pool_id=Uuid::default()))]
     fn new(
         measured_by: Uuid,
         data: MeasurementDataCore,
@@ -58,9 +58,9 @@ impl NewSuspensionPoolMeasurement {
 pub struct NewSuspensionPool {
     #[garde(dive)]
     pub readable_id: ValidString,
-    pub pooled_at: OffsetDateTime,
     #[garde(dive)]
-    pub notes: Option<ValidString>,
+    pub name: ValidString,
+    pub pooled_at: OffsetDateTime,
     #[garde(dive)]
     #[cfg_attr(feature = "backend", diesel(skip_insertion))]
     pub suspensions: Vec<NewSuspension>,
@@ -70,6 +70,34 @@ pub struct NewSuspensionPool {
     #[serde(default)]
     #[cfg_attr(feature = "backend", diesel(skip_insertion))]
     pub measurements: Vec<NewSuspensionPoolMeasurement>,
+    #[garde(dive)]
+    pub notes: Option<ValidString>,
+}
+
+#[cfg(feature = "python")]
+#[pymethods]
+impl NewSuspensionPool {
+    #[new]
+    #[pyo3(signature = (*, readable_id, name, pooled_at, suspensions, preparer_ids, measurements=Vec::new(), notes=None))]
+    fn new(
+        readable_id: ValidString,
+        name: ValidString,
+        pooled_at: OffsetDateTime,
+        suspensions: Vec<NewSuspension>,
+        preparer_ids: Vec<Uuid>,
+        measurements: Vec<NewSuspensionPoolMeasurement>,
+        notes: Option<ValidString>,
+    ) -> Self {
+        Self {
+            readable_id,
+            name,
+            pooled_at,
+            suspensions,
+            preparer_ids,
+            measurements,
+            notes,
+        }
+    }
 }
 
 #[db_insertion]

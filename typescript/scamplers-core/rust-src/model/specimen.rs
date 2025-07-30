@@ -12,8 +12,8 @@ use uuid::Uuid;
 pub(crate) use virtual_::NewVirtualSpecimen;
 #[cfg(feature = "python")]
 pub(crate) use {
-    block::{BlockFixative, FixedBlockEmbeddingMatrix},
-    common::NewCommitteeApproval,
+    block::{BlockFixative, FixedBlockEmbeddingMatrix, FrozenBlockEmbeddingMatrix},
+    common::{ComplianceCommitteeType, NewCommitteeApproval},
     tissue::TissueFixative,
     virtual_::SuspensionFixative,
 };

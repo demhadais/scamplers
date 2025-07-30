@@ -27,6 +27,7 @@ pub struct NewPoolMultiplexChipLoading {
 #[pymethods]
 impl NewPoolMultiplexChipLoading {
     #[new]
+    #[pyo3(signature = (*, suspension_pool_id, suspension_volume_loaded, buffer_volume_loaded, notes=None))]
     fn new(
         suspension_pool_id: Uuid,
         suspension_volume_loaded: MeasurementDataCore,
@@ -60,6 +61,7 @@ pub struct NewPoolMultiplexGems {
 #[pymethods]
 impl NewPoolMultiplexGems {
     #[new]
+    #[pyo3(signature = (*, readable_id, chemistry, loading))]
     fn new(
         readable_id: ValidString,
         chemistry: ValidString,
@@ -104,11 +106,12 @@ pub struct NewPoolMultiplexChromiumRun {
 #[pymethods]
 impl NewPoolMultiplexChromiumRun {
     #[new]
+    #[pyo3(signature = (*, readable_id, run_at, run_by, succeeded, chip, gems, notes=None))]
     fn new(
         readable_id: ValidString,
         run_at: OffsetDateTime,
-        succeeded: bool,
         run_by: Uuid,
+        succeeded: bool,
         chip: PoolMultiplexChromiumChip,
         gems: Vec<NewPoolMultiplexGems>,
         notes: Option<ValidString>,
@@ -117,9 +120,9 @@ impl NewPoolMultiplexChromiumRun {
             inner: NewChromiumRunCommon {
                 readable_id,
                 run_at,
+                run_by,
                 succeeded,
                 notes,
-                run_by,
             },
             chip,
             gems,

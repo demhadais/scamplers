@@ -25,6 +25,7 @@ pub struct NewInstitution {
 #[pymethods]
 impl NewInstitution {
     #[new]
+    #[pyo3(signature = (*, id, name))]
     fn new(id: Uuid, name: ValidString) -> Self {
         Self { id, name }
     }

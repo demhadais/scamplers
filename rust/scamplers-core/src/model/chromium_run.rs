@@ -1,14 +1,17 @@
 pub use common::NewChipLoadingCommon;
-pub use ocm::{NewOcmChipLoading, NewOcmChromiumRun, NewOcmGems};
+pub use ocm::{NewOcmChipLoading, NewOcmChromiumRun, NewOcmGems, OcmChromiumChip};
 pub use pool_multiplex::{
     NewPoolMultiplexChipLoading, NewPoolMultiplexChromiumRun, NewPoolMultiplexGems,
+    PoolMultiplexChromiumChip,
 };
 #[cfg(feature = "python")]
 use pyo3::prelude::*;
 use scamplers_macros::{base_api_model, db_selection};
 #[cfg(feature = "backend")]
 use scamplers_schema::{chromium_run, gems};
-pub use singleplex::{NewSingleplexChipLoading, NewSingleplexChromiumRun, NewSingleplexGems};
+pub use singleplex::{
+    NewSingleplexChipLoading, NewSingleplexChromiumRun, NewSingleplexGems, SingleplexChromiumChip,
+};
 use time::OffsetDateTime;
 use uuid::Uuid;
 #[cfg(target_arch = "wasm32")]

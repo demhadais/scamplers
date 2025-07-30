@@ -31,6 +31,7 @@ pub struct NewLab {
 #[pymethods]
 impl NewLab {
     #[new]
+    #[pyo3(signature = (*, name, pi_id, delivery_dir, member_ids=Vec::new()))]
     fn new(
         name: ValidString,
         pi_id: Uuid,

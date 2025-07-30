@@ -1,7 +1,9 @@
+use axum::http;
 use diesel::SelectableHelper;
 use diesel_async::RunQueryDsl;
-use scamplers_core::model::nucleic_acid::{
-    LibraryHandle, NewLibrary, NewLibraryMeasurement, NewLibraryPreparer,
+use scamplers_core::{
+    model::nucleic_acid::{LibraryHandle, NewLibrary, NewLibraryMeasurement, NewLibraryPreparer},
+    result::{LibraryIndexSetError, ScamplersCoreErrorResponse},
 };
 use scamplers_schema::{library, library_measurement, library_preparers};
 
@@ -64,6 +66,18 @@ impl WriteToDb for NewLibrary {
         mut self,
         db_conn: &mut diesel_async::AsyncPgConnection,
     ) -> ScamplersResult<Self::Returns> {
+        if self.single_index_set_name.is_none() == self.dual_index_set_name.is_none() {
+            return Err(ScamplersCoreErrorResponse::builder()
+                .status(http::StatusCode::UNPROCESSABLE_ENTITY)
+                .error(LibraryIndexSetError {
+                    message: "must provide exactly one of `single_index_set_name` or \
+                              'dual_index_set_name'"
+                        .to_string(),
+                })
+                .build()
+                .into());
+        }
+
         let handle = diesel::insert_into(library::table)
             .values(&self)
             .returning(LibraryHandle::as_select())

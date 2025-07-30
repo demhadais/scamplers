@@ -20,6 +20,62 @@ pub enum TissueType {
     Tissue,
 }
 
+#[to_from_json(python)]
+#[db_insertion]
+#[cfg_attr(feature = "backend", diesel(table_name = specimen))]
+pub struct NewCryopreservedTissue {
+    #[serde(flatten)]
+    #[garde(dive)]
+    #[cfg_attr(feature = "backend", diesel(embed))]
+    pub inner: NewSpecimenCommon,
+    #[serde(skip)]
+    pub type_: TissueType,
+    #[garde(dive)]
+    pub storage_buffer: Option<ValidString>,
+    #[garde(custom(super::common::is_true))]
+    pub cryopreserved: bool,
+}
+
+#[cfg(feature = "python")]
+#[pymethods]
+impl NewCryopreservedTissue {
+    #[new]
+    #[pyo3(signature = (*, readable_id, name, submitted_by, lab_id, received_at, species, storage_buffer=None, measurements=Vec::new(), committee_approvals=Vec::new(), notes=None, returned_at=None, returned_by=None))]
+    fn new(
+        readable_id: ValidString,
+        name: ValidString,
+        submitted_by: Uuid,
+        lab_id: Uuid,
+        received_at: OffsetDateTime,
+        species: Vec<Species>,
+        storage_buffer: Option<ValidString>,
+        measurements: Vec<NewSpecimenMeasurement>,
+        committee_approvals: Vec<NewCommitteeApproval>,
+        notes: Option<ValidString>,
+        returned_at: Option<OffsetDateTime>,
+        returned_by: Option<Uuid>,
+    ) -> Self {
+        Self {
+            inner: NewSpecimenCommon {
+                readable_id,
+                name,
+                submitted_by,
+                lab_id,
+                received_at,
+                species,
+                committee_approvals,
+                notes,
+                returned_at,
+                returned_by,
+                measurements,
+            },
+            type_: TissueType::Tissue,
+            cryopreserved: true,
+            storage_buffer,
+        }
+    }
+}
+
 #[db_enum]
 #[derive(Default)]
 pub enum TissueFixative {
@@ -37,15 +93,16 @@ pub struct NewFixedTissue {
     pub inner: NewSpecimenCommon,
     #[serde(skip)]
     pub type_: TissueType,
+    pub fixative: TissueFixative,
     #[garde(dive)]
     pub storage_buffer: Option<ValidString>,
-    pub fixative: TissueFixative,
 }
 
 #[cfg(feature = "python")]
 #[pymethods]
 impl NewFixedTissue {
     #[new]
+    #[pyo3(signature = (*, readable_id, name, submitted_by, lab_id, received_at, species, fixative, storage_buffer=None, measurements=Vec::new(), committee_approvals=Vec::new(), notes=None, returned_at=None, returned_by=None))]
     fn new(
         readable_id: ValidString,
         name: ValidString,
@@ -53,13 +110,13 @@ impl NewFixedTissue {
         lab_id: Uuid,
         received_at: OffsetDateTime,
         species: Vec<Species>,
+        fixative: TissueFixative,
+        storage_buffer: Option<ValidString>,
         measurements: Vec<NewSpecimenMeasurement>,
         committee_approvals: Vec<NewCommitteeApproval>,
-        fixative: TissueFixative,
         notes: Option<ValidString>,
         returned_at: Option<OffsetDateTime>,
         returned_by: Option<Uuid>,
-        storage_buffer: Option<ValidString>,
     ) -> Self {
         Self {
             inner: NewSpecimenCommon {
@@ -102,6 +159,7 @@ pub struct NewFrozenTissue {
 #[pymethods]
 impl NewFrozenTissue {
     #[new]
+    #[pyo3(signature = (*, readable_id, name, submitted_by, lab_id, received_at, species, storage_buffer=None, measurements=Vec::new(), committee_approvals=Vec::new(), notes=None, returned_at=None, returned_by=None))]
     fn new(
         readable_id: ValidString,
         name: ValidString,
@@ -109,12 +167,12 @@ impl NewFrozenTissue {
         lab_id: Uuid,
         received_at: OffsetDateTime,
         species: Vec<Species>,
+        storage_buffer: Option<ValidString>,
         measurements: Vec<NewSpecimenMeasurement>,
         committee_approvals: Vec<NewCommitteeApproval>,
         notes: Option<ValidString>,
         returned_at: Option<OffsetDateTime>,
         returned_by: Option<Uuid>,
-        storage_buffer: Option<ValidString>,
     ) -> Self {
         Self {
             inner: NewSpecimenCommon {
@@ -132,61 +190,6 @@ impl NewFrozenTissue {
             },
             type_: TissueType::Tissue,
             frozen: true,
-            storage_buffer,
-        }
-    }
-}
-
-#[to_from_json(python)]
-#[db_insertion]
-#[cfg_attr(feature = "backend", diesel(table_name = specimen))]
-pub struct NewCryopreservedTissue {
-    #[serde(flatten)]
-    #[garde(dive)]
-    #[cfg_attr(feature = "backend", diesel(embed))]
-    pub inner: NewSpecimenCommon,
-    #[serde(skip)]
-    pub type_: TissueType,
-    #[garde(dive)]
-    pub storage_buffer: Option<ValidString>,
-    #[garde(custom(super::common::is_true))]
-    pub cryopreserved: bool,
-}
-
-#[cfg(feature = "python")]
-#[pymethods]
-impl NewCryopreservedTissue {
-    #[new]
-    fn new(
-        readable_id: ValidString,
-        name: ValidString,
-        submitted_by: Uuid,
-        lab_id: Uuid,
-        received_at: OffsetDateTime,
-        species: Vec<Species>,
-        measurements: Vec<NewSpecimenMeasurement>,
-        committee_approvals: Vec<NewCommitteeApproval>,
-        notes: Option<ValidString>,
-        returned_at: Option<OffsetDateTime>,
-        returned_by: Option<Uuid>,
-        storage_buffer: Option<ValidString>,
-    ) -> Self {
-        Self {
-            inner: NewSpecimenCommon {
-                readable_id,
-                name,
-                submitted_by,
-                lab_id,
-                received_at,
-                species,
-                committee_approvals,
-                notes,
-                returned_at,
-                returned_by,
-                measurements,
-            },
-            type_: TissueType::Tissue,
-            cryopreserved: true,
             storage_buffer,
         }
     }

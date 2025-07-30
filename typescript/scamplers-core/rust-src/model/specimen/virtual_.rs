@@ -38,13 +38,14 @@ pub struct NewVirtualSpecimen {
     pub inner: NewSpecimenCommon,
     #[serde(skip)]
     pub type_: SuspensionType,
-    pub fixative: SuspensionFixative,
+    pub fixative: Option<SuspensionFixative>,
 }
 
 #[cfg(feature = "python")]
 #[pymethods]
 impl NewVirtualSpecimen {
     #[new]
+    #[pyo3(signature = (*, readable_id, name, submitted_by, lab_id, received_at, species, fixative=None, measurements=Vec::new(), committee_approvals=Vec::new(), notes=None, returned_at=None, returned_by=None))]
     fn new(
         readable_id: ValidString,
         name: ValidString,
@@ -52,12 +53,12 @@ impl NewVirtualSpecimen {
         lab_id: Uuid,
         received_at: OffsetDateTime,
         species: Vec<Species>,
+        fixative: Option<SuspensionFixative>,
         measurements: Vec<NewSpecimenMeasurement>,
         committee_approvals: Vec<NewCommitteeApproval>,
         notes: Option<ValidString>,
         returned_at: Option<OffsetDateTime>,
         returned_by: Option<Uuid>,
-        fixative: SuspensionFixative,
     ) -> Self {
         Self {
             inner: NewSpecimenCommon {

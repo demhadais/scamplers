@@ -56,6 +56,7 @@ pub struct NewFixedBlock {
 #[pymethods]
 impl NewFixedBlock {
     #[new]
+    #[pyo3(signature = (*, readable_id, name, submitted_by, lab_id, received_at, species, embedded_in, fixative, measurements=Vec::new(), committee_approvals=Vec::new(), notes=None, returned_at=None, returned_by=None))]
     fn new(
         readable_id: ValidString,
         name: ValidString,
@@ -63,13 +64,13 @@ impl NewFixedBlock {
         lab_id: Uuid,
         received_at: OffsetDateTime,
         species: Vec<Species>,
+        embedded_in: FixedBlockEmbeddingMatrix,
+        fixative: BlockFixative,
         measurements: Vec<NewSpecimenMeasurement>,
         committee_approvals: Vec<NewCommitteeApproval>,
         notes: Option<ValidString>,
         returned_at: Option<OffsetDateTime>,
         returned_by: Option<Uuid>,
-        embedded_in: FixedBlockEmbeddingMatrix,
-        fixative: BlockFixative,
     ) -> Self {
         Self {
             inner: NewSpecimenCommon {
@@ -120,6 +121,7 @@ pub struct NewFrozenBlock {
 #[pymethods]
 impl NewFrozenBlock {
     #[new]
+    #[pyo3(signature = (*, readable_id, name, submitted_by, lab_id, received_at, species, embedded_in, fixative=None, measurements=Vec::new(), committee_approvals=Vec::new(), notes=None, returned_at=None, returned_by=None))]
     fn new(
         readable_id: ValidString,
         name: ValidString,
@@ -127,13 +129,13 @@ impl NewFrozenBlock {
         lab_id: Uuid,
         received_at: OffsetDateTime,
         species: Vec<Species>,
+        embedded_in: FrozenBlockEmbeddingMatrix,
+        fixative: Option<BlockFixative>,
         measurements: Vec<NewSpecimenMeasurement>,
         committee_approvals: Vec<NewCommitteeApproval>,
         notes: Option<ValidString>,
         returned_at: Option<OffsetDateTime>,
         returned_by: Option<Uuid>,
-        embedded_in: FrozenBlockEmbeddingMatrix,
-        fixative: Option<BlockFixative>,
     ) -> Self {
         Self {
             inner: NewSpecimenCommon {

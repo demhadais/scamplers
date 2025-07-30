@@ -277,7 +277,7 @@ mod tests {
     use scamplers_core::model::{
         institution::{Institution, InstitutionQuery},
         person::{
-            NewMsLogin, PersonOrdinalColumn, PersonQuery, PersonSummary, PersonUpdate,
+            NewMsLogin, NewPerson, PersonOrdinalColumn, PersonQuery, PersonSummary, PersonUpdate,
             PersonUpdateCore, UserRole,
         },
     };
@@ -387,13 +387,13 @@ mod tests {
                     // First, write a new user to the db as a login from the frontend
                     let ms_user_id = Uuid::now_v7();
 
-                    let mut new_ms_login = NewMsLogin::new()
-                        .name("Peter Parker".into())
-                        .email("peter.parker@example.com".into())
+                    let spiderman = NewPerson::builder()
+                        .name("Peter Parker")
+                        .email("peter.parker@example.com")
                         .ms_user_id(ms_user_id)
                         .institution_id(institution_id)
-                        .build()
-                        .unwrap();
+                        .build();
+                    let mut new_ms_login = NewMsLogin(spiderman);
 
                     let created_user = new_ms_login.clone().write_to_db(tx).await.unwrap();
 

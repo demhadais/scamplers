@@ -25,6 +25,7 @@ pub struct NewOcmChipLoading(pub NewSingleplexChipLoading);
 #[pymethods]
 impl NewOcmChipLoading {
     #[new]
+    #[pyo3(signature = (*, suspension_id, suspension_volume_loaded, buffer_volume_loaded, notes=None))]
     fn new(
         suspension_id: Uuid,
         suspension_volume_loaded: MeasurementDataCore,
@@ -61,6 +62,7 @@ pub struct NewOcmGems {
 #[pymethods]
 impl NewOcmGems {
     #[new]
+    #[pyo3(signature = (*, readable_id, chemistry, loading))]
     fn new(
         readable_id: ValidString,
         chemistry: ValidString,
@@ -102,6 +104,7 @@ pub struct NewOcmChromiumRun {
 #[pymethods]
 impl NewOcmChromiumRun {
     #[new]
+    #[pyo3(signature = (*, readable_id, run_at, succeeded, run_by, chip, gems, notes=None))]
     fn new(
         readable_id: ValidString,
         run_at: OffsetDateTime,
@@ -115,9 +118,9 @@ impl NewOcmChromiumRun {
             inner: NewChromiumRunCommon {
                 readable_id,
                 run_at,
+                run_by,
                 succeeded,
                 notes,
-                run_by,
             },
             chip,
             gems,

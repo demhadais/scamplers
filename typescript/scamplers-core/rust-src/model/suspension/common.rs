@@ -1,4 +1,4 @@
-use scamplers_macros::{db_enum, db_json};
+use scamplers_macros::{db_enum, db_json, to_from_json};
 use time::OffsetDateTime;
 
 use crate::model::units::{LengthUnit, VolumeUnit};
@@ -16,10 +16,11 @@ pub enum BiologicalMaterial {
     Nuclei,
 }
 
+#[to_from_json(python)]
 #[db_json]
 #[cfg_attr(
     feature = "python",
-    pyo3(get_all, set_all, name = "SuspensionMeasurementData")
+    pyo3(get_all, set_all, name = "SuspensionMeasurementDataCommon")
 )]
 pub enum MeasurementDataCore {
     Concentration {

@@ -60,7 +60,7 @@ pub struct NewSuspensionMeasurement {
 #[pymethods]
 impl NewSuspensionMeasurement {
     #[new]
-    #[pyo3(signature = (measured_by, data, is_post_hybridization, suspension_id=Uuid::default()))]
+    #[pyo3(signature = (*, measured_by, data, is_post_hybridization, suspension_id=Uuid::default()))]
     fn new(
         measured_by: Uuid,
         data: MeasurementDataCore,
@@ -85,56 +85,57 @@ pub struct NewSuspension {
     pub readable_id: ValidString,
     pub parent_specimen_id: Uuid,
     pub biological_material: BiologicalMaterial,
-    pub created_at: Option<OffsetDateTime>,
-    pub pooled_into_id: Option<Uuid>,
-    pub multiplexing_tag_id: Option<Uuid>,
-    #[garde(range(min = 0.0))]
-    pub lysis_duration_minutes: Option<f32>,
     #[garde(range(min = 0.0))]
     pub target_cell_recovery: f32,
     #[garde(range(min = 0))]
     pub target_reads_per_cell: i32,
-    #[garde(dive)]
-    pub notes: Option<ValidString>,
     #[cfg_attr(feature = "backend", diesel(skip_insertion))]
     pub preparer_ids: Vec<Uuid>,
     #[garde(dive)]
     #[serde(default)]
     #[cfg_attr(feature = "backend", diesel(skip_insertion))]
     pub measurements: Vec<NewSuspensionMeasurement>,
+    pub created_at: Option<OffsetDateTime>,
+    pub pooled_into_id: Option<Uuid>,
+    pub multiplexing_tag_id: Option<Uuid>,
+    #[garde(range(min = 0.0))]
+    pub lysis_duration_minutes: Option<f32>,
+    #[garde(dive)]
+    pub notes: Option<ValidString>,
 }
 
 #[cfg(feature = "python")]
 #[pymethods]
 impl NewSuspension {
     #[new]
+    #[pyo3(signature = (*, readable_id, parent_specimen_id, biological_material, target_cell_recovery, target_reads_per_cell, preparer_ids, measurements=Vec::new(), created_at=None, pooled_into_id=None, multiplexing_tag_id=None,lysis_duration_minutes=None,notes=None))]
     fn new(
         readable_id: ValidString,
         parent_specimen_id: Uuid,
         biological_material: BiologicalMaterial,
+        target_cell_recovery: f32,
+        target_reads_per_cell: i32,
+        preparer_ids: Vec<Uuid>,
+        measurements: Vec<NewSuspensionMeasurement>,
         created_at: Option<OffsetDateTime>,
         pooled_into_id: Option<Uuid>,
         multiplexing_tag_id: Option<Uuid>,
         lysis_duration_minutes: Option<f32>,
-        target_cell_recovery: f32,
-        target_reads_per_cell: i32,
         notes: Option<ValidString>,
-        preparer_ids: Vec<Uuid>,
-        measurements: Vec<NewSuspensionMeasurement>,
     ) -> Self {
         Self {
             readable_id,
             parent_specimen_id,
             biological_material,
+            target_cell_recovery,
+            target_reads_per_cell,
+            preparer_ids,
+            measurements,
             created_at,
             pooled_into_id,
             multiplexing_tag_id,
             lysis_duration_minutes,
-            target_cell_recovery,
-            target_reads_per_cell,
             notes,
-            preparer_ids,
-            measurements,
         }
     }
 }

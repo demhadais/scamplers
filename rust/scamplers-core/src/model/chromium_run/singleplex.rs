@@ -29,6 +29,7 @@ pub struct NewSingleplexChipLoading {
 #[pymethods]
 impl NewSingleplexChipLoading {
     #[new]
+    #[pyo3(signature = (*, suspension_id, suspension_volume_loaded, buffer_volume_loaded, notes=None))]
     fn new(
         suspension_id: Uuid,
         suspension_volume_loaded: MeasurementDataCore,
@@ -62,6 +63,7 @@ pub struct NewSingleplexGems {
 #[pymethods]
 impl NewSingleplexGems {
     #[new]
+    #[pyo3(signature = (*, readable_id, chemistry, loading))]
     fn new(
         readable_id: ValidString,
         chemistry: ValidString,
@@ -115,11 +117,12 @@ pub struct NewSingleplexChromiumRun {
 #[pymethods]
 impl NewSingleplexChromiumRun {
     #[new]
+    #[pyo3(signature = (*, readable_id, run_at, run_by, succeeded, chip, gems, notes=None))]
     fn new(
         readable_id: ValidString,
         run_at: OffsetDateTime,
-        succeeded: bool,
         run_by: Uuid,
+        succeeded: bool,
         chip: SingleplexChromiumChip,
         gems: Vec<NewSingleplexGems>,
         notes: Option<ValidString>,
@@ -128,9 +131,9 @@ impl NewSingleplexChromiumRun {
             inner: NewChromiumRunCommon {
                 readable_id,
                 run_at,
+                run_by,
                 succeeded,
                 notes,
-                run_by,
             },
             chip,
             gems,

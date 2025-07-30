@@ -16,18 +16,19 @@ fn scamplers_core(m: &Bound<'_, PyModule>) -> PyResult<()> {
         chromium_run::{
             NewOcmChipLoading, NewOcmChromiumRun, NewOcmGems, NewPoolMultiplexChipLoading,
             NewPoolMultiplexChromiumRun, NewPoolMultiplexGems, NewSingleplexChipLoading,
-            NewSingleplexChromiumRun, NewSingleplexGems,
+            NewSingleplexChromiumRun, NewSingleplexGems, OcmChromiumChip,
+            PoolMultiplexChromiumChip, SingleplexChromiumChip,
         },
         institution::{Institution, NewInstitution},
         lab::NewLab,
-        library_type_specification::LibraryType,
-        nucleic_acid::{NewCdna, NewCdnaMeasurement},
+        library_type_specification::{LibraryType, NewLibraryTypeSpecification},
+        nucleic_acid::{self, NewCdna, NewCdnaMeasurement, NewLibrary, NewLibraryMeasurement},
         person::{NewPerson, UserRole},
         specimen::{
-            self, BlockFixative, FixedBlockEmbeddingMatrix, NewCommitteeApproval,
-            NewCryopreservedTissue, NewFixedBlock, NewFixedTissue, NewFrozenBlock, NewFrozenTissue,
-            NewSpecimenMeasurement, NewVirtualSpecimen, Species, SuspensionFixative,
-            TissueFixative,
+            self, BlockFixative, ComplianceCommitteeType, FixedBlockEmbeddingMatrix,
+            FrozenBlockEmbeddingMatrix, NewCommitteeApproval, NewCryopreservedTissue,
+            NewFixedBlock, NewFixedTissue, NewFrozenBlock, NewFrozenTissue, NewSpecimenMeasurement,
+            NewVirtualSpecimen, Species, SuspensionFixative, TissueFixative,
         },
         suspension::{
             self, BiologicalMaterial, CellCountingMethod, NewSuspension, NewSuspensionMeasurement,
@@ -82,28 +83,25 @@ fn scamplers_core(m: &Bound<'_, PyModule>) -> PyResult<()> {
     requests.add_class::<FixedBlockEmbeddingMatrix>()?;
     requests.add_class::<NewFrozenBlock>()?;
     requests.add_class::<BlockFixative>()?;
-
+    requests.add_class::<FrozenBlockEmbeddingMatrix>()?;
     requests.add_class::<NewCryopreservedTissue>()?;
     requests.add_class::<NewFixedTissue>()?;
     requests.add_class::<NewFrozenTissue>()?;
     requests.add_class::<TissueFixative>()?;
-
     requests.add_class::<NewVirtualSpecimen>()?;
     requests.add_class::<SuspensionFixative>()?;
-
     requests.add_class::<MassUnit>()?;
     requests.add_class::<VolumeUnit>()?;
     requests.add_class::<LengthUnit>()?;
-
     requests.add_class::<Species>()?;
     requests.add_class::<specimen::MeasurementData>()?;
     requests.add_class::<NewSpecimenMeasurement>()?;
     requests.add_class::<NewCommitteeApproval>()?;
+    requests.add_class::<ComplianceCommitteeType>()?;
 
     requests.add_class::<suspension::MeasurementDataCore>()?;
     requests.add_class::<BiologicalMaterial>()?;
     requests.add_class::<CellCountingMethod>()?;
-
     requests.add_class::<NewSuspension>()?;
     requests.add_class::<NewSuspensionMeasurement>()?;
     requests.add_class::<NewSuspensionPool>()?;
@@ -111,18 +109,26 @@ fn scamplers_core(m: &Bound<'_, PyModule>) -> PyResult<()> {
     requests.add_class::<NewSingleplexChromiumRun>()?;
     requests.add_class::<NewSingleplexGems>()?;
     requests.add_class::<NewSingleplexChipLoading>()?;
-
+    requests.add_class::<SingleplexChromiumChip>()?;
     requests.add_class::<NewOcmChromiumRun>()?;
     requests.add_class::<NewOcmGems>()?;
     requests.add_class::<NewOcmChipLoading>()?;
-
+    requests.add_class::<OcmChromiumChip>()?;
     requests.add_class::<NewPoolMultiplexChromiumRun>()?;
     requests.add_class::<NewPoolMultiplexGems>()?;
     requests.add_class::<NewPoolMultiplexChipLoading>()?;
+    requests.add_class::<PoolMultiplexChromiumChip>()?;
 
+    requests.add_class::<NewLibraryTypeSpecification>()?;
+
+    requests.add_class::<nucleic_acid::common::ElectrophoreticMeasurementData>()?;
+    requests.add_class::<nucleic_acid::common::Concentration>()?;
     requests.add_class::<LibraryType>()?;
     requests.add_class::<NewCdnaMeasurement>()?;
     requests.add_class::<NewCdna>()?;
+    requests.add_class::<nucleic_acid::library::MeasurementData>()?;
+    requests.add_class::<NewLibraryMeasurement>()?;
+    requests.add_class::<NewLibrary>()?;
 
     m.add_submodule(&requests)?;
 
