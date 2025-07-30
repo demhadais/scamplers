@@ -147,6 +147,7 @@ pub struct NewSpecimenCommon {
     pub measurements: Vec<NewSpecimenMeasurement>,
 }
 
+#[allow(clippy::trivially_copy_pass_by_ref)]
 pub(super) fn is_true(value: &bool, _: &()) -> garde::Result {
     if *value {
         Ok(())

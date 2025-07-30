@@ -33,7 +33,9 @@ jobs:
 
       - name: Lint
         working-directory: rust
-        run: cargo clippy --workspace --exclude scamplers-schema
+        run: |
+          cargo clippy --workspace --exclude scamplers-schema --all-features
+          cargo clippy --package scamplers-core --target wasm32-unknown-unknown
 
       - name: Test
         working-directory: rust

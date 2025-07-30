@@ -24,6 +24,7 @@ impl Concentration {
     }
 }
 
+#[allow(clippy::trivially_copy_pass_by_ref)]
 fn electrophoretic_sizing_range((min, max): &(u16, u16), _: &()) -> garde::Result {
     if min >= max {
         return Err(garde::Error::new("min must be less than max"));

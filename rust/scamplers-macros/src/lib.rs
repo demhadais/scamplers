@@ -222,8 +222,8 @@ pub fn db_selection(attr: TokenStream, input: TokenStream) -> TokenStream {
 }
 
 fn add_attribute_to_method(
-    method: ImplItemFn,
-    attribute: proc_macro2::TokenStream,
+    method: &ImplItemFn,
+    attribute: &proc_macro2::TokenStream,
 ) -> proc_macro2::TokenStream {
     quote! {
         #attribute
@@ -244,11 +244,11 @@ pub fn getters_impl(_attr: TokenStream, input: TokenStream) -> TokenStream {
 
     for (i, og_method) in og_methods.enumerate() {
         let wasmified_method = add_attribute_to_method(
-            og_method.clone(),
-            quote! { #[cfg_attr(target_arch = "wasm32", wasm_bindgen(getter))] },
+            og_method,
+            &quote! { #[cfg_attr(target_arch = "wasm32", wasm_bindgen(getter))] },
         );
 
-        let pythonized_method = add_attribute_to_method(og_method.clone(), quote! { #[getter] });
+        let pythonized_method = add_attribute_to_method(og_method, &quote! { #[getter] });
         py_impl_block.items[i] = parse2(pythonized_method).unwrap();
 
         *og_method = parse2(wasmified_method).unwrap();

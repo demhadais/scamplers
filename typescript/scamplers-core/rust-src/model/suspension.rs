@@ -9,4 +9,5 @@ pub use suspension::{
 
 mod common;
 mod pool;
+#[allow(clippy::module_inception)]
 mod suspension;

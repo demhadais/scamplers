@@ -41,6 +41,11 @@ impl MultiRowCsvMetricsFileGroup {
         self.0.len()
     }
 
+    #[must_use]
+    pub fn is_empty(&self) -> bool {
+        self.0.is_empty()
+    }
+
     pub fn as_mut_slice(&mut self) -> &mut [MultiRowCsvMetricsFile] {
         self.0.as_mut_slice()
     }
@@ -124,6 +129,7 @@ pub enum NewChromiumDataset {
     CellrangerVdj(CellrangerarcvdjCountDataset),
 }
 
+#[allow(clippy::trivially_copy_pass_by_ref)]
 fn validate_html(document: &str, _: &()) -> garde::Result {
     let result = scraper::Html::parse_document(document);
     if !result.errors.is_empty() {
