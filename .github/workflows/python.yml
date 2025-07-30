@@ -19,3 +19,7 @@ jobs:
       - name: Run tests
         working-directory: python/test_scamplers-core
         run: uv run --module pytest
+
+      - name: Analyze types
+        working-directory: python/test_scamplers-core
+        run: uv run --module pyright
