@@ -35,6 +35,12 @@ impl Display for ValidString {
     }
 }
 
+impl AsRef<str> for ValidString {
+    fn as_ref(&self) -> &str {
+        &self.0
+    }
+}
+
 impl ValidString {
     #[must_use]
     pub fn as_bytes(&self) -> &[u8] {

@@ -605,7 +605,7 @@ export class ResourceNotFoundError {
 }
 export class ScamplersClient {
   free(): void;
-  constructor(backend_base_url: string, frontend_token?: string | null, api_key?: string | null);
+  constructor(api_base_url: string, frontend_token?: string | null, api_key?: string | null);
   /**
    * # Errors
    */

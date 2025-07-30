@@ -1,28 +1,27 @@
+#[cfg(feature = "python")]
+use std::sync::Arc;
+
+#[cfg(feature = "python")]
+use pyo3::prelude::*;
 use reqwest::Method;
 use serde::{Serialize, de::DeserializeOwned};
+#[cfg(feature = "python")]
+use tokio::runtime::Runtime;
 #[cfg(target_arch = "wasm32")]
 use {
     crate::model::person::{CreatedUser, NewMsLogin},
     wasm_bindgen::prelude::*,
 };
-#[cfg(feature = "python")]
-use {
-    crate::model::{
-        institution::{Institution, NewInstitution},
-        lab::{Lab, NewLab},
-        person::{NewPerson, Person},
-        specimen::{NewSpecimen, Specimen},
-        suspension::NewSuspension,
-    },
-    pyo3::prelude::*,
-    std::sync::Arc,
-    tokio::runtime::Runtime,
-};
 
 #[cfg(feature = "python")]
 use crate::model::{
     chromium_run::{ChromiumRun, NewChromiumRun},
-    suspension::Suspension,
+    institution::{Institution, NewInstitution},
+    lab::{Lab, NewLab},
+    nucleic_acid::{CdnaHandle, NewCdnaGroup},
+    person::{NewPerson, Person},
+    specimen::{NewSpecimen, Specimen},
+    suspension::{NewSuspension, Suspension},
 };
 use crate::{
     api_path::ToApiPath,
@@ -47,7 +46,7 @@ impl ScamplersClient {
     #[new]
     #[pyo3(signature = (*, api_base_url, api_key=None))]
     fn py_new(api_base_url: String, api_key: Option<String>) -> Self {
-        Self::new(api_base_url, Some(String::new()), api_key)
+        Self::new(api_base_url, None, api_key)
     }
 }
 
@@ -56,7 +55,7 @@ impl ScamplersClient {
     #[cfg_attr(target_arch = "wasm32", wasm_bindgen(constructor))]
     #[must_use]
     pub fn new(
-        backend_base_url: String,
+        api_base_url: String,
         frontend_token: Option<String>,
         api_key: Option<String>,
     ) -> Self {
@@ -79,14 +78,14 @@ impl ScamplersClient {
 
         #[cfg(not(feature = "python"))]
         return Self {
-            backend_base_url,
+            backend_base_url: api_base_url,
             client,
             api_key,
         };
 
         #[cfg(feature = "python")]
         return Self {
-            backend_base_url,
+            backend_base_url: api_base_url,
             client,
             api_key,
             runtime: Arc::new(Runtime::new().unwrap()),
@@ -209,48 +208,30 @@ impl ScamplersClient {
     }
 }
 
-#[cfg(feature = "python")]
-#[pymethods]
-impl ScamplersClient {
-    async fn create_institution(
-        &self,
-        data: NewInstitution,
-    ) -> Result<Institution, ScamplersCoreErrorResponse> {
-        let client = self.clone();
-        client.send_request_python(data, Method::POST).await
-    }
-
-    async fn create_person(&self, data: NewPerson) -> Result<Person, ScamplersCoreErrorResponse> {
-        let client = self.clone();
-        client.send_request_python(data, Method::POST).await
-    }
-
-    async fn create_lab(&self, data: NewLab) -> Result<Lab, ScamplersCoreErrorResponse> {
-        let client = self.clone();
-        client.send_request_python(data, Method::POST).await
-    }
-
-    async fn create_specimen(
-        &self,
-        data: NewSpecimen,
-    ) -> Result<Specimen, ScamplersCoreErrorResponse> {
-        let client = self.clone();
-        client.send_request_python(data, Method::POST).await
-    }
-
-    async fn create_suspension(
-        &self,
-        data: NewSuspension,
-    ) -> Result<Suspension, ScamplersCoreErrorResponse> {
-        let client = self.clone();
-        client.send_request_python(data, Method::POST).await
-    }
-
-    async fn create_chromium_run(
-        &self,
-        data: NewChromiumRun,
-    ) -> Result<ChromiumRun, ScamplersCoreErrorResponse> {
-        let client = self.clone();
-        client.send_request_python(data, Method::POST).await
-    }
+macro_rules! impl_client_methods {
+    ($(($method_name:ident, $request_type:path, $response_type:path, $http_method:expr));*) => {
+        $(#[pymethods]
+        impl ScamplersClient {
+            async fn $method_name(
+                &self,
+                data: $request_type,
+            ) -> Result<$response_type, ScamplersCoreErrorResponse> {
+                let client = self.clone();
+                client.send_request_python(data, $http_method).await
+            }
+        })*
+    };
 }
+
+#[cfg(feature = "python")]
+impl_client_methods!((
+    create_institution,
+    NewInstitution,
+    Institution,
+    Method::POST
+); (create_person, NewPerson, Person, Method::POST);
+    (create_lab, NewLab, Lab, Method::POST);
+    (create_specimen, NewSpecimen, Specimen, Method::POST);
+    (create_suspension, NewSuspension, Suspension, Method::POST);
+    (create_chromium_run, NewChromiumRun, ChromiumRun, Method::POST);
+    (create_cdna, NewCdnaGroup, Vec<CdnaHandle>, Method::POST));

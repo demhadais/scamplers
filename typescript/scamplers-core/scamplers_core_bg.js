@@ -3321,12 +3321,12 @@ export class ScamplersClient {
         wasm.__wbg_scamplersclient_free(ptr, 0);
     }
     /**
-     * @param {string} backend_base_url
+     * @param {string} api_base_url
      * @param {string | null} [frontend_token]
      * @param {string | null} [api_key]
      */
-    constructor(backend_base_url, frontend_token, api_key) {
-        const ptr0 = passStringToWasm0(backend_base_url, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+    constructor(api_base_url, frontend_token, api_key) {
+        const ptr0 = passStringToWasm0(api_base_url, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
         const len0 = WASM_VECTOR_LEN;
         var ptr1 = isLikeNone(frontend_token) ? 0 : passStringToWasm0(frontend_token, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
         var len1 = WASM_VECTOR_LEN;

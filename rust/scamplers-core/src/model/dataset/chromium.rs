@@ -6,6 +6,8 @@ use pyo3::prelude::*;
 use scamplers_macros::{base_api_model, db_insertion, db_json, to_from_json};
 #[cfg(feature = "backend")]
 use scamplers_schema::dataset;
+#[cfg(feature = "python")]
+use time::OffsetDateTime;
 use uuid::Uuid;
 use valid_string::ValidString;
 
@@ -21,6 +23,46 @@ pub struct SingleRowCsvMetricsFile {
     pub contents: HashMap<String, AnyValue>,
 }
 
+macro_rules! impl_metrics_constructor {
+    ($metrics_struct:ident) => {
+        #[pymethods]
+        impl $metrics_struct {
+            #[new]
+            #[pyo3(signature = (*, filename, raw_contents))]
+            fn new(filename: String, raw_contents: ValidString) -> Self {
+                Self {
+                    filename,
+                    raw_contents,
+                    contents: Default::default(),
+                }
+            }
+
+            #[getter]
+            fn filename(&self) -> &str {
+                &self.filename
+            }
+
+            #[getter]
+            fn raw_contents(&self) -> &str {
+                self.raw_contents.as_ref()
+            }
+
+            #[setter]
+            fn set_filename(&mut self, filename: String) {
+                self.filename = filename;
+            }
+
+            #[setter]
+            fn set_raw_contents(&mut self, raw_contents: ValidString) {
+                self.raw_contents = raw_contents
+            }
+        }
+    };
+}
+
+#[cfg(feature = "python")]
+impl_metrics_constructor!(SingleRowCsvMetricsFile);
+
 #[db_json]
 pub struct MultiRowCsvMetricsFile {
     #[garde(pattern(r#"^[0-9A-Za-z_-]+/[[:alnum:]]+summary\.csv$"#))]
@@ -31,10 +73,15 @@ pub struct MultiRowCsvMetricsFile {
     pub contents: Vec<HashMap<String, AnyValue>>,
 }
 
+#[cfg(feature = "python")]
+impl_metrics_constructor!(MultiRowCsvMetricsFile);
+
 #[db_json]
 #[serde(transparent)]
 #[garde(transparent)]
+#[cfg_attr(feature = "python", pyo3(sequence))]
 pub struct MultiRowCsvMetricsFileGroup(#[garde(dive, length(min = 1))] Vec<MultiRowCsvMetricsFile>);
+
 impl MultiRowCsvMetricsFileGroup {
     #[must_use]
     pub fn len(&self) -> usize {
@@ -61,8 +108,12 @@ pub struct JsonMetricsFile {
     pub contents: AnyValue,
 }
 
+#[cfg(feature = "python")]
+impl_metrics_constructor!(JsonMetricsFile);
+
 #[db_insertion]
 #[cfg_attr(feature = "backend", diesel(table_name = dataset))]
+#[cfg_attr(feature = "python", pyo3(name = "_NewChromiumDatasetCore"))]
 pub struct NewChromiumDatasetCore {
     #[serde(flatten)]
     #[garde(dive)]
@@ -71,6 +122,39 @@ pub struct NewChromiumDatasetCore {
     pub gems_id: Uuid,
     #[garde(custom(validate_html))]
     pub web_summary: String,
+}
+
+macro_rules! impl_dataset_constructor {
+    ($dataset_struct:ident, $metrics_struct:ident) => {
+        #[pymethods]
+        impl $dataset_struct {
+            #[new]
+            #[pyo3(signature = (*, name, lab_id, data_path, delivered_at, gems_id, web_summary, metrics))]
+            fn new(
+                name: ValidString,
+                lab_id: Uuid,
+                data_path: ValidString,
+                delivered_at: OffsetDateTime,
+                gems_id: Uuid,
+                web_summary: String,
+                metrics: $metrics_struct,
+            ) -> Self {
+                Self {
+                    core: NewChromiumDatasetCore {
+                        inner: NewDatasetCommon {
+                            name,
+                            lab_id,
+                            data_path,
+                            delivered_at,
+                        },
+                        gems_id,
+                        web_summary,
+                    },
+                    metrics,
+                }
+            }
+        }
+    };
 }
 
 #[cfg_attr(feature = "python", pyclass)]
@@ -83,6 +167,9 @@ pub struct CellrangerarcvdjCountDataset {
     pub metrics: SingleRowCsvMetricsFile,
 }
 
+#[cfg(feature = "python")]
+impl_dataset_constructor!(CellrangerarcvdjCountDataset, SingleRowCsvMetricsFile);
+
 #[cfg_attr(feature = "python", pyclass)]
 #[to_from_json(python)]
 #[base_api_model]
@@ -93,6 +180,10 @@ pub struct CellrangerMultiDataset {
     #[garde(dive)]
     pub metrics: MultiRowCsvMetricsFileGroup,
 }
+
+#[cfg(feature = "python")]
+impl_dataset_constructor!(CellrangerMultiDataset, MultiRowCsvMetricsFileGroup);
+
 #[cfg_attr(feature = "python", pyclass)]
 #[to_from_json(python)]
 #[base_api_model]
@@ -103,6 +194,9 @@ pub struct CellrangeratacCountDataset {
     #[garde(dive)]
     pub metrics: JsonMetricsFile,
 }
+
+#[cfg(feature = "python")]
+impl_dataset_constructor!(CellrangeratacCountDataset, JsonMetricsFile);
 
 #[base_api_model]
 #[derive(strum::IntoStaticStr)]

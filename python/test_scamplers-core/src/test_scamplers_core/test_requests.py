@@ -1,10 +1,14 @@
 from datetime import UTC, datetime
 import maturin_import_hook
+import pytest
 
 maturin_import_hook.install()
 from scamplers_core.requests import (
     ComplianceCommitteeType,
+    CellCountingMethod,
+    LengthUnit,
     ElectrophoreticMeasurementData,
+    NewSuspensionMeasurement,
     FrozenBlockEmbeddingMatrix,
     LibraryMeasurementData,
     MassUnit,
@@ -53,17 +57,6 @@ from uuid import UUID
 
 ID = UUID(int=0)
 TIME = datetime(year=1999, month=1, day=1, tzinfo=UTC)
-SUSPENSION_VOLUME = SuspensionMeasurementDataCommon.Volume(
-    measured_at=TIME, value=0, unit=VolumeUnit.Millliter
-)
-ELECTROPHORETIC_MEASUREMENT_DATA = ElectrophoreticMeasurementData(
-    measured_at=TIME,
-    instrument_name="",
-    mean_library_size_bp=0,
-    sizing_range=(0, 0),
-    concentration_value=0,
-    concentration_unit=(MassUnit.Nanogram, VolumeUnit.Microliter),
-)
 
 
 def test_new_institution():
@@ -78,7 +71,30 @@ def test_new_lab():
     NewLab(name="", pi_id=ID, delivery_dir="")
 
 
-def test_new_fixed_block():
+@pytest.fixture
+def specimen_dv200() -> SpecimenMeasurementData:
+    return SpecimenMeasurementData.Dv200(measured_at=TIME, instrument_name="", value=0)
+
+
+@pytest.fixture
+def specimen_rin() -> SpecimenMeasurementData:
+    return SpecimenMeasurementData.Rin(measured_at=TIME, instrument_name="", value=0)
+
+
+@pytest.fixture
+def new_committee_approval() -> NewCommitteeApproval:
+    return NewCommitteeApproval(
+        institution_id=ID,
+        compliance_identifier="",
+        committee_type=ComplianceCommitteeType.Ibc,
+    )
+
+
+def test_new_fixed_block(
+    specimen_dv200: SpecimenMeasurementData,
+    specimen_rin: SpecimenMeasurementData,
+    new_committee_approval: NewCommitteeApproval,
+):
     NewFixedBlock(
         readable_id="",
         name="",
@@ -87,20 +103,10 @@ def test_new_fixed_block():
         received_at=TIME,
         species=[Species.HomoSapiens],
         measurements=[
-            NewSpecimenMeasurement(
-                measured_by=ID,
-                data=SpecimenMeasurementData.Rin(
-                    measured_at=TIME, instrument_name="", value=0
-                ),
-            )
+            NewSpecimenMeasurement(measured_by=ID, data=m)
+            for m in [specimen_dv200, specimen_rin]
         ],
-        committee_approvals=[
-            NewCommitteeApproval(
-                institution_id=ID,
-                compliance_identifier="",
-                committee_type=ComplianceCommitteeType.Ibc,
-            )
-        ],
+        committee_approvals=[new_committee_approval],
         embedded_in=FixedBlockEmbeddingMatrix.Paraffin,
         fixative=BlockFixative.FormaldehydeDerivative,
     )
@@ -164,7 +170,47 @@ def test_new_virtual_specimen():
     )
 
 
-def test_new_suspension():
+@pytest.fixture
+def suspension_concentration() -> SuspensionMeasurementDataCommon:
+    return SuspensionMeasurementDataCommon.Concentration(
+        measured_at=TIME,
+        value=0,
+        unit=(BiologicalMaterial.Cells, VolumeUnit.Microliter),
+        instrument_name="",
+        counting_method=CellCountingMethod.Aopi,
+    )
+
+
+@pytest.fixture
+def suspension_mean_diameter() -> SuspensionMeasurementDataCommon:
+    return SuspensionMeasurementDataCommon.MeanDiameter(
+        measured_at=TIME,
+        value=0,
+        unit=(BiologicalMaterial.Cells, LengthUnit.Micrometer),
+        instrument_name="",
+    )
+
+
+@pytest.fixture
+def suspension_viability():
+    return SuspensionMeasurementDataCommon.Viability(
+        measured_at=TIME, value=0, instrument_name=""
+    )
+
+
+@pytest.fixture
+def suspension_volume() -> SuspensionMeasurementDataCommon:
+    return SuspensionMeasurementDataCommon.Volume(
+        measured_at=TIME, value=0, unit=VolumeUnit.Microliter
+    )
+
+
+def test_new_suspension(
+    suspension_concentration: SuspensionMeasurementDataCommon,
+    suspension_mean_diameter: SuspensionMeasurementDataCommon,
+    suspension_viability: SuspensionMeasurementDataCommon,
+    suspension_volume: SuspensionMeasurementDataCommon,
+):
     NewSuspension(
         readable_id="",
         parent_specimen_id=ID,
@@ -173,10 +219,21 @@ def test_new_suspension():
         target_cell_recovery=0,
         target_reads_per_cell=0,
         preparer_ids=[ID],
+        measurements=[
+            NewSuspensionMeasurement(measured_by=ID, data=m, is_post_hybridization=True)
+            for m in [
+                suspension_concentration,
+                suspension_mean_diameter,
+                suspension_viability,
+                suspension_volume,
+            ]
+        ],
     )
 
 
-def test_new_singleplex_chromium_run():
+def test_new_singleplex_chromium_run(
+    suspension_volume: SuspensionMeasurementDataCommon,
+):
     NewSingleplexChromiumRun(
         readable_id="",
         run_at=datetime.now(UTC),
@@ -189,15 +246,17 @@ def test_new_singleplex_chromium_run():
                 chemistry="",
                 loading=NewSingleplexChipLoading(
                     suspension_id=ID,
-                    suspension_volume_loaded=SUSPENSION_VOLUME,
-                    buffer_volume_loaded=SUSPENSION_VOLUME,
+                    suspension_volume_loaded=suspension_volume,
+                    buffer_volume_loaded=suspension_volume,
                 ),
             )
         ],
     )
 
 
-def test_new_pool_multiplex_chromium_run():
+def test_new_pool_multiplex_chromium_run(
+    suspension_volume: SuspensionMeasurementDataCommon,
+):
     NewPoolMultiplexChromiumRun(
         readable_id="",
         run_at=datetime.now(UTC),
@@ -210,15 +269,15 @@ def test_new_pool_multiplex_chromium_run():
                 chemistry="",
                 loading=NewPoolMultiplexChipLoading(
                     suspension_pool_id=ID,
-                    suspension_volume_loaded=SUSPENSION_VOLUME,
-                    buffer_volume_loaded=SUSPENSION_VOLUME,
+                    suspension_volume_loaded=suspension_volume,
+                    buffer_volume_loaded=suspension_volume,
                 ),
             )
         ],
     )
 
 
-def test_new_ocm_chromium_run():
+def test_new_ocm_chromium_run(suspension_volume: SuspensionMeasurementDataCommon):
     NewOcmChromiumRun(
         readable_id="",
         run_at=datetime.now(UTC),
@@ -232,8 +291,8 @@ def test_new_ocm_chromium_run():
                 loading=[
                     NewOcmChipLoading(
                         suspension_id=ID,
-                        suspension_volume_loaded=SUSPENSION_VOLUME,
-                        buffer_volume_loaded=SUSPENSION_VOLUME,
+                        suspension_volume_loaded=suspension_volume,
+                        buffer_volume_loaded=suspension_volume,
                     )
                 ],
             )
@@ -241,7 +300,19 @@ def test_new_ocm_chromium_run():
     )
 
 
-def test_new_cdna():
+@pytest.fixture
+def electrophoretic_measurement_data() -> ElectrophoreticMeasurementData:
+    return ElectrophoreticMeasurementData(
+        measured_at=TIME,
+        instrument_name="",
+        mean_library_size_bp=0,
+        sizing_range=(0, 0),
+        concentration_value=0,
+        concentration_unit=(MassUnit.Nanogram, VolumeUnit.Microliter),
+    )
+
+
+def test_new_cdna(electrophoretic_measurement_data: ElectrophoreticMeasurementData):
     NewCdna(
         library_type=LibraryType.GeneExpression,
         readable_id="",
@@ -251,7 +322,7 @@ def test_new_cdna():
         measurements=[
             NewCdnaMeasurement(
                 measured_by=ID,
-                data=ELECTROPHORETIC_MEASUREMENT_DATA,
+                data=electrophoretic_measurement_data,
                 cdna_id=ID,
             )
         ],
@@ -259,22 +330,28 @@ def test_new_cdna():
     )
 
 
-def test_new_library():
-    m1 = NewLibraryMeasurement(
-        measured_by=ID,
-        data=LibraryMeasurementData.Fluorometric(
-            measured_at=TIME,
-            instrument_name="",
-            concentration=NucleicAcidConcentration(
-                value=0, unit=(MassUnit.Picogram, VolumeUnit.Microliter)
-            ),
+@pytest.fixture
+def library_electrophoretic_measurement(
+    electrophoretic_measurement_data: ElectrophoreticMeasurementData,
+) -> LibraryMeasurementData:
+    return LibraryMeasurementData.Electrophoretic(electrophoretic_measurement_data)
+
+
+@pytest.fixture
+def library_fluormetric_measurement() -> LibraryMeasurementData:
+    return LibraryMeasurementData.Fluorometric(
+        measured_at=TIME,
+        instrument_name="",
+        concentration=NucleicAcidConcentration(
+            value=0, unit=(MassUnit.Picogram, VolumeUnit.Microliter)
         ),
     )
-    m2 = NewLibraryMeasurement(
-        measured_by=ID,
-        data=LibraryMeasurementData.Electrophoretic(ELECTROPHORETIC_MEASUREMENT_DATA),
-    )
 
+
+def test_new_library(
+    library_electrophoretic_measurement: LibraryMeasurementData,
+    library_fluormetric_measurement: LibraryMeasurementData,
+):
     NewLibrary(
         readable_id="",
         cdna_id=ID,
@@ -282,5 +359,11 @@ def test_new_library():
         target_reads_per_cell=0,
         prepared_at=TIME,
         preparer_ids=[ID],
-        measurements=[m1, m2],
+        measurements=[
+            NewLibraryMeasurement(measured_by=ID, data=m)
+            for m in [
+                library_electrophoretic_measurement,
+                library_fluormetric_measurement,
+            ]
+        ],
     )

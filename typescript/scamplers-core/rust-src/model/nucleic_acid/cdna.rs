@@ -92,6 +92,7 @@ impl NewCdna {
 
 #[base_api_model]
 #[serde(tag = "group_type")]
+#[cfg_attr(feature = "python", pyclass(str, get_all, set_all))]
 pub enum NewCdnaGroup {
     Single(#[garde(dive)] NewCdna),
     Multiple(#[garde(dive)] Vec<NewCdna>),
