@@ -45,6 +45,7 @@ pub struct ScamplersClient {
 #[pymethods]
 impl ScamplersClient {
     #[new]
+    #[pyo3(signature = (*, api_base_url, api_key=None))]
     fn py_new(api_base_url: String, api_key: Option<String>) -> Self {
         Self::new(api_base_url, Some(String::new()), api_key)
     }
