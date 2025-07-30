@@ -16,9 +16,15 @@ use {
 #[cfg(feature = "python")]
 use crate::model::{
     chromium_run::{ChromiumRun, NewChromiumRun},
+    dataset::{
+        DatasetSummary, NewChromiumDataset, NewDataset,
+        chromium::{
+            CellrangerMultiDataset, CellrangerarcvdjCountDataset, CellrangeratacCountDataset,
+        },
+    },
     institution::{Institution, NewInstitution},
     lab::{Lab, NewLab},
-    nucleic_acid::{CdnaHandle, NewCdnaGroup},
+    nucleic_acid::{CdnaHandle, LibraryHandle, NewCdnaGroup, NewLibrary},
     person::{NewPerson, Person},
     specimen::{NewSpecimen, Specimen},
     suspension::{NewSuspension, Suspension},
@@ -208,6 +214,7 @@ impl ScamplersClient {
     }
 }
 
+#[cfg(feature = "python")]
 macro_rules! impl_client_methods {
     ($(($method_name:ident, $request_type:path, $response_type:path, $http_method:expr));*) => {
         $(#[pymethods]
@@ -224,14 +231,38 @@ macro_rules! impl_client_methods {
 }
 
 #[cfg(feature = "python")]
-impl_client_methods!((
-    create_institution,
-    NewInstitution,
-    Institution,
-    Method::POST
-); (create_person, NewPerson, Person, Method::POST);
+impl_client_methods!(
+    (create_institution, NewInstitution, Institution, Method::POST);
+    (create_person, NewPerson, Person, Method::POST);
     (create_lab, NewLab, Lab, Method::POST);
     (create_specimen, NewSpecimen, Specimen, Method::POST);
     (create_suspension, NewSuspension, Suspension, Method::POST);
     (create_chromium_run, NewChromiumRun, ChromiumRun, Method::POST);
-    (create_cdna, NewCdnaGroup, Vec<CdnaHandle>, Method::POST));
+    (create_cdna, NewCdnaGroup, Vec<CdnaHandle>, Method::POST);
+    (create_library, NewLibrary, LibraryHandle, Method::POST)
+);
+
+#[cfg(feature = "python")]
+macro_rules! impl_client_create_dataset_method {
+    ($(($method_name:ident, $request_type:path, $cellranger_variant:expr));*) => {
+        $(#[pymethods]
+        impl ScamplersClient {
+            async fn $method_name(
+                &self,
+                data: $request_type,
+            ) -> Result<DatasetSummary, ScamplersCoreErrorResponse> {
+                let client = self.clone();
+                client.send_request_python(NewDataset::Chromium($cellranger_variant(data)), Method::POST).await
+            }
+        })*
+    };
+}
+
+#[cfg(feature = "python")]
+impl_client_create_dataset_method!(
+    (create_cellrangerarc_count_dataset,CellrangerarcvdjCountDataset, NewChromiumDataset::CellrangerarcCount);
+    (create_cellrangeratac_count_dataset, CellrangeratacCountDataset, NewChromiumDataset::CellrangeratacCount);
+    (create_cellranger_count_dataset, CellrangerarcvdjCountDataset, NewChromiumDataset::CellrangerCount);
+    (create_cellranger_multi_dataset, CellrangerMultiDataset, NewChromiumDataset::CellrangerMulti);
+    (create_cellranger_vdj_dataset, CellrangerarcvdjCountDataset, NewChromiumDataset::CellrangerVdj)
+);

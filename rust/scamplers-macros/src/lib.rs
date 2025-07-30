@@ -334,7 +334,7 @@ pub fn db_json(attr: TokenStream, input: TokenStream) -> TokenStream {
     let ident = item.get_ident();
 
     let output = quote! {
-        #[cfg_attr(feature = "python", ::pyo3::pyclass(str))]
+        #[cfg_attr(feature = "python", ::pyo3::pyclass(get_all, str))]
         #[cfg_attr(feature = "backend", derive(::diesel::deserialize::FromSqlRow, ::diesel::expression::AsExpression))]
         #[cfg_attr(feature = "backend", diesel(sql_type = ::diesel::sql_types::Jsonb))]
         #item

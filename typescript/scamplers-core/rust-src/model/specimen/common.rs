@@ -73,9 +73,8 @@ pub struct CommitteeApproval {
 
 #[to_from_json(python)]
 #[db_json]
-#[cfg_attr(feature = "python", pyo3(get_all, set_all))]
 #[serde(tag = "type")]
-#[cfg_attr(feature = "python", pyo3(name = "SpecimenMeasurementData"))]
+#[cfg_attr(feature = "python", pyo3(name = "SpecimenMeasurementData", set_all))]
 pub enum MeasurementData {
     Rin {
         measured_at: OffsetDateTime,

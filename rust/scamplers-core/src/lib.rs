@@ -13,17 +13,30 @@ pub mod result;
 #[pymodule]
 fn scamplers_core(m: &Bound<'_, PyModule>) -> PyResult<()> {
     use client::ScamplersClient;
-    use model::{
+    use result::{
+        CdnaGemsError, CdnaLibraryTypeError, ClientError, DatasetCmdlineError,
+        DatasetMetricsFileParseError, DatasetNMetricsFilesError, DuplicateResourceError,
+        InvalidDataError, InvalidMeasurementError, InvalidReferenceError, MalformedRequestError,
+        PermissionDeniedError, ResourceNotFoundError, ScamplersCoreErrorResponse, ServerError,
+    };
+
+    use crate::model::{
         chromium_run::{
             NewOcmChipLoading, NewOcmChromiumRun, NewOcmGems, NewPoolMultiplexChipLoading,
             NewPoolMultiplexChromiumRun, NewPoolMultiplexGems, NewSingleplexChipLoading,
             NewSingleplexChromiumRun, NewSingleplexGems, OcmChromiumChip,
             PoolMultiplexChromiumChip, SingleplexChromiumChip,
         },
-        institution::{Institution, NewInstitution},
+        dataset::{
+            self,
+            chromium::{JsonMetricsFile, MultiRowCsvMetricsFile, SingleRowCsvMetricsFile},
+        },
+        institution::NewInstitution,
         lab::NewLab,
         library_type_specification::{LibraryType, NewLibraryTypeSpecification},
-        nucleic_acid::{self, NewCdna, NewCdnaMeasurement, NewLibrary, NewLibraryMeasurement},
+        nucleic_acid::{
+            self, NewCdna, NewCdnaGroup, NewCdnaMeasurement, NewLibrary, NewLibraryMeasurement,
+        },
         person::{NewPerson, UserRole},
         specimen::{
             self, BlockFixative, ComplianceCommitteeType, FixedBlockEmbeddingMatrix,
@@ -33,15 +46,9 @@ fn scamplers_core(m: &Bound<'_, PyModule>) -> PyResult<()> {
         },
         suspension::{
             self, BiologicalMaterial, CellCountingMethod, NewSuspension, NewSuspensionMeasurement,
-            NewSuspensionPool,
+            NewSuspensionPool, NewSuspensionPoolMeasurement,
         },
         units::{LengthUnit, MassUnit, VolumeUnit},
-    };
-    use result::{
-        CdnaGemsError, CdnaLibraryTypeError, ClientError, DatasetCmdlineError,
-        DatasetMetricsFileParseError, DatasetNMetricsFilesError, DuplicateResourceError,
-        InvalidDataError, InvalidMeasurementError, InvalidReferenceError, MalformedRequestError,
-        PermissionDeniedError, ResourceNotFoundError, ScamplersCoreErrorResponse, ServerError,
     };
 
     m.add_class::<ScamplersClient>()?;
@@ -106,6 +113,7 @@ fn scamplers_core(m: &Bound<'_, PyModule>) -> PyResult<()> {
     requests.add_class::<NewSuspension>()?;
     requests.add_class::<NewSuspensionMeasurement>()?;
     requests.add_class::<NewSuspensionPool>()?;
+    requests.add_class::<NewSuspensionPoolMeasurement>()?;
 
     requests.add_class::<NewSingleplexChromiumRun>()?;
     requests.add_class::<NewSingleplexGems>()?;
@@ -120,22 +128,31 @@ fn scamplers_core(m: &Bound<'_, PyModule>) -> PyResult<()> {
     requests.add_class::<NewPoolMultiplexChipLoading>()?;
     requests.add_class::<PoolMultiplexChromiumChip>()?;
 
+    requests.add_class::<LibraryType>()?;
     requests.add_class::<NewLibraryTypeSpecification>()?;
 
     requests.add_class::<nucleic_acid::common::ElectrophoreticMeasurementData>()?;
     requests.add_class::<nucleic_acid::common::Concentration>()?;
-    requests.add_class::<LibraryType>()?;
     requests.add_class::<NewCdnaMeasurement>()?;
     requests.add_class::<NewCdna>()?;
+    requests.add_class::<NewCdnaGroup>()?;
     requests.add_class::<nucleic_acid::library::MeasurementData>()?;
     requests.add_class::<NewLibraryMeasurement>()?;
     requests.add_class::<NewLibrary>()?;
+
+    requests.add_class::<SingleRowCsvMetricsFile>()?;
+    requests.add_class::<MultiRowCsvMetricsFile>()?;
+    requests.add_class::<JsonMetricsFile>()?;
+
+    requests.add_class::<dataset::chromium::CellrangerarcvdjCountDataset>()?;
+    requests.add_class::<dataset::chromium::CellrangerMultiDataset>()?;
+    requests.add_class::<dataset::chromium::CellrangeratacCountDataset>()?;
 
     m.add_submodule(&requests)?;
 
     // All the response types, grouped by domain
     let responses = PyModule::new(m.py(), responses_module)?;
-    responses.add_class::<Institution>()?;
+
     m.add_submodule(&responses)?;
 
     let python = m.py();

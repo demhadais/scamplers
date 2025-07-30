@@ -1,5 +1,7 @@
 from dataclasses import dataclass, field
 from datetime import datetime
+from collections.abc import Sequence
+from typing import Any
 from uuid import UUID
 
 @dataclass(kw_only=True)
@@ -385,6 +387,7 @@ class NewSuspensionPoolMeasurement:
     def __new__(
         cls,
         *,
+        measured_by: UUID,
         data: SuspensionMeasurementDataCommon,
         is_post_storage: bool,
         pool_id: UUID = ...,
@@ -667,3 +670,94 @@ class NewLibrary:
     dual_index_set_name: str | None = ...
     measurements: list[NewLibraryMeasurement] = ...
     notes: str | None = ...
+
+    @staticmethod
+    def from_json(json: str) -> NewLibrary: ...
+    def to_json(self) -> str: ...
+
+@dataclass(kw_only=True)
+class _MetricsFile:
+    filename: str
+    raw_contents: str
+
+@dataclass(kw_only=True)
+class SingleRowCsvMetricsFile(_MetricsFile):
+    contents: dict[str, Any] = field(init=False)
+
+@dataclass(kw_only=True)
+class MultiRowCsvMetricsFile(_MetricsFile):
+    contents: list[dict[str, Any]] = field(init=False)
+
+class _MultiRowCsvMetricsFileGroup(Sequence[MultiRowCsvMetricsFile]): ...
+
+@dataclass(kw_only=True)
+class JsonMetricsFile(_MetricsFile):
+    contents: Any = field(init=False)
+
+class _NewDatasetCommon:
+    name: str
+    lab_id: UUID
+    data_path: str
+    delivered_at: datetime
+
+class _NewChromiumDatasetCore:
+    inner: _NewDatasetCommon
+    gems_id: UUID
+    web_summary: str
+
+class CellrangerarcvdjCountDataset:
+    core: _NewChromiumDatasetCore
+    metrics: SingleRowCsvMetricsFile
+
+    def __new__(
+        cls,
+        *,
+        name: str,
+        lab_id: UUID,
+        data_path: str,
+        delivered_at: datetime,
+        gems_id: UUID,
+        web_summary: str,
+        metrics: SingleRowCsvMetricsFile,
+    ) -> CellrangerarcvdjCountDataset: ...
+    @staticmethod
+    def from_json(json: str) -> CellrangerarcvdjCountDataset: ...
+    def to_json(self) -> str: ...
+
+class CellrangerMultiDataset:
+    core: _NewChromiumDatasetCore
+    metrics: list[MultiRowCsvMetricsFile]
+
+    def __new__(
+        cls,
+        *,
+        name: str,
+        lab_id: UUID,
+        data_path: str,
+        delivered_at: datetime,
+        gems_id: UUID,
+        web_summary: str,
+        metrics: list[MultiRowCsvMetricsFile],
+    ) -> CellrangerMultiDataset: ...
+    @staticmethod
+    def from_json(json: str) -> CellrangerMultiDataset: ...
+    def to_json(self) -> str: ...
+
+class CellrangeratacCountDataset:
+    core: _NewChromiumDatasetCore
+    metrics: JsonMetricsFile
+
+    def __new__(
+        cls,
+        *,
+        name: str,
+        lab_id: UUID,
+        data_path: str,
+        delivered_at: datetime,
+        gems_id: UUID,
+        web_summary: str,
+        metrics: JsonMetricsFile,
+    ) -> CellrangeratacCountDataset: ...
+    @staticmethod
+    def from_json(json: str) -> CellrangeratacCountDataset: ...
+    def to_json(self) -> str: ...

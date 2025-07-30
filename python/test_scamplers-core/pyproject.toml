@@ -9,6 +9,7 @@ dependencies = [
     "maturin-import-hook>=0.3.0",
     "pyright>=1.1.403",
     "pytest>=8.4.1",
+    "pytest-asyncio>=1.1.0",
     "scamplers-core",
 ]
 
@@ -24,4 +25,4 @@ venvPath = "."
 venv = ".venv"
 
 [tool.ruff.lint]
-ignore = ["E402"]
+ignore = ["E402", "F403"]

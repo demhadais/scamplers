@@ -12,7 +12,7 @@ use crate::model::suspension::{common::MeasurementDataCore, suspension::NewSuspe
 #[db_json]
 #[cfg_attr(
     feature = "python",
-    pyo3(name = "_SuspensionPoolMeasurementData", get_all, set_all)
+    pyo3(name = "_SuspensionPoolMeasurementData", set_all)
 )]
 pub struct SuspensionPoolMeasurementData {
     #[serde(flatten)]

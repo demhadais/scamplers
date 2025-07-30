@@ -13,17 +13,8 @@ use valid_string::ValidString;
 
 use crate::model::dataset::common::NewDatasetCommon;
 
-#[db_json]
-pub struct SingleRowCsvMetricsFile {
-    #[garde(pattern(r#"^[0-9A-Za-z_-]*summary\.csv$"#))]
-    pub filename: String,
-    #[garde(dive)]
-    pub raw_contents: ValidString,
-    #[serde(skip)]
-    pub contents: HashMap<String, AnyValue>,
-}
-
-macro_rules! impl_metrics_constructor {
+#[cfg(feature = "python")]
+macro_rules! impl_metrics_methods {
     ($metrics_struct:ident) => {
         #[pymethods]
         impl $metrics_struct {
@@ -35,16 +26,6 @@ macro_rules! impl_metrics_constructor {
                     raw_contents,
                     contents: Default::default(),
                 }
-            }
-
-            #[getter]
-            fn filename(&self) -> &str {
-                &self.filename
-            }
-
-            #[getter]
-            fn raw_contents(&self) -> &str {
-                self.raw_contents.as_ref()
             }
 
             #[setter]
@@ -60,8 +41,18 @@ macro_rules! impl_metrics_constructor {
     };
 }
 
+#[db_json]
+pub struct SingleRowCsvMetricsFile {
+    #[garde(pattern(r#"^[0-9A-Za-z_-]*summary\.csv$"#))]
+    pub filename: String,
+    #[garde(dive)]
+    pub raw_contents: ValidString,
+    #[serde(skip)]
+    pub contents: HashMap<String, AnyValue>,
+}
+
 #[cfg(feature = "python")]
-impl_metrics_constructor!(SingleRowCsvMetricsFile);
+impl_metrics_methods!(SingleRowCsvMetricsFile);
 
 #[db_json]
 pub struct MultiRowCsvMetricsFile {
@@ -74,27 +65,39 @@ pub struct MultiRowCsvMetricsFile {
 }
 
 #[cfg(feature = "python")]
-impl_metrics_constructor!(MultiRowCsvMetricsFile);
+impl_metrics_methods!(MultiRowCsvMetricsFile);
 
 #[db_json]
 #[serde(transparent)]
 #[garde(transparent)]
-#[cfg_attr(feature = "python", pyo3(sequence))]
-pub struct MultiRowCsvMetricsFileGroup(#[garde(dive, length(min = 1))] Vec<MultiRowCsvMetricsFile>);
+#[cfg_attr(
+    feature = "python",
+    pyo3(sequence, name = "_MultiRowCsvMetricsFileGroup")
+)]
+pub struct MultiRowCsvMetricsFileGroup {
+    #[garde(dive, length(min = 1))]
+    inner: Vec<MultiRowCsvMetricsFile>,
+}
 
 impl MultiRowCsvMetricsFileGroup {
     #[must_use]
     pub fn len(&self) -> usize {
-        self.0.len()
+        self.inner.len()
     }
 
     #[must_use]
     pub fn is_empty(&self) -> bool {
-        self.0.is_empty()
+        self.inner.is_empty()
     }
 
     pub fn as_mut_slice(&mut self) -> &mut [MultiRowCsvMetricsFile] {
-        self.0.as_mut_slice()
+        self.inner.as_mut_slice()
+    }
+}
+
+impl From<Vec<MultiRowCsvMetricsFile>> for MultiRowCsvMetricsFileGroup {
+    fn from(inner: Vec<MultiRowCsvMetricsFile>) -> Self {
+        Self { inner }
     }
 }
 
@@ -109,7 +112,7 @@ pub struct JsonMetricsFile {
 }
 
 #[cfg(feature = "python")]
-impl_metrics_constructor!(JsonMetricsFile);
+impl_metrics_methods!(JsonMetricsFile);
 
 #[db_insertion]
 #[cfg_attr(feature = "backend", diesel(table_name = dataset))]
@@ -124,8 +127,9 @@ pub struct NewChromiumDatasetCore {
     pub web_summary: String,
 }
 
+#[cfg(feature = "python")]
 macro_rules! impl_dataset_constructor {
-    ($dataset_struct:ident, $metrics_struct:ident) => {
+    ($dataset_struct:path, $metrics_struct:path) => {
         #[pymethods]
         impl $dataset_struct {
             #[new]
@@ -150,7 +154,7 @@ macro_rules! impl_dataset_constructor {
                         gems_id,
                         web_summary,
                     },
-                    metrics,
+                    metrics: metrics.into(),
                 }
             }
         }
@@ -182,7 +186,7 @@ pub struct CellrangerMultiDataset {
 }
 
 #[cfg(feature = "python")]
-impl_dataset_constructor!(CellrangerMultiDataset, MultiRowCsvMetricsFileGroup);
+impl_dataset_constructor!(CellrangerMultiDataset, Vec<MultiRowCsvMetricsFile>);
 
 #[cfg_attr(feature = "python", pyclass)]
 #[to_from_json(python)]
@@ -201,6 +205,7 @@ impl_dataset_constructor!(CellrangeratacCountDataset, JsonMetricsFile);
 #[base_api_model]
 #[derive(strum::IntoStaticStr)]
 #[serde(tag = "cmdline")]
+#[cfg_attr(feature = "python", pyclass(get_all, set_all, str))]
 pub enum NewChromiumDataset {
     #[serde(rename = "cellranger-arc count")]
     #[strum(serialize = "cellranger-arc count")]

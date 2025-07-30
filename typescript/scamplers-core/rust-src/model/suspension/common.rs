@@ -20,7 +20,7 @@ pub enum BiologicalMaterial {
 #[db_json]
 #[cfg_attr(
     feature = "python",
-    pyo3(get_all, set_all, name = "SuspensionMeasurementDataCommon")
+    pyo3(name = "SuspensionMeasurementDataCommon", set_all)
 )]
 pub enum MeasurementDataCore {
     Concentration {

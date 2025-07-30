@@ -1,5 +1,7 @@
 use chromium::{JsonMetricsFile, MultiRowCsvMetricsFileGroup, SingleRowCsvMetricsFile};
 pub use chromium::{NewChromiumDataset, NewChromiumDatasetCore};
+#[cfg(feature = "python")]
+use pyo3::prelude::*;
 use scamplers_macros::{base_api_model, db_json, db_selection, to_from_json};
 #[cfg(feature = "backend")]
 use scamplers_schema::dataset;
@@ -11,6 +13,7 @@ mod common;
 
 #[base_api_model]
 #[serde(tag = "type")]
+#[cfg_attr(feature = "python", pyclass(get_all, set_all, str))]
 pub enum NewDataset {
     Chromium(#[garde(dive)] NewChromiumDataset),
 }

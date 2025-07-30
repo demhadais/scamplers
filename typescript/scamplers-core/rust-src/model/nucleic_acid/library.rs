@@ -11,10 +11,7 @@ use crate::model::nucleic_acid::common::{Concentration, ElectrophoreticMeasureme
 
 #[db_json]
 #[serde(tag = "type")]
-#[cfg_attr(
-    feature = "python",
-    pyo3(name = "LibraryMeasurementData", get_all, set_all)
-)]
+#[cfg_attr(feature = "python", pyo3(name = "LibraryMeasurementData", set_all))]
 pub enum MeasurementData {
     Electrophoretic(ElectrophoreticMeasurementData),
     Fluorometric {
