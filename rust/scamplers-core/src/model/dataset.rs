@@ -2,7 +2,7 @@ use chromium::{JsonMetricsFile, MultiRowCsvMetricsFileGroup, SingleRowCsvMetrics
 pub use chromium::{NewChromiumDataset, NewChromiumDatasetCore};
 #[cfg(feature = "python")]
 use pyo3::prelude::*;
-use scamplers_macros::{base_api_model, db_json, db_selection, to_from_json};
+use scamplers_macros::{base_api_model, db_json, db_selection};
 #[cfg(feature = "backend")]
 use scamplers_schema::dataset;
 use time::OffsetDateTime;
@@ -18,6 +18,15 @@ pub enum NewDataset {
     Chromium(#[garde(dive)] NewChromiumDataset),
 }
 
+impl<T> From<T> for NewDataset
+where
+    NewChromiumDataset: From<T>,
+{
+    fn from(value: T) -> Self {
+        Self::Chromium(value.into())
+    }
+}
+
 #[db_json]
 #[serde(tag = "format")]
 pub enum ParsedMetricsFile {
@@ -29,7 +38,10 @@ pub enum ParsedMetricsFile {
     TenxJson(JsonMetricsFile),
 }
 
-#[to_from_json(python)]
+#[cfg_attr(
+    not(target_arch = "wasm32"),
+    derive(scamplers_macros::FromJson, scamplers_macros::ToJson)
+)]
 #[db_selection]
 #[cfg_attr(feature = "backend", diesel(table_name = dataset))]
 pub struct DatasetHandle {
@@ -37,7 +49,10 @@ pub struct DatasetHandle {
     pub link: String,
 }
 
-#[to_from_json(python)]
+#[cfg_attr(
+    not(target_arch = "wasm32"),
+    derive(scamplers_macros::FromJson, scamplers_macros::ToJson)
+)]
 #[db_selection]
 #[cfg_attr(feature = "backend", diesel(table_name = dataset))]
 pub struct DatasetSummary {

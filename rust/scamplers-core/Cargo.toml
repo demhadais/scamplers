@@ -9,6 +9,8 @@ name = "scamplers_core"
 crate-type = ["lib", "cdylib"]
 
 [dependencies]
+derive_more = { workspace = true }
+anyhow = { workspace = true }
 any-value = { path = "../any-value" }
 heck = { workspace = true }
 regex = { workspace = true }

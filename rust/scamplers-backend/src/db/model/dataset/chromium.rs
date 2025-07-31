@@ -163,9 +163,11 @@ impl NewChromiumDatasetExt for NewChromiumDataset {
         };
 
         match self {
-            CellrangerCount(d) | CellrangerVdj(d) | CellrangerarcCount(d) => &d.core,
-            CellrangerMulti(d) => &d.core,
+            CellrangerarcCount(d) => &d.core,
             CellrangeratacCount(d) => &d.core,
+            CellrangerCount(d) => &d.core,
+            CellrangerMulti(d) => &d.core,
+            CellrangerVdj(d) => &d.core,
         }
     }
 
@@ -238,12 +240,17 @@ impl NewChromiumDatasetExt for NewChromiumDataset {
     }
 
     fn parse(self) -> ScamplersResult<NewParsedChromiumDataset> {
+        use NewChromiumDataset::{
+            CellrangerCount, CellrangerMulti, CellrangerVdj, CellrangerarcCount,
+            CellrangeratacCount,
+        };
+
         let (core, parsed_metrics) = match self {
-            Self::CellrangerarcCount(ds) | Self::CellrangerCount(ds) | Self::CellrangerVdj(ds) => {
-                (ds.core, ds.metrics.parse())
-            }
-            Self::CellrangeratacCount(ds) => (ds.core, ds.metrics.parse()),
-            Self::CellrangerMulti(ds) => (ds.core, ds.metrics.parse()),
+            CellrangerarcCount(ds) => (ds.core, ds.metrics.parse()),
+            CellrangeratacCount(ds) => (ds.core, ds.metrics.parse()),
+            CellrangerCount(ds) => (ds.core, ds.metrics.parse()),
+            CellrangerVdj(ds) => (ds.core, ds.metrics.parse()),
+            CellrangerMulti(ds) => (ds.core, ds.metrics.parse()),
         };
 
         Ok(NewParsedChromiumDataset {

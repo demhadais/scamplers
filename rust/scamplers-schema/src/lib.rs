@@ -218,7 +218,7 @@ diesel::table! {
         link -> Text,
         readable_id -> Text,
         begun_at -> Timestamptz,
-        finished_at -> Timestamptz,
+        finished_at -> Nullable<Timestamptz>,
         notes -> Nullable<Text>,
     }
 }

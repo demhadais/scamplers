@@ -94,8 +94,10 @@ pyo3 = { version = "0.25.1", features = [
     "experimental-async",
     "multiple-pymethods",
     "serde",
+    "anyhow",
 ] }
 bon = { version = "3.6.4" }
+derive_more = { version = "2.0.1", features = ["try_into", "from"] }
 
 [workspace.lints.clippy]
 pedantic = { level = "warn", priority = -1 }

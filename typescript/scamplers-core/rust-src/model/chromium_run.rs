@@ -25,6 +25,7 @@ mod singleplex;
 #[base_api_model]
 #[serde(tag = "plexy")]
 #[cfg_attr(feature = "python", derive(FromPyObject))]
+#[derive(derive_more::TryInto, derive_more::From)]
 pub enum NewChromiumRun {
     Singleplex(#[garde(dive)] NewSingleplexChromiumRun),
     Ocm(#[garde(dive)] NewOcmChromiumRun),
@@ -39,6 +40,11 @@ pub struct ChromiumRunHandle {
 }
 
 #[db_selection]
+#[cfg_attr(
+    not(target_arch = "wasm32"),
+    derive(scamplers_macros::FromJson, scamplers_macros::ToJson)
+)]
+#[cfg_attr(not(target_arch = "wasm32"), json(python))]
 #[cfg_attr(feature = "backend", diesel(table_name = chromium_run))]
 pub struct ChromiumRunSummary {
     #[serde(flatten)]

@@ -39,7 +39,6 @@ impl Default for Pagination {
 }
 
 #[base_api_model_with_default]
-#[derive(PartialEq)]
 pub struct SortBy<C>
 where
     C: valuable::Valuable + Default + Debug,
@@ -51,7 +50,6 @@ where
 #[base_api_model]
 #[serde(transparent)]
 #[valuable(transparent)]
-#[derive(PartialEq)]
 pub struct SortByGroup<C>(Vec<SortBy<C>>)
 where
     C: valuable::Valuable + Default + Debug;

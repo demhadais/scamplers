@@ -1,6 +1,6 @@
 #[cfg(feature = "python")]
 use pyo3::prelude::*;
-use scamplers_macros::{db_enum, db_insertion, db_json, db_selection, to_from_json};
+use scamplers_macros::{db_enum, db_insertion, db_json, db_selection};
 #[cfg(feature = "backend")]
 use scamplers_schema::{
     multiplexing_tag, suspension, suspension_measurement, suspension_preparers,
@@ -27,7 +27,10 @@ pub enum MultiplexingTagType {
     TotalSeqC,
 }
 
-#[to_from_json(python)]
+#[cfg_attr(
+    not(target_arch = "wasm32"),
+    derive(scamplers_macros::FromJson, scamplers_macros::ToJson)
+)]
 #[db_insertion]
 #[cfg_attr(feature = "backend", diesel(table_name = multiplexing_tag))]
 pub struct NewMultiplexingTag {
@@ -44,7 +47,10 @@ pub struct SuspensionMeasurementData {
     pub is_post_hybridization: bool,
 }
 
-#[to_from_json(python)]
+#[cfg_attr(
+    not(target_arch = "wasm32"),
+    derive(scamplers_macros::FromJson, scamplers_macros::ToJson)
+)]
 #[db_insertion]
 #[cfg_attr(feature = "backend", diesel(table_name = suspension_measurement))]
 pub struct NewSuspensionMeasurement {
@@ -78,7 +84,11 @@ impl NewSuspensionMeasurement {
     }
 }
 
-#[to_from_json(python)]
+#[cfg_attr(
+    not(target_arch = "wasm32"),
+    derive(scamplers_macros::FromJson, scamplers_macros::ToJson)
+)]
+#[cfg_attr(not(target_arch = "wasm32"), json(python))]
 #[db_insertion]
 #[cfg_attr(feature = "backend", diesel(table_name = suspension))]
 pub struct NewSuspension {
@@ -147,7 +157,10 @@ pub struct SuspensionPreparer {
     pub prepared_by: Uuid,
 }
 
-#[to_from_json(python)]
+#[cfg_attr(
+    not(target_arch = "wasm32"),
+    derive(scamplers_macros::FromJson, scamplers_macros::ToJson)
+)]
 #[db_selection]
 #[cfg_attr(feature = "backend", diesel(table_name = suspension))]
 pub struct SuspensionHandle {
@@ -155,7 +168,10 @@ pub struct SuspensionHandle {
     pub link: String,
 }
 
-#[to_from_json(python)]
+#[cfg_attr(
+    not(target_arch = "wasm32"),
+    derive(scamplers_macros::FromJson, scamplers_macros::ToJson)
+)]
 #[db_selection]
 #[cfg_attr(feature = "backend", diesel(table_name = suspension))]
 pub struct SuspensionSummary {
@@ -201,7 +217,10 @@ pub struct SuspensionMeasurement {
     pub data: SuspensionMeasurementData,
 }
 
-#[to_from_json(python)]
+#[cfg_attr(
+    not(target_arch = "wasm32"),
+    derive(scamplers_macros::FromJson, scamplers_macros::ToJson)
+)]
 #[cfg_attr(feature = "python", pyclass)]
 #[derive(serde::Deserialize, serde::Serialize)]
 pub struct Suspension {

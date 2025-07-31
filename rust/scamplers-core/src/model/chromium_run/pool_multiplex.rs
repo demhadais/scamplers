@@ -1,4 +1,4 @@
-use scamplers_macros::{db_enum, db_insertion, to_from_json};
+use scamplers_macros::{db_enum, db_insertion};
 #[cfg(feature = "backend")]
 use scamplers_schema::{chip_loading, chromium_run, gems};
 #[cfg(feature = "python")]
@@ -88,9 +88,13 @@ pub enum PoolMultiplexChromiumChip {
     GemxFx,
 }
 
-#[to_from_json(python)]
+#[cfg_attr(
+    not(target_arch = "wasm32"),
+    derive(scamplers_macros::FromJson, scamplers_macros::ToJson)
+)]
 #[db_insertion]
 #[cfg_attr(feature = "backend", diesel(table_name = chromium_run))]
+#[cfg_attr(not(target_arch = "wasm32"), json(wrapper = super::NewChromiumRun, python))]
 pub struct NewPoolMultiplexChromiumRun {
     #[serde(flatten)]
     #[garde(dive)]

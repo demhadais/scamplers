@@ -3,7 +3,7 @@ pub(crate) use common::Species;
 pub use common::{MeasurementData, NewSpecimenMeasurement};
 #[cfg(feature = "python")]
 use pyo3::{FromPyObject, prelude::*};
-use scamplers_macros::{base_api_model, db_enum, db_query, db_selection, to_from_json};
+use scamplers_macros::{base_api_model, db_enum, db_query, db_selection};
 #[cfg(feature = "backend")]
 use scamplers_schema::{specimen, specimen_measurement};
 use time::OffsetDateTime;
@@ -29,6 +29,7 @@ mod virtual_;
 #[base_api_model]
 #[serde(tag = "type")]
 #[cfg_attr(feature = "python", derive(FromPyObject))]
+#[derive(derive_more::TryInto, derive_more::From)]
 pub enum NewSpecimen {
     FixedBlock(#[garde(dive)] NewFixedBlock),
     FrozenBlock(#[garde(dive)] NewFrozenBlock),
@@ -38,7 +39,10 @@ pub enum NewSpecimen {
     FrozenTissue(#[garde(dive)] NewFrozenTissue),
 }
 
-#[to_from_json(python)]
+#[cfg_attr(
+    not(target_arch = "wasm32"),
+    derive(scamplers_macros::FromJson, scamplers_macros::ToJson)
+)]
 #[db_selection]
 #[cfg_attr(feature = "backend", diesel(table_name = specimen))]
 pub struct SpecimenHandle {
@@ -46,7 +50,10 @@ pub struct SpecimenHandle {
     pub link: String,
 }
 
-#[to_from_json(python)]
+#[cfg_attr(
+    not(target_arch = "wasm32"),
+    derive(scamplers_macros::FromJson, scamplers_macros::ToJson)
+)]
 #[db_selection]
 #[cfg_attr(feature = "backend", diesel(table_name = specimen))]
 pub struct SpecimenSummary {
@@ -92,7 +99,10 @@ pub struct SpecimenCore {
     // pub returned_by: PersonSummary,
 }
 
-#[to_from_json(python)]
+#[cfg_attr(
+    not(target_arch = "wasm32"),
+    derive(scamplers_macros::FromJson, scamplers_macros::ToJson)
+)]
 #[base_api_model]
 #[cfg_attr(
     target_arch = "wasm32",
@@ -137,7 +147,10 @@ pub enum SpecimenOrdinalColumn {
     ReceivedAt,
 }
 
-#[to_from_json(python)]
+#[cfg_attr(
+    not(target_arch = "wasm32"),
+    derive(scamplers_macros::FromJson, scamplers_macros::ToJson)
+)]
 #[db_query]
 pub struct SpecimenQuery {
     pub ids: Vec<Uuid>,

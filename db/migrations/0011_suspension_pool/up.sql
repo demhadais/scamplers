@@ -1,6 +1,6 @@
 create table suspension_pool (
     id uuid primary key default uuidv7(),
-    link text generated always as ('/samples/' || id) stored not null,
+    link text generated always as ('/suspension-pools/' || id) stored not null,
     name text not null,
     readable_id text unique not null,
     pooled_at timestamptz not null,

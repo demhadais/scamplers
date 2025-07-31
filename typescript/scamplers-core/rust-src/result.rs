@@ -1,6 +1,6 @@
 #[cfg(feature = "python")]
 use pyo3::{exceptions::PyException, prelude::*};
-use scamplers_macros::{scamplers_error, to_from_json};
+use scamplers_macros::scamplers_error;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 #[cfg(target_arch = "wasm32")]
@@ -92,9 +92,12 @@ pub struct LibraryIndexSetError {
     pub message: String,
 }
 
-#[to_from_json(python)]
+#[cfg_attr(
+    not(target_arch = "wasm32"),
+    derive(scamplers_macros::FromJson, scamplers_macros::ToJson)
+)]
 #[cfg_attr(feature = "python", pyclass(get_all, name = "ScamplersError", str))]
-#[derive(Clone, Deserialize, Serialize, Debug, thiserror::Error, valuable::Valuable)]
+#[derive(Clone, Deserialize, Serialize, Debug, thiserror::Error, valuable::Valuable, PartialEq)]
 #[serde(tag = "type", rename_all = "snake_case")]
 #[error(transparent)]
 pub enum ScamplersCoreError {

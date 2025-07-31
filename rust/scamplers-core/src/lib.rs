@@ -144,8 +144,10 @@ fn scamplers_core(m: &Bound<'_, PyModule>) -> PyResult<()> {
     requests.add_class::<MultiRowCsvMetricsFile>()?;
     requests.add_class::<JsonMetricsFile>()?;
 
-    requests.add_class::<dataset::chromium::CellrangerarcvdjCountDataset>()?;
+    requests.add_class::<dataset::chromium::CellrangerarcCountDataset>()?;
+    requests.add_class::<dataset::chromium::CellrangerCountDataset>()?;
     requests.add_class::<dataset::chromium::CellrangerMultiDataset>()?;
+    requests.add_class::<dataset::chromium::CellrangerVdjDataset>()?;
     requests.add_class::<dataset::chromium::CellrangeratacCountDataset>()?;
 
     m.add_submodule(&requests)?;

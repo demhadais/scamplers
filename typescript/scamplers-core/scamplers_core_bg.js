@@ -253,11 +253,11 @@ function __wbg_adapter_32(arg0, arg1) {
 }
 
 function __wbg_adapter_35(arg0, arg1, arg2) {
-    wasm.closure137_externref_shim(arg0, arg1, arg2);
+    wasm.closure142_externref_shim(arg0, arg1, arg2);
 }
 
 function __wbg_adapter_437(arg0, arg1, arg2, arg3) {
-    wasm.closure172_externref_shim(arg0, arg1, arg2, arg3);
+    wasm.closure177_externref_shim(arg0, arg1, arg2, arg3);
 }
 
 /**
@@ -579,7 +579,7 @@ export class ChromiumRunHandle {
     set id(arg0) {
         const ptr0 = passStringToWasm0(arg0, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
         const len0 = WASM_VECTOR_LEN;
-        wasm.__wbg_set_chromiumrunhandle_id(this.__wbg_ptr, ptr0, len0);
+        wasm.__wbg_set_cdnahandle_id(this.__wbg_ptr, ptr0, len0);
     }
     /**
      * @returns {string}
@@ -1447,7 +1447,7 @@ export class GemsHandle {
     set id(arg0) {
         const ptr0 = passStringToWasm0(arg0, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
         const len0 = WASM_VECTOR_LEN;
-        wasm.__wbg_set_chromiumrunhandle_id(this.__wbg_ptr, ptr0, len0);
+        wasm.__wbg_set_cdnahandle_id(this.__wbg_ptr, ptr0, len0);
     }
     /**
      * @returns {string}
@@ -2278,7 +2278,7 @@ export class LibraryHandle {
     set id(arg0) {
         const ptr0 = passStringToWasm0(arg0, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
         const len0 = WASM_VECTOR_LEN;
-        wasm.__wbg_set_cdnahandle_id(this.__wbg_ptr, ptr0, len0);
+        wasm.__wbg_set_datasethandle_id(this.__wbg_ptr, ptr0, len0);
     }
     /**
      * @returns {string}
@@ -2295,7 +2295,7 @@ export class LibraryHandle {
     set link(arg0) {
         const ptr0 = passStringToWasm0(arg0, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
         const len0 = WASM_VECTOR_LEN;
-        wasm.__wbg_set_libraryhandle_link(this.__wbg_ptr, ptr0, len0);
+        wasm.__wbg_set_datasethandle_link(this.__wbg_ptr, ptr0, len0);
     }
 }
 
@@ -2460,7 +2460,7 @@ export class MultiplexingTag {
     set tag_id(arg0) {
         const ptr0 = passStringToWasm0(arg0, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
         const len0 = WASM_VECTOR_LEN;
-        wasm.__wbg_set_datasethandle_link(this.__wbg_ptr, ptr0, len0);
+        wasm.__wbg_set_multiplexingtag_tag_id(this.__wbg_ptr, ptr0, len0);
     }
     /**
      * @returns {string}
@@ -3557,17 +3557,17 @@ export class SequencingRunSummary {
         wasm.__wbg_set_sequencingrunsummary_begun_at(this.__wbg_ptr, arg0);
     }
     /**
-     * @returns {Date}
+     * @returns {Date | undefined}
      */
     get finished_at() {
         const ret = wasm.__wbg_get_sequencingrunsummary_finished_at(this.__wbg_ptr);
         return ret;
     }
     /**
-     * @param {Date} arg0
+     * @param {Date | null} [arg0]
      */
     set finished_at(arg0) {
-        wasm.__wbg_set_sequencingrunsummary_finished_at(this.__wbg_ptr, arg0);
+        wasm.__wbg_set_sequencingrunsummary_finished_at(this.__wbg_ptr, isLikeNone(arg0) ? 0 : addToExternrefTable0(arg0));
     }
     /**
      * @returns {string}
@@ -4511,7 +4511,7 @@ export class SuspensionHandle {
     set id(arg0) {
         const ptr0 = passStringToWasm0(arg0, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
         const len0 = WASM_VECTOR_LEN;
-        wasm.__wbg_set_datasethandle_id(this.__wbg_ptr, ptr0, len0);
+        wasm.__wbg_set_suspensionhandle_id(this.__wbg_ptr, ptr0, len0);
     }
     /**
      * @returns {string}
@@ -4528,7 +4528,7 @@ export class SuspensionHandle {
     set link(arg0) {
         const ptr0 = passStringToWasm0(arg0, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
         const len0 = WASM_VECTOR_LEN;
-        wasm.__wbg_set_datasethandle_link(this.__wbg_ptr, ptr0, len0);
+        wasm.__wbg_set_multiplexingtag_tag_id(this.__wbg_ptr, ptr0, len0);
     }
 }
 
@@ -4627,7 +4627,7 @@ export class SuspensionPoolHandle {
     set id(arg0) {
         const ptr0 = passStringToWasm0(arg0, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
         const len0 = WASM_VECTOR_LEN;
-        wasm.__wbg_set_cdnahandle_id(this.__wbg_ptr, ptr0, len0);
+        wasm.__wbg_set_suspensionhandle_id(this.__wbg_ptr, ptr0, len0);
     }
     /**
      * @returns {string}
@@ -4644,7 +4644,7 @@ export class SuspensionPoolHandle {
     set link(arg0) {
         const ptr0 = passStringToWasm0(arg0, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
         const len0 = WASM_VECTOR_LEN;
-        wasm.__wbg_set_libraryhandle_link(this.__wbg_ptr, ptr0, len0);
+        wasm.__wbg_set_multiplexingtag_tag_id(this.__wbg_ptr, ptr0, len0);
     }
 }
 
@@ -5213,13 +5213,13 @@ export function __wbindgen_cb_drop(arg0) {
     return ret;
 };
 
-export function __wbindgen_closure_wrapper875(arg0, arg1, arg2) {
-    const ret = makeMutClosure(arg0, arg1, 120, __wbg_adapter_32);
+export function __wbindgen_closure_wrapper893(arg0, arg1, arg2) {
+    const ret = makeMutClosure(arg0, arg1, 125, __wbg_adapter_32);
     return ret;
 };
 
-export function __wbindgen_closure_wrapper898(arg0, arg1, arg2) {
-    const ret = makeMutClosure(arg0, arg1, 138, __wbg_adapter_35);
+export function __wbindgen_closure_wrapper916(arg0, arg1, arg2) {
+    const ret = makeMutClosure(arg0, arg1, 143, __wbg_adapter_35);
     return ret;
 };
 

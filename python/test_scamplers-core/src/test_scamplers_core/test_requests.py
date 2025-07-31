@@ -1,12 +1,16 @@
 from datetime import UTC, datetime
+from typing_extensions import Any
 import pytest
 import maturin_import_hook
+import json
 
 maturin_import_hook.install()
 
 from scamplers_core.requests import (
     CellCountingMethod,
     CellrangerMultiDataset,
+    CellrangerVdjDataset,
+    CellrangerarcCountDataset,
     CellrangeratacCountDataset,
     ComplianceCommitteeType,
     ElectrophoreticMeasurementData,
@@ -60,7 +64,7 @@ from scamplers_core.requests import (
     VolumeUnit,
     NewSuspensionPool,
     NewSuspensionPoolMeasurement,
-    CellrangerarcvdjCountDataset,
+    CellrangerCountDataset,
 )
 from uuid import UUID
 
@@ -132,7 +136,7 @@ def new_frozen_block() -> NewFrozenBlock:
         name="",
         submitted_by=ID,
         lab_id=ID,
-        received_at=datetime.now(UTC),
+        received_at=TIME,
         species=[Species.MusMusculus],
         embedded_in=FrozenBlockEmbeddingMatrix.CarboxymethylCellulose,
     )
@@ -145,7 +149,7 @@ def new_cryopreserved_tissue() -> NewCryopreservedTissue:
         name="",
         submitted_by=ID,
         lab_id=ID,
-        received_at=datetime.now(UTC),
+        received_at=TIME,
         species=[Species.RattusNorvegicus],
     )
 
@@ -157,7 +161,7 @@ def new_fixed_tissue() -> NewFixedTissue:
         name="",
         submitted_by=ID,
         lab_id=ID,
-        received_at=datetime.now(UTC),
+        received_at=TIME,
         species=[Species.HomoSapiens],
         fixative=TissueFixative.DithiobisSuccinimidylropionate,
     )
@@ -170,7 +174,7 @@ def new_frozen_tissue() -> NewFrozenTissue:
         name="",
         submitted_by=ID,
         lab_id=ID,
-        received_at=datetime.now(UTC),
+        received_at=TIME,
         species=[Species.CallithrixJacchus],
     )
 
@@ -182,7 +186,7 @@ def new_virtual_specimen() -> NewVirtualSpecimen:
         name="",
         submitted_by=ID,
         lab_id=ID,
-        received_at=datetime.now(UTC),
+        received_at=TIME,
         species=[Species.DrosophilaMelanogaster],
         fixative=SuspensionFixative.FormaldehydeDerivative,
     )
@@ -256,7 +260,7 @@ def new_suspension(
         readable_id="",
         parent_specimen_id=ID,
         biological_material=BiologicalMaterial.Cells,
-        created_at=datetime.now(UTC),
+        created_at=TIME,
         target_cell_recovery=0,
         target_reads_per_cell=0,
         preparer_ids=[ID],
@@ -295,7 +299,7 @@ def new_singleplex_chromium_run(
 ) -> NewSingleplexChromiumRun:
     return NewSingleplexChromiumRun(
         readable_id="",
-        run_at=datetime.now(UTC),
+        run_at=TIME,
         succeeded=True,
         run_by=ID,
         chip=SingleplexChromiumChip.Gemx3p,
@@ -319,7 +323,7 @@ def new_pool_multiplex_chromium_run(
 ) -> NewPoolMultiplexChromiumRun:
     return NewPoolMultiplexChromiumRun(
         readable_id="",
-        run_at=datetime.now(UTC),
+        run_at=TIME,
         succeeded=True,
         run_by=ID,
         chip=PoolMultiplexChromiumChip.GemxFx,
@@ -343,7 +347,7 @@ def new_ocm_chromium_run(
 ) -> NewOcmChromiumRun:
     return NewOcmChromiumRun(
         readable_id="",
-        run_at=datetime.now(UTC),
+        run_at=TIME,
         succeeded=True,
         run_by=ID,
         chip=OcmChromiumChip.GemxOcm3p,
@@ -382,7 +386,7 @@ def new_cdna(
     return NewCdna(
         library_type=LibraryType.GeneExpression,
         readable_id="",
-        prepared_at=datetime.now(UTC),
+        prepared_at=TIME,
         gems_id=ID,
         n_amplification_cycles=0,
         measurements=[
@@ -437,8 +441,8 @@ def new_library(
 
 
 @pytest.fixture
-def new_cellrangerarcvdj_count_dataset() -> CellrangerarcvdjCountDataset:
-    return CellrangerarcvdjCountDataset(
+def new_cellrangerarc_count_dataset() -> CellrangerarcCountDataset:
+    return CellrangerarcCountDataset(
         name="",
         lab_id=ID,
         data_path="",
@@ -463,6 +467,19 @@ def new_cellrangeratac_count_dataset() -> CellrangeratacCountDataset:
 
 
 @pytest.fixture
+def new_cellranger_count_dataset() -> CellrangerCountDataset:
+    return CellrangerCountDataset(
+        name="",
+        lab_id=ID,
+        data_path="",
+        delivered_at=TIME,
+        gems_id=ID,
+        web_summary="",
+        metrics=SingleRowCsvMetricsFile(filename="", raw_contents=""),
+    )
+
+
+@pytest.fixture
 def new_cellranger_multi_dataset() -> CellrangerMultiDataset:
     return CellrangerMultiDataset(
         name="",
@@ -475,67 +492,61 @@ def new_cellranger_multi_dataset() -> CellrangerMultiDataset:
     )
 
 
-def test_new_institution(new_institution: NewInstitution): ...
+@pytest.fixture
+def new_cellranger_vdj_dataset() -> CellrangerVdjDataset:
+    return CellrangerVdjDataset(
+        name="",
+        lab_id=ID,
+        data_path="",
+        delivered_at=TIME,
+        gems_id=ID,
+        web_summary="",
+        metrics=SingleRowCsvMetricsFile(filename="", raw_contents=""),
+    )
 
 
-def test_new_person(new_person: NewPerson): ...
+@pytest.mark.parametrize(
+    "data, key, expected_value",
+    [
+        ("new_institution", "name", ""),
+        ("new_person", "name", ""),
+        ("new_lab", "name", ""),
+        ("new_fixed_block", "type", "fixed_block"),
+        ("new_frozen_block", "type", "frozen_block"),
+        ("new_cryopreserved_tissue", "type", "cryopreserved_tissue"),
+        ("new_fixed_tissue", "type", "fixed_tissue"),
+        ("new_frozen_tissue", "type", "frozen_tissue"),
+        ("new_virtual_specimen", "type", "suspension"),
+        ("new_suspension", "target_cell_recovery", 0),
+        ("new_suspension_pool", "preparer_ids", [ID]),
+        ("new_singleplex_chromium_run", "plexy", "singleplex"),
+        ("new_pool_multiplex_chromium_run", "plexy", "pool_multiplex"),
+        ("new_ocm_chromium_run", "plexy", "ocm"),
+        ("new_cdna", "preparer_ids", [ID]),
+        ("new_library", "cdna_id", ID),
+        ("new_cellrangerarc_count_dataset", "cmdline", "cellranger-arc count"),
+        ("new_cellrangeratac_count_dataset", "cmdline", "cellranger-atac count"),
+        ("new_cellranger_count_dataset", "cmdline", "cellranger count"),
+        ("new_cellranger_multi_dataset", "cmdline", "cellranger multi"),
+        ("new_cellranger_vdj_dataset", "cmdline", "cellranger vdj"),
+    ],
+)
+def test_jsonification(
+    data: Any, key: str | None, expected_value: Any, request: pytest.FixtureRequest
+):
+    data = request.getfixturevalue(data)
+    json_str = data.to_json()
+    pythonized = json.loads(json_str)
+    found_value = pythonized[key]
 
+    if not isinstance(expected_value, (str, list, datetime)):
+        found_value = type(expected_value)(found_value)
 
-def test_new_lab(new_lab: NewLab): ...
+    elif isinstance(expected_value, list) and isinstance(found_value, list):
+        for i, v in enumerate(found_value):
+            found_value[i] = type(expected_value[0])(found_value[i])
 
+    assert found_value == expected_value
 
-def test_new_fixed_block(
-    new_fixed_block: NewFixedBlock,
-): ...
-
-
-def test_new_frozen_block(new_frozen_block: NewFrozenBlock): ...
-
-
-def test_new_cryopreserved_tissue(new_cryopreserved_tissue: NewCryopreservedTissue): ...
-
-
-def test_new_fixed_tissue(new_fixed_tissue: NewFixedTissue): ...
-
-
-def test_new_frozen_tissue(new_frozen_tissue: NewFrozenTissue): ...
-
-
-def test_new_virtual_specimen(new_virtual_specimen: NewVirtualSpecimen): ...
-
-
-def test_new_suspension(
-    new_suspension: NewSuspension,
-): ...
-
-
-def test_new_singleplex_chromium_run(
-    new_singleplex_chromium_run: NewSingleplexChromiumRun,
-): ...
-
-
-def test_new_pool_multiplex_chromium_run(
-    new_pool_multiplex_chromium_run: NewPoolMultiplexChromiumRun,
-): ...
-
-
-def test_new_ocm_chromium_run(
-    new_ocm_chromium_run: NewOcmChromiumRun,
-): ...
-
-
-def test_new_cdna(
-    new_cdna: NewCdna,
-): ...
-
-
-def test_new_library(
-    new_library: NewLibrary,
-): ...
-
-
-def test_new_chromium_dataset(
-    new_cellrangerarcvdj_count_dataset: CellrangerarcvdjCountDataset,
-    new_cellrangeratac_count_dataset: CellrangeratacCountDataset,
-    new_cellranger_multi_dataset: CellrangerMultiDataset,
-): ...
+    dataclass = type(data)
+    assert dataclass.from_json(json_str) == data

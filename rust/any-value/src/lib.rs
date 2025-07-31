@@ -15,7 +15,7 @@ use wasm_bindgen::JsValue;
 pub struct AnyValue(serde_json::Value);
 
 #[cfg(target_arch = "wasm32")]
-#[derive(Deserialize, Clone, Debug, Serialize, Default)]
+#[derive(Deserialize, Clone, Debug, Serialize, Default, PartialEq)]
 pub struct AnyValue(#[serde(with = "serde_wasm_bindgen::preserve")] JsValue);
 
 #[cfg(not(target_arch = "wasm32"))]

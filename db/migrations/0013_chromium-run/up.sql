@@ -1,6 +1,6 @@
 create table chromium_run (
     id uuid primary key default uuidv7(),
-    link text generated always as ('/chromium_runs/' || id) stored not null,
+    link text generated always as ('/chromium-runs/' || id) stored not null,
     readable_id text unique not null,
     chip text not null,
     run_at timestamptz not null,

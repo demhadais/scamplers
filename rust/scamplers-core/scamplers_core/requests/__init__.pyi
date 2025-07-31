@@ -1,17 +1,14 @@
 from dataclasses import dataclass, field
 from datetime import datetime
 from collections.abc import Sequence
-from typing import Any
+from typing import Any, Self
 from uuid import UUID
+from .._baseclass import _Json  # pyright: ignore[reportPrivateUsage]
 
 @dataclass(kw_only=True)
-class NewInstitution:
+class NewInstitution(_Json):
     id: UUID
     name: str
-
-    @staticmethod
-    def from_json(json: str) -> NewInstitution: ...
-    def to_json(self) -> str: ...
 
 class UserRole:
     AppAdmin = ...
@@ -19,7 +16,7 @@ class UserRole:
     ComputationalStaff = ...
 
 @dataclass(kw_only=True)
-class NewPerson:
+class NewPerson(_Json):
     name: str
     email: str
     orcid: str | None = field(init=False)
@@ -27,20 +24,12 @@ class NewPerson:
     ms_user_id: UUID | None = field(init=False)
     roles: list[UserRole]
 
-    @staticmethod
-    def from_json(json: str) -> NewPerson: ...
-    def to_json(self) -> str: ...
-
 @dataclass(kw_only=True)
-class NewLab:
+class NewLab(_Json):
     name: str
     pi_id: UUID
     delivery_dir: str
     member_ids: list[UUID] = ...
-
-    @staticmethod
-    def from_json(json: str) -> NewLab: ...
-    def to_json(self) -> str: ...
 
 class ComplianceCommitteeType:
     Ibc = ...
@@ -48,15 +37,11 @@ class ComplianceCommitteeType:
     Iacuc = ...
 
 @dataclass(kw_only=True)
-class NewCommitteeApproval:
+class NewCommitteeApproval(_Json):
     institution_id: UUID
     committee_type: ComplianceCommitteeType
     compliance_identifier: str
     specimen_id: UUID = ...
-
-    @staticmethod
-    def from_json(json: str) -> NewCommitteeApproval: ...
-    def to_json(self) -> str: ...
 
 class MassUnit:
     Nanogram = ...
@@ -81,23 +66,15 @@ class MeasurementData_Dv200(SpecimenMeasurementData):
     instrument_name: str
     value: float
 
-class SpecimenMeasurementData:
+class SpecimenMeasurementData(_Json):
     Rin = MeasurementData_Rin
     Dv200 = MeasurementData_Dv200
 
-    @staticmethod
-    def from_json(json: str) -> SpecimenMeasurementData: ...
-    def to_json(self) -> str: ...
-
 @dataclass(kw_only=True)
-class NewSpecimenMeasurement:
+class NewSpecimenMeasurement(_Json):
     measured_by: UUID
     data: SpecimenMeasurementData
     specimen_id: UUID = ...
-
-    @staticmethod
-    def from_json(json: str) -> NewSpecimenMeasurement: ...
-    def to_json(self) -> str: ...
 
 class Species:
     AmbystomaMexicanum = ...
@@ -129,7 +106,7 @@ class FixedBlockEmbeddingMatrix:
 class BlockFixative:
     FormaldehydeDerivative = ...
 
-class NewFixedBlock:
+class NewFixedBlock(_Json):
     inner: _NewSpecimenCommon
     embedded_in: FixedBlockEmbeddingMatrix
     fixative: BlockFixative
@@ -151,15 +128,12 @@ class NewFixedBlock:
         returned_at: datetime | None = ...,
         returned_by: UUID | None = ...,
     ) -> NewFixedBlock: ...
-    @staticmethod
-    def from_json(json: str) -> NewFixedBlock: ...
-    def to_json(self) -> str: ...
 
 class FrozenBlockEmbeddingMatrix:
     CarboxymethylCellulose = ...
     OptimalCuttingTemperatureCompound = ...
 
-class NewFrozenBlock:
+class NewFrozenBlock(_Json):
     inner: _NewSpecimenCommon
     embedded_in: FrozenBlockEmbeddingMatrix
     fixative: BlockFixative | None
@@ -182,11 +156,8 @@ class NewFrozenBlock:
         returned_at: datetime | None = ...,
         returned_by: UUID | None = ...,
     ) -> NewFrozenBlock: ...
-    @staticmethod
-    def from_json(json: str) -> NewFrozenBlock: ...
-    def to_json(self) -> str: ...
 
-class NewCryopreservedTissue:
+class NewCryopreservedTissue(_Json):
     inner: _NewSpecimenCommon
     storage_buffer: str | None
     cryopreserved: bool
@@ -207,14 +178,11 @@ class NewCryopreservedTissue:
         returned_by: UUID | None = ...,
         storage_buffer: str | None = ...,
     ) -> NewCryopreservedTissue: ...
-    @staticmethod
-    def from_json(json: str) -> NewCryopreservedTissue: ...
-    def to_json(self) -> str: ...
 
 class TissueFixative:
     DithiobisSuccinimidylropionate = ...
 
-class NewFixedTissue:
+class NewFixedTissue(_Json):
     inner: _NewSpecimenCommon
     fixative: TissueFixative
     storage_buffer: str | None
@@ -236,11 +204,8 @@ class NewFixedTissue:
         returned_at: datetime | None = ...,
         returned_by: UUID | None = ...,
     ) -> NewFixedTissue: ...
-    @staticmethod
-    def from_json(json: str) -> NewFixedTissue: ...
-    def to_json(self) -> str: ...
 
-class NewFrozenTissue:
+class NewFrozenTissue(_Json):
     inner: _NewSpecimenCommon
     storage_buffer: str | None
     frozen: bool
@@ -261,14 +226,11 @@ class NewFrozenTissue:
         returned_at: datetime | None = ...,
         returned_by: UUID | None = ...,
     ) -> NewFrozenTissue: ...
-    @staticmethod
-    def from_json(json: str) -> NewFrozenTissue: ...
-    def to_json(self) -> str: ...
 
 class SuspensionFixative:
     FormaldehydeDerivative = ...
 
-class NewVirtualSpecimen:
+class NewVirtualSpecimen(_Json):
     inner: _NewSpecimenCommon
     fixative: SuspensionFixative | None
 
@@ -288,9 +250,21 @@ class NewVirtualSpecimen:
         returned_at: datetime | None = ...,
         returned_by: UUID | None = ...,
     ) -> NewVirtualSpecimen: ...
-    @staticmethod
-    def from_json(json: str) -> NewVirtualSpecimen: ...
-    def to_json(self) -> str: ...
+
+@dataclass(kw_only=True)
+class NewSequencingSubmission(_Json):
+    library_id: UUID
+    fastq_paths: list[str]
+    submitted_at: datetime
+    sequencing_run_id: UUID = ...
+
+@dataclass(kw_only=True)
+class NewSequencingRun(_Json):
+    readable_id: str
+    begun_at: datetime
+    libraries: list[NewSequencingSubmission]
+    finished_at: datetime | None = ...
+    notes: str | None = ...
 
 class BiologicalMaterial:
     Cells = ...
@@ -328,21 +302,17 @@ class MeasurementDataCore_MeanDiameter(SuspensionMeasurementDataCommon):
     value: float
     unit: tuple[BiologicalMaterial, LengthUnit]
 
-class SuspensionMeasurementDataCommon:
+class SuspensionMeasurementDataCommon(_Json):
     Concentration = MeasurementDataCore_Concentration
     Volume = MeasurementDataCore_Volume
     Viability = MeasurementDataCore_Viability
     MeanDiameter = MeasurementDataCore_MeanDiameter
 
-    @staticmethod
-    def from_json(json: str) -> SuspensionMeasurementDataCommon: ...
-    def to_json(self) -> str: ...
-
 class _SuspensionMeasurementData:
     core: SuspensionMeasurementDataCommon
     is_post_hybridization: bool
 
-class NewSuspensionMeasurement:
+class NewSuspensionMeasurement(_Json):
     measured_by: UUID
     data: _SuspensionMeasurementData
     suspension_id: UUID = ...
@@ -357,7 +327,7 @@ class NewSuspensionMeasurement:
     ) -> NewSuspensionMeasurement: ...
 
 @dataclass(kw_only=True)
-class NewSuspension:
+class NewSuspension(_Json):
     readable_id: str
     parent_specimen_id: UUID
     biological_material: BiologicalMaterial
@@ -371,15 +341,11 @@ class NewSuspension:
     lysis_duration_minutes: float | None = ...
     notes: str | None = ...
 
-    @staticmethod
-    def from_json(json: str) -> NewSuspension: ...
-    def to_json(self) -> str: ...
-
 class _SuspensionPoolMeasurementData:
     data: SuspensionMeasurementDataCommon
     is_post_storage: bool
 
-class NewSuspensionPoolMeasurement:
+class NewSuspensionPoolMeasurement(_Json):
     measured_by: UUID
     data: _SuspensionPoolMeasurementData
     pool_id: UUID = ...
@@ -394,7 +360,7 @@ class NewSuspensionPoolMeasurement:
     ) -> NewSuspensionPoolMeasurement: ...
 
 @dataclass(kw_only=True)
-class NewSuspensionPool:
+class NewSuspensionPool(_Json):
     readable_id: str
     name: str
     pooled_at: datetime
@@ -402,10 +368,6 @@ class NewSuspensionPool:
     preparer_ids: list[UUID]
     measurements: list[NewSuspensionPoolMeasurement] = ...
     notes: str | None = ...
-
-    @staticmethod
-    def from_json(json: str) -> NewSuspensionPool: ...
-    def to_json(self) -> str: ...
 
 class SingleplexChromiumChip:
     J = ...
@@ -453,7 +415,7 @@ class NewSingleplexGems:
         cls, *, readable_id: str, chemistry: str, loading: NewSingleplexChipLoading
     ) -> NewSingleplexGems: ...
 
-class NewSingleplexChromiumRun:
+class NewSingleplexChromiumRun(_Json):
     inner: _NewChromiumRunCommon
     chip: SingleplexChromiumChip
     gems: list[NewSingleplexGems]
@@ -469,9 +431,6 @@ class NewSingleplexChromiumRun:
         gems: list[NewSingleplexGems],
         notes: str | None = ...,
     ) -> NewSingleplexChromiumRun: ...
-    @staticmethod
-    def from_json(json: str) -> NewSingleplexChromiumRun: ...
-    def to_json(self) -> str: ...
 
 class NewOcmChipLoading:
     _0: NewSingleplexChipLoading
@@ -496,7 +455,7 @@ class NewOcmGems:
 class OcmChromiumChip:
     GemxOcm3p = ...
 
-class NewOcmChromiumRun:
+class NewOcmChromiumRun(_Json):
     inner: _NewChromiumRunCommon
     chip: OcmChromiumChip
     gems: list[NewOcmGems]
@@ -512,9 +471,6 @@ class NewOcmChromiumRun:
         gems: list[NewOcmGems],
         notes: str | None = ...,
     ) -> NewOcmChromiumRun: ...
-    @staticmethod
-    def from_json(json: str) -> NewOcmChromiumRun: ...
-    def to_json(self) -> str: ...
 
 class NewPoolMultiplexChipLoading:
     suspension_id: UUID
@@ -541,7 +497,7 @@ class PoolMultiplexChromiumChip:
     Q = ...
     GemxFx = ...
 
-class NewPoolMultiplexChromiumRun:
+class NewPoolMultiplexChromiumRun(_Json):
     inner: _NewChromiumRunCommon
     chip: PoolMultiplexChromiumChip
     gems: list[NewPoolMultiplexGems]
@@ -557,9 +513,6 @@ class NewPoolMultiplexChromiumRun:
         gems: list[NewPoolMultiplexGems],
         notes: str | None = ...,
     ) -> NewPoolMultiplexChromiumRun: ...
-    @staticmethod
-    def from_json(json: str) -> NewPoolMultiplexChromiumRun: ...
-    def to_json(self) -> str: ...
 
 class LibraryType:
     AntibodyCapture = ...
@@ -574,24 +527,20 @@ class LibraryType:
     VdjT = ...
     VdjTGd = ...
 
-@dataclass
-class NewLibraryTypeSpecification:
+@dataclass(kw_only=True)
+class NewLibraryTypeSpecification(_Json):
     chemistry: str
     library_type: LibraryType
     index_kit: str
     cdna_volume_µl: float
     library_volume_µl: float
 
-    @staticmethod
-    def from_json(json: str) -> NewPoolMultiplexChromiumRun: ...
-    def to_json(self) -> str: ...
-
 @dataclass(kw_only=True)
 class NucleicAcidConcentration:
     value: float
     unit: tuple[MassUnit, VolumeUnit]
 
-class ElectrophoreticMeasurementData:
+class ElectrophoreticMeasurementData(_Json):
     measured_at: datetime
     instrument_name: str
     mean_library_size_bp: float
@@ -608,22 +557,15 @@ class ElectrophoreticMeasurementData:
         concentration_value: float,
         concentration_unit: tuple[MassUnit, VolumeUnit],
     ) -> ElectrophoreticMeasurementData: ...
-    @staticmethod
-    def from_json(json: str) -> NewPoolMultiplexChromiumRun: ...
-    def to_json(self) -> str: ...
 
 @dataclass(kw_only=True)
-class NewCdnaMeasurement:
+class NewCdnaMeasurement(_Json):
     measured_by: UUID
     data: ElectrophoreticMeasurementData
     cdna_id: UUID = ...
 
-    @staticmethod
-    def from_json(json: str) -> NewCdnaMeasurement: ...
-    def to_json(self) -> str: ...
-
 @dataclass(kw_only=True)
-class NewCdna:
+class NewCdna(_Json):
     library_type: LibraryType
     readable_id: str
     prepared_at: datetime
@@ -633,10 +575,6 @@ class NewCdna:
     measurements: list[NewCdnaMeasurement] = ...
     storage_location: str | None = ...
     notes: str | None = ...
-
-    @staticmethod
-    def from_json(json: str) -> NewCdna: ...
-    def to_json(self) -> str: ...
 
 @dataclass
 class MeasurementData_Electrophoretic(LibraryMeasurementData):
@@ -659,7 +597,7 @@ class NewLibraryMeasurement:
     library_id: UUID = ...
 
 @dataclass(kw_only=True)
-class NewLibrary:
+class NewLibrary(_Json):
     readable_id: str
     cdna_id: UUID
     number_of_sample_index_pcr_cycles: int
@@ -670,10 +608,6 @@ class NewLibrary:
     dual_index_set_name: str | None = ...
     measurements: list[NewLibraryMeasurement] = ...
     notes: str | None = ...
-
-    @staticmethod
-    def from_json(json: str) -> NewLibrary: ...
-    def to_json(self) -> str: ...
 
 @dataclass(kw_only=True)
 class _MetricsFile:
@@ -705,7 +639,7 @@ class _NewChromiumDatasetCore:
     gems_id: UUID
     web_summary: str
 
-class CellrangerarcvdjCountDataset:
+class _CellrangerarcvdjCountDataset(_Json):
     core: _NewChromiumDatasetCore
     metrics: SingleRowCsvMetricsFile
 
@@ -719,12 +653,13 @@ class CellrangerarcvdjCountDataset:
         gems_id: UUID,
         web_summary: str,
         metrics: SingleRowCsvMetricsFile,
-    ) -> CellrangerarcvdjCountDataset: ...
-    @staticmethod
-    def from_json(json: str) -> CellrangerarcvdjCountDataset: ...
-    def to_json(self) -> str: ...
+    ) -> Self: ...
 
-class CellrangerMultiDataset:
+class CellrangerarcCountDataset(_CellrangerarcvdjCountDataset): ...
+class CellrangerCountDataset(_CellrangerarcvdjCountDataset): ...
+class CellrangerVdjDataset(_CellrangerarcvdjCountDataset): ...
+
+class CellrangerMultiDataset(_Json):
     core: _NewChromiumDatasetCore
     metrics: list[MultiRowCsvMetricsFile]
 
@@ -739,11 +674,8 @@ class CellrangerMultiDataset:
         web_summary: str,
         metrics: list[MultiRowCsvMetricsFile],
     ) -> CellrangerMultiDataset: ...
-    @staticmethod
-    def from_json(json: str) -> CellrangerMultiDataset: ...
-    def to_json(self) -> str: ...
 
-class CellrangeratacCountDataset:
+class CellrangeratacCountDataset(_Json):
     core: _NewChromiumDatasetCore
     metrics: JsonMetricsFile
 
@@ -758,6 +690,3 @@ class CellrangeratacCountDataset:
         web_summary: str,
         metrics: JsonMetricsFile,
     ) -> CellrangeratacCountDataset: ...
-    @staticmethod
-    def from_json(json: str) -> CellrangeratacCountDataset: ...
-    def to_json(self) -> str: ...

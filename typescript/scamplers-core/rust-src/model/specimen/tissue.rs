@@ -1,6 +1,6 @@
 #[cfg(feature = "python")]
 use pyo3::prelude::*;
-use scamplers_macros::{db_enum, db_insertion, to_from_json};
+use scamplers_macros::{db_enum, db_insertion};
 #[cfg(feature = "backend")]
 use scamplers_schema::specimen;
 #[cfg(feature = "python")]
@@ -20,7 +20,11 @@ pub enum TissueType {
     Tissue,
 }
 
-#[to_from_json(python)]
+#[cfg_attr(
+    not(target_arch = "wasm32"),
+    derive(scamplers_macros::FromJson, scamplers_macros::ToJson)
+)]
+#[cfg_attr(not(target_arch = "wasm32"), json(wrapper = super::NewSpecimen, python))]
 #[db_insertion]
 #[cfg_attr(feature = "backend", diesel(table_name = specimen))]
 pub struct NewCryopreservedTissue {
@@ -83,7 +87,11 @@ pub enum TissueFixative {
     DithiobisSuccinimidylropionate,
 }
 
-#[to_from_json(python)]
+#[cfg_attr(
+    not(target_arch = "wasm32"),
+    derive(scamplers_macros::FromJson, scamplers_macros::ToJson)
+)]
+#[cfg_attr(not(target_arch = "wasm32"), json(wrapper = super::NewSpecimen, python))]
 #[db_insertion]
 #[cfg_attr(feature = "backend", diesel(table_name = specimen))]
 pub struct NewFixedTissue {
@@ -139,7 +147,11 @@ impl NewFixedTissue {
     }
 }
 
-#[to_from_json(python)]
+#[cfg_attr(
+    not(target_arch = "wasm32"),
+    derive(scamplers_macros::FromJson, scamplers_macros::ToJson)
+)]
+#[cfg_attr(not(target_arch = "wasm32"), json(wrapper = super::NewSpecimen, python))]
 #[db_insertion]
 #[cfg_attr(feature = "backend", diesel(table_name = specimen))]
 pub struct NewFrozenTissue {

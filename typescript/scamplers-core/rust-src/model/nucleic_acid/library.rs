@@ -1,6 +1,6 @@
 #[cfg(feature = "python")]
 use pyo3::prelude::*;
-use scamplers_macros::{db_insertion, db_json, db_selection, to_from_json};
+use scamplers_macros::{db_insertion, db_json, db_selection};
 #[cfg(feature = "backend")]
 use scamplers_schema::{library, library_measurement, library_preparers};
 use time::OffsetDateTime;
@@ -23,7 +23,10 @@ pub enum MeasurementData {
     },
 }
 
-#[to_from_json(python)]
+#[cfg_attr(
+    not(target_arch = "wasm32"),
+    derive(scamplers_macros::FromJson, scamplers_macros::ToJson)
+)]
 #[db_insertion]
 #[cfg_attr(feature = "backend", diesel(table_name = library_measurement))]
 pub struct NewLibraryMeasurement {
@@ -49,7 +52,11 @@ impl NewLibraryMeasurement {
     }
 }
 
-#[to_from_json(python)]
+#[cfg_attr(
+    not(target_arch = "wasm32"),
+    derive(scamplers_macros::FromJson, scamplers_macros::ToJson)
+)]
+#[cfg_attr(not(target_arch = "wasm32"), json(python))]
 #[db_insertion]
 #[cfg_attr(feature = "backend", diesel(table_name = library))]
 pub struct NewLibrary {
@@ -113,7 +120,10 @@ pub struct NewLibraryPreparer {
     pub prepared_by: Uuid,
 }
 
-#[to_from_json(python)]
+#[cfg_attr(
+    not(target_arch = "wasm32"),
+    derive(scamplers_macros::FromJson, scamplers_macros::ToJson)
+)]
 #[db_selection]
 #[cfg_attr(feature = "backend", diesel(table_name = library))]
 pub struct LibraryHandle {

@@ -2,7 +2,7 @@
 use pyo3::prelude::*;
 use scamplers_macros::{
     base_api_model, base_api_model_with_default, db_enum, db_insertion, db_query, db_selection,
-    db_update, to_from_json,
+    db_update,
 };
 #[cfg(feature = "backend")]
 use scamplers_schema::person;
@@ -15,14 +15,17 @@ use crate::model::{Pagination, SortByGroup, institution::Institution};
 
 #[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
 #[db_enum]
-#[derive(PartialEq)]
 pub enum UserRole {
     AppAdmin,
     BiologyStaff,
     ComputationalStaff,
 }
 
-#[to_from_json(python)]
+#[cfg_attr(
+    not(target_arch = "wasm32"),
+    derive(scamplers_macros::FromJson, scamplers_macros::ToJson)
+)]
+#[cfg_attr(not(target_arch = "wasm32"), json(python))]
 #[db_insertion]
 #[cfg_attr(feature = "backend", diesel(table_name = person))]
 pub struct NewPerson {
@@ -182,7 +185,10 @@ impl NewPersonInstitutionId {
     }
 }
 
-#[to_from_json(python)]
+#[cfg_attr(
+    not(target_arch = "wasm32"),
+    derive(scamplers_macros::FromJson, scamplers_macros::ToJson)
+)]
 #[db_selection]
 #[cfg_attr(feature = "backend", diesel(table_name = person))]
 pub struct PersonHandle {
@@ -190,7 +196,10 @@ pub struct PersonHandle {
     pub link: String,
 }
 
-#[to_from_json(python)]
+#[cfg_attr(
+    not(target_arch = "wasm32"),
+    derive(scamplers_macros::FromJson, scamplers_macros::ToJson)
+)]
 #[db_selection]
 #[cfg_attr(feature = "backend", diesel(table_name = person))]
 pub struct PersonSummary {
@@ -212,7 +221,10 @@ pub struct PersonCore {
     pub institution: Institution,
 }
 
-#[to_from_json(python)]
+#[cfg_attr(
+    not(target_arch = "wasm32"),
+    derive(scamplers_macros::FromJson, scamplers_macros::ToJson)
+)]
 #[cfg_attr(target_arch = "wasm32", wasm_bindgen(getter_with_clone))]
 #[cfg_attr(feature = "python", pyclass(get_all, str))]
 #[base_api_model]
@@ -244,7 +256,10 @@ pub struct PersonUpdateCore {
     pub institution_id: Option<Uuid>,
 }
 
-#[to_from_json(python)]
+#[cfg_attr(
+    not(target_arch = "wasm32"),
+    derive(scamplers_macros::FromJson, scamplers_macros::ToJson)
+)]
 #[cfg_attr(feature = "python", pyclass(get_all, set_all, str))]
 #[base_api_model_with_default]
 pub struct PersonUpdate {
@@ -262,7 +277,10 @@ pub enum PersonOrdinalColumn {
     Email,
 }
 
-#[to_from_json(python)]
+#[cfg_attr(
+    not(target_arch = "wasm32"),
+    derive(scamplers_macros::FromJson, scamplers_macros::ToJson)
+)]
 #[db_query]
 pub struct PersonQuery {
     #[builder(default)]

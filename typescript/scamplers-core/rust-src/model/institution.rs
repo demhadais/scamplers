@@ -1,7 +1,7 @@
 #[cfg(feature = "python")]
 use pyo3::prelude::*;
 use scamplers_macros::{
-    base_api_model_with_default, db_insertion, db_query, db_selection, to_from_json,
+    FromJson, ToJson, base_api_model_with_default, db_insertion, db_query, db_selection,
 };
 #[cfg(feature = "backend")]
 use scamplers_schema::institution;
@@ -12,9 +12,10 @@ use wasm_bindgen::prelude::*;
 
 use crate::model::{Pagination, SortByGroup};
 
-#[to_from_json(python)]
 #[db_insertion]
 #[cfg_attr(feature = "backend", diesel(table_name = institution))]
+#[derive(ToJson, FromJson)]
+#[cfg_attr(not(target_arch = "wasm32"), json(python))]
 pub struct NewInstitution {
     pub id: Uuid,
     #[garde(dive)]
@@ -31,17 +32,19 @@ impl NewInstitution {
     }
 }
 
-#[to_from_json(python)]
 #[db_selection]
 #[cfg_attr(feature = "backend", diesel(table_name = institution))]
+#[derive(ToJson, FromJson)]
+#[cfg_attr(not(target_arch = "wasm32"), json(python))]
 pub struct InstitutionHandle {
     pub id: Uuid,
     pub link: String,
 }
 
-#[to_from_json(python)]
 #[db_selection]
 #[cfg_attr(feature = "backend", diesel(table_name = institution))]
+#[derive(ToJson, FromJson)]
+#[cfg_attr(not(target_arch = "wasm32"), json(python))]
 pub struct Institution {
     #[serde(flatten)]
     #[cfg_attr(feature = "backend", diesel(embed))]
@@ -55,8 +58,9 @@ pub enum InstitutionOrdinalColumn {
     Name,
 }
 
-#[to_from_json(python)]
 #[db_query]
+#[derive(ToJson, FromJson)]
+#[cfg_attr(not(target_arch = "wasm32"), json(python))]
 pub struct InstitutionQuery {
     #[builder(default)]
     pub ids: Vec<Uuid>,

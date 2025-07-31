@@ -1,4 +1,4 @@
-use scamplers_macros::{db_enum, db_json, to_from_json};
+use scamplers_macros::{db_enum, db_json};
 use time::OffsetDateTime;
 
 use crate::model::units::{LengthUnit, VolumeUnit};
@@ -16,7 +16,10 @@ pub enum BiologicalMaterial {
     Nuclei,
 }
 
-#[to_from_json(python)]
+#[cfg_attr(
+    not(target_arch = "wasm32"),
+    derive(scamplers_macros::FromJson, scamplers_macros::ToJson)
+)]
 #[db_json]
 #[cfg_attr(
     feature = "python",

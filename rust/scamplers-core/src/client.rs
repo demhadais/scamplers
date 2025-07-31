@@ -17,15 +17,17 @@ use {
 use crate::model::{
     chromium_run::{ChromiumRun, NewChromiumRun},
     dataset::{
-        DatasetSummary, NewChromiumDataset, NewDataset,
+        DatasetSummary, NewDataset,
         chromium::{
-            CellrangerMultiDataset, CellrangerarcvdjCountDataset, CellrangeratacCountDataset,
+            CellrangerCountDataset, CellrangerMultiDataset, CellrangerVdjDataset,
+            CellrangerarcCountDataset, CellrangeratacCountDataset,
         },
     },
     institution::{Institution, NewInstitution},
     lab::{Lab, NewLab},
     nucleic_acid::{CdnaHandle, LibraryHandle, NewCdnaGroup, NewLibrary},
     person::{NewPerson, Person},
+    sequencing_run::{NewSequencingRun, SequencingRunSummary},
     specimen::{NewSpecimen, Specimen},
     suspension::{NewSuspension, Suspension},
 };
@@ -237,14 +239,15 @@ impl_client_methods!(
     (create_lab, NewLab, Lab, Method::POST);
     (create_specimen, NewSpecimen, Specimen, Method::POST);
     (create_suspension, NewSuspension, Suspension, Method::POST);
+    (create_sequencing_run, NewSequencingRun, SequencingRunSummary, Method::POST);
     (create_chromium_run, NewChromiumRun, ChromiumRun, Method::POST);
     (create_cdna, NewCdnaGroup, Vec<CdnaHandle>, Method::POST);
     (create_library, NewLibrary, LibraryHandle, Method::POST)
 );
 
 #[cfg(feature = "python")]
-macro_rules! impl_client_create_dataset_method {
-    ($(($method_name:ident, $request_type:path, $cellranger_variant:expr));*) => {
+macro_rules! impl_chromium_dataset_creation {
+    ($(($method_name:ident, $request_type:path));*) => {
         $(#[pymethods]
         impl ScamplersClient {
             async fn $method_name(
@@ -252,17 +255,17 @@ macro_rules! impl_client_create_dataset_method {
                 data: $request_type,
             ) -> Result<DatasetSummary, ScamplersCoreErrorResponse> {
                 let client = self.clone();
-                client.send_request_python(NewDataset::Chromium($cellranger_variant(data)), Method::POST).await
+                client.send_request_python(NewDataset::from(data), Method::POST).await
             }
         })*
     };
 }
 
 #[cfg(feature = "python")]
-impl_client_create_dataset_method!(
-    (create_cellrangerarc_count_dataset,CellrangerarcvdjCountDataset, NewChromiumDataset::CellrangerarcCount);
-    (create_cellrangeratac_count_dataset, CellrangeratacCountDataset, NewChromiumDataset::CellrangeratacCount);
-    (create_cellranger_count_dataset, CellrangerarcvdjCountDataset, NewChromiumDataset::CellrangerCount);
-    (create_cellranger_multi_dataset, CellrangerMultiDataset, NewChromiumDataset::CellrangerMulti);
-    (create_cellranger_vdj_dataset, CellrangerarcvdjCountDataset, NewChromiumDataset::CellrangerVdj)
+impl_chromium_dataset_creation!(
+    (create_cellrangerarc_count_dataset,CellrangerarcCountDataset);
+    (create_cellrangeratac_count_dataset, CellrangeratacCountDataset);
+    (create_cellranger_count_dataset, CellrangerCountDataset);
+    (create_cellranger_multi_dataset, CellrangerMultiDataset);
+    (create_cellranger_vdj_dataset, CellrangerVdjDataset)
 );

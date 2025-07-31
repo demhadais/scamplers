@@ -1,60 +1,66 @@
-from typing import Any
-from typing_extensions import Callable
+import pytest
 import maturin_import_hook
 
 maturin_import_hook.install()
 
 from scamplers_core import ScamplersClient
-from scamplers_core.requests import (
-    CellrangerMultiDataset,
-    CellrangerarcvdjCountDataset,
-    CellrangeratacCountDataset,
-    NewFixedBlock,
-    NewFrozenBlock,
-)
 from .test_requests import (
-    new_cellrangerarcvdj_count_dataset,
-    new_cellrangeratac_count_dataset,
+    new_cellranger_count_dataset,
     new_cellranger_multi_dataset,
+    new_cellrangeratac_count_dataset,
+    new_committee_approval,
+    new_cryopreserved_tissue,
     new_fixed_block,
+    new_fixed_tissue,
+    new_frozen_block,
+    new_frozen_tissue,
+    new_singleplex_chromium_run,
     specimen_dv200,
     specimen_rin,
-    new_committee_approval,
-    new_frozen_block,
+    suspension_volume,
 )
 
+
 __all__ = [
-    "new_cellrangerarcvdj_count_dataset",
-    "new_cellrangeratac_count_dataset",
+    "new_cellranger_count_dataset",
     "new_cellranger_multi_dataset",
+    "new_cellrangeratac_count_dataset",
+    "new_committee_approval",
+    "new_cryopreserved_tissue",
     "new_fixed_block",
+    "new_fixed_tissue",
+    "new_frozen_block",
+    "new_frozen_tissue",
+    "new_singleplex_chromium_run",
     "specimen_dv200",
     "specimen_rin",
-    "new_committee_approval",
-    "new_frozen_block",
+    "suspension_volume",
 ]
 
 
-def test_client(
-    new_fixed_block: NewFixedBlock,
-    new_frozen_block: NewFrozenBlock,
-    new_cellrangerarcvdj_count_dataset: CellrangerarcvdjCountDataset,
-    new_cellrangeratac_count_dataset: CellrangeratacCountDataset,
-    new_cellranger_multi_dataset: CellrangerMultiDataset,
-):
-    client = ScamplersClient(api_base_url="")
-    methods_params: list[tuple[Callable, Any]] = [
-        (client.create_specimen, new_fixed_block),
-        (client.create_specimen, new_frozen_block),
-        (
-            client.create_cellrangerarc_count_dataset,
-            new_cellrangerarcvdj_count_dataset,
-        ),
-        (client.create_cellrangeratac_count_dataset, new_cellrangeratac_count_dataset),
-        (client.create_cellranger_count_dataset, new_cellrangerarcvdj_count_dataset),
-        (client.create_cellranger_multi_dataset, new_cellranger_multi_dataset),
-        (client.create_cellranger_vdj_dataset, new_cellrangerarcvdj_count_dataset),
-    ]
+@pytest.fixture
+def scamplers_client() -> ScamplersClient:
+    return ScamplersClient(api_base_url="")
 
-    for method, data in methods_params:
-        _ = method(data)
+
+@pytest.mark.parametrize(
+    "method_name, fixture",
+    [
+        ("create_specimen", "new_fixed_block"),
+        ("create_specimen", "new_frozen_block"),
+        ("create_specimen", "new_cryopreserved_tissue"),
+        ("create_specimen", "new_fixed_tissue"),
+        ("create_specimen", "new_frozen_tissue"),
+        ("create_cellranger_count_dataset", "new_cellranger_count_dataset"),
+        ("create_chromium_run", "new_singleplex_chromium_run"),
+    ],
+)
+def test_client(
+    scamplers_client: ScamplersClient,
+    method_name: str,
+    fixture: str,
+    request: pytest.FixtureRequest,
+):
+    method = scamplers_client.__getattribute__(method_name)
+    data = request.getfixturevalue(fixture)
+    _ = method(data)

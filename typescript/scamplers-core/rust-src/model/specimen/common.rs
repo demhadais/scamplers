@@ -1,6 +1,6 @@
 #[cfg(feature = "python")]
 use pyo3::prelude::*;
-use scamplers_macros::{db_enum, db_insertion, db_json, db_selection, to_from_json};
+use scamplers_macros::{db_enum, db_insertion, db_json, db_selection};
 #[cfg(feature = "backend")]
 use scamplers_schema::{committee_approval, specimen, specimen_measurement};
 use time::OffsetDateTime;
@@ -30,7 +30,10 @@ pub enum ComplianceCommitteeType {
     Iacuc,
 }
 
-#[to_from_json(python)]
+#[cfg_attr(
+    not(target_arch = "wasm32"),
+    derive(scamplers_macros::FromJson, scamplers_macros::ToJson)
+)]
 #[db_insertion]
 #[cfg_attr(feature = "backend", diesel(table_name = committee_approval))]
 pub struct NewCommitteeApproval {
@@ -71,7 +74,10 @@ pub struct CommitteeApproval {
     pub compliance_identifier: String,
 }
 
-#[to_from_json(python)]
+#[cfg_attr(
+    not(target_arch = "wasm32"),
+    derive(scamplers_macros::FromJson, scamplers_macros::ToJson)
+)]
 #[db_json]
 #[serde(tag = "type")]
 #[cfg_attr(feature = "python", pyo3(name = "SpecimenMeasurementData", set_all))]
@@ -92,7 +98,10 @@ pub enum MeasurementData {
     },
 }
 
-#[to_from_json(python)]
+#[cfg_attr(
+    not(target_arch = "wasm32"),
+    derive(scamplers_macros::FromJson, scamplers_macros::ToJson)
+)]
 #[db_insertion]
 #[cfg_attr(feature = "backend", diesel(table_name = specimen_measurement))]
 pub struct NewSpecimenMeasurement {

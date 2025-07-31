@@ -654,7 +654,8 @@ export class SequencingRunSummary {
   handle: SequencingRunHandle;
   readable_id: string;
   begun_at: Date;
-  finished_at: Date;
+  get finished_at(): Date | undefined;
+  set finished_at(value: Date | null | undefined);
   get notes(): string;
   set notes(value: string | null | undefined);
 }

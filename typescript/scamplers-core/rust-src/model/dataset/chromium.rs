@@ -1,9 +1,10 @@
 use std::collections::HashMap;
 
 use any_value::AnyValue;
+use derive_more::{From, TryInto};
 #[cfg(feature = "python")]
 use pyo3::prelude::*;
-use scamplers_macros::{base_api_model, db_insertion, db_json, to_from_json};
+use scamplers_macros::{FromJson, ToJson, base_api_model, db_insertion, db_json};
 #[cfg(feature = "backend")]
 use scamplers_schema::dataset;
 #[cfg(feature = "python")]
@@ -161,36 +162,26 @@ macro_rules! impl_dataset_constructor {
     };
 }
 
-#[cfg_attr(feature = "python", pyclass)]
-#[to_from_json(python)]
 #[base_api_model]
-pub struct CellrangerarcvdjCountDataset {
+#[cfg_attr(feature = "python", pyclass(get_all, set_all, str, eq))]
+#[derive(FromJson, ToJson)]
+#[cfg_attr(not(target_arch = "wasm32"), json(wrapper = NewChromiumDataset, python))]
+pub struct CellrangerarcCountDataset {
     #[serde(flatten)]
     #[garde(dive)]
     pub core: NewChromiumDatasetCore,
     pub metrics: SingleRowCsvMetricsFile,
 }
-
 #[cfg(feature = "python")]
-impl_dataset_constructor!(CellrangerarcvdjCountDataset, SingleRowCsvMetricsFile);
+impl_dataset_constructor!(CellrangerarcCountDataset, SingleRowCsvMetricsFile);
 
-#[cfg_attr(feature = "python", pyclass)]
-#[to_from_json(python)]
 #[base_api_model]
-pub struct CellrangerMultiDataset {
-    #[serde(flatten)]
-    #[garde(dive)]
-    pub core: NewChromiumDatasetCore,
-    #[garde(dive)]
-    pub metrics: MultiRowCsvMetricsFileGroup,
-}
-
-#[cfg(feature = "python")]
-impl_dataset_constructor!(CellrangerMultiDataset, Vec<MultiRowCsvMetricsFile>);
-
-#[cfg_attr(feature = "python", pyclass)]
-#[to_from_json(python)]
-#[base_api_model]
+#[cfg_attr(feature = "python", pyclass(get_all, set_all, str, eq))]
+#[cfg_attr(
+    not(target_arch = "wasm32"),
+    derive(scamplers_macros::FromJson, scamplers_macros::ToJson)
+)]
+#[cfg_attr(not(target_arch = "wasm32"), json(wrapper = NewChromiumDataset, python))]
 pub struct CellrangeratacCountDataset {
     #[serde(flatten)]
     #[garde(dive)]
@@ -198,18 +189,60 @@ pub struct CellrangeratacCountDataset {
     #[garde(dive)]
     pub metrics: JsonMetricsFile,
 }
-
 #[cfg(feature = "python")]
 impl_dataset_constructor!(CellrangeratacCountDataset, JsonMetricsFile);
 
 #[base_api_model]
-#[derive(strum::IntoStaticStr)]
+#[cfg_attr(feature = "python", pyclass(get_all, set_all, str, eq))]
+#[derive(FromJson, ToJson)]
+#[cfg_attr(not(target_arch = "wasm32"), json(wrapper = NewChromiumDataset, python))]
+pub struct CellrangerCountDataset {
+    #[serde(flatten)]
+    #[garde(dive)]
+    pub core: NewChromiumDatasetCore,
+    pub metrics: SingleRowCsvMetricsFile,
+}
+#[cfg(feature = "python")]
+impl_dataset_constructor!(CellrangerCountDataset, SingleRowCsvMetricsFile);
+
+#[base_api_model]
+#[cfg_attr(feature = "python", pyclass(get_all, set_all, str, eq))]
+#[cfg_attr(
+    not(target_arch = "wasm32"),
+    derive(scamplers_macros::FromJson, scamplers_macros::ToJson)
+)]
+#[cfg_attr(not(target_arch = "wasm32"), json(wrapper = NewChromiumDataset, python))]
+pub struct CellrangerMultiDataset {
+    #[serde(flatten)]
+    #[garde(dive)]
+    pub core: NewChromiumDatasetCore,
+    #[garde(dive)]
+    pub metrics: MultiRowCsvMetricsFileGroup,
+}
+#[cfg(feature = "python")]
+impl_dataset_constructor!(CellrangerMultiDataset, Vec<MultiRowCsvMetricsFile>);
+
+#[base_api_model]
+#[cfg_attr(feature = "python", pyclass(get_all, set_all, str, eq))]
+#[derive(FromJson, ToJson)]
+#[cfg_attr(not(target_arch = "wasm32"), json(wrapper = NewChromiumDataset, python))]
+pub struct CellrangerVdjDataset {
+    #[serde(flatten)]
+    #[garde(dive)]
+    pub core: NewChromiumDatasetCore,
+    pub metrics: SingleRowCsvMetricsFile,
+}
+#[cfg(feature = "python")]
+impl_dataset_constructor!(CellrangerVdjDataset, SingleRowCsvMetricsFile);
+
+#[base_api_model]
+#[derive(strum::IntoStaticStr, TryInto, From)]
 #[serde(tag = "cmdline")]
 #[cfg_attr(feature = "python", pyclass(get_all, set_all, str))]
 pub enum NewChromiumDataset {
     #[serde(rename = "cellranger-arc count")]
     #[strum(serialize = "cellranger-arc count")]
-    CellrangerarcCount(CellrangerarcvdjCountDataset),
+    CellrangerarcCount(CellrangerarcCountDataset),
 
     #[serde(rename = "cellranger-atac count")]
     #[strum(serialize = "cellranger-atac count")]
@@ -217,7 +250,7 @@ pub enum NewChromiumDataset {
 
     #[serde(rename = "cellranger count")]
     #[strum(serialize = "cellranger count")]
-    CellrangerCount(CellrangerarcvdjCountDataset),
+    CellrangerCount(CellrangerCountDataset),
 
     #[serde(rename = "cellranger multi")]
     #[strum(serialize = "cellranger multi")]
@@ -225,7 +258,7 @@ pub enum NewChromiumDataset {
 
     #[serde(rename = "cellranger vdj")]
     #[strum(serialize = "cellranger vdj")]
-    CellrangerVdj(CellrangerarcvdjCountDataset),
+    CellrangerVdj(CellrangerVdjDataset),
 }
 
 #[allow(clippy::trivially_copy_pass_by_ref)]

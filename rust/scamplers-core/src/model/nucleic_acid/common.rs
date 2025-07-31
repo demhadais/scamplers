@@ -1,6 +1,6 @@
 #[cfg(feature = "python")]
 use pyo3::prelude::*;
-use scamplers_macros::{db_json, to_from_json};
+use scamplers_macros::db_json;
 use time::OffsetDateTime;
 use valid_string::ValidString;
 
@@ -36,7 +36,10 @@ fn electrophoretic_sizing_range((min, max): &(u16, u16), _: &()) -> garde::Resul
     Ok(())
 }
 
-#[to_from_json(python)]
+#[cfg_attr(
+    not(target_arch = "wasm32"),
+    derive(scamplers_macros::FromJson, scamplers_macros::ToJson)
+)]
 #[db_json]
 #[cfg_attr(feature = "python", pyo3(set_all))]
 pub struct ElectrophoreticMeasurementData {

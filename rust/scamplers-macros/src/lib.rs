@@ -1,9 +1,6 @@
 use proc_macro::TokenStream;
 use quote::quote;
-use syn::{
-    Ident, ImplItem, ImplItemFn, Item, ItemEnum, ItemImpl, ItemStruct, parse, parse_macro_input,
-    parse2,
-};
+use syn::{DeriveInput, Ident, Item, ItemEnum, ItemStruct, TypePath, parse, parse_macro_input};
 
 trait GetIdent {
     fn get_ident(&self) -> &Ident;
@@ -22,7 +19,7 @@ fn base_api_model_derives(input: TokenStream) -> proc_macro2::TokenStream {
     let item: Item = parse(input).unwrap();
 
     let first_lines = quote! {
-        #[derive(Debug, ::serde::Deserialize, ::serde::Serialize, Clone, ::garde::Validate, ::valuable::Valuable, ::thiserror::Error)]
+        #[derive(Debug, ::serde::Deserialize, ::serde::Serialize, Clone, ::garde::Validate, ::valuable::Valuable, ::thiserror::Error, PartialEq)]
         #[garde(allow_unvalidated)]
         #[error("{self:#?}")]
     };
@@ -37,71 +34,6 @@ fn base_api_model_derives(input: TokenStream) -> proc_macro2::TokenStream {
         },
         _ => panic!("expected enum or struct"),
     }
-}
-
-#[proc_macro_attribute]
-pub fn to_from_json(attr: TokenStream, input: TokenStream) -> TokenStream {
-    let item = parse_macro_input!(input as Item);
-    let ident = item.get_ident();
-
-    let attr = attr.to_string();
-    let python = if attr == "python" {
-        true
-    } else if attr.is_empty() {
-        false
-    } else {
-        panic!("unexpected proc macro attribute {attr}")
-    };
-
-    let mut from_json_method = quote! {
-        pub fn from_json(
-            json: &str,
-        ) -> ::std::result::Result<Self, crate::result::ScamplersCoreErrorResponse> {
-            let error = |err| {
-                let inner = crate::result::ClientError {
-                    message: format!("failed to deserialize provided json string: {err}")
-                };
-
-                crate::result::ScamplersCoreErrorResponse::builder().error(inner).build()
-            };
-
-            ::serde_json::from_str(json).map_err(error)
-        }
-    };
-
-    if python {
-        from_json_method = quote! {
-            #[staticmethod]
-            #from_json_method
-        };
-    }
-
-    let implementation = quote! {
-        impl #ident {
-            #from_json_method
-
-            pub fn to_json(&self) -> String {
-                ::serde_json::to_string(self).unwrap()
-            }
-        }
-    };
-
-    let result = if python {
-        quote! {
-            #item
-            #[cfg(feature = "python")]
-            #[::pyo3::pymethods]
-            #implementation
-        }
-    } else {
-        quote! {
-            #item
-            #[cfg(not(feature = "python"))]
-            #implementation
-        }
-    };
-
-    result.into()
 }
 
 #[proc_macro_attribute]
@@ -165,7 +97,7 @@ pub fn db_insertion(attr: TokenStream, input: TokenStream) -> TokenStream {
     let struct_item = parse_macro_input!(input as ItemStruct);
 
     let output = quote! {
-        #[cfg_attr(feature = "python", ::pyo3::pyclass(get_all, set_all, str))]
+        #[cfg_attr(feature = "python", ::pyo3::pyclass(get_all, set_all, str, eq))]
         #[cfg_attr(
             feature = "backend",
             derive(::diesel::Insertable),
@@ -187,7 +119,7 @@ pub fn db_query(attr: TokenStream, input: TokenStream) -> TokenStream {
     let struct_name = &struct_item.ident;
 
     let output = quote! {
-        #[cfg_attr(feature = "python", ::pyo3::pyclass(str))]
+        #[cfg_attr(feature = "python", ::pyo3::pyclass(str, eq))]
         #[cfg_attr(target_arch = "wasm32", ::wasm_bindgen::prelude::wasm_bindgen(inspectable, getter_with_clone))]
         #[derive(::bon::Builder)]
         #[builder(on(_, into))]
@@ -212,56 +144,10 @@ pub fn db_selection(attr: TokenStream, input: TokenStream) -> TokenStream {
     let struct_item = parse_macro_input!(input as ItemStruct);
 
     let output = quote! {
-        #[cfg_attr(feature = "python", ::pyo3::pyclass(get_all, str))]
+        #[cfg_attr(feature = "python", ::pyo3::pyclass(get_all, str, eq))]
         #[cfg_attr(target_arch = "wasm32", ::wasm_bindgen::prelude::wasm_bindgen(inspectable, getter_with_clone))]
         #[cfg_attr(feature = "backend", derive(::diesel::Selectable, ::diesel::Queryable), diesel(check_for_backend(::diesel::pg::Pg)))]
         #struct_item
-    };
-
-    output.into()
-}
-
-fn add_attribute_to_method(
-    method: &ImplItemFn,
-    attribute: &proc_macro2::TokenStream,
-) -> proc_macro2::TokenStream {
-    quote! {
-        #attribute
-        #method
-    }
-}
-
-#[proc_macro_attribute]
-pub fn getters_impl(_attr: TokenStream, input: TokenStream) -> TokenStream {
-    let mut impl_block = parse_macro_input!(input as ItemImpl);
-
-    let mut py_impl_block = impl_block.clone();
-
-    let og_methods = impl_block.items.iter_mut().filter_map(|i| match i {
-        ImplItem::Fn(f) => Some(f),
-        _ => None,
-    });
-
-    for (i, og_method) in og_methods.enumerate() {
-        let wasmified_method = add_attribute_to_method(
-            og_method,
-            &quote! { #[cfg_attr(target_arch = "wasm32", wasm_bindgen(getter))] },
-        );
-
-        let pythonized_method = add_attribute_to_method(og_method, &quote! { #[getter] });
-        py_impl_block.items[i] = parse2(pythonized_method).unwrap();
-
-        *og_method = parse2(wasmified_method).unwrap();
-    }
-
-    let output = quote! {
-        #[cfg(not(feature = "python"))]
-        #[cfg_attr(target_arch = "wasm32", ::wasm_bindgen::prelude::wasm_bindgen)]
-        #impl_block
-
-        #[cfg(feature = "python")]
-        #[::pyo3::pymethods]
-        #py_impl_block
     };
 
     output.into()
@@ -273,7 +159,7 @@ pub fn db_update(attr: TokenStream, input: TokenStream) -> TokenStream {
     let struct_item = parse_macro_input!(input as ItemStruct);
 
     let output = quote! {
-        #[cfg_attr(feature = "python", ::pyo3::pyclass(str))]
+        #[cfg_attr(feature = "python", ::pyo3::pyclass(str, eq))]
         #[cfg_attr(feature = "backend", derive(::diesel::AsChangeset, ::diesel::Identifiable), diesel(check_for_backend(::diesel::pg::Pg)))]
         #[derive(::bon::Builder)]
         #[builder(on(_, into))]
@@ -291,7 +177,7 @@ pub fn db_enum(attr: TokenStream, input: TokenStream) -> TokenStream {
     let ItemEnum { ident, .. } = &enum_item;
 
     let output = quote! {
-        #[cfg_attr(feature = "python", ::pyo3::pyclass(str))]
+        #[cfg_attr(feature = "python", ::pyo3::pyclass(str, eq))]
         #[cfg_attr(feature = "backend", derive(::diesel::deserialize::FromSqlRow, ::diesel::expression::AsExpression))]
         #[derive(::strum::EnumString, ::strum::IntoStaticStr)]
         #[strum(serialize_all = "snake_case")]
@@ -334,7 +220,7 @@ pub fn db_json(attr: TokenStream, input: TokenStream) -> TokenStream {
     let ident = item.get_ident();
 
     let output = quote! {
-        #[cfg_attr(feature = "python", ::pyo3::pyclass(get_all, str))]
+        #[cfg_attr(feature = "python", ::pyo3::pyclass(get_all, str, eq))]
         #[cfg_attr(feature = "backend", derive(::diesel::deserialize::FromSqlRow, ::diesel::expression::AsExpression))]
         #[cfg_attr(feature = "backend", diesel(sql_type = ::diesel::sql_types::Jsonb))]
         #item
@@ -362,6 +248,122 @@ pub fn db_json(attr: TokenStream, input: TokenStream) -> TokenStream {
             }
         }
     };
+
+    output.into()
+}
+
+fn extract_wrapper_type_and_python(
+    DeriveInput { attrs, .. }: &DeriveInput,
+    attribute_name: &str,
+) -> (Option<TypePath>, bool) {
+    let mut wrapper_type = None;
+    let mut python = false;
+
+    for attribute in attrs {
+        if attribute.path().is_ident(attribute_name) {
+            attribute
+                .parse_nested_meta(|meta| {
+                    if meta.path.is_ident("wrapper") {
+                        wrapper_type = Some(meta.value()?.parse()?);
+                    } else if meta.path.is_ident("python") {
+                        python = true;
+                    } else {
+                        return Err(meta.error(
+                            "expected attribute '#[json(wrapper = Type)]' or #[json(wrapper = \
+                             Type, python)]'",
+                        ));
+                    }
+
+                    Ok(())
+                })
+                .unwrap();
+        }
+    }
+
+    (wrapper_type, python)
+}
+
+#[proc_macro_derive(ToJson, attributes(json))]
+pub fn derive_to_json(input: TokenStream) -> TokenStream {
+    let derive_input = parse_macro_input!(input as DeriveInput);
+
+    let name = &derive_input.ident;
+
+    let (wrapper_type, python) = extract_wrapper_type_and_python(&derive_input, "json");
+
+    let method_body = match wrapper_type {
+        Some(wrapper_type) => {
+            quote! {
+                ::serde_json::to_string(&#wrapper_type::from(self.clone())).unwrap()
+            }
+        }
+        None => {
+            quote! {
+                ::serde_json::to_string(self).unwrap()
+            }
+        }
+    };
+
+    let mut output = quote! {
+        impl #name {
+            pub fn to_json(&self) -> String {
+                #method_body
+            }
+        }
+    };
+
+    if python {
+        output = quote! {
+            #[cfg_attr(feature = "python", ::pyo3::pymethods)]
+            #output
+        }
+    }
+
+    output.into()
+}
+
+#[proc_macro_derive(FromJson, attributes(json))]
+pub fn derive_from_json(input: TokenStream) -> TokenStream {
+    let derive_input = parse_macro_input!(input as DeriveInput);
+
+    let name = &derive_input.ident;
+
+    let (wrapper_type, python) = extract_wrapper_type_and_python(&derive_input, "json");
+
+    let method_body = if let Some(wrapper_type) = wrapper_type {
+        quote! {
+            let wrapped: #wrapper_type = serde_json::from_str(json)?;
+            Ok(wrapped.try_into()?)
+        }
+    } else {
+        quote! {
+            Ok(serde_json::from_str(json)?)
+        }
+    };
+
+    let mut output = quote! {
+        impl #name {
+            pub fn from_json(json: &str) -> ::anyhow::Result<Self> {
+                #method_body
+            }
+        }
+    };
+
+    if python {
+        output = quote! {
+            #output
+
+            #[cfg(feature = "python")]
+            #[::pyo3::pymethods]
+            impl #name {
+                #[staticmethod]
+                #[pyo3(name = "from_json")]
+                fn py_from_json(json: &str) -> ::anyhow::Result<Self> {
+                    Self::from_json(json)
+                }
+            }
+        }
+    }
 
     output.into()
 }

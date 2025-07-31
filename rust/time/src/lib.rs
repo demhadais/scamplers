@@ -15,7 +15,7 @@ const OFFSET_DATETIME_AS_VALUE: &str = "OffsetDateTime";
 #[cfg_attr(feature = "python", pyo3(transparent))]
 #[cfg_attr(feature = "backend", diesel(sql_type = sql_types::Timestamptz))]
 #[serde(transparent)]
-pub struct OffsetDateTime(_time::OffsetDateTime);
+pub struct OffsetDateTime(#[serde(with = "_time::serde::iso8601")] _time::OffsetDateTime);
 impl OffsetDateTime {
     #[must_use]
     pub fn now_utc() -> Self {
