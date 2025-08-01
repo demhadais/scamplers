@@ -39,10 +39,16 @@ fn scamplers_core(m: &Bound<'_, PyModule>) -> PyResult<()> {
         },
         person::{NewPerson, UserRole},
         specimen::{
-            self, BlockFixative, ComplianceCommitteeType, FixedBlockEmbeddingMatrix,
-            FrozenBlockEmbeddingMatrix, NewCommitteeApproval, NewCryopreservedTissue,
-            NewFixedBlock, NewFixedTissue, NewFrozenBlock, NewFrozenTissue, NewSpecimenMeasurement,
-            NewVirtualSpecimen, Species, SuspensionFixative, TissueFixative,
+            self,
+            block::{
+                BlockFixative, FixedBlockEmbeddingMatrix, FrozenBlockEmbeddingMatrix,
+                NewFixedBlock, NewFrozenBlock,
+            },
+            common::{
+                ComplianceCommitteeType, NewCommitteeApproval, NewSpecimenMeasurement, Species,
+            },
+            tissue::{NewCryopreservedTissue, NewFixedTissue, NewFrozenTissue, TissueFixative},
+            virtual_::{NewVirtualSpecimen, SuspensionFixative},
         },
         suspension::{
             self, BiologicalMaterial, CellCountingMethod, NewSuspension, NewSuspensionMeasurement,
@@ -102,7 +108,7 @@ fn scamplers_core(m: &Bound<'_, PyModule>) -> PyResult<()> {
     requests.add_class::<VolumeUnit>()?;
     requests.add_class::<LengthUnit>()?;
     requests.add_class::<Species>()?;
-    requests.add_class::<specimen::MeasurementData>()?;
+    requests.add_class::<specimen::common::MeasurementData>()?;
     requests.add_class::<NewSpecimenMeasurement>()?;
     requests.add_class::<NewCommitteeApproval>()?;
     requests.add_class::<ComplianceCommitteeType>()?;

@@ -271,14 +271,16 @@ impl WriteToDb for NewMsLogin {
 
 #[cfg(test)]
 mod tests {
+    use std::cmp::Ordering;
+
     use diesel_async::{AsyncConnection, scoped_futures::ScopedFutureExt};
     use pretty_assertions::assert_eq;
     use rstest::rstest;
     use scamplers_core::model::{
         institution::{Institution, InstitutionQuery},
         person::{
-            NewMsLogin, NewPerson, PersonOrdinalColumn, PersonQuery, PersonSummary, PersonUpdate,
-            PersonUpdateCore, UserRole,
+            NewMsLogin, NewPerson, Person, PersonOrdinalColumn, PersonQuery, PersonSummary,
+            PersonUpdate, PersonUpdateCore, UserRole,
         },
     };
     use uuid::Uuid;
@@ -288,41 +290,49 @@ mod tests {
         db::{
             DbTransaction,
             model::{FetchByQuery, IsUpdate, WriteToDb},
-            test_util::{DbConnection, N_PEOPLE, db_conn, test_query},
+            test_util::{DbConnection, db_conn, people, test_query},
         },
         result::ScamplersError,
     };
 
-    fn comparison_fn(p: &PersonSummary) -> String {
-        p.name.to_string()
+    fn extract(p: Person) -> PersonSummary {
+        p.core.summary
+    }
+
+    fn sort_by_name(p1: &PersonSummary, p2: &PersonSummary) -> Ordering {
+        p1.name.cmp(&p2.name)
     }
 
     #[rstest]
     #[awt]
     #[tokio::test]
-    async fn default_person_query(#[future] db_conn: DbConnection) {
-        let expected = [(0, "person0"), (N_PEOPLE - 1, "person99")];
-        test_query(
-            PersonQuery::default(),
-            db_conn,
-            N_PEOPLE,
-            comparison_fn,
-            &expected,
-        )
-        .await;
+    async fn default_person_query(#[future] db_conn: DbConnection, #[future] people: Vec<Person>) {
+        test_query()
+            .all_data(people)
+            .extract(extract)
+            .sort_by(sort_by_name)
+            .db_query(PersonQuery::default())
+            .run(db_conn)
+            .await;
     }
 
     #[rstest]
     #[awt]
     #[tokio::test]
-    async fn specific_person_query(#[future] db_conn: DbConnection) {
+    async fn specific_person_query(#[future] db_conn: DbConnection, #[future] people: Vec<Person>) {
         let query = PersonQuery::builder()
             .name("person1")
             .order_by((PersonOrdinalColumn::Name, true))
             .build();
 
-        let expected = [(0, "person19"), (10, "person1")];
-        test_query(query, db_conn, 11, comparison_fn, &expected).await;
+        test_query()
+            .all_data(people)
+            .extract(extract)
+            .filter(|p| p.name.starts_with("person1"))
+            .sort_by(|p1, p2| sort_by_name(p1, p2).reverse())
+            .db_query(query)
+            .run(db_conn)
+            .await;
     }
 
     #[rstest]

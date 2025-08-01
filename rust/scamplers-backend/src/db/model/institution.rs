@@ -89,41 +89,51 @@ impl model::FetchByQuery for Institution {
 
 #[cfg(test)]
 mod tests {
+    use std::cmp::Ordering;
+
     use rstest::rstest;
     use scamplers_core::model::institution::*;
 
-    use crate::db::test_util::{DbConnection, N_INSTITUTIONS, db_conn, test_query};
+    use crate::db::test_util::{DbConnection, db_conn, institutions, test_query};
 
-    fn comparison_fn(i: &Institution) -> String {
-        i.name.to_string()
+    fn sort_by_name(i1: &Institution, i2: &Institution) -> Ordering {
+        i1.name.cmp(&i2.name)
     }
 
     #[rstest]
     #[awt]
     #[tokio::test]
-    async fn default_institution_query(#[future] db_conn: DbConnection) {
-        let expected = [(0, "institution0"), (N_INSTITUTIONS - 1, "institution9")];
-        test_query(
-            InstitutionQuery::default(),
-            db_conn,
-            N_INSTITUTIONS,
-            comparison_fn,
-            &expected,
-        )
-        .await;
+    async fn default_institution_query(
+        #[future] db_conn: DbConnection,
+        #[future] institutions: Vec<Institution>,
+    ) {
+        test_query()
+            .all_data(institutions)
+            .extract(|i| i)
+            .sort_by(sort_by_name)
+            .run(db_conn)
+            .await;
     }
 
     #[rstest]
     #[awt]
     #[tokio::test]
-    async fn specific_institution_query(#[future] db_conn: DbConnection) {
+    async fn specific_institution_query(
+        #[future] db_conn: DbConnection,
+        #[future] institutions: Vec<Institution>,
+    ) {
         let query = InstitutionQuery::builder()
             .name("institution1")
             .order_by((InstitutionOrdinalColumn::Name, true))
             .build();
 
-        let expected = [(0, "institution19"), (10, "institution1")];
-
-        test_query(query, db_conn, 11, comparison_fn, &expected).await;
+        test_query()
+            .all_data(institutions)
+            .extract(|i| i)
+            .filter(|i| i.name.starts_with("institution1"))
+            .sort_by(|i1, i2| sort_by_name(i1, i2).reverse())
+            .db_query(query)
+            .run(db_conn)
+            .await;
     }
 }

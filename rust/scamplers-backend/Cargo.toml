@@ -39,10 +39,12 @@ axum-extra = { workspace = true }
 rand = { workspace = true }
 dotenvy = { workspace = true }
 valid-string = { path = "../valid-string" }
+bon = { workspace = true }
 
 [dev-dependencies]
 pretty_assertions = { workspace = true }
 rstest = { workspace = true }
+time = { path = "../time", features = ["backend"] }
 
 [lints]
 workspace = true

@@ -13,7 +13,7 @@ use valid_string::ValidString;
 use super::common::NewSpecimenCommon;
 #[cfg(feature = "python")]
 use crate::model::specimen::{
-    NewSpecimenMeasurement,
+    common::NewSpecimenMeasurement,
     common::{NewCommitteeApproval, Species},
 };
 
@@ -51,6 +51,7 @@ pub struct NewFixedBlock {
     #[cfg_attr(feature = "backend", diesel(embed))]
     pub inner: NewSpecimenCommon,
     #[serde(skip)]
+    #[builder(default)]
     pub type_: BlockType,
     pub embedded_in: FixedBlockEmbeddingMatrix,
     pub fixative: BlockFixative,
@@ -98,7 +99,7 @@ impl NewFixedBlock {
 }
 
 #[db_enum]
-#[derive(Default)]
+#[derive(Default, strum::VariantArray)]
 pub enum FrozenBlockEmbeddingMatrix {
     #[default] // Honestly not sure why I need this :(
     CarboxymethylCellulose,
@@ -118,6 +119,7 @@ pub struct NewFrozenBlock {
     #[cfg_attr(feature = "backend", diesel(embed))]
     pub inner: NewSpecimenCommon,
     #[serde(skip)]
+    #[builder(default)]
     pub type_: BlockType,
     pub embedded_in: FrozenBlockEmbeddingMatrix,
     pub fixative: Option<BlockFixative>,

@@ -201,13 +201,13 @@ impl model::FetchById for Lab {
 
 #[cfg(test)]
 mod tests {
-    use std::collections::HashSet;
+    use std::{cmp::Ordering, collections::HashSet};
 
     use diesel_async::{AsyncConnection, scoped_futures::ScopedFutureExt};
     use pretty_assertions::assert_eq;
     use rstest::rstest;
     use scamplers_core::model::{
-        lab::{LabQuery, LabSummary, LabUpdate, LabUpdateCore, NewLab},
+        lab::{Lab, LabQuery, LabSummary, LabUpdate, LabUpdateCore, NewLab},
         person::{PersonQuery, PersonSummary},
     };
     use scamplers_schema::lab;
@@ -215,28 +215,29 @@ mod tests {
     use crate::{
         db::{
             model::{FetchByQuery, FetchRelatives, WriteToDb},
-            test_util::{DbConnection, N_LAB_MEMBERS, N_LABS, db_conn, test_query},
+            test_util::{DbConnection, N_LAB_MEMBERS, db_conn, labs, test_query},
         },
         result::ScamplersError,
     };
 
-    fn comparison_fn(l: &LabSummary) -> String {
-        l.name.to_string()
+    fn extract(l: Lab) -> LabSummary {
+        l.core.summary
+    }
+
+    fn sort_by_name(l1: &LabSummary, l2: &LabSummary) -> Ordering {
+        l1.name.cmp(&l2.name)
     }
 
     #[rstest]
     #[awt]
     #[tokio::test]
-    async fn default_query(#[future] db_conn: DbConnection) {
-        let expected = [(0, "lab0"), (N_LABS - 1, "lab9")];
-        test_query(
-            LabQuery::default(),
-            db_conn,
-            N_LABS,
-            comparison_fn,
-            &expected,
-        )
-        .await;
+    async fn default_query(#[future] db_conn: DbConnection, #[future] labs: Vec<Lab>) {
+        test_query()
+            .all_data(labs)
+            .extract(extract)
+            .sort_by(sort_by_name)
+            .run(db_conn)
+            .await;
     }
 
     #[rstest]

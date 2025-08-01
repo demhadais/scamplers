@@ -104,7 +104,7 @@ pub fn db_insertion(attr: TokenStream, input: TokenStream) -> TokenStream {
             diesel(check_for_backend(::diesel::pg::Pg))
         )]
         #[derive(::bon::Builder)]
-        #[builder(on(_, into))]
+        #[builder(on(_, into), derive(Clone, Debug, Into))]
         #struct_item
     };
 

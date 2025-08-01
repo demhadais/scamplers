@@ -1,42 +1,30 @@
-pub(crate) use block::{NewFixedBlock, NewFrozenBlock};
-pub(crate) use common::Species;
-pub use common::{MeasurementData, NewSpecimenMeasurement};
 #[cfg(feature = "python")]
 use pyo3::{FromPyObject, prelude::*};
 use scamplers_macros::{base_api_model, db_enum, db_query, db_selection};
 #[cfg(feature = "backend")]
 use scamplers_schema::{specimen, specimen_measurement};
 use time::OffsetDateTime;
-pub(crate) use tissue::{NewCryopreservedTissue, NewFixedTissue, NewFrozenTissue};
 use uuid::Uuid;
-pub(crate) use virtual_::NewVirtualSpecimen;
-#[cfg(feature = "python")]
-pub(crate) use {
-    block::{BlockFixative, FixedBlockEmbeddingMatrix, FrozenBlockEmbeddingMatrix},
-    common::{ComplianceCommitteeType, NewCommitteeApproval},
-    tissue::TissueFixative,
-    virtual_::SuspensionFixative,
-};
 
 use super::{lab::LabSummary, person::PersonSummary};
 use crate::model::{Pagination, SortByGroup, person::PersonHandle};
 
-mod block;
-mod common;
-mod tissue;
-mod virtual_;
+pub mod block;
+pub mod common;
+pub mod tissue;
+pub mod virtual_;
 
 #[base_api_model]
 #[serde(tag = "type")]
 #[cfg_attr(feature = "python", derive(FromPyObject))]
 #[derive(derive_more::TryInto, derive_more::From)]
 pub enum NewSpecimen {
-    FixedBlock(#[garde(dive)] NewFixedBlock),
-    FrozenBlock(#[garde(dive)] NewFrozenBlock),
-    Suspension(#[garde(dive)] NewVirtualSpecimen),
-    CryopreservedTissue(#[garde(dive)] NewCryopreservedTissue),
-    FixedTissue(#[garde(dive)] NewFixedTissue),
-    FrozenTissue(#[garde(dive)] NewFrozenTissue),
+    CryopreservedTissue(#[garde(dive)] tissue::NewCryopreservedTissue),
+    FixedBlock(#[garde(dive)] block::NewFixedBlock),
+    FixedTissue(#[garde(dive)] tissue::NewFixedTissue),
+    FrozenBlock(#[garde(dive)] block::NewFrozenBlock),
+    FrozenTissue(#[garde(dive)] tissue::NewFrozenTissue),
+    Suspension(#[garde(dive)] virtual_::NewVirtualSpecimen),
 }
 
 #[cfg_attr(
@@ -82,7 +70,7 @@ pub struct SpecimenMeasurement {
     pub measured_by: PersonHandle,
     #[serde(flatten)]
     #[cfg_attr(target_arch = "wasm32", wasm_bindgen(skip))]
-    pub data: MeasurementData,
+    pub data: common::MeasurementData,
 }
 
 #[db_selection]
@@ -140,7 +128,6 @@ pub enum Fixative {
 
 #[db_enum]
 #[derive(Default)]
-#[serde(untagged)]
 pub enum SpecimenOrdinalColumn {
     Name,
     #[default]
@@ -153,13 +140,17 @@ pub enum SpecimenOrdinalColumn {
 )]
 #[db_query]
 pub struct SpecimenQuery {
+    #[builder(default)]
     pub ids: Vec<Uuid>,
     pub name: Option<String>,
+    #[builder(default)]
     pub submitters: Vec<Uuid>,
+    #[builder(default)]
     pub labs: Vec<Uuid>,
     pub received_before: Option<OffsetDateTime>,
     pub received_after: Option<OffsetDateTime>,
-    pub species: Vec<Species>,
+    #[builder(default)]
+    pub species: Vec<common::Species>,
     pub notes: Option<String>,
     #[serde(alias = "type")]
     #[cfg_attr(target_arch = "wasm32", wasm_bindgen(skip))]
@@ -172,7 +163,9 @@ pub struct SpecimenQuery {
     pub frozen: Option<bool>,
     pub cryopreserved: Option<bool>,
     #[cfg_attr(target_arch = "wasm32", wasm_bindgen(skip))]
+    #[builder(default)]
     pub order_by: SortByGroup<SpecimenOrdinalColumn>,
+    #[builder(default)]
     pub pagination: Pagination,
 }
 

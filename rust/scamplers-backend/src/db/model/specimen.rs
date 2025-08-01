@@ -1,8 +1,8 @@
 use diesel::{dsl::AssumeNotNull, prelude::*};
 use diesel_async::{AsyncPgConnection, RunQueryDsl};
 use scamplers_core::model::specimen::{
-    NewSpecimen, NewSpecimenMeasurement, Specimen, SpecimenCore, SpecimenMeasurement,
-    SpecimenQuery, SpecimenSummary,
+    NewSpecimen, Specimen, SpecimenCore, SpecimenMeasurement, SpecimenQuery, SpecimenSummary,
+    common::NewSpecimenMeasurement,
 };
 use scamplers_schema::{
     lab, person,
@@ -263,5 +263,72 @@ impl FetchByQuery for SpecimenSummary {
             [(Name, name_col), (ReceivedAt, received_at_col)],
             db_conn
         )
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use rstest::rstest;
+    use scamplers_core::model::specimen::{
+        BlockEmbeddingMatrix, Specimen, SpecimenOrdinalColumn, SpecimenQuery, SpecimenSummary,
+        SpecimenType,
+        block::{BlockType, FrozenBlockEmbeddingMatrix},
+    };
+
+    use crate::db::test_util::{DbConnection, db_conn, specimens, test_query};
+
+    fn extract(s: Specimen) -> SpecimenSummary {
+        s.core.summary
+    }
+
+    #[rstest]
+    #[awt]
+    #[tokio::test]
+    async fn default_specimen_query(
+        #[future] db_conn: DbConnection,
+        #[future] specimens: Vec<Specimen>,
+    ) {
+        test_query()
+            .all_data(specimens)
+            .extract(extract)
+            .sort_by(|s1, s2| s1.received_at.cmp(&s2.received_at))
+            .run(db_conn)
+            .await;
+    }
+
+    #[rstest]
+    #[awt]
+    #[tokio::test]
+    async fn specific_specimen_query(
+        #[future] db_conn: DbConnection,
+        #[future] specimens: Vec<Specimen>,
+    ) {
+        let query = SpecimenQuery::builder()
+            .frozen(true)
+            .type_(SpecimenType::Block(BlockType::Block))
+            .embedded_in(BlockEmbeddingMatrix::Frozen(
+                FrozenBlockEmbeddingMatrix::CarboxymethylCellulose,
+            ))
+            .order_by((SpecimenOrdinalColumn::Name, true))
+            .build();
+
+        println!("{}", serde_json::to_string_pretty(&query).unwrap());
+
+        fn filter(s: &SpecimenSummary) -> bool {
+            s.frozen
+                && s.type_ == "block"
+                && s.embedded_in
+                    .as_ref()
+                    .is_some_and(|e| e == "carboxymethyl_cellulose")
+        }
+
+        test_query()
+            .all_data(specimens)
+            .extract(extract)
+            .filter(filter)
+            .sort_by(|s1, s2| s1.name.cmp(&s2.name).reverse())
+            .db_query(query)
+            .run(db_conn)
+            .await;
     }
 }

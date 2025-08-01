@@ -11,7 +11,10 @@ use valid_string::ValidString;
 
 use crate::model::specimen::common::NewSpecimenCommon;
 #[cfg(feature = "python")]
-use crate::model::specimen::{NewSpecimenMeasurement, Species, common::NewCommitteeApproval};
+use crate::model::specimen::{
+    common::NewCommitteeApproval,
+    common::{NewSpecimenMeasurement, Species},
+};
 
 #[db_enum]
 #[derive(Default)]
@@ -33,6 +36,7 @@ pub struct NewCryopreservedTissue {
     #[cfg_attr(feature = "backend", diesel(embed))]
     pub inner: NewSpecimenCommon,
     #[serde(skip)]
+    #[builder(default)]
     pub type_: TissueType,
     #[garde(dive)]
     pub storage_buffer: Option<ValidString>,
@@ -100,6 +104,7 @@ pub struct NewFixedTissue {
     #[cfg_attr(feature = "backend", diesel(embed))]
     pub inner: NewSpecimenCommon,
     #[serde(skip)]
+    #[builder(default)]
     pub type_: TissueType,
     pub fixative: TissueFixative,
     #[garde(dive)]
@@ -160,6 +165,7 @@ pub struct NewFrozenTissue {
     #[cfg_attr(feature = "backend", diesel(embed))]
     pub inner: NewSpecimenCommon,
     #[serde(skip)]
+    #[builder(default)]
     pub type_: TissueType,
     #[garde(dive)]
     pub storage_buffer: Option<ValidString>,

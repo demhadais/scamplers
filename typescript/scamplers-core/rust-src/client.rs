@@ -219,7 +219,7 @@ impl ScamplersClient {
 #[cfg(feature = "python")]
 macro_rules! impl_client_methods {
     ($(($method_name:ident, $request_type:path, $response_type:path, $http_method:expr));*) => {
-        $(#[pymethods]
+        $(#[::pyo3::pymethods]
         impl ScamplersClient {
             async fn $method_name(
                 &self,

@@ -10,6 +10,7 @@ use valid_string::ValidString;
 use crate::model::institution::InstitutionHandle;
 
 #[db_enum]
+#[derive(strum::VariantArray)]
 #[cfg_attr(target_arch = "wasm32", wasm_bindgen::prelude::wasm_bindgen)]
 pub enum Species {
     AmbystomaMexicanum,
@@ -106,11 +107,11 @@ pub enum MeasurementData {
 #[cfg_attr(feature = "backend", diesel(table_name = specimen_measurement))]
 pub struct NewSpecimenMeasurement {
     #[serde(default)]
+    #[builder(default)]
     pub specimen_id: Uuid,
     pub measured_by: Uuid,
     #[serde(flatten)]
     #[garde(dive)]
-    #[cfg_attr(feature = "backend", diesel(skip_insertion))]
     pub data: MeasurementData,
 }
 
@@ -142,6 +143,7 @@ pub struct NewSpecimenCommon {
     #[garde(length(min = 1))]
     pub species: Vec<Species>,
     #[serde(default)]
+    #[builder(default)]
     #[garde(dive)]
     #[cfg_attr(feature = "backend", diesel(skip_insertion))]
     pub committee_approvals: Vec<NewCommitteeApproval>,
@@ -151,6 +153,7 @@ pub struct NewSpecimenCommon {
     pub returned_by: Option<Uuid>,
     #[serde(default)]
     #[garde(dive)]
+    #[builder(default)]
     #[cfg_attr(feature = "backend", diesel(skip_insertion))]
     pub measurements: Vec<NewSpecimenMeasurement>,
 }
