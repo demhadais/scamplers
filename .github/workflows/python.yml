@@ -23,3 +23,8 @@ jobs:
       - name: Analyze types
         working-directory: python/test_scamplers-core
         run: uv run --module pyright
+
+      - name: Lint and format
+        uses: astral-sh/ruff-action@v3
+        with:
+          src: python/test_scamplers-core

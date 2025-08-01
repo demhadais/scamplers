@@ -189,7 +189,7 @@ mod tests {
     #[rstest]
     fn deserialize_new_specimen() {
         let uuid = Uuid::now_v7();
-        let received_at = "1999-01-01 00:00:00.0 +00:00:00";
+        let received_at = "+001999-01-01T00:00:00.000000000Z";
         let frozen_embedding_matrix = "carboxymethyl_cellulose";
 
         let mut incorrectly_embedded_block = json!({
