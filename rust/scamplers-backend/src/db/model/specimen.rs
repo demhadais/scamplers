@@ -272,7 +272,6 @@ mod tests {
     use scamplers_core::model::specimen::{
         BlockEmbeddingMatrix, Specimen, SpecimenOrdinalColumn, SpecimenQuery, SpecimenSummary,
         SpecimenType,
-        block::{BlockType, FrozenBlockEmbeddingMatrix},
     };
 
     use crate::db::test_util::{DbConnection, db_conn, specimens, test_query};
@@ -305,10 +304,8 @@ mod tests {
     ) {
         let query = SpecimenQuery::builder()
             .frozen(true)
-            .type_(SpecimenType::Block(BlockType::Block))
-            .embedded_in(BlockEmbeddingMatrix::Frozen(
-                FrozenBlockEmbeddingMatrix::CarboxymethylCellulose,
-            ))
+            .type_(SpecimenType::Block)
+            .embedded_in(BlockEmbeddingMatrix::CarboxymethylCellulose)
             .order_by((SpecimenOrdinalColumn::Name, true))
             .build();
 

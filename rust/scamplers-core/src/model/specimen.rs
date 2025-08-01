@@ -104,26 +104,23 @@ pub struct Specimen {
 }
 
 #[db_enum]
-#[serde(untagged)]
 pub enum SpecimenType {
-    Block(block::BlockType),
-    Tissue(tissue::TissueType),
-    Suspension(virtual_::SuspensionType),
+    Block,
+    Tissue,
+    Suspension,
 }
 
 #[db_enum]
-#[serde(untagged)]
 pub enum BlockEmbeddingMatrix {
-    Fixed(block::FixedBlockEmbeddingMatrix),
-    Frozen(block::FrozenBlockEmbeddingMatrix),
+    Paraffin,
+    CarboxymethylCellulose,
+    OptimalCuttingTemperatureCompound,
 }
 
 #[db_enum]
-#[serde(untagged)]
 pub enum Fixative {
-    Block(block::BlockFixative),
-    Tissue(tissue::TissueFixative),
-    Suspension(virtual_::SuspensionFixative),
+    FormaldehydeDerivative,
+    DithiobisSuccinimidylropionate,
 }
 
 #[db_enum]
