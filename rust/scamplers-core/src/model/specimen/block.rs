@@ -99,9 +99,8 @@ impl NewFixedBlock {
 }
 
 #[db_enum]
-#[derive(Default, strum::VariantArray)]
+#[derive(strum::VariantArray)]
 pub enum FrozenBlockEmbeddingMatrix {
-    #[default] // Honestly not sure why I need this :(
     CarboxymethylCellulose,
     OptimalCuttingTemperatureCompound,
 }

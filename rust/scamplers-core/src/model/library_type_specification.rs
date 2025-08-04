@@ -6,7 +6,7 @@ use scamplers_schema::library_type_specification;
 
 #[cfg_attr(target_arch = "wasm32", wasm_bindgen::prelude::wasm_bindgen)]
 #[db_enum]
-#[derive(Copy, PartialOrd, Eq, Ord)]
+#[derive(PartialOrd, Eq, Ord)]
 pub enum LibraryType {
     #[serde(rename = "Antibody Capture")]
     #[strum(serialize = "Antibody Capture")]

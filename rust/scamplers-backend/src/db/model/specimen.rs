@@ -205,18 +205,14 @@ where
         let q6 = notes
             .as_ref()
             .map(|notes| notes_col.assume_not_null().ilike(notes.as_ilike()));
-        let q7 = type_.as_ref().map(|t| type_col.eq(t));
+        let q7 = type_.map(|t| type_col.eq(t));
         let q8 = storage_buffer
             .as_ref()
             .map(|buf| buffer_col.assume_not_null().ilike(buf.as_ilike()));
         let q9 = frozen.map(|f| frozen_col.eq(f));
         let q10 = cryopreserved.map(|c| cryopreserved_col.eq(c));
-        let q11 = embedded_in
-            .as_ref()
-            .map(|e| embedding_col.assume_not_null().eq(e));
-        let q12 = fixative
-            .as_ref()
-            .map(|f| fixative_col.assume_not_null().eq(f));
+        let q11 = embedded_in.map(|e| embedding_col.assume_not_null().eq(e));
+        let q12 = fixative.map(|f| fixative_col.assume_not_null().eq(f));
 
         let query = BoxedDieselExpression::new_expression()
             .and_condition(q1)
@@ -269,12 +265,15 @@ impl FetchByQuery for SpecimenSummary {
 #[cfg(test)]
 mod tests {
     use rstest::rstest;
-    use scamplers_core::model::specimen::{
-        BlockEmbeddingMatrix, Specimen, SpecimenOrdinalColumn, SpecimenQuery, SpecimenSummary,
-        SpecimenType,
+    use scamplers_core::model::{
+        Pagination,
+        specimen::{
+            BlockEmbeddingMatrix, Specimen, SpecimenOrdinalColumn, SpecimenQuery, SpecimenSummary,
+            SpecimenType,
+        },
     };
 
-    use crate::db::test_util::{DbConnection, db_conn, specimens, test_query};
+    use crate::db::test_util::{DbConnection, N_SPECIMENS, db_conn, specimens, test_query};
 
     fn extract(s: Specimen) -> SpecimenSummary {
         s.core.summary
@@ -287,10 +286,18 @@ mod tests {
         #[future] db_conn: DbConnection,
         #[future] specimens: Vec<Specimen>,
     ) {
+        let query = SpecimenQuery::builder()
+            .pagination(Pagination {
+                limit: N_SPECIMENS as i64,
+                offset: 0,
+            })
+            .build();
+
         test_query()
             .all_data(specimens)
             .extract(extract)
             .sort_by(|s1, s2| s1.received_at.cmp(&s2.received_at))
+            .db_query(query)
             .run(db_conn)
             .await;
     }
@@ -307,9 +314,11 @@ mod tests {
             .type_(SpecimenType::Block)
             .embedded_in(BlockEmbeddingMatrix::CarboxymethylCellulose)
             .order_by((SpecimenOrdinalColumn::Name, true))
+            .pagination(Pagination {
+                limit: N_SPECIMENS as i64,
+                offset: 0,
+            })
             .build();
-
-        println!("{}", serde_json::to_string_pretty(&query).unwrap());
 
         fn filter(s: &SpecimenSummary) -> bool {
             s.frozen
@@ -327,5 +336,7 @@ mod tests {
             .db_query(query)
             .run(db_conn)
             .await;
+
+        assert!(false, "this test intermittently fails");
     }
 }

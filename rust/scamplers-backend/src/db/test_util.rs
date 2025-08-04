@@ -1,5 +1,5 @@
 #![allow(dead_code)]
-use std::{cmp::Ordering, fmt::Debug};
+use std::{cmp::Ordering, collections::HashSet, fmt::Debug};
 
 use diesel_async::{
     AsyncConnection, AsyncPgConnection,
@@ -52,12 +52,12 @@ impl<T> ChooseUnwrap<T> for Vec<T> {
     }
 }
 
-const N_INSTITUTIONS: usize = 20;
-const N_PEOPLE: usize = 500;
+const N_INSTITUTIONS: usize = 10;
+const N_PEOPLE: usize = 250;
 const N_LABS: usize = 50;
-pub const N_LAB_MEMBERS: usize = 10;
+pub const N_LAB_MEMBERS: usize = 5;
 
-const N_SPECIMENS: usize = 400;
+pub const N_SPECIMENS: usize = 1000;
 
 const N_MULTIPLEXING_TAGS: usize = 100;
 
@@ -149,7 +149,8 @@ impl TestState {
     }
 
     fn random_people_ids(&self, n: usize) -> Vec<Uuid> {
-        (0..n).map(|_| self.random_person_id()).collect()
+        let map: HashSet<_> = (0..n).map(|_| self.random_person_id()).collect();
+        map.into_iter().collect()
     }
 
     async fn insert_labs(&mut self, db_conn: &mut DbConnection) {
@@ -180,7 +181,7 @@ impl TestState {
 
     async fn insert_specimens(&mut self, db_conn: &mut DbConnection) {
         let rng = rand::rng();
-        let random_species = || Species::VARIANTS.choose(&mut rng.clone()).cloned().unwrap();
+        let random_species = || Species::VARIANTS.choose(&mut rng.clone()).copied().unwrap();
 
         let inner_specimen = NewSpecimenCommon::builder()
             .submitted_by(self.random_person_id())
@@ -203,26 +204,26 @@ impl TestState {
                 .name(format!("specimen{i}"))
                 .build();
 
-            let new_specimen: NewSpecimen = if i % 2 == 0 {
+            let new_specimen: NewSpecimen = if i % 5 == 0 {
                 NewCryopreservedTissue::builder()
                     .inner(inner_specimen)
                     .cryopreserved(true)
                     .storage_buffer("buffer")
                     .build()
                     .into()
-            } else if i % 3 == 0 {
+            } else if i % 4 == 0 {
                 NewFixedTissue::builder()
                     .inner(inner_specimen)
                     .fixative(TissueFixative::DithiobisSuccinimidylropionate)
                     .build()
                     .into()
-            } else if i % 4 == 0 {
+            } else if i % 3 == 0 {
                 NewFrozenTissue::builder()
                     .inner(inner_specimen)
                     .frozen(true)
                     .build()
                     .into()
-            } else if i % 5 == 0 {
+            } else if i % 2 == 0 {
                 NewFixedBlock::builder()
                     .inner(inner_specimen)
                     .fixative(BlockFixative::FormaldehydeDerivative)
@@ -233,7 +234,7 @@ impl TestState {
                 let random_embedding_matrix = || {
                     FrozenBlockEmbeddingMatrix::VARIANTS
                         .choose(&mut rng.clone())
-                        .cloned()
+                        .copied()
                         .unwrap()
                 };
 
@@ -258,7 +259,7 @@ impl TestState {
         let random_multiplexing_tag_type = || {
             MultiplexingTagType::VARIANTS
                 .choose(&mut rand::rng().clone())
-                .cloned()
+                .copied()
                 .unwrap()
         };
 
@@ -433,7 +434,23 @@ pub async fn test_query<FullRecord, Summary>(
             async move {
                 let loaded_records = Summary::fetch_by_query(&db_query, conn).await.unwrap();
 
-                assert_eq!(loaded_records, data);
+                assert_eq!(
+                    loaded_records.len(),
+                    data.len(),
+                    "filter returned different number of records"
+                );
+
+                for loaded in &loaded_records {
+                    assert!(data.contains(loaded));
+                }
+
+                for expected in &data {
+                    assert!(loaded_records.contains(expected));
+                }
+
+                for (i, (loaded, expected)) in loaded_records.iter().zip(&data).enumerate() {
+                    assert_eq!(loaded, expected, "comparison failed at record {i}");
+                }
 
                 Ok(())
             }

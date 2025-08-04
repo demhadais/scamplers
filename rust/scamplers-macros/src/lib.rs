@@ -177,6 +177,7 @@ pub fn db_enum(attr: TokenStream, input: TokenStream) -> TokenStream {
     let ItemEnum { ident, .. } = &enum_item;
 
     let output = quote! {
+        #[derive(Copy)]
         #[cfg_attr(feature = "python", ::pyo3::pyclass(str, eq))]
         #[cfg_attr(feature = "backend", derive(::diesel::deserialize::FromSqlRow, ::diesel::expression::AsExpression))]
         #[derive(::strum::EnumString, ::strum::IntoStaticStr)]
