@@ -201,13 +201,13 @@ impl model::FetchById for Lab {
 
 #[cfg(test)]
 mod tests {
-    use std::{cmp::Ordering, collections::HashSet};
+    use std::cmp::Ordering;
 
     use diesel_async::{AsyncConnection, scoped_futures::ScopedFutureExt};
     use pretty_assertions::assert_eq;
     use rstest::rstest;
     use scamplers_core::model::{
-        lab::{Lab, LabQuery, LabSummary, LabUpdate, LabUpdateCore, NewLab},
+        lab::{Lab, LabSummary, LabUpdate, LabUpdateCore, NewLab},
         person::{PersonQuery, PersonSummary},
     };
     use scamplers_schema::lab;
@@ -274,24 +274,21 @@ mod tests {
     #[rstest]
     #[awt]
     #[tokio::test]
-    async fn remove_lab_members(#[future] mut db_conn: DbConnection) {
+    async fn remove_lab_members(#[future] mut db_conn: DbConnection, #[future] labs: Vec<Lab>) {
         db_conn
             .test_transaction::<_, ScamplersError, _>(|tx| {
                 async move {
-                    let lab = LabSummary::fetch_by_query(&LabQuery::default(), tx)
-                        .await
-                        .unwrap()
-                        .swap_remove(1);
+                    let lab = labs.first().unwrap();
+                    let original_loaded_members =
+                        lab::table::fetch_relatives(&lab.core.summary.handle.id, tx)
+                            .await
+                            .unwrap();
+                    assert_eq!(original_loaded_members.len(), lab.members.len());
 
-                    let original_members = lab::table::fetch_relatives(&lab.handle.id, tx)
-                        .await
-                        .unwrap();
-                    assert_eq!(original_members.len(), N_LAB_MEMBERS);
-
-                    let member_to_be_removed = original_members[0].handle.id;
+                    let member_to_be_removed = original_loaded_members[0].handle.id;
                     let updated_lab = LabUpdate {
                         core: LabUpdateCore {
-                            id: lab.handle.id,
+                            id: lab.core.summary.handle.id,
                             ..Default::default()
                         },
                         remove_members: vec![member_to_be_removed],
@@ -301,16 +298,15 @@ mod tests {
                     .await
                     .unwrap();
 
-                    assert_eq!(updated_lab.core.summary.handle.id, lab.handle.id);
-                    assert_eq!(updated_lab.members.len(), N_LAB_MEMBERS - 1);
-
-                    let extract_ids = |people: &[PersonSummary]| {
-                        people.iter().map(|p| p.handle.id).collect::<HashSet<_>>()
-                    };
+                    assert_eq!(
+                        updated_lab.core.summary.handle.id,
+                        lab.core.summary.handle.id
+                    );
+                    assert_eq!(updated_lab.members.len(), lab.members.len() - 1);
 
                     assert_eq!(
-                        extract_ids(&original_members[1..5]),
-                        extract_ids(&updated_lab.members)
+                        original_loaded_members[1..N_LAB_MEMBERS],
+                        updated_lab.members
                     );
 
                     Ok(())

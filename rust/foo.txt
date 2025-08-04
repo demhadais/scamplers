@@ -1,0 +1,148 @@
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 12 tests
+test server::auth::tests::api_key_prefix_matches_hash_prefix ... ok
+test db::model::person::tests::specific_person_query ... ok
+test db::model::lab::tests::default_query ... ok
+test db::model::institution::tests::default_institution_query ... ok
+test db::model::institution::tests::specific_institution_query ... ok
+test db::model::specimen::tests::specific_specimen_query ... ok
+test db::model::person::tests::default_person_query ... ok
+test db::model::specimen::tests::default_specimen_query ... ok
+test db::model::lab::tests::remove_lab_members ... ok
+test db::model::person::tests::update_user_info ... ok
+test db::model::lab::tests::new_lab_without_members ... ok
+test db::model::person::tests::ms_login_with_roles_update ... ok
+
+test result: ok. 12 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.26s
+
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 1 test
+  [2m2025-08-04T19:12:32.280171Z[0m [32m INFO[0m [1;32mscamplers_backend::server[0m[32m: [32minitialized app state[0m
+    [2;3mat[0m scamplers-backend/src/server.rs:35
+
+  [2m2025-08-04T19:12:32.422729Z[0m [32m INFO[0m [1;32mscamplers_backend::server[0m[32m: [32mran database migrations[0m
+    [2;3mat[0m scamplers-backend/src/server.rs:45
+
+  [2m2025-08-04T19:12:32.674193Z[0m [32m INFO[0m [1;32mscamplers_backend::server[0m[32m: [32minserted seed data[0m
+    [2;3mat[0m scamplers-backend/src/server.rs:56
+
+  [2m2025-08-04T19:12:32.675194Z[0m [32m INFO[0m [1;32mscamplers_backend::server[0m[32m: [32mscamplers listening on localhost:8000[0m
+    [2;3mat[0m scamplers-backend/src/server.rs:65
+
+  [2m2025-08-04T19:12:33.284864Z[0m [34mDEBUG[0m [1;34mtower_http::trace::on_request[0m[34m: [34mstarted processing request[0m
+    [2;3mat[0m /Users/saida/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tower-http-0.6.6/src/trace/on_request.rs:80
+    [2;3min[0m tower_http::trace::make_span::[1mrequest[0m [2;3mwith[0m [1mmethod[0m: GET, [1muri[0m: /, [1mversion[0m: HTTP/1.1
+
+  [2m2025-08-04T19:12:33.285148Z[0m [34mDEBUG[0m [1;34mtower_http::trace::on_response[0m[34m: [34mfinished processing request, [1;34mlatency[0m[34m: 0 ms, [1;34mstatus[0m[34m: 200[0m
+    [2;3mat[0m /Users/saida/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tower-http-0.6.6/src/trace/on_response.rs:114
+    [2;3min[0m tower_http::trace::make_span::[1mrequest[0m [2;3mwith[0m [1mmethod[0m: GET, [1muri[0m: /, [1mversion[0m: HTTP/1.1
+
+  [2m2025-08-04T19:12:33.286649Z[0m [34mDEBUG[0m [1;34mtower_http::trace::on_request[0m[34m: [34mstarted processing request[0m
+    [2;3mat[0m /Users/saida/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tower-http-0.6.6/src/trace/on_request.rs:80
+    [2;3min[0m tower_http::trace::make_span::[1mrequest[0m [2;3mwith[0m [1mmethod[0m: POST, [1muri[0m: /institutions/search, [1mversion[0m: HTTP/1.1
+
+  [2m2025-08-04T19:12:33.286960Z[0m [31mERROR[0m [1;31mscamplers_backend::result[0m[31m: [1;31merror[0m[31m: ScamplersError(ScamplersCoreErrorResponse { status: 401, error: ScamplersCoreError::PermissionDenied(PermissionDeniedError { message: "invalid API key" }) })[0m
+    [2;3mat[0m scamplers-backend/src/result.rs:203
+    [2;3min[0m tower_http::trace::make_span::[1mrequest[0m [2;3mwith[0m [1mmethod[0m: POST, [1muri[0m: /institutions/search, [1mversion[0m: HTTP/1.1
+
+  [2m2025-08-04T19:12:33.287321Z[0m [34mDEBUG[0m [1;34mtower_http::trace::on_response[0m[34m: [34mfinished processing request, [1;34mlatency[0m[34m: 0 ms, [1;34mstatus[0m[34m: 401[0m
+    [2;3mat[0m /Users/saida/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tower-http-0.6.6/src/trace/on_response.rs:114
+    [2;3min[0m tower_http::trace::make_span::[1mrequest[0m [2;3mwith[0m [1mmethod[0m: POST, [1muri[0m: /institutions/search, [1mversion[0m: HTTP/1.1
+
+  [2m2025-08-04T19:12:33.288632Z[0m [34mDEBUG[0m [1;34mtower_http::trace::on_request[0m[34m: [34mstarted processing request[0m
+    [2;3mat[0m /Users/saida/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tower-http-0.6.6/src/trace/on_request.rs:80
+    [2;3min[0m tower_http::trace::make_span::[1mrequest[0m [2;3mwith[0m [1mmethod[0m: POST, [1muri[0m: /institutions/search, [1mversion[0m: HTTP/1.1
+
+  [2m2025-08-04T19:12:33.375856Z[0m [31mERROR[0m [1;31mscamplers_backend::result[0m[31m: [1;31merror[0m[31m: ScamplersError(ScamplersCoreErrorResponse { status: 401, error: ScamplersCoreError::PermissionDenied(PermissionDeniedError { message: "invalid API key" }) })[0m
+    [2;3mat[0m scamplers-backend/src/result.rs:203
+    [2;3min[0m tower_http::trace::make_span::[1mrequest[0m [2;3mwith[0m [1mmethod[0m: POST, [1muri[0m: /institutions/search, [1mversion[0m: HTTP/1.1
+
+  [2m2025-08-04T19:12:33.375940Z[0m [34mDEBUG[0m [1;34mtower_http::trace::on_response[0m[34m: [34mfinished processing request, [1;34mlatency[0m[34m: 87 ms, [1;34mstatus[0m[34m: 401[0m
+    [2;3mat[0m /Users/saida/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tower-http-0.6.6/src/trace/on_response.rs:114
+    [2;3min[0m tower_http::trace::make_span::[1mrequest[0m [2;3mwith[0m [1mmethod[0m: POST, [1muri[0m: /institutions/search, [1mversion[0m: HTTP/1.1
+
+test prod_api ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.94s
+
+
+running 1 test
+test model::specimen::tests::deserialize_new_specimen ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+

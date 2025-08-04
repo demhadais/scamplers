@@ -53,9 +53,9 @@ impl<T> ChooseUnwrap<T> for Vec<T> {
 }
 
 const N_INSTITUTIONS: usize = 20;
-const N_PEOPLE: usize = 100;
-const N_LABS: usize = 25;
-pub const N_LAB_MEMBERS: usize = 5;
+const N_PEOPLE: usize = 500;
+const N_LABS: usize = 50;
+pub const N_LAB_MEMBERS: usize = 10;
 
 const N_SPECIMENS: usize = 400;
 
