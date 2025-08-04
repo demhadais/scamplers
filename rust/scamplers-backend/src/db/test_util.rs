@@ -1,3 +1,4 @@
+#![allow(dead_code)]
 use std::{cmp::Ordering, fmt::Debug};
 
 use diesel_async::{
@@ -25,8 +26,8 @@ use scamplers_core::model::{
         tissue::{NewCryopreservedTissue, NewFixedTissue, NewFrozenTissue, TissueFixative},
     },
     suspension::{
-        self, BiologicalMaterial, MultiplexingTagType, NewMultiplexingTag, NewSuspension,
-        NewSuspensionMeasurement, NewSuspensionPool, NewSuspensionPoolMeasurement,
+        self, BiologicalMaterial, MultiplexingTag, MultiplexingTagType, NewMultiplexingTag,
+        NewSuspension, NewSuspensionMeasurement, NewSuspensionPool, NewSuspensionPoolMeasurement,
         SuspensionMeasurementData, SuspensionPoolHandle, SuspensionPoolMeasurementData,
     },
     units::VolumeUnit,
@@ -41,6 +42,15 @@ use crate::{
     result::ScamplersError,
     server::{run_migrations, util::DevContainer},
 };
+
+trait ChooseUnwrap<T> {
+    fn choose_unwrap(&self) -> &T;
+}
+impl<T> ChooseUnwrap<T> for Vec<T> {
+    fn choose_unwrap(&self) -> &T {
+        self.choose(&mut rand::rng()).unwrap()
+    }
+}
 
 const N_INSTITUTIONS: usize = 20;
 const N_PEOPLE: usize = 100;
@@ -72,6 +82,7 @@ pub struct TestState {
     people: Vec<Person>,
     labs: Vec<Lab>,
     specimens: Vec<Specimen>,
+    multiplexing_tags: Vec<MultiplexingTag>,
     suspension_pools: Vec<SuspensionPoolHandle>,
 }
 impl TestState {
@@ -92,6 +103,7 @@ impl TestState {
             labs: Vec::with_capacity(N_LABS),
             specimens: Vec::with_capacity(N_SPECIMENS),
             suspension_pools: Vec::with_capacity(N_SUSPENSION_POOLS),
+            multiplexing_tags: Vec::with_capacity(N_MULTIPLEXING_TAGS),
         };
 
         test_state.populate_db().await;
@@ -99,22 +111,7 @@ impl TestState {
         test_state
     }
 
-    async fn populate_db(&mut self) {
-        let Self {
-            db_pool,
-            institutions,
-            people,
-            labs,
-            specimens,
-            suspension_pools,
-            ..
-        } = self;
-
-        let db_conn = db_pool.get().await.unwrap();
-        run_migrations(db_conn).await.unwrap();
-
-        let db_conn = &mut db_pool.get().await.unwrap();
-
+    async fn insert_institutions(&mut self, db_conn: &mut DbConnection) {
         for i in 0..N_INSTITUTIONS {
             let new_institution = NewInstitution::builder()
                 .id(Uuid::now_v7())
@@ -124,41 +121,44 @@ impl TestState {
                 .await
                 .unwrap();
 
-            institutions.push(new_institution);
+            self.institutions.push(new_institution);
         }
+    }
 
-        let rng = rand::rng();
+    fn random_institution_id(&mut self) -> Uuid {
+        self.institutions.choose_unwrap().handle.id
+    }
 
+    async fn insert_people(&mut self, db_conn: &mut DbConnection) {
         for i in 0..N_PEOPLE {
-            let institution_id = institutions.choose(&mut rng.clone()).unwrap().handle.id;
-
             let new_person = NewPerson::builder()
                 .name(format!("person{i}"))
                 .email(format!("person{i}@example.com"))
-                .institution_id(institution_id)
+                .institution_id(self.random_institution_id())
                 .build()
                 .write_to_db(db_conn)
                 .await
                 .unwrap();
 
-            people.push(new_person);
+            self.people.push(new_person);
         }
+    }
 
-        let random_people_ids = |amount| {
-            people
-                .choose_multiple(&mut rng.clone(), amount)
-                .map(|p| p.core.summary.handle.id)
-                .collect::<Vec<_>>()
-        };
+    fn random_person_id(&self) -> Uuid {
+        self.people.choose_unwrap().core.summary.handle.id
+    }
 
-        let random_person_id = || random_people_ids(1)[0];
+    fn random_people_ids(&self, n: usize) -> Vec<Uuid> {
+        (0..n).map(|_| self.random_person_id()).collect()
+    }
 
+    async fn insert_labs(&mut self, db_conn: &mut DbConnection) {
         for i in 0..N_LABS {
-            let pi_id = random_person_id();
+            let pi_id = self.random_person_id();
             let name = format!("lab{i}");
             // Use `N_LAB_MEMBERS - 1` because we're expecting to add the PI, so using this
             // constant later can be correct
-            let member_ids = random_people_ids(N_LAB_MEMBERS - 1);
+            let member_ids = self.random_people_ids(N_LAB_MEMBERS - 1);
 
             let new_lab = NewLab::builder()
                 .name(name.as_str())
@@ -170,27 +170,25 @@ impl TestState {
                 .await
                 .unwrap();
 
-            labs.push(new_lab);
+            self.labs.push(new_lab);
         }
+    }
 
-        let random_lab_id = || {
-            labs.choose(&mut rng.clone())
-                .unwrap()
-                .core
-                .summary
-                .handle
-                .id
-        };
+    fn random_lab_id(&self) -> Uuid {
+        self.labs.choose_unwrap().core.summary.handle.id
+    }
 
+    async fn insert_specimens(&mut self, db_conn: &mut DbConnection) {
+        let rng = rand::rng();
         let random_species = || Species::VARIANTS.choose(&mut rng.clone()).cloned().unwrap();
 
         let inner_specimen = NewSpecimenCommon::builder()
-            .submitted_by(random_person_id())
-            .lab_id(random_lab_id())
+            .submitted_by(self.random_person_id())
+            .lab_id(self.random_lab_id())
             .received_at(OffsetDateTime::now_utc())
             .species([random_species()])
             .measurements([NewSpecimenMeasurement::builder()
-                .measured_by(random_person_id())
+                .measured_by(self.random_person_id())
                 .data(specimen::common::MeasurementData::Rin {
                     measured_at: OffsetDateTime::now_utc(),
                     instrument_name: "mayonnaise".into(),
@@ -247,64 +245,82 @@ impl TestState {
                     .into()
             };
 
-            specimens.push(new_specimen.write_to_db(db_conn).await.unwrap());
+            self.specimens
+                .push(new_specimen.write_to_db(db_conn).await.unwrap());
         }
+    }
 
+    fn random_specimen_id(&self) -> Uuid {
+        self.specimens.choose_unwrap().core.summary.handle.id
+    }
+
+    async fn insert_multiplexing_tags(&mut self, db_conn: &mut DbConnection) {
         let random_multiplexing_tag_type = || {
             MultiplexingTagType::VARIANTS
-                .choose(&mut rng.clone())
+                .choose(&mut rand::rng().clone())
                 .cloned()
                 .unwrap()
         };
-        let mut multiplexing_tags = Vec::new();
-        for i in 0..N_MULTIPLEXING_TAGS {
-            multiplexing_tags.push(
-                NewMultiplexingTag::builder()
-                    .tag_id(format!("{i}"))
-                    .type_(random_multiplexing_tag_type())
-                    .build()
-                    .write_to_db(db_conn)
-                    .await
-                    .unwrap(),
-            );
-        }
 
-        let random_specimen_id = || {
-            specimens
-                .choose(&mut rng.clone())
-                .cloned()
-                .unwrap()
-                .core
-                .summary
-                .handle
-                .id
-        };
-        let random_multiplexing_tag = || multiplexing_tags.choose(&mut rng.clone()).unwrap().id;
-        let new_suspension_measurement = NewSuspensionMeasurement::builder()
-            .measured_by(random_person_id())
-            .data(SuspensionMeasurementData {
-                core: suspension::MeasurementDataCore::Volume {
-                    measured_at: OffsetDateTime::now_utc(),
-                    value: 10.0,
-                    unit: VolumeUnit::Microliter,
-                },
-                is_post_hybridization: true,
-            })
-            .build();
-        let new_suspension = |i: usize| {
-            NewSuspension::builder()
-                .biological_material(BiologicalMaterial::Cells)
-                .readable_id(format!("S{i}"))
-                .parent_specimen_id(random_specimen_id())
-                .multiplexing_tag_id(random_multiplexing_tag())
-                .target_cell_recovery(5_000.0)
-                .target_reads_per_cell(50_000)
-                .preparer_ids(random_people_ids(2))
-                .measurements([new_suspension_measurement.clone()])
+        for i in 0..N_MULTIPLEXING_TAGS {
+            let multiplexing_tag = NewMultiplexingTag::builder()
+                .tag_id(format!("{i}"))
+                .type_(random_multiplexing_tag_type())
                 .build()
-        };
+                .write_to_db(db_conn)
+                .await
+                .unwrap();
+
+            self.multiplexing_tags.push(multiplexing_tag);
+        }
+    }
+
+    fn random_multiplexing_tag_id(&self) -> Uuid {
+        self.multiplexing_tags.choose_unwrap().id
+    }
+
+    fn new_suspensions(&self, n: usize, for_pool: bool) -> Vec<NewSuspension> {
+        let new_suspension_measurements: Vec<_> = (0..2)
+            .map(|i| {
+                NewSuspensionMeasurement::builder()
+                    .measured_by(self.random_person_id())
+                    .data(SuspensionMeasurementData {
+                        core: suspension::MeasurementDataCore::Volume {
+                            measured_at: OffsetDateTime::now_utc(),
+                            value: 10.0 * i as f32,
+                            unit: VolumeUnit::Microliter,
+                        },
+                        is_post_hybridization: for_pool,
+                    })
+                    .build()
+            })
+            .collect();
+
+        (0..n)
+            .map(|i| {
+                let new_suspension = NewSuspension::builder()
+                    .biological_material(BiologicalMaterial::Cells)
+                    .readable_id(format!("S{i}"))
+                    .parent_specimen_id(self.random_specimen_id())
+                    .target_cell_recovery(5_000.0 + i as f32)
+                    .target_reads_per_cell(50_000 + i as i32)
+                    .measurements(new_suspension_measurements.clone())
+                    .preparer_ids(self.random_people_ids(2));
+
+                if for_pool {
+                    new_suspension
+                        .multiplexing_tag_id(self.random_multiplexing_tag_id())
+                        .build()
+                } else {
+                    new_suspension.build()
+                }
+            })
+            .collect()
+    }
+
+    async fn insert_suspension_pools(&mut self, db_conn: &mut DbConnection) {
         let new_suspension_pool_measurement = NewSuspensionPoolMeasurement::builder()
-            .measured_by(random_person_id())
+            .measured_by(self.random_person_id())
             .data(SuspensionPoolMeasurementData {
                 data: suspension::MeasurementDataCore::Volume {
                     measured_at: OffsetDateTime::now_utc(),
@@ -314,22 +330,36 @@ impl TestState {
                 is_post_storage: false,
             })
             .build();
+
         for i in 0..N_SUSPENSION_POOLS {
             let new_suspension_pool = NewSuspensionPool::builder()
                 .readable_id(format!("P{i}"))
                 .name(format!("pool{i}"))
                 .pooled_at(OffsetDateTime::now_utc())
-                .preparer_ids(random_people_ids(2))
-                .suspensions(
-                    (0..N_SUSPENSIONS_PER_POOL)
-                        .map(&new_suspension)
-                        .collect::<Vec<_>>(),
-                )
+                .preparer_ids(self.random_people_ids(2))
+                .suspensions(self.new_suspensions(N_SUSPENSIONS_PER_POOL, true))
                 .measurements([new_suspension_pool_measurement.clone()])
                 .build();
 
-            suspension_pools.push(new_suspension_pool.write_to_db(db_conn).await.unwrap());
+            self.suspension_pools
+                .push(new_suspension_pool.write_to_db(db_conn).await.unwrap());
         }
+    }
+
+    async fn populate_db(&mut self) {
+        let Self { db_pool, .. } = self;
+
+        let db_conn = db_pool.get().await.unwrap();
+        run_migrations(db_conn).await.unwrap();
+
+        let db_conn = &mut db_pool.get().await.unwrap();
+
+        self.insert_institutions(db_conn).await;
+        self.insert_people(db_conn).await;
+        self.insert_labs(db_conn).await;
+        self.insert_specimens(db_conn).await;
+        self.insert_multiplexing_tags(db_conn).await;
+        self.insert_suspension_pools(db_conn).await;
     }
 }
 
