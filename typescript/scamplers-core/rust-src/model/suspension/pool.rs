@@ -29,6 +29,7 @@ pub struct SuspensionPoolMeasurementData {
 #[cfg_attr(feature = "backend", diesel(table_name = suspension_pool_measurement))]
 pub struct NewSuspensionPoolMeasurement {
     #[serde(default)]
+    #[builder(default)]
     pub pool_id: Uuid,
     pub measured_by: Uuid,
     #[serde(flatten)]

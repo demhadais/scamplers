@@ -12,6 +12,7 @@ pub mod dataset;
 pub mod institution;
 pub mod lab;
 pub mod library;
+pub mod multiplexing_tag;
 pub mod person;
 pub mod sequencing_run;
 pub mod specimen;

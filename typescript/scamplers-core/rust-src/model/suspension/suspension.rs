@@ -16,6 +16,7 @@ use crate::model::{
 };
 
 #[db_enum]
+#[derive(strum::VariantArray)]
 pub enum MultiplexingTagType {
     FlexBarcode,
     OnChipMultiplexing,
@@ -55,6 +56,7 @@ pub struct SuspensionMeasurementData {
 #[cfg_attr(feature = "backend", diesel(table_name = suspension_measurement))]
 pub struct NewSuspensionMeasurement {
     #[serde(default)]
+    #[builder(default)]
     pub suspension_id: Uuid,
     pub measured_by: Uuid,
     #[serde(flatten)]

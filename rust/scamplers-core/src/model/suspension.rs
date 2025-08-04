@@ -1,10 +1,12 @@
 pub use common::{BiologicalMaterial, CellCountingMethod, MeasurementDataCore};
 pub use pool::{
-    NewSuspensionPool, NewSuspensionPoolMeasurement, SuspensionPoolHandle, SuspensionPoolPreparer,
+    NewSuspensionPool, NewSuspensionPoolMeasurement, SuspensionPoolHandle,
+    SuspensionPoolMeasurementData, SuspensionPoolPreparer,
 };
 pub use suspension::{
-    NewSuspension, NewSuspensionMeasurement, Suspension, SuspensionCore, SuspensionMeasurement,
-    SuspensionPreparer,
+    MultiplexingTag, MultiplexingTagType, NewMultiplexingTag, NewSuspension,
+    NewSuspensionMeasurement, Suspension, SuspensionCore, SuspensionMeasurement,
+    SuspensionMeasurementData, SuspensionPreparer,
 };
 
 mod common;

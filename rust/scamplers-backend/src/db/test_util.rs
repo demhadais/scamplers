@@ -24,6 +24,12 @@ use scamplers_core::model::{
         common::{NewSpecimenCommon, NewSpecimenMeasurement, Species},
         tissue::{NewCryopreservedTissue, NewFixedTissue, NewFrozenTissue, TissueFixative},
     },
+    suspension::{
+        self, BiologicalMaterial, MultiplexingTagType, NewMultiplexingTag, NewSuspension,
+        NewSuspensionMeasurement, NewSuspensionPool, NewSuspensionPoolMeasurement,
+        SuspensionMeasurementData, SuspensionPoolHandle, SuspensionPoolMeasurementData,
+    },
+    units::VolumeUnit,
 };
 use strum::VariantArray;
 use time::OffsetDateTime;
@@ -36,11 +42,28 @@ use crate::{
     server::{run_migrations, util::DevContainer},
 };
 
-pub const N_INSTITUTIONS: usize = 20;
-pub const N_PEOPLE: usize = 100;
-pub const N_LABS: usize = 25;
+const N_INSTITUTIONS: usize = 20;
+const N_PEOPLE: usize = 100;
+const N_LABS: usize = 25;
 pub const N_LAB_MEMBERS: usize = 5;
-pub const N_SPECIMENS: usize = 200;
+
+const N_SPECIMENS: usize = 400;
+
+const N_MULTIPLEXING_TAGS: usize = 100;
+
+const N_SUSPENSION_POOLS: usize = N_SPECIMENS / 4;
+const N_SUSPENSIONS_PER_POOL: usize = 2;
+const N_SUSPENSIONS: usize = N_SPECIMENS - N_SUSPENSIONS_PER_POOL;
+
+const N_GEMS_PER_NONOCM_CHROMIUM_RUN: usize = 8;
+const N_NONPOOL_GEMS: usize = N_SUSPENSIONS - (N_SUSPENSION_POOLS * N_SUSPENSIONS_PER_POOL) / 2;
+
+const N_SINGLEPLEX_CHROMIUM_RUNS: usize = N_NONPOOL_GEMS / N_GEMS_PER_NONOCM_CHROMIUM_RUN;
+
+const N_GEMS_PER_OCM_CHROMIUM_RUN: usize = 2;
+const N_OCM_CHROMIUM_RUNS: usize = N_NONPOOL_GEMS / N_GEMS_PER_OCM_CHROMIUM_RUN;
+
+const N_POOL_MULTIPLEX_CHROMIUM_RUNS: usize = N_SUSPENSION_POOLS / N_GEMS_PER_NONOCM_CHROMIUM_RUN;
 
 pub struct TestState {
     _container: DevContainer,
@@ -49,6 +72,7 @@ pub struct TestState {
     people: Vec<Person>,
     labs: Vec<Lab>,
     specimens: Vec<Specimen>,
+    suspension_pools: Vec<SuspensionPoolHandle>,
 }
 impl TestState {
     async fn new() -> Self {
@@ -67,6 +91,7 @@ impl TestState {
             people: Vec::with_capacity(N_PEOPLE),
             labs: Vec::with_capacity(N_LABS),
             specimens: Vec::with_capacity(N_SPECIMENS),
+            suspension_pools: Vec::with_capacity(N_SUSPENSION_POOLS),
         };
 
         test_state.populate_db().await;
@@ -81,6 +106,7 @@ impl TestState {
             people,
             labs,
             specimens,
+            suspension_pools,
             ..
         } = self;
 
@@ -223,6 +249,87 @@ impl TestState {
 
             specimens.push(new_specimen.write_to_db(db_conn).await.unwrap());
         }
+
+        let random_multiplexing_tag_type = || {
+            MultiplexingTagType::VARIANTS
+                .choose(&mut rng.clone())
+                .cloned()
+                .unwrap()
+        };
+        let mut multiplexing_tags = Vec::new();
+        for i in 0..N_MULTIPLEXING_TAGS {
+            multiplexing_tags.push(
+                NewMultiplexingTag::builder()
+                    .tag_id(format!("{i}"))
+                    .type_(random_multiplexing_tag_type())
+                    .build()
+                    .write_to_db(db_conn)
+                    .await
+                    .unwrap(),
+            );
+        }
+
+        let random_specimen_id = || {
+            specimens
+                .choose(&mut rng.clone())
+                .cloned()
+                .unwrap()
+                .core
+                .summary
+                .handle
+                .id
+        };
+        let random_multiplexing_tag = || multiplexing_tags.choose(&mut rng.clone()).unwrap().id;
+        let new_suspension_measurement = NewSuspensionMeasurement::builder()
+            .measured_by(random_person_id())
+            .data(SuspensionMeasurementData {
+                core: suspension::MeasurementDataCore::Volume {
+                    measured_at: OffsetDateTime::now_utc(),
+                    value: 10.0,
+                    unit: VolumeUnit::Microliter,
+                },
+                is_post_hybridization: true,
+            })
+            .build();
+        let new_suspension = |i: usize| {
+            NewSuspension::builder()
+                .biological_material(BiologicalMaterial::Cells)
+                .readable_id(format!("S{i}"))
+                .parent_specimen_id(random_specimen_id())
+                .multiplexing_tag_id(random_multiplexing_tag())
+                .target_cell_recovery(5_000.0)
+                .target_reads_per_cell(50_000)
+                .preparer_ids(random_people_ids(2))
+                .measurements([new_suspension_measurement.clone()])
+                .build()
+        };
+        let new_suspension_pool_measurement = NewSuspensionPoolMeasurement::builder()
+            .measured_by(random_person_id())
+            .data(SuspensionPoolMeasurementData {
+                data: suspension::MeasurementDataCore::Volume {
+                    measured_at: OffsetDateTime::now_utc(),
+                    value: 10.0,
+                    unit: VolumeUnit::Microliter,
+                },
+                is_post_storage: false,
+            })
+            .build();
+        for i in 0..N_SUSPENSION_POOLS {
+            let new_suspension_pool = NewSuspensionPool::builder()
+                .readable_id(format!("P{i}"))
+                .name(format!("pool{i}"))
+                .pooled_at(OffsetDateTime::now_utc())
+                .preparer_ids(random_people_ids(2))
+                .suspensions(
+                    (0..N_SUSPENSIONS_PER_POOL)
+                        .map(&new_suspension)
+                        .collect::<Vec<_>>(),
+                )
+                .measurements([new_suspension_pool_measurement.clone()])
+                .build();
+
+            suspension_pools.push(new_suspension_pool.write_to_db(db_conn).await.unwrap());
+        }
     }
 }
 
@@ -248,20 +355,6 @@ macro_rules! data_fixtures {
 }
 
 data_fixtures!((institutions, Institution); (people, Person); (labs, Lab); (specimens, Specimen));
-
-pub trait IntoSorted<Summary>: IntoIterator {
-    fn filter_extract_sort<FilterFn, ExtractFn, CompareFn>(
-        self,
-        filter: FilterFn,
-        extract: ExtractFn,
-        compare: CompareFn,
-    ) -> Vec<Summary>
-    where
-        Self: Sized,
-        FilterFn: FnMut(&Self::Item) -> bool,
-        ExtractFn: Fn(Self::Item) -> Summary,
-        CompareFn: FnMut(&Summary, &Summary) -> Ordering;
-}
 
 #[bon::builder]
 fn extract_filter_sort<Record, Summary>(
@@ -311,22 +404,6 @@ pub async fn test_query<FullRecord, Summary>(
                 let loaded_records = Summary::fetch_by_query(&db_query, conn).await.unwrap();
 
                 assert_eq!(loaded_records, data);
-
-                // let loaded_len = loaded_records.len();
-                // let expected_len = data.len();
-
-                // let greater_len = loaded_len.max(expected_len);
-
-                // // Compare in a for-loop to have easier-to-read error messages
-                // for (i, (loaded, expected)) in
-                // loaded_records.into_iter().zip(data).enumerate() {
-                //     assert_eq!(loaded, expected, "comparison failed on iteration {i}");
-                // }
-
-                // assert_eq!(
-                //     loaded_len, expected_len,
-                //     "loaded records length: {loaded_len}\nexpected data length:
-                // {expected_len}" );
 
                 Ok(())
             }
