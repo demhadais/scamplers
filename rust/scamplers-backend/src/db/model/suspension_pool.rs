@@ -6,10 +6,7 @@ use scamplers_core::model::suspension::{
 use scamplers_schema::{suspension_pool, suspension_pool_measurement, suspension_pool_preparers};
 use uuid::Uuid;
 
-use crate::{
-    db::model::{WriteToDb, WriteToDbInternal},
-    result::ScamplersResult,
-};
+use crate::{db::model::WriteToDb, result::ScamplersResult};
 
 trait SuspensionPoolExt {
     fn measurements(&mut self, self_id: Uuid) -> &[NewSuspensionPoolMeasurement];
