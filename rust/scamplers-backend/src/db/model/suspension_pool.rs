@@ -6,7 +6,10 @@ use scamplers_core::model::suspension::{
 use scamplers_schema::{suspension_pool, suspension_pool_measurement, suspension_pool_preparers};
 use uuid::Uuid;
 
-use crate::{db::model::WriteToDb, result::ScamplersResult};
+use crate::{
+    db::model::{WriteToDb, WriteToDbInternal},
+    result::ScamplersResult,
+};
 
 trait SuspensionPoolExt {
     fn measurements(&mut self, self_id: Uuid) -> &[NewSuspensionPoolMeasurement];
@@ -56,6 +59,12 @@ impl WriteToDb for NewSuspensionPool {
             .values(self.preparers(handle.id))
             .execute(db_conn)
             .await?;
+
+        // This for-loop sucks
+        for mut s in self.suspensions {
+            s.pooled_into_id = Some(handle.id);
+            s.write_to_db(db_conn).await?;
+        }
 
         Ok(handle)
     }

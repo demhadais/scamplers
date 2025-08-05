@@ -5,10 +5,13 @@ from .responses import (
     ChromiumRun,
     Institution,
     DatasetSummary,
+    Lab,
     LibraryHandle,
+    Person,
     SequencingRunSummary,
     Specimen,
     Suspension,
+    SuspensionPoolHandle,
 )
 from .requests import (
     CellrangerMultiDataset,
@@ -23,12 +26,15 @@ from .requests import (
     NewFrozenBlock,
     NewFrozenTissue,
     NewInstitution,
+    NewLab,
     NewLibrary,
     NewOcmChromiumRun,
+    NewPerson,
     NewPoolMultiplexChromiumRun,
     NewSequencingRun,
     NewSingleplexChromiumRun,
     NewSuspension,
+    NewSuspensionPool,
     NewVirtualSpecimen,
 )
 
@@ -36,8 +42,11 @@ from .requests import (
 class ScamplersClient:
     api_base_url: str
     api_key: str | None = ...
+    accept_invalid_certificates: bool | None = ...
 
     async def create_institution(self, data: NewInstitution) -> Institution: ...
+    async def create_person(self, data: NewPerson) -> Person: ...
+    async def create_lab(self, data: NewLab) -> Lab: ...
     async def create_specimen(
         self,
         data: NewFixedBlock
@@ -47,6 +56,9 @@ class ScamplersClient:
         | NewFrozenTissue
         | NewVirtualSpecimen,
     ) -> Specimen: ...
+    async def create_suspension_pool(
+        self, data: NewSuspensionPool
+    ) -> SuspensionPoolHandle: ...
     async def create_suspension(self, data: NewSuspension) -> Suspension: ...
     async def create_sequencing_run(
         self, data: NewSequencingRun

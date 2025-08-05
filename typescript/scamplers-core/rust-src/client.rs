@@ -29,7 +29,7 @@ use crate::model::{
     person::{NewPerson, Person},
     sequencing_run::{NewSequencingRun, SequencingRunSummary},
     specimen::{NewSpecimen, Specimen},
-    suspension::{NewSuspension, Suspension},
+    suspension::{NewSuspension, NewSuspensionPool, Suspension, SuspensionPoolHandle},
 };
 use crate::{
     api_path::ToApiPath,
@@ -250,6 +250,7 @@ impl_client_methods!(
     (create_person, NewPerson, Person, Method::POST);
     (create_lab, NewLab, Lab, Method::POST);
     (create_specimen, NewSpecimen, Specimen, Method::POST);
+    (create_suspension_pool, NewSuspensionPool, SuspensionPoolHandle, Method::POST);
     (create_suspension, NewSuspension, Suspension, Method::POST);
     (create_sequencing_run, NewSequencingRun, SequencingRunSummary, Method::POST);
     (create_chromium_run, NewChromiumRun, ChromiumRun, Method::POST);

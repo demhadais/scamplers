@@ -1,0 +1,57 @@
+Cells,Gene Expression,,,Cells,"5,087"
+Cells,Gene Expression,,,Confidently mapped reads in cells,69.0%
+Cells,Gene Expression,,,Estimated UMIs from genomic DNA,0.3%
+Cells,Gene Expression,,,Estimated UMIs from genomic DNA per unspliced probe,1
+Cells,Gene Expression,,,Mean reads per cell,"487,658"
+Cells,Gene Expression,,,Median UMI counts per cell,"1,234"
+Cells,Gene Expression,,,Median genes per cell,917
+Cells,Gene Expression,,,Number of reads from cells called from this sample,"2,480,716,911"
+Cells,Gene Expression,,,Reads confidently mapped to filtered probe set,97.5%
+Cells,Gene Expression,,,Reads confidently mapped to probe set,97.8%
+Cells,Gene Expression,,,Reads half-mapped to probe set,0.5%
+Cells,Gene Expression,,,Reads mapped to probe set,98.7%
+Cells,Gene Expression,,,Reads split-mapped to probe set,0.5%
+Cells,Gene Expression,,,Total genes detected,"15,355"
+Cells,Gene Expression,Physical library ID,GEX_1,Cells detected in other samples,"14,194 (73.6%)"
+Cells,Gene Expression,Physical library ID,GEX_1,Cells detected in this sample,"5,087 (26.4%)"
+Library,Gene Expression,,,Estimated UMIs from genomic DNA,0.2%
+Library,Gene Expression,,,Estimated UMIs from genomic DNA per unspliced probe,1
+Library,Gene Expression,Fastq ID,fastq,Number of reads,"529,021,013"
+Library,Gene Expression,Fastq ID,fastq,Number of short reads skipped,0
+Library,Gene Expression,Fastq ID,fastq,Q30 GEM barcodes,95.5%
+Library,Gene Expression,Fastq ID,fastq,Q30 RNA read,95.6%
+Library,Gene Expression,Fastq ID,fastq,Q30 UMI,96.5%
+Library,Gene Expression,Fastq ID,fastq,Q30 barcodes,94.1%
+Library,Gene Expression,Fastq ID,fastq,Q30 probe barcodes,91.3%
+Library,Gene Expression,Fastq ID,fastq (2),Number of reads,"6,496,627,396"
+Library,Gene Expression,Fastq ID,fastq (2),Number of short reads skipped,0
+Library,Gene Expression,Fastq ID,fastq (2),Q30 GEM barcodes,97.7%
+Library,Gene Expression,Fastq ID,fastq (2),Q30 RNA read,97.7%
+Library,Gene Expression,Fastq ID,fastq (2),Q30 UMI,98.2%
+Library,Gene Expression,Fastq ID,fastq (2),Q30 barcodes,96.9%
+Library,Gene Expression,Fastq ID,fastq (2),Q30 probe barcodes,95.5%
+Library,Gene Expression,Physical library ID,GEX_1,Cells,"19,281"
+Library,Gene Expression,Physical library ID,GEX_1,Confidently mapped reads in cells,72.3%
+Library,Gene Expression,Physical library ID,GEX_1,Fraction of initial cell barcodes passing high occupancy GEM filtering,100.0%
+Library,Gene Expression,Physical library ID,GEX_1,Mean reads per cell,"364,382"
+Library,Gene Expression,Physical library ID,GEX_1,Number of reads,"7,025,648,409"
+Library,Gene Expression,Physical library ID,GEX_1,Number of reads in the library,"7,025,648,409"
+Library,Gene Expression,Physical library ID,GEX_1,Reads confidently mapped to filtered probe set,82.5%
+Library,Gene Expression,Physical library ID,GEX_1,Reads confidently mapped to probe set,82.7%
+Library,Gene Expression,Physical library ID,GEX_1,Reads half-mapped to probe set,9.7%
+Library,Gene Expression,Physical library ID,GEX_1,Reads mapped to probe set,93.4%
+Library,Gene Expression,Physical library ID,GEX_1,Reads split-mapped to probe set,1.0%
+Library,Gene Expression,Physical library ID,GEX_1,Sequencing saturation,99.5%
+Library,Gene Expression,Physical library ID,GEX_1,Valid GEM barcodes,97.7%
+Library,Gene Expression,Physical library ID,GEX_1,Valid UMIs,99.7%
+Library,Gene Expression,Physical library ID,GEX_1,Valid barcodes,82.4%
+Library,Gene Expression,Physical library ID,GEX_1,Valid probe barcodes,82.6%
+Library,Gene Expression,Probe barcode ID,BC001,Cells per probe barcode,"10,247 (53.1%)"
+Library,Gene Expression,Probe barcode ID,BC001,Sample ID,sample
+Library,Gene Expression,Probe barcode ID,BC001,UMIs per probe barcode,"4,183,374 (17.1%)"
+Library,Gene Expression,Probe barcode ID,BC002,Cells per probe barcode,"5,087 (26.4%)"
+Library,Gene Expression,Probe barcode ID,BC002,Sample ID,sample
+Library,Gene Expression,Probe barcode ID,BC002,UMIs per probe barcode,"15,252,673 (62.2%)"
+Library,Gene Expression,Probe barcode ID,BC003,Cells per probe barcode,"3,947 (20.5%)"
+Library,Gene Expression,Probe barcode ID,BC003,Sample ID,sample
+Library,Gene Expression,Probe barcode ID,BC003,UMIs per probe barcode,"4,928,518 (20.1%)"

@@ -17,6 +17,1466 @@
     "ms_user_id": "",
     "institution_id": ""
   },
-  "chemistries": [],
+  "chemistries": [
+    {
+      "barcode": [
+        {
+          "kind": "gel_bead",
+          "length": 16,
+          "offset": 0,
+          "read_type": "R1",
+          "whitelist": { "name": "3M-february-2018" }
+        }
+      ],
+      "description": "Single Cell 3' v3",
+      "endedness": "three_prime",
+      "name": "SC3Pv3",
+      "rna": { "length": null, "offset": 0, "read_type": "R2" },
+      "rna2": null,
+      "strandedness": "+",
+      "umi": [
+        { "length": 12, "min_length": 10, "offset": 16, "read_type": "R1" }
+      ],
+      "cmdline": "cellranger count"
+    },
+    {
+      "barcode": [
+        {
+          "kind": "gel_bead",
+          "length": 16,
+          "offset": 0,
+          "read_type": "R1",
+          "whitelist": { "name": "3M-3pgex-may-2023" }
+        }
+      ],
+      "description": "Single Cell 3' v4",
+      "endedness": "three_prime",
+      "name": "SC3Pv4",
+      "rna": { "length": null, "offset": 0, "read_type": "R2" },
+      "rna2": null,
+      "strandedness": "+",
+      "umi": [
+        { "length": 12, "min_length": 10, "offset": 16, "read_type": "R1" }
+      ],
+      "cmdline": "cellranger count"
+    },
+    {
+      "barcode": [
+        {
+          "kind": "gel_bead",
+          "length": 16,
+          "offset": 0,
+          "read_type": "R1",
+          "whitelist": { "name": "3M-february-2018" }
+        }
+      ],
+      "description": "Single Cell 3' v3",
+      "endedness": "three_prime",
+      "name": "SC3Pv3",
+      "rna": { "length": null, "offset": 0, "read_type": "R2" },
+      "rna2": null,
+      "strandedness": "+",
+      "umi": [
+        { "length": 12, "min_length": 10, "offset": 16, "read_type": "R1" }
+      ],
+      "cmdline": "cellranger count"
+    },
+    {
+      "barcode": [
+        {
+          "kind": "gel_bead",
+          "length": 16,
+          "offset": 0,
+          "read_type": "R1",
+          "whitelist": { "name": "3M-february-2018" }
+        }
+      ],
+      "description": "Single Cell 3' v3",
+      "endedness": "three_prime",
+      "name": "SC3Pv3",
+      "rna": { "length": null, "offset": 0, "read_type": "R2" },
+      "rna2": null,
+      "strandedness": "+",
+      "umi": [
+        { "length": 12, "min_length": 10, "offset": 16, "read_type": "R1" }
+      ],
+      "cmdline": "cellranger count"
+    },
+    {
+      "barcode": [
+        {
+          "kind": "gel_bead",
+          "length": 16,
+          "offset": 0,
+          "read_type": "R1",
+          "whitelist": { "name": "3M-february-2018" }
+        }
+      ],
+      "description": "Single Cell 3' v3",
+      "endedness": "three_prime",
+      "name": "SC3Pv3",
+      "rna": { "length": null, "offset": 0, "read_type": "R2" },
+      "rna2": null,
+      "strandedness": "+",
+      "umi": [
+        { "length": 12, "min_length": 10, "offset": 16, "read_type": "R1" }
+      ],
+      "cmdline": "cellranger multi"
+    },
+    {
+      "barcode": [
+        {
+          "kind": "gel_bead",
+          "length": 16,
+          "offset": 0,
+          "read_type": "R1",
+          "whitelist": { "name": "3M-3pgex-may-2023_TRU" }
+        },
+        {
+          "kind": "overhang",
+          "length": 2,
+          "offset": 7,
+          "read_type": "R1",
+          "whitelist": { "name": "overhang", "translation": true }
+        }
+      ],
+      "description": "Single Cell 3' v4 (polyA) OCM",
+      "endedness": "three_prime",
+      "name": "SC3Pv4-polyA-OCM",
+      "rna": { "length": null, "offset": 0, "read_type": "R2" },
+      "rna2": null,
+      "strandedness": "+",
+      "umi": [
+        { "length": 12, "min_length": 10, "offset": 16, "read_type": "R1" }
+      ],
+      "cmdline": "cellranger multi"
+    },
+    {
+      "barcode": [
+        {
+          "kind": "gel_bead",
+          "length": 16,
+          "offset": 0,
+          "read_type": "R1",
+          "whitelist": { "name": "3M-february-2018" }
+        }
+      ],
+      "description": "Single Cell 3' v3",
+      "endedness": "three_prime",
+      "name": "SC3Pv3",
+      "rna": { "length": null, "offset": 0, "read_type": "R2" },
+      "rna2": null,
+      "strandedness": "+",
+      "umi": [
+        { "length": 12, "min_length": 10, "offset": 16, "read_type": "R1" }
+      ],
+      "cmdline": "cellranger count"
+    },
+    {
+      "barcode": [
+        {
+          "kind": "gel_bead",
+          "length": 16,
+          "offset": 0,
+          "read_type": "R1",
+          "whitelist": { "name": "3M-february-2018" }
+        }
+      ],
+      "description": "Single Cell 3' v3",
+      "endedness": "three_prime",
+      "name": "SC3Pv3",
+      "rna": { "length": null, "offset": 0, "read_type": "R2" },
+      "rna2": null,
+      "strandedness": "+",
+      "umi": [
+        { "length": 12, "min_length": 10, "offset": 16, "read_type": "R1" }
+      ],
+      "cmdline": "cellranger count"
+    },
+    {
+      "barcode": [
+        {
+          "kind": "gel_bead",
+          "length": 16,
+          "offset": 0,
+          "read_type": "R1",
+          "whitelist": { "name": "3M-february-2018" }
+        }
+      ],
+      "description": "Single Cell 3' v3",
+      "endedness": "three_prime",
+      "name": "SC3Pv3",
+      "rna": { "length": null, "offset": 0, "read_type": "R2" },
+      "rna2": null,
+      "strandedness": "+",
+      "umi": [
+        { "length": 12, "min_length": 10, "offset": 16, "read_type": "R1" }
+      ],
+      "cmdline": "cellranger multi"
+    },
+    {
+      "barcode": [
+        {
+          "kind": "gel_bead",
+          "length": 16,
+          "offset": 0,
+          "read_type": "R1",
+          "whitelist": { "name": "3M-february-2018" }
+        }
+      ],
+      "description": "Single Cell 3' v3",
+      "endedness": "three_prime",
+      "name": "SC3Pv3",
+      "rna": { "length": null, "offset": 0, "read_type": "R2" },
+      "rna2": null,
+      "strandedness": "+",
+      "umi": [
+        { "length": 12, "min_length": 10, "offset": 16, "read_type": "R1" }
+      ],
+      "cmdline": "cellranger count"
+    },
+    {
+      "barcode": [
+        {
+          "kind": "gel_bead",
+          "length": 16,
+          "offset": 0,
+          "read_type": "R1",
+          "whitelist": { "name": "3M-february-2018" }
+        }
+      ],
+      "description": "Single Cell 3' v3",
+      "endedness": "three_prime",
+      "name": "SC3Pv3",
+      "rna": { "length": null, "offset": 0, "read_type": "R2" },
+      "rna2": null,
+      "strandedness": "+",
+      "umi": [
+        { "length": 12, "min_length": 10, "offset": 16, "read_type": "R1" }
+      ],
+      "cmdline": "cellranger count"
+    },
+    {
+      "barcode": [
+        {
+          "kind": "gel_bead",
+          "length": 16,
+          "offset": 0,
+          "read_type": "R1",
+          "whitelist": { "name": "3M-february-2018" }
+        }
+      ],
+      "description": "Single Cell 3' v3",
+      "endedness": "three_prime",
+      "name": "SC3Pv3",
+      "rna": { "length": null, "offset": 0, "read_type": "R2" },
+      "rna2": null,
+      "strandedness": "+",
+      "umi": [
+        { "length": 12, "min_length": 10, "offset": 16, "read_type": "R1" }
+      ],
+      "cmdline": "cellranger count"
+    },
+    {
+      "barcode": [
+        {
+          "kind": "gel_bead",
+          "length": 16,
+          "offset": 0,
+          "read_type": "R1",
+          "whitelist": { "name": "3M-february-2018" }
+        }
+      ],
+      "description": "Single Cell 3' v3",
+      "endedness": "three_prime",
+      "name": "SC3Pv3",
+      "rna": { "length": null, "offset": 0, "read_type": "R2" },
+      "rna2": null,
+      "strandedness": "+",
+      "umi": [
+        { "length": 12, "min_length": 10, "offset": 16, "read_type": "R1" }
+      ],
+      "cmdline": "cellranger count"
+    },
+    {
+      "barcode": [
+        {
+          "kind": "gel_bead",
+          "length": 16,
+          "offset": 0,
+          "read_type": "R1",
+          "whitelist": { "name": "3M-3pgex-may-2023" }
+        }
+      ],
+      "description": "Single Cell 3' v4",
+      "endedness": "three_prime",
+      "name": "SC3Pv4",
+      "rna": { "length": null, "offset": 0, "read_type": "R2" },
+      "rna2": null,
+      "strandedness": "+",
+      "umi": [
+        { "length": 12, "min_length": 10, "offset": 16, "read_type": "R1" }
+      ],
+      "cmdline": "cellranger count"
+    },
+    {
+      "barcode": [
+        {
+          "kind": "gel_bead",
+          "length": 16,
+          "offset": 0,
+          "read_type": "R1",
+          "whitelist": { "name": "3M-3pgex-may-2023_TRU" }
+        }
+      ],
+      "description": "Single Cell 3' v4 (polyA)",
+      "endedness": "three_prime",
+      "name": "SC3Pv4-polyA",
+      "rna": { "length": null, "offset": 0, "read_type": "R2" },
+      "rna2": null,
+      "strandedness": "+",
+      "umi": [
+        { "length": 12, "min_length": 10, "offset": 16, "read_type": "R1" }
+      ],
+      "cmdline": "cellranger count"
+    },
+    {
+      "barcode": [
+        {
+          "kind": "gel_bead",
+          "length": 16,
+          "offset": 0,
+          "read_type": "R1",
+          "whitelist": { "name": "3M-february-2018" }
+        }
+      ],
+      "description": "Single Cell 3' v3",
+      "endedness": "three_prime",
+      "name": "SC3Pv3",
+      "rna": { "length": null, "offset": 0, "read_type": "R2" },
+      "rna2": null,
+      "strandedness": "+",
+      "umi": [
+        { "length": 12, "min_length": 10, "offset": 16, "read_type": "R1" }
+      ],
+      "cmdline": "cellranger count"
+    },
+    {
+      "barcode": [
+        {
+          "kind": "gel_bead",
+          "length": 16,
+          "offset": 0,
+          "read_type": "R1",
+          "whitelist": { "name": "3M-february-2018" }
+        }
+      ],
+      "description": "Single Cell 3' v3",
+      "endedness": "three_prime",
+      "name": "SC3Pv3",
+      "rna": { "length": null, "offset": 0, "read_type": "R2" },
+      "rna2": null,
+      "strandedness": "+",
+      "umi": [
+        { "length": 12, "min_length": 10, "offset": 16, "read_type": "R1" }
+      ],
+      "cmdline": "cellranger count"
+    },
+    {
+      "barcode": [
+        {
+          "kind": "gel_bead",
+          "length": 16,
+          "offset": 0,
+          "read_type": "R1",
+          "whitelist": { "name": "3M-february-2018" }
+        }
+      ],
+      "description": "Single Cell 3' v3",
+      "endedness": "three_prime",
+      "name": "SC3Pv3",
+      "rna": { "length": null, "offset": 0, "read_type": "R2" },
+      "rna2": null,
+      "strandedness": "+",
+      "umi": [
+        { "length": 12, "min_length": 10, "offset": 16, "read_type": "R1" }
+      ],
+      "cmdline": "cellranger multi"
+    },
+    {
+      "barcode": [
+        {
+          "kind": "gel_bead",
+          "length": 16,
+          "offset": 0,
+          "read_type": "R1",
+          "whitelist": { "name": "3M-february-2018" }
+        }
+      ],
+      "description": "Single Cell 3' v3",
+      "endedness": "three_prime",
+      "name": "SC3Pv3",
+      "rna": { "length": null, "offset": 0, "read_type": "R2" },
+      "rna2": null,
+      "strandedness": "+",
+      "umi": [
+        { "length": 12, "min_length": 10, "offset": 16, "read_type": "R1" }
+      ],
+      "cmdline": "/projects/robson-lab/software/cellranger/3.1.0/cellranger-cs/3.1.0/bin/count --id=DB20002"
+    },
+    {
+      "barcode": [
+        {
+          "kind": "gel_bead",
+          "length": 16,
+          "offset": 0,
+          "read_type": "R1",
+          "whitelist": { "name": "3M-3pgex-may-2023_TRU" }
+        }
+      ],
+      "description": "Single Cell 3' v4 (polyA)",
+      "endedness": "three_prime",
+      "name": "SC3Pv4-polyA",
+      "rna": { "length": null, "offset": 0, "read_type": "R2" },
+      "rna2": null,
+      "strandedness": "+",
+      "umi": [
+        { "length": 12, "min_length": 10, "offset": 16, "read_type": "R1" }
+      ],
+      "cmdline": "cellranger count"
+    },
+    {
+      "barcode": [
+        {
+          "kind": "gel_bead",
+          "length": 16,
+          "offset": 0,
+          "read_type": "R1",
+          "whitelist": { "name": "3M-february-2018" }
+        }
+      ],
+      "description": "Single Cell 3' v3",
+      "endedness": "three_prime",
+      "name": "SC3Pv3",
+      "rna": { "length": null, "offset": 0, "read_type": "R2" },
+      "rna2": null,
+      "strandedness": "+",
+      "umi": [
+        { "length": 12, "min_length": 10, "offset": 16, "read_type": "R1" }
+      ],
+      "cmdline": "cellranger count"
+    },
+    {
+      "barcode": [
+        {
+          "kind": "gel_bead",
+          "length": 16,
+          "offset": 0,
+          "read_type": "R1",
+          "whitelist": { "name": "3M-february-2018" }
+        }
+      ],
+      "description": "Single Cell 3' v3",
+      "endedness": "three_prime",
+      "name": "SC3Pv3",
+      "rna": { "length": null, "offset": 0, "read_type": "R2" },
+      "rna2": null,
+      "strandedness": "+",
+      "umi": [
+        { "length": 12, "min_length": 10, "offset": 16, "read_type": "R1" }
+      ],
+      "cmdline": "cellranger count"
+    },
+    {
+      "barcode": [
+        {
+          "kind": "gel_bead",
+          "length": 16,
+          "offset": 0,
+          "read_type": "R1",
+          "whitelist": { "name": "3M-february-2018" }
+        }
+      ],
+      "description": "Single Cell 3' v3",
+      "endedness": "three_prime",
+      "name": "SC3Pv3",
+      "rna": { "length": null, "offset": 0, "read_type": "R2" },
+      "rna2": null,
+      "strandedness": "+",
+      "umi": [
+        { "length": 12, "min_length": 10, "offset": 16, "read_type": "R1" }
+      ],
+      "cmdline": "cellranger count"
+    },
+    {
+      "barcode": [
+        {
+          "kind": "gel_bead",
+          "length": 16,
+          "offset": 0,
+          "read_type": "R1",
+          "whitelist": { "name": "3M-february-2018" }
+        }
+      ],
+      "description": "Single Cell 3' v3",
+      "endedness": "three_prime",
+      "name": "SC3Pv3",
+      "rna": { "length": null, "offset": 0, "read_type": "R2" },
+      "rna2": null,
+      "strandedness": "+",
+      "umi": [
+        { "length": 12, "min_length": 10, "offset": 16, "read_type": "R1" }
+      ],
+      "cmdline": "cellranger count"
+    },
+    {
+      "barcode": [
+        {
+          "kind": "gel_bead",
+          "length": 16,
+          "offset": 0,
+          "read_type": "R1",
+          "whitelist": { "name": "737K-fixed-rna-profiling" }
+        },
+        {
+          "kind": "right_probe",
+          "length": 8,
+          "offset": 68,
+          "read_type": "R2",
+          "whitelist": { "name": "probe-barcodes-fixed-rna-profiling" }
+        }
+      ],
+      "description": "Fixed RNA Profiling",
+      "endedness": "three_prime",
+      "name": "MFRP",
+      "rna": { "length": 50, "offset": 0, "read_type": "R2", "min_length": 50 },
+      "rna2": null,
+      "strandedness": "-",
+      "umi": [
+        { "length": 12, "min_length": 10, "offset": 16, "read_type": "R1" }
+      ],
+      "cmdline": "cellranger multi"
+    },
+    {
+      "barcode": [
+        {
+          "kind": "gel_bead",
+          "length": 16,
+          "offset": 0,
+          "read_type": "R1",
+          "whitelist": { "name": "3M-february-2018" }
+        }
+      ],
+      "description": "Single Cell 3' v3",
+      "endedness": "three_prime",
+      "name": "SC3Pv3",
+      "rna": { "length": null, "offset": 0, "read_type": "R2" },
+      "rna2": null,
+      "strandedness": "+",
+      "umi": [
+        { "length": 12, "min_length": 10, "offset": 16, "read_type": "R1" }
+      ],
+      "cmdline": "cellranger count"
+    },
+    {
+      "barcode": [
+        {
+          "kind": "gel_bead",
+          "length": 16,
+          "offset": 0,
+          "read_type": "R1",
+          "whitelist": { "name": "3M-february-2018" }
+        }
+      ],
+      "description": "Single Cell 3' v3",
+      "endedness": "three_prime",
+      "name": "SC3Pv3",
+      "rna": { "length": null, "offset": 0, "read_type": "R2" },
+      "rna2": null,
+      "strandedness": "+",
+      "umi": [
+        { "length": 12, "min_length": 10, "offset": 16, "read_type": "R1" }
+      ],
+      "cmdline": "cellranger count"
+    },
+    {
+      "barcode": [
+        {
+          "kind": "gel_bead",
+          "length": 16,
+          "offset": 0,
+          "read_type": "R1",
+          "whitelist": { "name": "3M-february-2018" }
+        }
+      ],
+      "description": "Single Cell 3' v3",
+      "endedness": "three_prime",
+      "name": "SC3Pv3",
+      "rna": { "length": null, "offset": 0, "read_type": "R2" },
+      "rna2": null,
+      "strandedness": "+",
+      "umi": [
+        { "length": 12, "min_length": 10, "offset": 16, "read_type": "R1" }
+      ],
+      "cmdline": "cellranger count"
+    },
+    {
+      "barcode": [
+        {
+          "kind": "gel_bead",
+          "length": 16,
+          "offset": 0,
+          "read_type": "R1",
+          "whitelist": { "name": "3M-3pgex-may-2023" }
+        }
+      ],
+      "description": "Single Cell 3' v4",
+      "endedness": "three_prime",
+      "name": "SC3Pv4",
+      "rna": { "length": null, "offset": 0, "read_type": "R2" },
+      "rna2": null,
+      "strandedness": "+",
+      "umi": [
+        { "length": 12, "min_length": 10, "offset": 16, "read_type": "R1" }
+      ],
+      "cmdline": "cellranger count"
+    },
+    {
+      "barcode": [
+        {
+          "kind": "gel_bead",
+          "length": 16,
+          "offset": 0,
+          "read_type": "R1",
+          "whitelist": { "name": "3M-february-2018" }
+        }
+      ],
+      "description": "Single Cell 3' v3",
+      "endedness": "three_prime",
+      "name": "SC3Pv3",
+      "rna": { "length": null, "offset": 0, "read_type": "R2" },
+      "rna2": null,
+      "strandedness": "+",
+      "umi": [
+        { "length": 12, "min_length": 10, "offset": 16, "read_type": "R1" }
+      ],
+      "cmdline": "cellranger count"
+    },
+    {
+      "barcode": [
+        {
+          "kind": "gel_bead",
+          "length": 16,
+          "offset": 0,
+          "read_type": "R1",
+          "whitelist": { "name": "737K-fixed-rna-profiling" }
+        },
+        {
+          "kind": "right_probe",
+          "length": 8,
+          "offset": 68,
+          "read_type": "R2",
+          "whitelist": { "name": "probe-barcodes-fixed-rna-profiling" }
+        }
+      ],
+      "description": "Fixed RNA Profiling",
+      "endedness": "three_prime",
+      "name": "MFRP",
+      "rna": { "length": 50, "offset": 0, "read_type": "R2", "min_length": 50 },
+      "rna2": null,
+      "strandedness": "-",
+      "umi": [
+        { "length": 12, "min_length": 10, "offset": 16, "read_type": "R1" }
+      ],
+      "cmdline": "cellranger multi"
+    },
+    {
+      "barcode": [
+        {
+          "kind": "gel_bead",
+          "length": 16,
+          "offset": 0,
+          "read_type": "R1",
+          "whitelist": { "name": "3M-february-2018" }
+        }
+      ],
+      "description": "Single Cell 3' v3",
+      "endedness": "three_prime",
+      "name": "SC3Pv3",
+      "rna": { "length": null, "offset": 0, "read_type": "R2" },
+      "rna2": null,
+      "strandedness": "+",
+      "umi": [
+        { "length": 12, "min_length": 10, "offset": 16, "read_type": "R1" }
+      ],
+      "cmdline": "cellranger count"
+    },
+    {
+      "barcode": [
+        {
+          "kind": "gel_bead",
+          "length": 16,
+          "offset": 0,
+          "read_type": "R1",
+          "whitelist": { "name": "3M-february-2018" }
+        }
+      ],
+      "description": "Single Cell 3' v3",
+      "endedness": "three_prime",
+      "name": "SC3Pv3",
+      "rna": { "length": null, "offset": 0, "read_type": "R2" },
+      "rna2": null,
+      "strandedness": "+",
+      "umi": [
+        { "length": 12, "min_length": 10, "offset": 16, "read_type": "R1" }
+      ],
+      "cmdline": "cellranger count"
+    },
+    {
+      "barcode": [
+        {
+          "kind": "gel_bead",
+          "length": 16,
+          "offset": 0,
+          "read_type": "R1",
+          "whitelist": { "name": "3M-february-2018" }
+        }
+      ],
+      "description": "Single Cell 3' v3",
+      "endedness": "three_prime",
+      "name": "SC3Pv3",
+      "rna": { "length": null, "offset": 0, "read_type": "R2" },
+      "rna2": null,
+      "strandedness": "+",
+      "umi": [
+        { "length": 12, "min_length": 10, "offset": 16, "read_type": "R1" }
+      ],
+      "cmdline": "cellranger count"
+    },
+    {
+      "barcode": [
+        {
+          "kind": "gel_bead",
+          "length": 16,
+          "offset": 0,
+          "read_type": "R1",
+          "whitelist": { "name": "3M-february-2018" }
+        }
+      ],
+      "description": "Single Cell 3' v3",
+      "endedness": "three_prime",
+      "name": "SC3Pv3",
+      "rna": { "length": null, "offset": 0, "read_type": "R2" },
+      "rna2": null,
+      "strandedness": "+",
+      "umi": [
+        { "length": 12, "min_length": 10, "offset": 16, "read_type": "R1" }
+      ],
+      "cmdline": "cellranger count"
+    },
+    {
+      "barcode": [
+        {
+          "kind": "gel_bead",
+          "length": 16,
+          "offset": 0,
+          "read_type": "R1",
+          "whitelist": { "name": "3M-february-2018" }
+        }
+      ],
+      "description": "Single Cell 3' v3",
+      "endedness": "three_prime",
+      "name": "SC3Pv3",
+      "rna": { "length": null, "offset": 0, "read_type": "R2" },
+      "rna2": null,
+      "strandedness": "+",
+      "umi": [
+        { "length": 12, "min_length": 10, "offset": 16, "read_type": "R1" }
+      ],
+      "cmdline": "cellranger count"
+    },
+    {
+      "barcode": [
+        {
+          "kind": "gel_bead",
+          "length": 16,
+          "offset": 0,
+          "read_type": "R1",
+          "whitelist": { "name": "3M-february-2018" }
+        }
+      ],
+      "description": "Single Cell 3' v3",
+      "endedness": "three_prime",
+      "name": "SC3Pv3",
+      "rna": { "length": null, "offset": 0, "read_type": "R2" },
+      "rna2": null,
+      "strandedness": "+",
+      "umi": [
+        { "length": 12, "min_length": 10, "offset": 16, "read_type": "R1" }
+      ],
+      "cmdline": "cellranger count"
+    },
+    {
+      "barcode": [
+        {
+          "kind": "gel_bead",
+          "length": 16,
+          "offset": 0,
+          "read_type": "R1",
+          "whitelist": { "name": "3M-3pgex-may-2023" }
+        }
+      ],
+      "description": "Single Cell 3' v4",
+      "endedness": "three_prime",
+      "name": "SC3Pv4",
+      "rna": { "length": null, "offset": 0, "read_type": "R2" },
+      "rna2": null,
+      "strandedness": "+",
+      "umi": [
+        { "length": 12, "min_length": 10, "offset": 16, "read_type": "R1" }
+      ],
+      "cmdline": "cellranger count"
+    },
+    {
+      "barcode": [
+        {
+          "kind": "gel_bead",
+          "length": 16,
+          "offset": 0,
+          "read_type": "R1",
+          "whitelist": { "name": "737K-fixed-rna-profiling" }
+        },
+        {
+          "kind": "right_probe",
+          "length": 8,
+          "offset": 68,
+          "read_type": "R2",
+          "whitelist": { "name": "probe-barcodes-fixed-rna-profiling" }
+        }
+      ],
+      "description": "Fixed RNA Profiling",
+      "endedness": "three_prime",
+      "name": "MFRP",
+      "rna": { "length": 50, "offset": 0, "read_type": "R2", "min_length": 50 },
+      "rna2": null,
+      "strandedness": "-",
+      "umi": [
+        { "length": 12, "min_length": 10, "offset": 16, "read_type": "R1" }
+      ],
+      "cmdline": "cellranger multi"
+    },
+    {
+      "barcode": [
+        {
+          "kind": "gel_bead",
+          "length": 16,
+          "offset": 0,
+          "read_type": "R1",
+          "whitelist": { "name": "3M-february-2018" }
+        }
+      ],
+      "description": "Single Cell 3' v3",
+      "endedness": "three_prime",
+      "name": "SC3Pv3",
+      "rna": { "length": null, "offset": 0, "read_type": "R2" },
+      "rna2": null,
+      "strandedness": "+",
+      "umi": [
+        { "length": 12, "min_length": 10, "offset": 16, "read_type": "R1" }
+      ],
+      "cmdline": "cellranger count"
+    },
+    {
+      "barcode": [
+        {
+          "kind": "gel_bead",
+          "length": 16,
+          "offset": 0,
+          "read_type": "R1",
+          "whitelist": { "name": "737K-august-2016" }
+        }
+      ],
+      "description": "Single Cell 5' R2-only",
+      "endedness": "five_prime",
+      "name": "SC5P-R2",
+      "rna": { "length": null, "offset": 0, "read_type": "R2" },
+      "rna2": null,
+      "strandedness": "-",
+      "umi": [
+        { "length": 10, "min_length": null, "offset": 16, "read_type": "R1" }
+      ],
+      "cmdline": "cellranger multi"
+    },
+    {
+      "barcode": [
+        {
+          "kind": "gel_bead",
+          "length": 16,
+          "offset": 0,
+          "read_type": "R1",
+          "whitelist": { "name": "3M-february-2018" }
+        }
+      ],
+      "description": "Single Cell 3' v3",
+      "endedness": "three_prime",
+      "name": "SC3Pv3",
+      "rna": { "length": null, "offset": 0, "read_type": "R2" },
+      "rna2": null,
+      "strandedness": "+",
+      "umi": [
+        { "length": 12, "min_length": 10, "offset": 16, "read_type": "R1" }
+      ],
+      "cmdline": "cellranger count"
+    },
+    {
+      "barcode": [
+        {
+          "kind": "gel_bead",
+          "length": 16,
+          "offset": 0,
+          "read_type": "R1",
+          "whitelist": { "name": "3M-february-2018" }
+        }
+      ],
+      "description": "Single Cell 3' v3",
+      "endedness": "three_prime",
+      "name": "SC3Pv3",
+      "rna": { "length": null, "offset": 0, "read_type": "R2" },
+      "rna2": null,
+      "strandedness": "+",
+      "umi": [
+        { "length": 12, "min_length": 10, "offset": 16, "read_type": "R1" }
+      ],
+      "cmdline": "cellranger count"
+    },
+    {
+      "barcode": [
+        {
+          "kind": "gel_bead",
+          "length": 16,
+          "offset": 0,
+          "read_type": "R1",
+          "whitelist": { "name": "3M-february-2018" }
+        }
+      ],
+      "description": "Single Cell 3' v3",
+      "endedness": "three_prime",
+      "name": "SC3Pv3",
+      "rna": { "length": null, "offset": 0, "read_type": "R2" },
+      "rna2": null,
+      "strandedness": "+",
+      "umi": [
+        { "length": 12, "min_length": 10, "offset": 16, "read_type": "R1" }
+      ],
+      "cmdline": "cellranger count"
+    },
+    {
+      "barcode": [
+        {
+          "kind": "gel_bead",
+          "length": 16,
+          "offset": 0,
+          "read_type": "R1",
+          "whitelist": { "name": "3M-february-2018" }
+        }
+      ],
+      "description": "Single Cell 3' v3",
+      "endedness": "three_prime",
+      "name": "SC3Pv3",
+      "rna": { "length": null, "offset": 0, "read_type": "R2" },
+      "rna2": null,
+      "strandedness": "+",
+      "umi": [
+        { "length": 12, "min_length": 10, "offset": 16, "read_type": "R1" }
+      ],
+      "cmdline": "cellranger count"
+    },
+    {
+      "barcode": [
+        {
+          "kind": "gel_bead",
+          "length": 16,
+          "offset": 0,
+          "read_type": "R1",
+          "whitelist": { "name": "3M-3pgex-may-2023" }
+        }
+      ],
+      "description": "Single Cell 3' v4",
+      "endedness": "three_prime",
+      "name": "SC3Pv4",
+      "rna": { "length": null, "offset": 0, "read_type": "R2" },
+      "rna2": null,
+      "strandedness": "+",
+      "umi": [
+        { "length": 12, "min_length": 10, "offset": 16, "read_type": "R1" }
+      ],
+      "cmdline": "cellranger count"
+    },
+    {
+      "barcode": [
+        {
+          "kind": "gel_bead",
+          "length": 16,
+          "offset": 0,
+          "read_type": "R1",
+          "whitelist": { "name": "3M-february-2018" }
+        }
+      ],
+      "description": "Single Cell 3' v3",
+      "endedness": "three_prime",
+      "name": "SC3Pv3",
+      "rna": { "length": null, "offset": 0, "read_type": "R2" },
+      "rna2": null,
+      "strandedness": "+",
+      "umi": [
+        { "length": 12, "min_length": 10, "offset": 16, "read_type": "R1" }
+      ],
+      "cmdline": "cellranger multi"
+    },
+    {
+      "barcode": [
+        {
+          "kind": "gel_bead",
+          "length": 16,
+          "offset": 0,
+          "read_type": "R1",
+          "whitelist": { "name": "3M-3pgex-may-2023" }
+        }
+      ],
+      "description": "Single Cell 3' v4",
+      "endedness": "three_prime",
+      "name": "SC3Pv4",
+      "rna": { "length": null, "offset": 0, "read_type": "R2" },
+      "rna2": null,
+      "strandedness": "+",
+      "umi": [
+        { "length": 12, "min_length": 10, "offset": 16, "read_type": "R1" }
+      ],
+      "cmdline": "cellranger count"
+    },
+    {
+      "barcode": [
+        {
+          "kind": "gel_bead",
+          "length": 16,
+          "offset": 0,
+          "read_type": "R1",
+          "whitelist": { "name": "3M-february-2018" }
+        }
+      ],
+      "description": "Single Cell 3' v3",
+      "endedness": "three_prime",
+      "name": "SC3Pv3",
+      "rna": { "length": null, "offset": 0, "read_type": "R2" },
+      "rna2": null,
+      "strandedness": "+",
+      "umi": [
+        { "length": 12, "min_length": 10, "offset": 16, "read_type": "R1" }
+      ],
+      "cmdline": "/projects/robson-lab/software/cellranger/3.1.0/cellranger-cs/3.1.0/bin/count --id=BB20004"
+    },
+    {
+      "barcode": [
+        {
+          "kind": "gel_bead",
+          "length": 16,
+          "offset": 0,
+          "read_type": "R1",
+          "whitelist": { "name": "3M-3pgex-may-2023" }
+        }
+      ],
+      "description": "Single Cell 3' v4",
+      "endedness": "three_prime",
+      "name": "SC3Pv4",
+      "rna": { "length": null, "offset": 0, "read_type": "R2" },
+      "rna2": null,
+      "strandedness": "+",
+      "umi": [
+        { "length": 12, "min_length": 10, "offset": 16, "read_type": "R1" }
+      ],
+      "cmdline": "cellranger count"
+    },
+    {
+      "barcode": [
+        {
+          "kind": "gel_bead",
+          "length": 16,
+          "offset": 0,
+          "read_type": "R1",
+          "whitelist": { "name": "737K-fixed-rna-profiling" }
+        },
+        {
+          "kind": "right_probe",
+          "length": 8,
+          "offset": 68,
+          "read_type": "R2",
+          "whitelist": {
+            "name": "probe-barcodes-fixed-rna-profiling-rna",
+            "translation": true
+          }
+        }
+      ],
+      "description": "Flex Gene Expression",
+      "endedness": "three_prime",
+      "name": "MFRP-RNA",
+      "rna": { "length": 50, "offset": 0, "read_type": "R2", "min_length": 50 },
+      "rna2": null,
+      "strandedness": "-",
+      "umi": [
+        { "length": 12, "min_length": 10, "offset": 16, "read_type": "R1" }
+      ],
+      "cmdline": "cellranger multi"
+    },
+    {
+      "barcode": [
+        {
+          "kind": "gel_bead",
+          "length": 16,
+          "offset": 0,
+          "read_type": "R1",
+          "whitelist": { "name": "3M-february-2018" }
+        }
+      ],
+      "description": "Single Cell 3' v3",
+      "endedness": "three_prime",
+      "name": "SC3Pv3",
+      "rna": { "length": null, "offset": 0, "read_type": "R2" },
+      "rna2": null,
+      "strandedness": "+",
+      "umi": [
+        { "length": 12, "min_length": 10, "offset": 16, "read_type": "R1" }
+      ],
+      "cmdline": "cellranger count"
+    },
+    {
+      "barcode": [
+        {
+          "kind": "gel_bead",
+          "length": 16,
+          "offset": 0,
+          "read_type": "R1",
+          "whitelist": { "name": "737K-fixed-rna-profiling" }
+        },
+        {
+          "kind": "right_probe",
+          "length": 8,
+          "offset": 68,
+          "read_type": "R2",
+          "whitelist": { "name": "probe-barcodes-fixed-rna-profiling" }
+        }
+      ],
+      "description": "Fixed RNA Profiling",
+      "endedness": "three_prime",
+      "name": "MFRP",
+      "rna": { "length": 50, "offset": 0, "read_type": "R2", "min_length": 50 },
+      "rna2": null,
+      "strandedness": "-",
+      "umi": [
+        { "length": 12, "min_length": 10, "offset": 16, "read_type": "R1" }
+      ],
+      "cmdline": "cellranger multi"
+    },
+    {
+      "barcode": [
+        {
+          "kind": "gel_bead",
+          "length": 16,
+          "offset": 0,
+          "read_type": "R1",
+          "whitelist": { "name": "3M-february-2018" }
+        }
+      ],
+      "description": "Single Cell 3' v3",
+      "endedness": "three_prime",
+      "name": "SC3Pv3",
+      "rna": { "length": null, "offset": 0, "read_type": "R2" },
+      "rna2": null,
+      "strandedness": "+",
+      "umi": [
+        { "length": 12, "min_length": 10, "offset": 16, "read_type": "R1" }
+      ],
+      "cmdline": "cellranger count"
+    },
+    {
+      "barcode": [
+        {
+          "kind": "gel_bead",
+          "length": 16,
+          "offset": 0,
+          "read_type": "R1",
+          "whitelist": { "name": "3M-february-2018" }
+        }
+      ],
+      "description": "Single Cell 3' v3",
+      "endedness": "three_prime",
+      "name": "SC3Pv3",
+      "rna": { "length": null, "offset": 0, "read_type": "R2" },
+      "rna2": null,
+      "strandedness": "+",
+      "umi": [
+        { "length": 12, "min_length": 10, "offset": 16, "read_type": "R1" }
+      ],
+      "cmdline": "cellranger count"
+    },
+    {
+      "barcode": [
+        {
+          "kind": "gel_bead",
+          "length": 16,
+          "offset": 0,
+          "read_type": "R1",
+          "whitelist": { "name": "3M-february-2018" }
+        }
+      ],
+      "description": "Single Cell 3' v3",
+      "endedness": "three_prime",
+      "name": "SC3Pv3",
+      "rna": { "length": null, "offset": 0, "read_type": "R2" },
+      "rna2": null,
+      "strandedness": "+",
+      "umi": [
+        { "length": 12, "min_length": 10, "offset": 16, "read_type": "R1" }
+      ],
+      "cmdline": "cellranger count"
+    },
+    {
+      "barcode": [
+        {
+          "kind": "gel_bead",
+          "length": 16,
+          "offset": 0,
+          "read_type": "R1",
+          "whitelist": { "name": "3M-february-2018" }
+        }
+      ],
+      "description": "Single Cell 3' v3",
+      "endedness": "three_prime",
+      "name": "SC3Pv3",
+      "rna": { "length": null, "offset": 0, "read_type": "R2" },
+      "rna2": null,
+      "strandedness": "+",
+      "umi": [
+        { "length": 12, "min_length": 10, "offset": 16, "read_type": "R1" }
+      ],
+      "cmdline": "cellranger count"
+    },
+    {
+      "barcode": [
+        {
+          "kind": "gel_bead",
+          "length": 16,
+          "offset": 0,
+          "read_type": "R1",
+          "whitelist": { "name": "737K-fixed-rna-profiling" }
+        },
+        {
+          "kind": "right_probe",
+          "length": 8,
+          "offset": 68,
+          "read_type": "R2",
+          "whitelist": { "name": "probe-barcodes-fixed-rna-profiling" }
+        }
+      ],
+      "description": "Fixed RNA Profiling",
+      "endedness": "three_prime",
+      "name": "MFRP",
+      "rna": { "length": 50, "offset": 0, "read_type": "R2", "min_length": 50 },
+      "rna2": null,
+      "strandedness": "-",
+      "umi": [
+        { "length": 12, "min_length": 10, "offset": 16, "read_type": "R1" }
+      ],
+      "cmdline": "cellranger multi"
+    },
+    {
+      "barcode": [
+        {
+          "kind": "gel_bead",
+          "length": 16,
+          "offset": 0,
+          "read_type": "R1",
+          "whitelist": { "name": "737K-august-2016" }
+        }
+      ],
+      "description": "Single Cell 5' R2-only",
+      "endedness": "five_prime",
+      "name": "SC5P-R2",
+      "rna": { "length": null, "offset": 0, "read_type": "R2" },
+      "rna2": null,
+      "strandedness": "-",
+      "umi": [
+        { "length": 10, "min_length": null, "offset": 16, "read_type": "R1" }
+      ],
+      "cmdline": "cellranger count"
+    },
+    {
+      "barcode": [
+        {
+          "kind": "gel_bead",
+          "length": 16,
+          "offset": 0,
+          "read_type": "R1",
+          "whitelist": { "name": "3M-february-2018" }
+        }
+      ],
+      "description": "Single Cell 3' v3",
+      "endedness": "three_prime",
+      "name": "SC3Pv3",
+      "rna": { "length": null, "offset": 0, "read_type": "R2" },
+      "rna2": null,
+      "strandedness": "+",
+      "umi": [
+        { "length": 12, "min_length": 10, "offset": 16, "read_type": "R1" }
+      ],
+      "cmdline": "cellranger count"
+    },
+    {
+      "barcode": [
+        {
+          "kind": "gel_bead",
+          "length": 16,
+          "offset": 0,
+          "read_type": "R1",
+          "whitelist": { "name": "3M-february-2018" }
+        }
+      ],
+      "description": "Single Cell 3' v3",
+      "endedness": "three_prime",
+      "name": "SC3Pv3",
+      "rna": { "length": null, "offset": 0, "read_type": "R2" },
+      "rna2": null,
+      "strandedness": "+",
+      "umi": [
+        { "length": 12, "min_length": 10, "offset": 16, "read_type": "R1" }
+      ],
+      "cmdline": "cellranger count"
+    },
+    {
+      "barcode": [
+        {
+          "kind": "gel_bead",
+          "length": 16,
+          "offset": 0,
+          "read_type": "R1",
+          "whitelist": { "name": "3M-february-2018" }
+        }
+      ],
+      "description": "Single Cell 3' v3",
+      "endedness": "three_prime",
+      "name": "SC3Pv3",
+      "rna": { "length": null, "offset": 0, "read_type": "R2" },
+      "rna2": null,
+      "strandedness": "+",
+      "umi": [
+        { "length": 12, "min_length": 10, "offset": 16, "read_type": "R1" }
+      ],
+      "cmdline": "cellranger count"
+    },
+    {
+      "barcode": [
+        {
+          "kind": "gel_bead",
+          "length": 16,
+          "offset": 0,
+          "read_type": "R1",
+          "whitelist": { "name": "3M-3pgex-may-2023" }
+        }
+      ],
+      "description": "Single Cell 3' v4",
+      "endedness": "three_prime",
+      "name": "SC3Pv4",
+      "rna": { "length": null, "offset": 0, "read_type": "R2" },
+      "rna2": null,
+      "strandedness": "+",
+      "umi": [
+        { "length": 12, "min_length": 10, "offset": 16, "read_type": "R1" }
+      ],
+      "cmdline": "cellranger count"
+    },
+    {
+      "barcode": [
+        {
+          "kind": "gel_bead",
+          "length": 16,
+          "offset": 0,
+          "read_type": "R1",
+          "whitelist": { "name": "3M-february-2018" }
+        }
+      ],
+      "description": "Single Cell 3' v3",
+      "endedness": "three_prime",
+      "name": "SC3Pv3",
+      "rna": { "length": null, "offset": 0, "read_type": "R2" },
+      "rna2": null,
+      "strandedness": "+",
+      "umi": [
+        { "length": 12, "min_length": 10, "offset": 16, "read_type": "R1" }
+      ],
+      "cmdline": "cellranger count"
+    },
+    {
+      "barcode": [
+        {
+          "kind": "gel_bead",
+          "length": 16,
+          "offset": 0,
+          "read_type": "R1",
+          "whitelist": { "name": "3M-february-2018" }
+        }
+      ],
+      "description": "Single Cell 3' v3",
+      "endedness": "three_prime",
+      "name": "SC3Pv3",
+      "rna": { "length": null, "offset": 0, "read_type": "R2" },
+      "rna2": null,
+      "strandedness": "+",
+      "umi": [
+        { "length": 12, "min_length": 10, "offset": 16, "read_type": "R1" }
+      ],
+      "cmdline": "cellranger count"
+    },
+    {
+      "barcode": [
+        {
+          "kind": "gel_bead",
+          "length": 16,
+          "offset": 0,
+          "read_type": "R1",
+          "whitelist": { "name": "3M-3pgex-may-2023" }
+        }
+      ],
+      "description": "Single Cell 3' v4",
+      "endedness": "three_prime",
+      "name": "SC3Pv4",
+      "rna": { "length": null, "offset": 0, "read_type": "R2" },
+      "rna2": null,
+      "strandedness": "+",
+      "umi": [
+        { "length": 12, "min_length": 10, "offset": 16, "read_type": "R1" }
+      ],
+      "cmdline": "cellranger count"
+    },
+    {
+      "barcode": [
+        {
+          "kind": "gel_bead",
+          "length": 16,
+          "offset": 0,
+          "read_type": "R1",
+          "whitelist": { "name": "3M-february-2018" }
+        }
+      ],
+      "description": "Single Cell 3' v3",
+      "endedness": "three_prime",
+      "name": "SC3Pv3",
+      "rna": { "length": null, "offset": 0, "read_type": "R2" },
+      "rna2": null,
+      "strandedness": "+",
+      "umi": [
+        { "length": 12, "min_length": 10, "offset": 16, "read_type": "R1" }
+      ],
+      "cmdline": "cellranger count"
+    }
+  ],
   "library_type_specifications": []
 }
