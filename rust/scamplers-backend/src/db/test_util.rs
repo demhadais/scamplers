@@ -10,7 +10,11 @@ use diesel_async::{
     scoped_futures::ScopedFutureExt,
 };
 use pretty_assertions::assert_eq;
-use rand::seq::IndexedRandom;
+use rand::{
+    SeedableRng,
+    rngs::StdRng,
+    seq::{IndexedRandom, IteratorRandom},
+};
 use rstest::fixture;
 use scamplers_core::model::{
     institution::{Institution, NewInstitution},
@@ -44,11 +48,19 @@ use crate::{
 };
 
 trait ChooseUnwrap<T> {
-    fn choose_unwrap(&self) -> &T;
+    fn choose_unwrap(&self, rng: &mut StdRng) -> &T;
 }
 impl<T> ChooseUnwrap<T> for Vec<T> {
-    fn choose_unwrap(&self) -> &T {
-        self.choose(&mut rand::rng()).unwrap()
+    fn choose_unwrap(&self, rng: &mut StdRng) -> &T {
+        self.choose(rng).unwrap()
+    }
+}
+trait ChooseUnwrapOwned<T> {
+    fn choose_unwrap_owned(self, rng: &mut StdRng) -> T;
+}
+impl ChooseUnwrapOwned<i64> for std::ops::Range<i64> {
+    fn choose_unwrap_owned(self, rng: &mut StdRng) -> i64 {
+        self.choose(rng).unwrap()
     }
 }
 
@@ -77,6 +89,7 @@ const N_POOL_MULTIPLEX_CHROMIUM_RUNS: usize = N_SUSPENSION_POOLS / N_GEMS_PER_NO
 
 pub struct TestState {
     _container: DevContainer,
+    rng: StdRng,
     db_pool: Pool<AsyncPgConnection>,
     institutions: Vec<Institution>,
     people: Vec<Person>,
@@ -86,29 +99,12 @@ pub struct TestState {
     suspension_pools: Vec<SuspensionPoolHandle>,
 }
 impl TestState {
-    async fn new() -> Self {
-        let name = "scamplers-backend_unit_test";
-        let container = DevContainer::new(name, false).await.unwrap();
-
-        let db_config = AsyncDieselConnectionManager::<AsyncPgConnection>::new(
-            container.db_url().await.unwrap(),
-        );
-        let db_pool = Pool::builder(db_config).build().unwrap();
-
-        let mut test_state = Self {
-            _container: container,
-            db_pool,
-            institutions: Vec::with_capacity(N_INSTITUTIONS),
-            people: Vec::with_capacity(N_PEOPLE),
-            labs: Vec::with_capacity(N_LABS),
-            specimens: Vec::with_capacity(N_SPECIMENS),
-            suspension_pools: Vec::with_capacity(N_SUSPENSION_POOLS),
-            multiplexing_tags: Vec::with_capacity(N_MULTIPLEXING_TAGS),
-        };
-
-        test_state.populate_db().await;
-
-        test_state
+    fn random_time(&mut self) -> OffsetDateTime {
+        // These numbers correspond to the first second of the year -4000 and the last second of the year 4000 (https://www.postgresql.org/docs/current/datatype-datetime.html)
+        OffsetDateTime::from_unix_timestamp(
+            (-188395009438..64092229199).choose_unwrap_owned(&mut self.rng),
+        )
+        .unwrap()
     }
 
     async fn insert_institutions(&mut self, db_conn: &mut DbConnection) {
@@ -126,7 +122,7 @@ impl TestState {
     }
 
     fn random_institution_id(&mut self) -> Uuid {
-        self.institutions.choose_unwrap().handle.id
+        self.institutions.choose_unwrap(&mut self.rng).handle.id
     }
 
     async fn insert_people(&mut self, db_conn: &mut DbConnection) {
@@ -144,13 +140,18 @@ impl TestState {
         }
     }
 
-    fn random_person_id(&self) -> Uuid {
-        self.people.choose_unwrap().core.summary.handle.id
+    fn random_person_id(&mut self) -> Uuid {
+        self.people
+            .choose_unwrap(&mut self.rng)
+            .core
+            .summary
+            .handle
+            .id
     }
 
-    fn random_people_ids(&self, n: usize) -> Vec<Uuid> {
-        let map: HashSet<_> = (0..n).map(|_| self.random_person_id()).collect();
-        map.into_iter().collect()
+    fn random_people_ids(&mut self, n: usize) -> Vec<Uuid> {
+        let set: HashSet<_> = (0..n).map(|_| self.random_person_id()).collect();
+        set.into_iter().collect()
     }
 
     async fn insert_labs(&mut self, db_conn: &mut DbConnection) {
@@ -175,31 +176,33 @@ impl TestState {
         }
     }
 
-    fn random_lab_id(&self) -> Uuid {
-        self.labs.choose_unwrap().core.summary.handle.id
+    fn random_lab_id(&mut self) -> Uuid {
+        self.labs
+            .choose_unwrap(&mut self.rng)
+            .core
+            .summary
+            .handle
+            .id
     }
 
     async fn insert_specimens(&mut self, db_conn: &mut DbConnection) {
-        let rng = rand::rng();
-        let random_species = || Species::VARIANTS.choose(&mut rng.clone()).copied().unwrap();
-
-        let inner_specimen = NewSpecimenCommon::builder()
-            .submitted_by(self.random_person_id())
-            .lab_id(self.random_lab_id())
-            .received_at(OffsetDateTime::now_utc())
-            .species([random_species()])
-            .measurements([NewSpecimenMeasurement::builder()
+        for i in 0..N_SPECIMENS {
+            let measurement = NewSpecimenMeasurement::builder()
                 .measured_by(self.random_person_id())
                 .data(specimen::common::MeasurementData::Rin {
-                    measured_at: OffsetDateTime::now_utc(),
+                    measured_at: self.random_time(),
                     instrument_name: "mayonnaise".into(),
                     value: 5.0,
                 })
-                .build()]);
+                .build();
 
-        for i in 0..N_SPECIMENS {
-            let inner_specimen = inner_specimen
-                .clone()
+            let random_species = Species::VARIANTS.choose(&mut self.rng).copied().unwrap();
+            let inner_specimen = NewSpecimenCommon::builder()
+                .submitted_by(self.random_person_id())
+                .lab_id(self.random_lab_id())
+                .received_at(self.random_time())
+                .species([random_species])
+                .measurements([measurement])
                 .readable_id(format!("SP{i}"))
                 .name(format!("specimen{i}"))
                 .build();
@@ -231,17 +234,15 @@ impl TestState {
                     .build()
                     .into()
             } else {
-                let random_embedding_matrix = || {
-                    FrozenBlockEmbeddingMatrix::VARIANTS
-                        .choose(&mut rng.clone())
-                        .copied()
-                        .unwrap()
-                };
+                let random_embedding_matrix = FrozenBlockEmbeddingMatrix::VARIANTS
+                    .choose(&mut self.rng)
+                    .copied()
+                    .unwrap();
 
                 NewFrozenBlock::builder()
                     .inner(inner_specimen)
                     .frozen(true)
-                    .embedded_in(random_embedding_matrix())
+                    .embedded_in(random_embedding_matrix)
                     .build()
                     .into()
             };
@@ -251,22 +252,25 @@ impl TestState {
         }
     }
 
-    fn random_specimen_id(&self) -> Uuid {
-        self.specimens.choose_unwrap().core.summary.handle.id
+    fn random_specimen_id(&mut self) -> Uuid {
+        self.specimens
+            .choose_unwrap(&mut self.rng)
+            .core
+            .summary
+            .handle
+            .id
     }
 
     async fn insert_multiplexing_tags(&mut self, db_conn: &mut DbConnection) {
-        let random_multiplexing_tag_type = || {
-            MultiplexingTagType::VARIANTS
-                .choose(&mut rand::rng().clone())
-                .copied()
-                .unwrap()
-        };
-
         for i in 0..N_MULTIPLEXING_TAGS {
+            let random_multiplexing_tag_type = MultiplexingTagType::VARIANTS
+                .choose(&mut self.rng)
+                .copied()
+                .unwrap();
+
             let multiplexing_tag = NewMultiplexingTag::builder()
                 .tag_id(format!("{i}"))
-                .type_(random_multiplexing_tag_type())
+                .type_(random_multiplexing_tag_type)
                 .build()
                 .write_to_db(db_conn)
                 .await
@@ -276,36 +280,36 @@ impl TestState {
         }
     }
 
-    fn random_multiplexing_tag_id(&self) -> Uuid {
-        self.multiplexing_tags.choose_unwrap().id
+    fn random_multiplexing_tag_id(&mut self) -> Uuid {
+        self.multiplexing_tags.choose_unwrap(&mut self.rng).id
     }
 
-    fn new_suspensions(&self, n: usize, for_pool: bool) -> Vec<NewSuspension> {
-        let new_suspension_measurements: Vec<_> = (0..2)
-            .map(|i| {
-                NewSuspensionMeasurement::builder()
-                    .measured_by(self.random_person_id())
-                    .data(SuspensionMeasurementData {
-                        core: suspension::MeasurementDataCore::Volume {
-                            measured_at: OffsetDateTime::now_utc(),
-                            value: 10.0 * i as f32,
-                            unit: VolumeUnit::Microliter,
-                        },
-                        is_post_hybridization: for_pool,
-                    })
-                    .build()
-            })
-            .collect();
-
+    fn new_suspensions(&mut self, n: usize, for_pool: bool) -> Vec<NewSuspension> {
         (0..n)
             .map(|i| {
+                let new_suspension_measurements: Vec<_> = (0..2)
+                    .map(|i| {
+                        NewSuspensionMeasurement::builder()
+                            .measured_by(self.random_person_id())
+                            .data(SuspensionMeasurementData {
+                                core: suspension::MeasurementDataCore::Volume {
+                                    measured_at: self.random_time(),
+                                    value: 10.0 * i as f32,
+                                    unit: VolumeUnit::Microliter,
+                                },
+                                is_post_hybridization: for_pool,
+                            })
+                            .build()
+                    })
+                    .collect();
+
                 let new_suspension = NewSuspension::builder()
                     .biological_material(BiologicalMaterial::Cells)
                     .readable_id(format!("S{i}"))
                     .parent_specimen_id(self.random_specimen_id())
                     .target_cell_recovery(5_000.0 + i as f32)
                     .target_reads_per_cell(50_000 + i as i32)
-                    .measurements(new_suspension_measurements.clone())
+                    .measurements(new_suspension_measurements)
                     .preparer_ids(self.random_people_ids(2));
 
                 if for_pool {
@@ -320,26 +324,26 @@ impl TestState {
     }
 
     async fn insert_suspension_pools(&mut self, db_conn: &mut DbConnection) {
-        let new_suspension_pool_measurement = NewSuspensionPoolMeasurement::builder()
-            .measured_by(self.random_person_id())
-            .data(SuspensionPoolMeasurementData {
-                data: suspension::MeasurementDataCore::Volume {
-                    measured_at: OffsetDateTime::now_utc(),
-                    value: 10.0,
-                    unit: VolumeUnit::Microliter,
-                },
-                is_post_storage: false,
-            })
-            .build();
-
         for i in 0..N_SUSPENSION_POOLS {
+            let new_suspension_pool_measurement = NewSuspensionPoolMeasurement::builder()
+                .measured_by(self.random_person_id())
+                .data(SuspensionPoolMeasurementData {
+                    data: suspension::MeasurementDataCore::Volume {
+                        measured_at: self.random_time(),
+                        value: 10.0,
+                        unit: VolumeUnit::Microliter,
+                    },
+                    is_post_storage: false,
+                })
+                .build();
+
             let new_suspension_pool = NewSuspensionPool::builder()
                 .readable_id(format!("P{i}"))
                 .name(format!("pool{i}"))
-                .pooled_at(OffsetDateTime::now_utc())
+                .pooled_at(self.random_time())
                 .preparer_ids(self.random_people_ids(2))
                 .suspensions(self.new_suspensions(N_SUSPENSIONS_PER_POOL, true))
-                .measurements([new_suspension_pool_measurement.clone()])
+                .measurements([new_suspension_pool_measurement])
                 .build();
 
             self.suspension_pools
@@ -361,6 +365,32 @@ impl TestState {
         self.insert_specimens(db_conn).await;
         self.insert_multiplexing_tags(db_conn).await;
         self.insert_suspension_pools(db_conn).await;
+    }
+
+    async fn new() -> Self {
+        let name = "scamplers-backend_unit_test";
+        let container = DevContainer::new(name, false).await.unwrap();
+
+        let db_config = AsyncDieselConnectionManager::<AsyncPgConnection>::new(
+            container.db_url().await.unwrap(),
+        );
+        let db_pool = Pool::builder(db_config).build().unwrap();
+
+        let mut test_state = Self {
+            _container: container,
+            rng: StdRng::from_os_rng(),
+            db_pool,
+            institutions: Vec::with_capacity(N_INSTITUTIONS),
+            people: Vec::with_capacity(N_PEOPLE),
+            labs: Vec::with_capacity(N_LABS),
+            specimens: Vec::with_capacity(N_SPECIMENS),
+            suspension_pools: Vec::with_capacity(N_SUSPENSION_POOLS),
+            multiplexing_tags: Vec::with_capacity(N_MULTIPLEXING_TAGS),
+        };
+
+        test_state.populate_db().await;
+
+        test_state
     }
 }
 

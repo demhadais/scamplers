@@ -125,7 +125,7 @@ impl WriteToDb for NewSpecimen {
     }
 }
 
-diesel::alias!(person as returned_by: ReturnedByAlias);
+// diesel::alias!(person as returned_by: ReturnedByAlias);
 
 #[diesel::dsl::auto_type]
 #[must_use]
@@ -214,7 +214,7 @@ where
         let q11 = embedded_in.map(|e| embedding_col.assume_not_null().eq(e));
         let q12 = fixative.map(|f| fixative_col.assume_not_null().eq(f));
 
-        let query = BoxedDieselExpression::new_expression()
+        BoxedDieselExpression::new_expression()
             .and_condition(q1)
             .and_condition(q2)
             .and_condition(q3)
@@ -226,9 +226,8 @@ where
             .and_condition(q9)
             .and_condition(q10)
             .and_condition(q11)
-            .and_condition(q12);
-
-        query.build()
+            .and_condition(q12)
+            .build()
     }
 }
 
@@ -336,7 +335,5 @@ mod tests {
             .db_query(query)
             .run(db_conn)
             .await;
-
-        assert!(false, "this test intermittently fails");
     }
 }

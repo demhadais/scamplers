@@ -21,6 +21,10 @@ impl OffsetDateTime {
     pub fn now_utc() -> Self {
         Self(_time::OffsetDateTime::now_utc())
     }
+
+    pub fn from_unix_timestamp(timestamp: i64) -> Result<Self, _time::error::ComponentRange> {
+        _time::OffsetDateTime::from_unix_timestamp(timestamp).map(Self)
+    }
 }
 
 impl Display for OffsetDateTime {

@@ -215,7 +215,7 @@ mod tests {
     use crate::{
         db::{
             model::{FetchByQuery, FetchRelatives, WriteToDb},
-            test_util::{DbConnection, N_LAB_MEMBERS, db_conn, labs, test_query},
+            test_util::{DbConnection, db_conn, labs, test_query},
         },
         result::ScamplersError,
     };
@@ -305,7 +305,7 @@ mod tests {
                     assert_eq!(updated_lab.members.len(), lab.members.len() - 1);
 
                     assert_eq!(
-                        original_loaded_members[1..N_LAB_MEMBERS],
+                        original_loaded_members[1..original_loaded_members.len()],
                         updated_lab.members
                     );
 
