@@ -5,36 +5,28 @@ maturin_import_hook.install()
 
 from scamplers_core import ScamplersClient
 from .test_requests import (
-    new_cellranger_count_dataset,
-    new_cellranger_multi_dataset,
-    new_cellrangeratac_count_dataset,
-    new_committee_approval,
-    new_cryopreserved_tissue,
-    new_fixed_block,
-    new_fixed_tissue,
-    new_frozen_block,
-    new_frozen_tissue,
-    new_singleplex_chromium_run,
-    specimen_dv200,
-    specimen_rin,
-    suspension_volume,
+    new_cellranger_count_dataset_fixture,
+    new_cellranger_multi_dataset_fixture,
+    new_cellrangeratac_count_dataset_fixture,
+    new_cryopreserved_tissue_fixture,
+    new_fixed_block_fixture,
+    new_fixed_tissue_fixture,
+    new_frozen_block_fixture,
+    new_frozen_tissue_fixture,
+    new_singleplex_chromium_run_fixture,
 )
 
 
 __all__ = [
-    "new_cellranger_count_dataset",
-    "new_cellranger_multi_dataset",
-    "new_cellrangeratac_count_dataset",
-    "new_committee_approval",
-    "new_cryopreserved_tissue",
-    "new_fixed_block",
-    "new_fixed_tissue",
-    "new_frozen_block",
-    "new_frozen_tissue",
-    "new_singleplex_chromium_run",
-    "specimen_dv200",
-    "specimen_rin",
-    "suspension_volume",
+    "new_cellranger_count_dataset_fixture",
+    "new_cellranger_multi_dataset_fixture",
+    "new_cellrangeratac_count_dataset_fixture",
+    "new_cryopreserved_tissue_fixture",
+    "new_fixed_block_fixture",
+    "new_fixed_tissue_fixture",
+    "new_frozen_block_fixture",
+    "new_frozen_tissue_fixture",
+    "new_singleplex_chromium_run_fixture",
 ]
 
 
@@ -46,13 +38,13 @@ def scamplers_client() -> ScamplersClient:
 @pytest.mark.parametrize(
     "method_name, fixture",
     [
-        ("create_specimen", "new_fixed_block"),
-        ("create_specimen", "new_frozen_block"),
-        ("create_specimen", "new_cryopreserved_tissue"),
-        ("create_specimen", "new_fixed_tissue"),
-        ("create_specimen", "new_frozen_tissue"),
-        ("create_cellranger_count_dataset", "new_cellranger_count_dataset"),
-        ("create_chromium_run", "new_singleplex_chromium_run"),
+        ("create_specimen", "new_fixed_block_fixture"),
+        ("create_specimen", "new_frozen_block_fixture"),
+        ("create_specimen", "new_cryopreserved_tissue_fixture"),
+        ("create_specimen", "new_fixed_tissue_fixture"),
+        ("create_specimen", "new_frozen_tissue_fixture"),
+        ("create_cellranger_count_dataset", "new_cellranger_count_dataset_fixture"),
+        ("create_chromium_run", "new_singleplex_chromium_run_fixture"),
     ],
 )
 def test_client(

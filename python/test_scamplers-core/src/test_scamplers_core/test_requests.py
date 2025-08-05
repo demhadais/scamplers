@@ -618,9 +618,9 @@ def new_cellranger_vdj_dataset_fixture() -> CellrangerVdjDataset:
 @pytest.mark.parametrize(
     "data, key, expected_value",
     [
-        ("new_institution_fixture", "name", ""),
-        ("new_person_fixture", "name", ""),
-        ("new_lab_fixture", "name", ""),
+        ("new_institution_fixture", "name", "institution"),
+        ("new_person_fixture", "name", "ahmed"),
+        ("new_lab_fixture", "name", "lab"),
         ("new_fixed_block_fixture", "type", "fixed_block"),
         ("new_frozen_block_fixture", "type", "frozen_block"),
         ("new_cryopreserved_tissue_fixture", "type", "cryopreserved_tissue"),
