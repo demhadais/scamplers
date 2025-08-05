@@ -12,4 +12,4 @@ trap cleanup_docker EXIT
 
 ./pre-commit_scripts/build-scamplers-core.sh
 
-COMPOSE_BAKE=true docker compose --env-file ../.env.dev up --build
+COMPOSE_BAKE=true docker compose up --build

@@ -5,16 +5,20 @@ use axum::{
 };
 use diesel_async::{AsyncConnection, scoped_futures::ScopedFutureExt};
 use garde::Validate;
+use scamplers_core::model::person::{CreatedUser, NewMsLogin};
 use serde::{Serialize, de::DeserializeOwned};
 use valuable::Valuable;
 
 use crate::{
     db::{
         DbTransaction,
-        model::{self, FetchRelatives},
+        model::{self, FetchRelatives, WriteToDb},
     },
     result::{ScamplersError, ScamplersResult},
-    server::{AppState, auth::User},
+    server::{
+        AppState,
+        auth::{Frontend, User},
+    },
 };
 
 #[derive(Default)]
@@ -71,13 +75,29 @@ impl<T: Serialize> IntoResponse for ValidJson<T> {
     }
 }
 
+pub async fn new_ms_login(
+    _: Frontend,
+    State(app_state): State<AppState>,
+    ValidJson(login): ValidJson<NewMsLogin>,
+) -> ScamplersResult<Json<CreatedUser>> {
+    tracing::info!(deserialized_data = login.as_value());
+
+    let mut db_conn = app_state.db_conn().await?;
+
+    let item = db_conn
+        .transaction(|conn| async move { login.write_to_db(conn).await }.scope_boxed())
+        .await?;
+
+    Ok(Json(item))
+}
+
 pub async fn write<Data>(
     User(user_id): User,
     State(app_state): State<AppState>,
     ValidJson(data): ValidJson<Data>,
 ) -> ScamplersResult<Json<Data::Returns>>
 where
-    Data: model::WriteToDb + Send + valuable::Valuable,
+    Data: WriteToDb + Send + valuable::Valuable,
     Data::Returns: Send,
 {
     tracing::info!(deserialized_data = data.as_value());

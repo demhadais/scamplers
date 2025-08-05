@@ -52,9 +52,13 @@ pub struct ScamplersClient {
 #[pymethods]
 impl ScamplersClient {
     #[new]
-    #[pyo3(signature = (*, api_base_url, api_key=None))]
-    fn py_new(api_base_url: String, api_key: Option<String>) -> Self {
-        Self::new(api_base_url, None, api_key)
+    #[pyo3(signature = (*, api_base_url, api_key=None, accept_invalid_certificates=None))]
+    fn py_new(
+        api_base_url: String,
+        api_key: Option<String>,
+        accept_invalid_certificates: Option<bool>,
+    ) -> Self {
+        Self::new(api_base_url, None, api_key, accept_invalid_certificates)
     }
 }
 
@@ -66,6 +70,7 @@ impl ScamplersClient {
         api_base_url: String,
         frontend_token: Option<String>,
         api_key: Option<String>,
+        #[allow(unused_variables)] accept_invalid_certificates: Option<bool>,
     ) -> Self {
         use reqwest::{
             ClientBuilder,
@@ -79,10 +84,17 @@ impl ScamplersClient {
 
         let headers = HeaderMap::from_iter([(AUTHORIZATION, auth)]);
 
-        let client = ClientBuilder::new()
-            .default_headers(headers)
-            .build()
-            .unwrap();
+        #[allow(unused_mut)]
+        let mut client = ClientBuilder::new().default_headers(headers);
+
+        #[cfg(not(target_arch = "wasm32"))]
+        {
+            if let Some(accept_invalid_certs) = accept_invalid_certificates {
+                client = client.danger_accept_invalid_certs(accept_invalid_certs);
+            }
+        }
+
+        let client = client.build().unwrap();
 
         #[cfg(not(feature = "python"))]
         return Self {

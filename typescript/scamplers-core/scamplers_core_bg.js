@@ -3324,15 +3324,16 @@ export class ScamplersClient {
      * @param {string} api_base_url
      * @param {string | null} [frontend_token]
      * @param {string | null} [api_key]
+     * @param {boolean | null} [accept_invalid_certificates]
      */
-    constructor(api_base_url, frontend_token, api_key) {
+    constructor(api_base_url, frontend_token, api_key, accept_invalid_certificates) {
         const ptr0 = passStringToWasm0(api_base_url, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
         const len0 = WASM_VECTOR_LEN;
         var ptr1 = isLikeNone(frontend_token) ? 0 : passStringToWasm0(frontend_token, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
         var len1 = WASM_VECTOR_LEN;
         var ptr2 = isLikeNone(api_key) ? 0 : passStringToWasm0(api_key, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
         var len2 = WASM_VECTOR_LEN;
-        const ret = wasm.scamplersclient_new(ptr0, len0, ptr1, len1, ptr2, len2);
+        const ret = wasm.scamplersclient_new(ptr0, len0, ptr1, len1, ptr2, len2, isLikeNone(accept_invalid_certificates) ? 0xFFFFFF : accept_invalid_certificates ? 1 : 0);
         this.__wbg_ptr = ret >>> 0;
         ScamplersClientFinalization.register(this, this.__wbg_ptr, this);
         return this;
@@ -5213,12 +5214,12 @@ export function __wbindgen_cb_drop(arg0) {
     return ret;
 };
 
-export function __wbindgen_closure_wrapper898(arg0, arg1, arg2) {
+export function __wbindgen_closure_wrapper899(arg0, arg1, arg2) {
     const ret = makeMutClosure(arg0, arg1, 125, __wbg_adapter_32);
     return ret;
 };
 
-export function __wbindgen_closure_wrapper921(arg0, arg1, arg2) {
+export function __wbindgen_closure_wrapper922(arg0, arg1, arg2) {
     const ret = makeMutClosure(arg0, arg1, 143, __wbg_adapter_35);
     return ret;
 };

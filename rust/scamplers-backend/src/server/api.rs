@@ -20,30 +20,9 @@ use scamplers_schema::lab::dsl::lab;
 use uuid::Uuid;
 
 use super::AppState;
-use crate::server::api::handler::{by_id, by_query, relatives, write};
+use crate::server::api::handler::{by_id, by_query, new_ms_login, relatives, write};
 
 mod handler;
-
-// trait RouterExt {
-//     fn post_to_db_route<Req>(self) -> Self
-//     where
-//         Req: WriteToDb + Send + Valuable,
-//         Req::Returns: Send,
-//         (Req, Req::Returns): ToApiPath;
-//     fn fetch_by_id_route<Req, Resp>(self) -> Self;
-//     fn fetch_by_query_route<Req, Resp>(self) -> Self;
-// }
-
-// impl RouterExt for Router {
-//     fn post_to_db_route<Req>(self) -> Self
-//     where
-//         Req: WriteToDb + Send + Valuable,
-//         Req::Returns: Send,
-//         (Req, Req::Returns): ToApiPath,
-//     {
-//         self.route(&<(Req, Req::Returns)>::to_api_path(), post(write::<Req>))
-//     }
-// }
 
 pub(super) fn router() -> Router<AppState> {
     Router::new()
@@ -66,7 +45,7 @@ pub(super) fn router() -> Router<AppState> {
         )
         .route(
             &<(NewMsLogin, CreatedUser)>::to_api_path(),
-            post(write::<NewMsLogin>),
+            post(new_ms_login),
         )
         .route(&<(Uuid, Person)>::to_api_path(), get(by_id::<Person>))
         .route(
