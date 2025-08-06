@@ -164,7 +164,7 @@ export class DatasetCmdlineError {
   free(): void;
   get chemistry(): string;
   set chemistry(value: string | null | undefined);
-  expected_cmdline: string;
+  expected_cmdlines: string[];
   found_cmdline: string;
 }
 export class DatasetHandle {

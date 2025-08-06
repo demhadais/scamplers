@@ -939,7 +939,7 @@ export class DatasetCmdlineError {
     toJSON() {
         return {
             chemistry: this.chemistry,
-            expected_cmdline: this.expected_cmdline,
+            expected_cmdlines: this.expected_cmdlines,
             found_cmdline: this.found_cmdline,
         };
     }
@@ -977,21 +977,21 @@ export class DatasetCmdlineError {
         wasm.__wbg_set_datasetcmdlineerror_chemistry(this.__wbg_ptr, ptr0, len0);
     }
     /**
-     * @returns {string}
+     * @returns {string[]}
      */
-    get expected_cmdline() {
-        const ret = wasm.__wbg_get_datasetcmdlineerror_expected_cmdline(this.__wbg_ptr);
-        var v1 = getCachedStringFromWasm0(ret[0], ret[1]);
-        if (ret[0] !== 0) { wasm.__wbindgen_free(ret[0], ret[1], 1); }
+    get expected_cmdlines() {
+        const ret = wasm.__wbg_get_datasetcmdlineerror_expected_cmdlines(this.__wbg_ptr);
+        var v1 = getArrayJsValueFromWasm0(ret[0], ret[1]).slice();
+        wasm.__wbindgen_free(ret[0], ret[1] * 4, 4);
         return v1;
     }
     /**
-     * @param {string} arg0
+     * @param {string[]} arg0
      */
-    set expected_cmdline(arg0) {
-        const ptr0 = passStringToWasm0(arg0, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+    set expected_cmdlines(arg0) {
+        const ptr0 = passArrayJsValueToWasm0(arg0, wasm.__wbindgen_malloc);
         const len0 = WASM_VECTOR_LEN;
-        wasm.__wbg_set_cdnagemserror_message(this.__wbg_ptr, ptr0, len0);
+        wasm.__wbg_set_datasetcmdlineerror_expected_cmdlines(this.__wbg_ptr, ptr0, len0);
     }
     /**
      * @returns {string}
@@ -5214,12 +5214,12 @@ export function __wbindgen_cb_drop(arg0) {
     return ret;
 };
 
-export function __wbindgen_closure_wrapper899(arg0, arg1, arg2) {
+export function __wbindgen_closure_wrapper901(arg0, arg1, arg2) {
     const ret = makeMutClosure(arg0, arg1, 125, __wbg_adapter_32);
     return ret;
 };
 
-export function __wbindgen_closure_wrapper922(arg0, arg1, arg2) {
+export function __wbindgen_closure_wrapper924(arg0, arg1, arg2) {
     const ret = makeMutClosure(arg0, arg1, 143, __wbg_adapter_35);
     return ret;
 };

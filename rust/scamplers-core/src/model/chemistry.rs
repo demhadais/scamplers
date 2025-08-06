@@ -18,5 +18,5 @@ pub struct Chemistry {
     #[valuable(skip)]
     pub definition: Value,
     #[garde(dive)]
-    pub cmdline: ValidString,
+    pub cmdlines: Vec<Option<ValidString>>,
 }

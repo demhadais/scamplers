@@ -18,6 +18,7 @@ pub struct NewGemsCommon {
     #[garde(dive)]
     pub chemistry: ValidString,
     #[serde(skip)]
+    #[builder(skip)]
     pub chromium_run_id: Uuid,
 }
 
@@ -26,6 +27,7 @@ pub struct NewGemsCommon {
 #[cfg_attr(feature = "python", pyo3(name = "_NewChipLoadingCommon"))]
 pub struct NewChipLoadingCommon {
     #[serde(skip)]
+    #[builder(skip)]
     pub gems_id: Uuid,
     #[garde(dive)]
     pub suspension_volume_loaded: MeasurementDataCore,

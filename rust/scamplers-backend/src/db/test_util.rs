@@ -17,9 +17,17 @@ use rand::{
 };
 use rstest::fixture;
 use scamplers_core::model::{
+    chromium_run::{
+        ChromiumRun, NewChipLoadingCommon, NewChromiumRun, NewChromiumRunCommon, NewGemsCommon,
+        NewPoolMultiplexChipLoading, NewPoolMultiplexChromiumRun, NewPoolMultiplexGems,
+        PoolMultiplexChromiumChip,
+    },
+    dataset::DatasetSummary,
     institution::{Institution, NewInstitution},
     lab::{Lab, NewLab},
+    nucleic_acid::{CdnaHandle, LibraryHandle},
     person::{NewPerson, Person},
+    sequencing_run::SequencingRunSummary,
     specimen::{
         self, NewSpecimen, Specimen,
         block::{
@@ -42,7 +50,10 @@ use tokio::sync::OnceCell;
 use uuid::Uuid;
 
 use crate::{
-    db::model::{FetchByQuery, WriteToDb},
+    db::{
+        model::{FetchByQuery, WriteToDb},
+        seed_data::SeedData,
+    },
     result::ScamplersError,
     server::{run_migrations, util::DevContainer},
 };
@@ -73,19 +84,36 @@ pub const N_SPECIMENS: usize = 1000;
 
 const N_MULTIPLEXING_TAGS: usize = 100;
 
+// 25% of the specimens will be pooled
 const N_SUSPENSION_POOLS: usize = N_SPECIMENS / 4;
 const N_SUSPENSIONS_PER_POOL: usize = 2;
+
+// The remaining specimens will become singular suspensions
 const N_SUSPENSIONS: usize = N_SPECIMENS - N_SUSPENSIONS_PER_POOL;
 
 const N_GEMS_PER_NONOCM_CHROMIUM_RUN: usize = 8;
-const N_NONPOOL_GEMS: usize = N_SUSPENSIONS - (N_SUSPENSION_POOLS * N_SUSPENSIONS_PER_POOL) / 2;
-
-const N_SINGLEPLEX_CHROMIUM_RUNS: usize = N_NONPOOL_GEMS / N_GEMS_PER_NONOCM_CHROMIUM_RUN;
-
 const N_GEMS_PER_OCM_CHROMIUM_RUN: usize = 2;
-const N_OCM_CHROMIUM_RUNS: usize = N_NONPOOL_GEMS / N_GEMS_PER_OCM_CHROMIUM_RUN;
+const N_SUSPENSIONS_PER_OCM_GEMS: usize = 4;
 
+// Every suspension can be used both for singleplex and OCM runs
+const N_SINGLEPLEX_CHROMIUM_RUNS: usize = N_SUSPENSIONS / N_GEMS_PER_NONOCM_CHROMIUM_RUN;
+const N_OCM_CHROMIUM_RUNS: usize =
+    N_SUSPENSIONS / (N_GEMS_PER_OCM_CHROMIUM_RUN * N_SUSPENSIONS_PER_OCM_GEMS);
+
+// Every suspension pool can be used for a pool multiplex chromium run
 const N_POOL_MULTIPLEX_CHROMIUM_RUNS: usize = N_SUSPENSION_POOLS / N_GEMS_PER_NONOCM_CHROMIUM_RUN;
+
+const N_CDNA: usize = (N_SINGLEPLEX_CHROMIUM_RUNS * N_GEMS_PER_NONOCM_CHROMIUM_RUN)
+    + (N_OCM_CHROMIUM_RUNS * N_GEMS_PER_OCM_CHROMIUM_RUN)
+    + (N_POOL_MULTIPLEX_CHROMIUM_RUNS * N_GEMS_PER_NONOCM_CHROMIUM_RUN);
+
+const N_LIBRARIES: usize = N_CDNA;
+
+const N_SEQUENCING_RUNS: usize = 1;
+
+const N_DATASETS: usize = N_LIBRARIES;
+
+const CHEMISTRY: &str = "MFRP-RNA";
 
 pub struct TestState {
     _container: DevContainer,
@@ -97,14 +125,29 @@ pub struct TestState {
     specimens: Vec<Specimen>,
     multiplexing_tags: Vec<MultiplexingTag>,
     suspension_pools: Vec<SuspensionPoolHandle>,
+    chromium_runs: Vec<ChromiumRun>,
+    cdna: Vec<CdnaHandle>,
+    libraries: Vec<LibraryHandle>,
+    sequencing_runs: Vec<SequencingRunSummary>,
+    datasets: Vec<DatasetSummary>,
 }
 impl TestState {
     fn random_time(&mut self) -> OffsetDateTime {
         // These numbers correspond to the first second of the year -4000 and the last second of the year 4000 (https://www.postgresql.org/docs/current/datatype-datetime.html)
         OffsetDateTime::from_unix_timestamp(
-            (-188395009438..64092229199).choose_unwrap_owned(&mut self.rng),
+            (-188_395_009_438..64_092_229_199).choose_unwrap_owned(&mut self.rng),
         )
         .unwrap()
+    }
+
+    async fn insert_seed_data(&mut self, db_conn: &mut DbConnection) {
+        let seed_data: SeedData =
+            serde_json::from_str(include_str!("../../../../seed_data.sample.json")).unwrap();
+
+        seed_data
+            .write(db_conn, reqwest::Client::new())
+            .await
+            .unwrap();
     }
 
     async fn insert_institutions(&mut self, db_conn: &mut DbConnection) {
@@ -198,12 +241,12 @@ impl TestState {
 
             let random_species = Species::VARIANTS.choose(&mut self.rng).copied().unwrap();
             let inner_specimen = NewSpecimenCommon::builder()
+                .readable_id(Uuid::now_v7().to_string())
                 .submitted_by(self.random_person_id())
                 .lab_id(self.random_lab_id())
                 .received_at(self.random_time())
                 .species([random_species])
                 .measurements([measurement])
-                .readable_id(format!("SP{i}"))
                 .name(format!("specimen{i}"))
                 .build();
 
@@ -305,7 +348,7 @@ impl TestState {
 
                 let new_suspension = NewSuspension::builder()
                     .biological_material(BiologicalMaterial::Cells)
-                    .readable_id(format!("S{i}"))
+                    .readable_id(Uuid::now_v7().to_string())
                     .parent_specimen_id(self.random_specimen_id())
                     .target_cell_recovery(5_000.0 + i as f32)
                     .target_reads_per_cell(50_000 + i as i32)
@@ -323,22 +366,26 @@ impl TestState {
             .collect()
     }
 
+    fn suspension_volume(&mut self) -> suspension::MeasurementDataCore {
+        suspension::MeasurementDataCore::Volume {
+            measured_at: self.random_time(),
+            value: 10.0,
+            unit: VolumeUnit::Microliter,
+        }
+    }
+
     async fn insert_suspension_pools(&mut self, db_conn: &mut DbConnection) {
         for i in 0..N_SUSPENSION_POOLS {
             let new_suspension_pool_measurement = NewSuspensionPoolMeasurement::builder()
                 .measured_by(self.random_person_id())
                 .data(SuspensionPoolMeasurementData {
-                    data: suspension::MeasurementDataCore::Volume {
-                        measured_at: self.random_time(),
-                        value: 10.0,
-                        unit: VolumeUnit::Microliter,
-                    },
+                    data: self.suspension_volume(),
                     is_post_storage: false,
                 })
                 .build();
 
             let new_suspension_pool = NewSuspensionPool::builder()
-                .readable_id(format!("P{i}"))
+                .readable_id(Uuid::now_v7().to_string())
                 .name(format!("pool{i}"))
                 .pooled_at(self.random_time())
                 .preparer_ids(self.random_people_ids(2))
@@ -348,6 +395,58 @@ impl TestState {
 
             self.suspension_pools
                 .push(new_suspension_pool.write_to_db(db_conn).await.unwrap());
+        }
+    }
+
+    fn random_suspension_pool_id(&mut self) -> Uuid {
+        self.suspension_pools.choose_unwrap(&mut self.rng).id
+    }
+
+    async fn insert_pool_multiplexed_chromium_runs(&mut self, db_conn: &mut DbConnection) {
+        for i in 0..N_POOL_MULTIPLEX_CHROMIUM_RUNS {
+            let chromium_run_common = NewChromiumRunCommon::builder()
+                .readable_id(format!("PMCR{i}"))
+                .run_at(self.random_time())
+                .run_by(self.random_person_id())
+                .succeeded(true)
+                .build();
+
+            let chip_loading_common = NewChipLoadingCommon::builder()
+                .suspension_volume_loaded(self.suspension_volume())
+                .buffer_volume_loaded(self.suspension_volume())
+                .build();
+
+            let gems: Vec<_> = (0..N_GEMS_PER_NONOCM_CHROMIUM_RUN)
+                .map(|j| {
+                    let chip_loading = NewPoolMultiplexChipLoading::builder()
+                        .inner(chip_loading_common.clone())
+                        .suspension_pool_id(self.random_suspension_pool_id())
+                        .build();
+
+                    NewPoolMultiplexGems::builder()
+                        .loading(chip_loading)
+                        .inner(
+                            NewGemsCommon::builder()
+                                .chemistry(CHEMISTRY)
+                                .readable_id(format!("G{}", i + j))
+                                .build(),
+                        )
+                        .build()
+                })
+                .collect();
+
+            let chromium_run = NewPoolMultiplexChromiumRun::builder()
+                .inner(chromium_run_common)
+                .chip(PoolMultiplexChromiumChip::GemxFx)
+                .gems(gems)
+                .build();
+
+            self.chromium_runs.push(
+                NewChromiumRun::PoolMultiplex(chromium_run)
+                    .write_to_db(db_conn)
+                    .await
+                    .unwrap(),
+            );
         }
     }
 
@@ -365,6 +464,7 @@ impl TestState {
         self.insert_specimens(db_conn).await;
         self.insert_multiplexing_tags(db_conn).await;
         self.insert_suspension_pools(db_conn).await;
+        self.insert_pool_multiplexed_chromium_runs(db_conn).await;
     }
 
     async fn new() -> Self {
@@ -386,6 +486,13 @@ impl TestState {
             specimens: Vec::with_capacity(N_SPECIMENS),
             suspension_pools: Vec::with_capacity(N_SUSPENSION_POOLS),
             multiplexing_tags: Vec::with_capacity(N_MULTIPLEXING_TAGS),
+            chromium_runs: Vec::with_capacity(
+                N_SINGLEPLEX_CHROMIUM_RUNS + N_OCM_CHROMIUM_RUNS + N_POOL_MULTIPLEX_CHROMIUM_RUNS,
+            ),
+            cdna: Vec::with_capacity(N_CDNA),
+            libraries: Vec::with_capacity(N_LIBRARIES),
+            sequencing_runs: Vec::with_capacity(N_SEQUENCING_RUNS),
+            datasets: Vec::with_capacity(N_DATASETS),
         };
 
         test_state.populate_db().await;

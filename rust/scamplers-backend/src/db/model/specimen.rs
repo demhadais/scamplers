@@ -281,6 +281,15 @@ mod tests {
     #[rstest]
     #[awt]
     #[tokio::test]
+    async fn specimen_measurements(#[future] specimens: Vec<Specimen>) {
+        for s in specimens {
+            assert_eq!(s.measurements.len(), 1);
+        }
+    }
+
+    #[rstest]
+    #[awt]
+    #[tokio::test]
     async fn default_specimen_query(
         #[future] db_conn: DbConnection,
         #[future] specimens: Vec<Specimen>,

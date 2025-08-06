@@ -1,4 +1,4 @@
-pub use common::NewChipLoadingCommon;
+pub use common::{NewChipLoadingCommon, NewChromiumRunCommon, NewGemsCommon};
 pub use ocm::{NewOcmChipLoading, NewOcmChromiumRun, NewOcmGems, OcmChromiumChip};
 pub use pool_multiplex::{
     NewPoolMultiplexChipLoading, NewPoolMultiplexChromiumRun, NewPoolMultiplexGems,

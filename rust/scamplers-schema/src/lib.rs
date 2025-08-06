@@ -41,7 +41,7 @@ diesel::table! {
         name -> Text,
         description -> Text,
         definition -> Jsonb,
-        cmdline -> Text,
+        cmdlines -> Array<Nullable<Text>>,
     }
 }
 

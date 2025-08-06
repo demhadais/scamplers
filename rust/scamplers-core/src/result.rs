@@ -56,7 +56,7 @@ pub struct ServerError {
 #[scamplers_error]
 pub struct DatasetCmdlineError {
     pub chemistry: Option<String>,
-    pub expected_cmdline: String,
+    pub expected_cmdlines: Vec<String>,
     pub found_cmdline: String,
 }
 

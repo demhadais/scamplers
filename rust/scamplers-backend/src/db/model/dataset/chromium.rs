@@ -174,23 +174,26 @@ impl NewChromiumDatasetExt for NewChromiumDataset {
     async fn validate_chemistry(&self, db_conn: &mut AsyncPgConnection) -> ScamplersResult<()> {
         let gems_id = &self.core().gems_id;
 
-        let (stored_chemistry, expected_cmdline): (Option<String>, Option<String>) = gems::table
-            .left_join(chemistry::table)
-            .filter(gems::id.eq(gems_id))
-            .select((gems::chemistry, chemistry::cmdline.nullable()))
-            .first(db_conn)
-            .await?;
+        let (stored_chemistry, expected_cmdlines): (Option<String>, Option<Vec<Option<String>>>) =
+            gems::table
+                .left_join(chemistry::table)
+                .filter(gems::id.eq(gems_id))
+                .select((gems::chemistry, chemistry::cmdlines.nullable()))
+                .first(db_conn)
+                .await?;
 
-        let expected_cmdline = expected_cmdline.unwrap_or("cellranger atac".to_string());
+        let expected_cmdlines: Vec<_> = expected_cmdlines
+            .map(|v| v.into_iter().flatten())
+            .unwrap()
+            .collect();
 
-        let cmdline = self.cmdline();
-
-        if expected_cmdline != self.cmdline() {
+        let cmdline = self.cmdline().to_string();
+        if !expected_cmdlines.contains(&cmdline) {
             return Err(ScamplersError::new_unprocessable_entity_error(
                 DatasetCmdlineError {
                     chemistry: stored_chemistry,
                     found_cmdline: cmdline.to_string(),
-                    expected_cmdline,
+                    expected_cmdlines,
                 },
             ));
         }
