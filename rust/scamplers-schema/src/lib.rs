@@ -46,10 +46,11 @@ diesel::table! {
 }
 
 diesel::table! {
-    chip_loading (gems_id, suspension_id, suspension_pool_id) {
+    chip_loading (id) {
+        id -> Uuid,
         gems_id -> Uuid,
-        suspension_id -> Uuid,
-        suspension_pool_id -> Uuid,
+        suspension_id -> Nullable<Uuid>,
+        suspension_pool_id -> Nullable<Uuid>,
         suspension_volume_loaded -> Jsonb,
         buffer_volume_loaded -> Jsonb,
         notes -> Nullable<Text>,

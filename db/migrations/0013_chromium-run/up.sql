@@ -18,13 +18,15 @@ create table gems (
 );
 
 create table chip_loading (
+    id uuid primary key default uuidv7(),
     gems_id uuid references gems on delete restrict on update restrict not null,
     suspension_id uuid references suspension on delete restrict on update restrict,
     suspension_pool_id uuid references suspension_pool on delete restrict on update restrict,
     suspension_volume_loaded jsonb not null,
     buffer_volume_loaded jsonb not null,
     notes text,
-    primary key (gems_id, suspension_id, suspension_pool_id),
 
+    unique (gems_id, suspension_id),
+    unique (gems_id, suspension_pool_id),
     constraint has_suspension check ((suspension_id is null) != (suspension_pool_id is null))
 );

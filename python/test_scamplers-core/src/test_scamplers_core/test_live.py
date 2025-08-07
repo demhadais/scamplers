@@ -4,7 +4,17 @@ maturin_import_hook.install()
 
 import asyncio
 from scamplers_core import ScamplersClient
-from scamplers_core.requests import *  # noqa: F403
+from scamplers_core.requests import (
+    new_institution,
+    new_person,
+    new_lab,
+    new_fixed_block,
+    new_frozen_block,
+    new_fixed_tissue,
+    new_frozen_tissue,
+    new_virtual_specimen,
+    new_suspension_pool,
+)  # noqa: F403
 import fire
 
 from test_scamplers_core.test_requests import *  # noqa: F403

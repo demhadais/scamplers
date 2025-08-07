@@ -26,7 +26,7 @@ use scamplers_core::model::{
     institution::{Institution, NewInstitution},
     lab::{Lab, NewLab},
     nucleic_acid::{CdnaHandle, LibraryHandle},
-    person::{NewPerson, Person},
+    person::{NewPerson, Person, PersonQuery, PersonSummary},
     sequencing_run::SequencingRunSummary,
     specimen::{
         self, NewSpecimen, Specimen,
@@ -51,7 +51,7 @@ use uuid::Uuid;
 
 use crate::{
     db::{
-        model::{FetchByQuery, WriteToDb},
+        model::{FetchById, FetchByQuery, WriteToDb},
         seed_data::SeedData,
     },
     result::ScamplersError,
@@ -162,6 +162,12 @@ impl TestState {
 
             self.institutions.push(new_institution);
         }
+        // We know that the seed_data has an institution with a nil UUID
+        self.institutions.push(
+            Institution::fetch_by_id(&Uuid::nil(), db_conn)
+                .await
+                .unwrap(),
+        );
     }
 
     fn random_institution_id(&mut self) -> Uuid {
@@ -181,6 +187,13 @@ impl TestState {
 
             self.people.push(new_person);
         }
+        // We know that seed_data contains "ahmed said" so make sure we add that too
+        let query = PersonQuery::builder().name("ahmed").build();
+        let me = &PersonSummary::fetch_by_query(&query, db_conn)
+            .await
+            .unwrap()[0];
+        self.people
+            .push(Person::fetch_by_id(&me.handle.id, db_conn).await.unwrap());
     }
 
     fn random_person_id(&mut self) -> Uuid {
@@ -417,7 +430,7 @@ impl TestState {
                 .build();
 
             let gems: Vec<_> = (0..N_GEMS_PER_NONOCM_CHROMIUM_RUN)
-                .map(|j| {
+                .map(|_| {
                     let chip_loading = NewPoolMultiplexChipLoading::builder()
                         .inner(chip_loading_common.clone())
                         .suspension_pool_id(self.random_suspension_pool_id())
@@ -428,7 +441,10 @@ impl TestState {
                         .inner(
                             NewGemsCommon::builder()
                                 .chemistry(CHEMISTRY)
-                                .readable_id(format!("G{}", i + j))
+                                .readable_id(format!(
+                                    "G{}",
+                                    (0..1_000_000).choose_unwrap_owned(&mut self.rng)
+                                ))
                                 .build(),
                         )
                         .build()
@@ -458,6 +474,7 @@ impl TestState {
 
         let db_conn = &mut db_pool.get().await.unwrap();
 
+        self.insert_seed_data(db_conn).await;
         self.insert_institutions(db_conn).await;
         self.insert_people(db_conn).await;
         self.insert_labs(db_conn).await;
@@ -480,8 +497,8 @@ impl TestState {
             _container: container,
             rng: StdRng::from_os_rng(),
             db_pool,
-            institutions: Vec::with_capacity(N_INSTITUTIONS),
-            people: Vec::with_capacity(N_PEOPLE),
+            institutions: Vec::with_capacity(N_INSTITUTIONS + 1),
+            people: Vec::with_capacity(N_PEOPLE + 1),
             labs: Vec::with_capacity(N_LABS),
             specimens: Vec::with_capacity(N_SPECIMENS),
             suspension_pools: Vec::with_capacity(N_SUSPENSION_POOLS),

@@ -40,6 +40,11 @@ impl Uuid {
     }
 
     #[must_use]
+    pub fn nil() -> Self {
+        Self(_uuid::Uuid::nil())
+    }
+
+    #[must_use]
     pub fn now_v7() -> Self {
         Self(_uuid::Uuid::now_v7())
     }

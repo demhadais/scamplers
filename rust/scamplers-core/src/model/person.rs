@@ -289,6 +289,7 @@ pub struct PersonQuery {
     pub email: Option<String>,
     pub orcid: Option<String>,
     pub ms_user_id: Option<Uuid>,
+    #[builder(default)]
     #[cfg_attr(target_arch = "wasm32", wasm_bindgen(skip))]
     pub order_by: SortByGroup<PersonOrdinalColumn>,
     #[builder(default)]
