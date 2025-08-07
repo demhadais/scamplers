@@ -19,12 +19,15 @@ use crate::model::{
 #[derive(strum::VariantArray)]
 pub enum MultiplexingTagType {
     FlexBarcode,
-    OnChipMultiplexing,
-    #[cfg_attr(feature = "backend", serde(rename = "TotalSeqA"))]
+    Ocm,
+    #[serde(rename = "TotalSeq-A")]
+    #[strum(serialize = "TotalSeq-A")]
     TotalSeqA,
-    #[cfg_attr(feature = "backend", serde(rename = "TotalSeqB"))]
+    #[serde(rename = "TotalSeq-B")]
+    #[strum(serialize = "TotalSeq-B")]
     TotalSeqB,
-    #[cfg_attr(feature = "backend", serde(rename = "TotalSeqC"))]
+    #[serde(rename = "TotalSeq-C")]
+    #[strum(serialize = "TotalSeq-C")]
     TotalSeqC,
 }
 

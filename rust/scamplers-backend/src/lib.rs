@@ -1,3 +1,4 @@
+#![allow(uncommon_codepoints)]
 pub mod config;
 pub mod db;
 pub mod result;

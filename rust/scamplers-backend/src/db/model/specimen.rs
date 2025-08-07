@@ -317,6 +317,14 @@ mod tests {
         #[future] db_conn: DbConnection,
         #[future] specimens: Vec<Specimen>,
     ) {
+        fn filter(s: &SpecimenSummary) -> bool {
+            s.frozen
+                && s.type_ == "block"
+                && s.embedded_in
+                    .as_ref()
+                    .is_some_and(|e| e == "carboxymethyl_cellulose")
+        }
+
         let query = SpecimenQuery::builder()
             .frozen(true)
             .type_(SpecimenType::Block)
@@ -327,14 +335,6 @@ mod tests {
                 offset: 0,
             })
             .build();
-
-        fn filter(s: &SpecimenSummary) -> bool {
-            s.frozen
-                && s.type_ == "block"
-                && s.embedded_in
-                    .as_ref()
-                    .is_some_and(|e| e == "carboxymethyl_cellulose")
-        }
 
         test_query()
             .all_data(specimens)

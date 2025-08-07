@@ -75,6 +75,8 @@ pub struct DatasetMetricsFileParseError {
 pub struct CdnaLibraryTypeError {
     pub expected_library_types: Vec<LibraryType>,
     pub found_library_types: Vec<LibraryType>,
+    pub expected_volumes: Vec<f32>,
+    pub found_volumes: Vec<f32>,
 }
 
 #[scamplers_error]

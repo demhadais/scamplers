@@ -69,6 +69,8 @@ export class CdnaLibraryTypeError {
   free(): void;
   expected_library_types: any[];
   found_library_types: any[];
+  expected_volumes: Float32Array;
+  found_volumes: Float32Array;
 }
 export class ChromiumRun {
   private constructor();

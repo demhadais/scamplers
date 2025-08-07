@@ -55,6 +55,8 @@ pub struct NewCdna {
     pub gems_id: Uuid,
     #[garde(range(min = 1))]
     pub n_amplification_cycles: i32,
+    #[cfg_attr(feature = "backend", diesel(skip_insertion))]
+    pub volume_µl: f32,
     #[garde(length(min = 1))]
     #[cfg_attr(feature = "backend", diesel(skip_insertion))]
     pub preparer_ids: Vec<Uuid>,
@@ -71,13 +73,14 @@ pub struct NewCdna {
 #[pymethods]
 impl NewCdna {
     #[new]
-    #[pyo3(signature = (*, library_type, readable_id, prepared_at, gems_id, n_amplification_cycles, preparer_ids, measurements=Vec::new(), storage_location=None, notes=None))]
+    #[pyo3(signature = (*, library_type, readable_id, prepared_at, gems_id, n_amplification_cycles, volume_mcl, preparer_ids, measurements=Vec::new(), storage_location=None, notes=None))]
     fn new(
         library_type: LibraryType,
         readable_id: ValidString,
         prepared_at: OffsetDateTime,
         gems_id: Uuid,
         n_amplification_cycles: i32,
+        volume_mcl: f32, // name change due to python
         preparer_ids: Vec<Uuid>,
         measurements: Vec<NewCdnaMeasurement>,
         storage_location: Option<ValidString>,
@@ -89,6 +92,7 @@ impl NewCdna {
             prepared_at,
             gems_id,
             n_amplification_cycles,
+            volume_µl: volume_mcl,
             preparer_ids,
             measurements,
             storage_location,

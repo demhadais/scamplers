@@ -38,9 +38,9 @@ use scamplers_core::model::{
         tissue::{NewCryopreservedTissue, NewFixedTissue, NewFrozenTissue, TissueFixative},
     },
     suspension::{
-        self, BiologicalMaterial, MultiplexingTag, MultiplexingTagType, NewMultiplexingTag,
-        NewSuspension, NewSuspensionMeasurement, NewSuspensionPool, NewSuspensionPoolMeasurement,
-        SuspensionMeasurementData, SuspensionPoolHandle, SuspensionPoolMeasurementData,
+        self, BiologicalMaterial, MultiplexingTag, NewSuspension, NewSuspensionMeasurement,
+        NewSuspensionPool, NewSuspensionPoolMeasurement, SuspensionMeasurementData,
+        SuspensionPoolHandle, SuspensionPoolMeasurementData,
     },
     units::VolumeUnit,
 };
@@ -82,7 +82,7 @@ pub const N_LAB_MEMBERS: usize = 5;
 
 pub const N_SPECIMENS: usize = 1000;
 
-const N_MULTIPLEXING_TAGS: usize = 100;
+const N_MULTIPLEXING_TAGS: usize = 1600;
 
 // 25% of the specimens will be pooled
 const N_SUSPENSION_POOLS: usize = N_SPECIMENS / 4;
@@ -317,25 +317,6 @@ impl TestState {
             .id
     }
 
-    async fn insert_multiplexing_tags(&mut self, db_conn: &mut DbConnection) {
-        for i in 0..N_MULTIPLEXING_TAGS {
-            let random_multiplexing_tag_type = MultiplexingTagType::VARIANTS
-                .choose(&mut self.rng)
-                .copied()
-                .unwrap();
-
-            let multiplexing_tag = NewMultiplexingTag::builder()
-                .tag_id(format!("{i}"))
-                .type_(random_multiplexing_tag_type)
-                .build()
-                .write_to_db(db_conn)
-                .await
-                .unwrap();
-
-            self.multiplexing_tags.push(multiplexing_tag);
-        }
-    }
-
     fn random_multiplexing_tag_id(&mut self) -> Uuid {
         self.multiplexing_tags.choose_unwrap(&mut self.rng).id
     }
@@ -479,7 +460,6 @@ impl TestState {
         self.insert_people(db_conn).await;
         self.insert_labs(db_conn).await;
         self.insert_specimens(db_conn).await;
-        self.insert_multiplexing_tags(db_conn).await;
         self.insert_suspension_pools(db_conn).await;
         self.insert_pool_multiplexed_chromium_runs(db_conn).await;
     }
@@ -492,6 +472,8 @@ impl TestState {
             container.db_url().await.unwrap(),
         );
         let db_pool = Pool::builder(db_config).build().unwrap();
+
+        let mut db_conn = db_pool.get().await.unwrap();
 
         let mut test_state = Self {
             _container: container,
@@ -513,6 +495,10 @@ impl TestState {
         };
 
         test_state.populate_db().await;
+
+        test_state.multiplexing_tags = MultiplexingTag::fetch_by_query(&(), &mut db_conn)
+            .await
+            .unwrap();
 
         test_state
     }

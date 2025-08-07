@@ -19,6 +19,8 @@ create table suspension (
     target_reads_per_cell integer not null, -- validated on Rust side
     notes text,
 
+    -- two suspensions cannot be pooled together and tagged with the same tag
+    unique (pooled_into_id, multiplexing_tag_id),
     -- either both are specified or neither is specified
     constraint pooling_is_correctly_specified check ((pooled_into_id is null) = (multiplexing_tag_id is null))
 );

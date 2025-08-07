@@ -1,6 +1,6 @@
 from datetime import UTC, datetime
 from pathlib import Path
-from typing_extensions import Any
+from typing import Any
 import pytest
 import maturin_import_hook
 import json
@@ -468,6 +468,7 @@ def new_cdna(gems_id: UUID = ID, person_id: UUID = ID) -> NewCdna:
         prepared_at=TIME,
         gems_id=gems_id,
         n_amplification_cycles=0,
+        volume_mcl=40.0,
         measurements=[
             NewCdnaMeasurement(
                 measured_by=person_id,

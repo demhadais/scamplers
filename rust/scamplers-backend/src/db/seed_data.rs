@@ -6,13 +6,14 @@ use index_set::IndexSetFileUrl;
 use scamplers_core::{
     model::{
         chemistry::Chemistry, institution::NewInstitution,
-        library_type_specification::NewLibraryTypeSpecification,
+        library_type_specification::NewLibraryTypeSpecification, suspension::NewMultiplexingTag,
     },
     result::ScamplersCoreError,
 };
 use serde::Deserialize;
 
 use super::model::WriteToDb;
+use crate::db::model::WriteToDbInternal;
 mod admin;
 mod chemistry;
 mod index_set;
@@ -28,6 +29,8 @@ pub struct SeedData {
     index_set_urls: Vec<IndexSetFileUrl>,
     #[garde(skip)]
     chemistries: Vec<Chemistry>,
+    #[garde(dive)]
+    multiplexing_tags: Vec<NewMultiplexingTag>,
     #[garde(dive)]
     library_type_specifications: Vec<NewLibraryTypeSpecification>,
 }
@@ -46,6 +49,7 @@ impl SeedData {
             app_admin,
             index_set_urls,
             chemistries,
+            multiplexing_tags,
             library_type_specifications,
         } = self;
 
@@ -60,6 +64,7 @@ impl SeedData {
         app_admin.write(db_conn).await?;
         download_and_insert_index_sets(db_conn, http_client, &index_set_urls).await?;
         chemistries.write_to_db(db_conn).await?;
+        multiplexing_tags.write_to_db(db_conn).await?;
         library_type_specifications.write_to_db(db_conn).await?;
 
         Ok(())

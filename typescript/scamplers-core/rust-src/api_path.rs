@@ -9,7 +9,9 @@ use crate::model::{
     person::{CreatedUser, NewMsLogin, NewPerson, Person, PersonQuery, PersonSummary},
     sequencing_run::{NewSequencingRun, SequencingRunSummary},
     specimen::{NewSpecimen, Specimen, SpecimenQuery, SpecimenSummary},
-    suspension::{NewSuspension, NewSuspensionPool, Suspension, SuspensionPoolHandle},
+    suspension::{
+        MultiplexingTag, NewSuspension, NewSuspensionPool, Suspension, SuspensionPoolHandle,
+    },
 };
 
 const SEARCH_SUFFIX: &str = "search";
@@ -105,6 +107,13 @@ const SEQUENCING_RUNS: &str = "/sequencing-runs";
 impl ToApiPath for (NewSequencingRun, SequencingRunSummary) {
     fn to_api_path() -> String {
         SEQUENCING_RUNS.to_string()
+    }
+}
+
+const MULTIPLEXING_TAGS: &str = "/multiplexing-tags";
+impl ToApiPath for ((), MultiplexingTag) {
+    fn to_api_path() -> String {
+        format!("{MULTIPLEXING_TAGS}/{SEARCH_SUFFIX}")
     }
 }
 

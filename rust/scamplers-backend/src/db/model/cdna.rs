@@ -66,6 +66,18 @@ impl NewCdnaVecExt for Vec<NewCdna> {
         should_have_same_library_type: bool,
         db_conn: &mut AsyncPgConnection,
     ) -> ScamplersResult<()> {
+        fn transform(lib_types_and_volumes: &[(LibraryType, f32)]) -> (Vec<LibraryType>, Vec<f32>) {
+            let mut lib_types = Vec::with_capacity(lib_types_and_volumes.len());
+            let mut volumes = Vec::with_capacity(lib_types_and_volumes.len());
+
+            for (lib_type, volume) in lib_types_and_volumes {
+                lib_types.push(*lib_type);
+                volumes.push(*volume);
+            }
+
+            (lib_types, volumes)
+        }
+
         let chemistry: Option<String> = gems::table
             .inner_join(chemistry::table)
             .filter(gems::id.eq(&self[0].gems_id))
@@ -73,41 +85,53 @@ impl NewCdnaVecExt for Vec<NewCdna> {
             .first(db_conn)
             .await?;
 
-        let mut found_library_types: Vec<_> = self.iter().map(|c| c.library_type).collect();
-        found_library_types.sort();
+        let mut found_library_types_and_volumes: Vec<_> =
+            self.iter().map(|c| (c.library_type, c.volume_µl)).collect();
+        found_library_types_and_volumes.sort_by_key(|(lib_type, _)| *lib_type);
 
-        let err = |expected_library_types| {
+        let err = |expected_library_types_and_volumes| {
+            let (found_library_types, found_volumes) = transform(&found_library_types_and_volumes);
+            let (expected_library_types, expected_volumes) =
+                transform(expected_library_types_and_volumes);
+
             Err(ScamplersError::new_unprocessable_entity_error(
                 CdnaLibraryTypeError {
+                    found_library_types,
                     expected_library_types,
-                    found_library_types: found_library_types.clone(),
+                    found_volumes,
+                    expected_volumes,
                 },
             ))
         };
 
         let Some(chemistry) = chemistry else {
-            let expected_library_types = vec![LibraryType::ChromatinAccessibility];
-            if found_library_types != expected_library_types {
-                return err(expected_library_types);
+            let expected_library_types_and_volumes = [(LibraryType::ChromatinAccessibility, 40.0)];
+
+            if found_library_types_and_volumes != expected_library_types_and_volumes {
+                return err(&expected_library_types_and_volumes);
             }
 
             return Ok(());
         };
 
-        let expected_library_types: Vec<LibraryType> = library_type_specification::table
-            .filter(library_type_specification::chemistry.eq(chemistry))
-            .order_by(library_type_specification::library_type)
-            .select(library_type_specification::library_type)
-            .load(db_conn)
-            .await?;
+        let expected_library_types_and_volumes: Vec<(LibraryType, f32)> =
+            library_type_specification::table
+                .filter(library_type_specification::chemistry.eq(chemistry))
+                .order_by(library_type_specification::library_type)
+                .select((
+                    library_type_specification::library_type,
+                    library_type_specification::cdna_volume_l,
+                ))
+                .load(db_conn)
+                .await?;
 
-        let mismatching_library_types1 =
-            should_have_same_library_type && expected_library_types[0] != found_library_types[0];
-        let mistmatching_library_types2 =
-            !(should_have_same_library_type || expected_library_types == found_library_types);
+        let mismatch1 = should_have_same_library_type
+            && expected_library_types_and_volumes[0] != found_library_types_and_volumes[0];
+        let mismatch2 = !(should_have_same_library_type
+            || expected_library_types_and_volumes == found_library_types_and_volumes);
 
-        if mismatching_library_types1 || mistmatching_library_types2 {
-            return err(expected_library_types);
+        if mismatch1 || mismatch2 {
+            return err(&expected_library_types_and_volumes);
         }
 
         Ok(())

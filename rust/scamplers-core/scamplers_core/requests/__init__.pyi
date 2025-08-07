@@ -571,6 +571,7 @@ class NewCdna(_Json):
     prepared_at: datetime
     gems_id: UUID
     n_amplification_cycles: int
+    volume_mcl: float
     preparer_ids: list[UUID]
     measurements: list[NewCdnaMeasurement] = ...
     storage_location: str | None = ...

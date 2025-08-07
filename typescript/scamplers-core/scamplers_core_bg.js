@@ -243,6 +243,27 @@ function passArrayJsValueToWasm0(array, malloc) {
     return ptr;
 }
 
+let cachedFloat32ArrayMemory0 = null;
+
+function getFloat32ArrayMemory0() {
+    if (cachedFloat32ArrayMemory0 === null || cachedFloat32ArrayMemory0.byteLength === 0) {
+        cachedFloat32ArrayMemory0 = new Float32Array(wasm.memory.buffer);
+    }
+    return cachedFloat32ArrayMemory0;
+}
+
+function getArrayF32FromWasm0(ptr, len) {
+    ptr = ptr >>> 0;
+    return getFloat32ArrayMemory0().subarray(ptr / 4, ptr / 4 + len);
+}
+
+function passArrayF32ToWasm0(arg, malloc) {
+    const ptr = malloc(arg.length * 4, 4) >>> 0;
+    getFloat32ArrayMemory0().set(arg, ptr / 4);
+    WASM_VECTOR_LEN = arg.length;
+    return ptr;
+}
+
 function takeFromExternrefTable0(idx) {
     const value = wasm.__wbindgen_export_0.get(idx);
     wasm.__externref_table_dealloc(idx);
@@ -256,7 +277,7 @@ function __wbg_adapter_35(arg0, arg1, arg2) {
     wasm.closure142_externref_shim(arg0, arg1, arg2);
 }
 
-function __wbg_adapter_437(arg0, arg1, arg2, arg3) {
+function __wbg_adapter_441(arg0, arg1, arg2, arg3) {
     wasm.closure177_externref_shim(arg0, arg1, arg2, arg3);
 }
 
@@ -423,6 +444,8 @@ export class CdnaLibraryTypeError {
         return {
             expected_library_types: this.expected_library_types,
             found_library_types: this.found_library_types,
+            expected_volumes: this.expected_volumes,
+            found_volumes: this.found_volumes,
         };
     }
 
@@ -474,6 +497,40 @@ export class CdnaLibraryTypeError {
         const ptr0 = passArrayJsValueToWasm0(arg0, wasm.__wbindgen_malloc);
         const len0 = WASM_VECTOR_LEN;
         wasm.__wbg_set_cdnalibrarytypeerror_found_library_types(this.__wbg_ptr, ptr0, len0);
+    }
+    /**
+     * @returns {Float32Array}
+     */
+    get expected_volumes() {
+        const ret = wasm.__wbg_get_cdnalibrarytypeerror_expected_volumes(this.__wbg_ptr);
+        var v1 = getArrayF32FromWasm0(ret[0], ret[1]).slice();
+        wasm.__wbindgen_free(ret[0], ret[1] * 4, 4);
+        return v1;
+    }
+    /**
+     * @param {Float32Array} arg0
+     */
+    set expected_volumes(arg0) {
+        const ptr0 = passArrayF32ToWasm0(arg0, wasm.__wbindgen_malloc);
+        const len0 = WASM_VECTOR_LEN;
+        wasm.__wbg_set_cdnalibrarytypeerror_expected_volumes(this.__wbg_ptr, ptr0, len0);
+    }
+    /**
+     * @returns {Float32Array}
+     */
+    get found_volumes() {
+        const ret = wasm.__wbg_get_cdnalibrarytypeerror_found_volumes(this.__wbg_ptr);
+        var v1 = getArrayF32FromWasm0(ret[0], ret[1]).slice();
+        wasm.__wbindgen_free(ret[0], ret[1] * 4, 4);
+        return v1;
+    }
+    /**
+     * @param {Float32Array} arg0
+     */
+    set found_volumes(arg0) {
+        const ptr0 = passArrayF32ToWasm0(arg0, wasm.__wbindgen_malloc);
+        const len0 = WASM_VECTOR_LEN;
+        wasm.__wbg_set_cdnalibrarytypeerror_found_volumes(this.__wbg_ptr, ptr0, len0);
     }
 }
 
@@ -5014,7 +5071,7 @@ export function __wbg_new_23a2665fac83c611(arg0, arg1) {
             const a = state0.a;
             state0.a = 0;
             try {
-                return __wbg_adapter_437(a, state0.b, arg0, arg1);
+                return __wbg_adapter_441(a, state0.b, arg0, arg1);
             } finally {
                 state0.a = a;
             }
@@ -5214,12 +5271,12 @@ export function __wbindgen_cb_drop(arg0) {
     return ret;
 };
 
-export function __wbindgen_closure_wrapper901(arg0, arg1, arg2) {
+export function __wbindgen_closure_wrapper929(arg0, arg1, arg2) {
     const ret = makeMutClosure(arg0, arg1, 125, __wbg_adapter_32);
     return ret;
 };
 
-export function __wbindgen_closure_wrapper924(arg0, arg1, arg2) {
+export function __wbindgen_closure_wrapper952(arg0, arg1, arg2) {
     const ret = makeMutClosure(arg0, arg1, 143, __wbg_adapter_35);
     return ret;
 };
