@@ -14,7 +14,7 @@ from scamplers_core.requests import (
     new_frozen_tissue,
     new_virtual_specimen,
     new_suspension_pool,
-)  # noqa: F403
+)
 import fire
 
 from test_scamplers_core.test_requests import *  # noqa: F403
