@@ -4,7 +4,11 @@ maturin_import_hook.install()
 
 import asyncio
 from scamplers_core import ScamplersClient
-from scamplers_core.requests import (
+from scamplers_core.requests import *  # noqa: F403
+import fire
+
+from test_scamplers_core.test_requests import (
+    new_cryopreserved_tissue,
     new_institution,
     new_person,
     new_lab,
@@ -15,9 +19,6 @@ from scamplers_core.requests import (
     new_virtual_specimen,
     new_suspension_pool,
 )
-import fire
-
-from test_scamplers_core.test_requests import *  # noqa: F403
 
 
 def create_client(
