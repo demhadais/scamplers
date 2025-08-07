@@ -1961,5 +1961,5 @@
     { "tag_id": "OB3", "type_": "ocm" },
     { "tag_id": "OB4", "type_": "ocm" }
   ],
-  "library_type_specifications": [{ "chemistry": "" }]
+  "library_type_specifications": []
 }
