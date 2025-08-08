@@ -13,7 +13,9 @@ use scamplers_core::{
         person::{CreatedUser, NewMsLogin, NewPerson, Person, PersonQuery, PersonSummary},
         sequencing_run::{NewSequencingRun, SequencingRunSummary},
         specimen::{NewSpecimen, Specimen, SpecimenQuery, SpecimenSummary},
-        suspension::{NewSuspension, NewSuspensionPool, Suspension, SuspensionPoolHandle},
+        suspension::{
+            MultiplexingTag, NewSuspension, NewSuspensionPool, Suspension, SuspensionPoolHandle,
+        },
     },
 };
 use scamplers_schema::lab::dsl::lab;
@@ -70,6 +72,10 @@ pub(super) fn router() -> Router<AppState> {
         .route(
             &<(SpecimenQuery, SpecimenSummary)>::to_api_path(),
             post(by_query::<SpecimenSummary>),
+        )
+        .route(
+            &<((), MultiplexingTag)>::to_api_path(),
+            post(by_query::<MultiplexingTag>),
         )
         .route(
             &<(NewSuspension, Suspension)>::to_api_path(),
