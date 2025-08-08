@@ -13,7 +13,7 @@ default-members = ["scamplers-backend"]
 edition = "2024"
 
 [workspace.dependencies]
-clap = { version = "4.5.40", features = ["derive", "env"] }
+clap = { version = "4.5.43", features = ["derive", "env"] }
 anyhow = "1.0.98"
 axum = { version = "0.8.4", default-features = false, features = [
     "http2",
@@ -22,19 +22,19 @@ axum = { version = "0.8.4", default-features = false, features = [
     "query",
     "tokio",
 ] }
-tokio = { version = "1.45.1", features = [
+tokio = { version = "1.47.1", features = [
     "macros",
     "rt-multi-thread",
     "signal",
 ] }
 regex = "1.11.1"
 axum-extra = { version = "0.10.1", features = ["typed-header", "query"] }
-camino = { version = "1.1.10", features = ["serde1"] }
+camino = { version = "1.1.11", features = ["serde1"] }
 thiserror = "2.0.12"
 _uuid = { package = "uuid", version = "1.16.0", features = ["serde"] }
 serde = { version = "1.0.219", features = ["derive"] }
-serde_json = { version = "1.0.140" }
-diesel = { version = "2.2.10", default-features = false, features = [
+serde_json = { version = "1.0.142" }
+diesel = { version = "2.2.12", default-features = false, features = [
     "without-deprecated",
     "time",
     "uuid",
@@ -44,7 +44,7 @@ time = { version = "0.3.38", features = ["serde-human-readable"] }
 futures = { version = "0.3.31" }
 valuable = { version = "0.1.1", features = ["derive"] }
 garde = { version = "0.22.0", features = ["derive", "email", "serde", "regex"] }
-strum = { version = "0.27.1", features = ["derive"] }
+strum = { version = "0.27.2", features = ["derive"] }
 scraper = { version = "0.23.1", features = ["serde"] }
 wasm-bindgen = { version = "0.2.100", features = ["enable-interning"] }
 dotenvy = { version = "0.15.7" }
@@ -64,15 +64,15 @@ tower = { version = "0.5.2", default-features = false }
 tracing-subscriber = { version = "0.3.19", features = ["json"] }
 argon2 = "0.5.3"
 tower-http = { version = "0.6.6", features = ["trace", "fs"] }
-rand = "0.9.1"
-reqwest = { version = "0.12.20", default-features = false, features = [
+rand = "0.9.2"
+reqwest = { version = "0.12.22", default-features = false, features = [
     "rustls-tls",
     "http2",
     "charset",
     "json",
 ] }
 url = { version = "2.5.4", features = ["serde"] }
-syn = { version = "2.0.102", features = ["full"] }
+syn = { version = "2.0.104", features = ["full"] }
 quote = { version = "1.0.40" }
 proc-macro2 = { version = "1.0.95" }
 heck = { version = "0.5.0" }
