@@ -1,0 +1,88 @@
+[package]
+name = "scamplers"
+version = "0.1.0"
+edition.workspace = true
+
+[lib]
+crate-type = ["cdylib", "lib"]
+
+[[bin]]
+name = "py-stubs"
+required-features = ["python"]
+
+[dependencies]
+strum = { workspace = true }
+scamplers-schema = { path = "../scamplers-schema", optional = true }
+snafu = { workspace = true }
+base64 = { workspace = true }
+heck = { workspace = true }
+axum = { workspace = true, optional = true }
+any-value = { path = "../any-value" }
+csv = { workspace = true }
+camino = { workspace = true, optional = true }
+clap = { workspace = true, optional = true }
+serde_json = { workspace = true, optional = true }
+diesel = { workspace = true, optional = true }
+serde = { workspace = true }
+garde = { workspace = true }
+uuid = { path = "../uuid" }
+valuable = { workspace = true }
+regex = { workspace = true, optional = true }
+reqwest = { workspace = true }
+url = { workspace = true }
+futures = { workspace = true, optional = true }
+tokio = { workspace = true, optional = true }
+testcontainers-modules = { workspace = true, optional = true }
+diesel_migrations = { workspace = true, optional = true }
+tower = { workspace = true, optional = true }
+tower-http = { workspace = true, optional = true }
+tracing = { workspace = true, optional = true }
+tracing-subscriber = { workspace = true, optional = true }
+tracing-appender = { workspace = true, optional = true }
+argon2 = { workspace = true }
+axum-extra = { workspace = true, optional = true }
+rand = { workspace = true, optional = true }
+dotenvy = { workspace = true }
+valid-string = { path = "../valid-string" }
+bon = { workspace = true }
+pyo3 = { workspace = true, optional = true }
+pyo3-stub-gen = { workspace = true, optional = true }
+macro_rules_attribute = { workspace = true }
+
+[target.'cfg(target_arch = "wasm32")'.dependencies]
+wasm-bindgen = { workspace = true }
+
+[dev-dependencies]
+pretty_assertions = { workspace = true }
+rstest = { workspace = true }
+time = { path = "../time", features = ["backend"] }
+
+[features]
+app = [
+    "scamplers-schema",
+    "axum",
+    "any-value/backend",
+    "camino",
+    "clap",
+    "serde_json",
+    "diesel",
+    "uuid/backend",
+    "regex",
+    "futures",
+    "tokio",
+    "testcontainers-modules",
+    "tower",
+    "tower-http",
+    "diesel_migrations",
+    "tracing",
+    "tracing-subscriber",
+    "tracing-appender",
+    "axum-extra",
+    "rand",
+    "valid-string/backend",
+]
+python = ["pyo3", "pyo3-stub-gen"]
+
+
+[lints]
+workspace = true
