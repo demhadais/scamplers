@@ -1,7 +1,7 @@
 use std::{fmt::Display, str::FromStr};
 
 use _uuid::Bytes;
-#[cfg(feature = "backend")]
+#[cfg(feature = "app")]
 use diesel::{deserialize::FromSqlRow, expression::AsExpression, sql_types};
 #[cfg(feature = "python")]
 use pyo3::prelude::*;
@@ -11,9 +11,9 @@ use serde::{Deserialize, Serialize};
     Clone, Copy, Eq, Ord, PartialEq, PartialOrd, Debug, Hash, Default, Deserialize, Serialize,
 )]
 #[cfg_attr(feature = "python", derive(IntoPyObject, FromPyObject))]
-#[cfg_attr(feature = "backend", derive(FromSqlRow, AsExpression))]
+#[cfg_attr(feature = "app", derive(FromSqlRow, AsExpression))]
 #[cfg_attr(feature = "python", pyo3(transparent))]
-#[cfg_attr(feature = "backend", diesel(sql_type = sql_types::Uuid))]
+#[cfg_attr(feature = "app", diesel(sql_type = sql_types::Uuid))]
 #[serde(transparent)]
 pub struct Uuid(_uuid::Uuid);
 
@@ -147,7 +147,19 @@ mod wasm32 {
     }
 }
 
-#[cfg(feature = "backend")]
+#[cfg(feature = "python")]
+mod python {
+    use super::Uuid;
+    use pyo3_stub_gen::{PyStubType, TypeInfo};
+
+    impl PyStubType for Uuid {
+        fn type_output() -> TypeInfo {
+            TypeInfo::with_module("uuid.UUID", "uuid".into())
+        }
+    }
+}
+
+#[cfg(feature = "app")]
 mod backend {
     use diesel::{
         backend::Backend,

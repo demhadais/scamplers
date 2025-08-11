@@ -1,7 +1,7 @@
 #[cfg(not(target_arch = "wasm32"))]
 use std::fmt::Display;
 
-#[cfg(feature = "backend")]
+#[cfg(feature = "app")]
 use diesel::{deserialize::FromSqlRow, expression::AsExpression, sql_types};
 use serde::{Deserialize, Serialize};
 #[cfg(target_arch = "wasm32")]
@@ -9,9 +9,9 @@ use wasm_bindgen::JsValue;
 
 #[cfg(not(target_arch = "wasm32"))]
 #[derive(Eq, PartialEq, Debug, Deserialize, Serialize, Clone, Default)]
-#[cfg_attr(feature = "backend", derive(FromSqlRow, AsExpression))]
+#[cfg_attr(feature = "app", derive(FromSqlRow, AsExpression))]
 #[serde(transparent)]
-#[cfg_attr(feature = "backend", diesel(sql_type = sql_types::Jsonb))]
+#[cfg_attr(feature = "app", diesel(sql_type = sql_types::Jsonb))]
 pub struct AnyValue(serde_json::Value);
 
 #[cfg(target_arch = "wasm32")]
@@ -53,7 +53,7 @@ impl valuable::Valuable for AnyValue {
     }
 }
 
-#[cfg(feature = "backend")]
+#[cfg(feature = "app")]
 mod backend {
     use diesel::{
         backend::Backend,

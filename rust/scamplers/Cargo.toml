@@ -11,9 +11,11 @@ name = "py-stubs"
 required-features = ["python"]
 
 [dependencies]
+anyhow = { workspace = true }
 strum = { workspace = true }
-scamplers-schema = { path = "../scamplers-schema" }
-snafu = { workspace = true }
+scamplers-schema = { path = "../scamplers-schema", optional = true }
+scamplers-macros = { path = "../scamplers-macros" }
+thiserror = { workspace = true }
 base64 = { workspace = true }
 heck = { workspace = true }
 axum = { workspace = true, optional = true }
@@ -21,8 +23,8 @@ any-value = { path = "../any-value" }
 csv = { workspace = true }
 camino = { workspace = true, optional = true }
 clap = { workspace = true, optional = true }
-serde_json = { workspace = true, optional = true }
-diesel = { workspace = true }
+serde_json = { workspace = true }
+diesel = { workspace = true, optional = true }
 serde = { workspace = true }
 garde = { workspace = true }
 uuid = { path = "../uuid" }
@@ -47,25 +49,25 @@ valid-string = { path = "../valid-string" }
 bon = { workspace = true }
 pyo3 = { workspace = true, optional = true }
 pyo3-stub-gen = { workspace = true, optional = true }
-macro_rules_attribute = { workspace = true }
 
 [target.'cfg(target_arch = "wasm32")'.dependencies]
 wasm-bindgen = { workspace = true }
+getrandom = { workspace = true, features = ["wasm_js"] }
 
 [dev-dependencies]
 pretty_assertions = { workspace = true }
 rstest = { workspace = true }
-time = { path = "../time", features = ["backend"] }
+time = { path = "../time", features = ["app"] }
 
 [features]
 app = [
+    "scamplers-schema",
     "axum",
-    "any-value/backend",
+    "any-value/app",
     "camino",
     "clap",
-    "serde_json",
-    "diesel/postgres",
-    "uuid/backend",
+    "diesel",
+    "uuid/app",
     "regex",
     "futures",
     "tokio",
@@ -78,9 +80,15 @@ app = [
     "tracing-appender",
     "axum-extra",
     "rand",
-    "valid-string/backend",
+    "valid-string/app",
 ]
-python = ["pyo3", "pyo3-stub-gen"]
+python = [
+    "pyo3",
+    "pyo3-stub-gen",
+    "uuid/python",
+    "valid-string/python",
+    "any-value/python",
+]
 
 
 [lints]

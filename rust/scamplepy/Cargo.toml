@@ -1,0 +1,15 @@
+[package]
+name = "scamplepy"
+version = "0.1.0"
+edition.workspace = true
+
+[lib]
+crate-type = ["cdylib", "lib"]
+
+[dependencies]
+scamplers = { path = "../scamplers", features = ["python"] }
+pyo3 = { workspace = true }
+pyo3-stub-gen = { workspace = true }
+
+[lints]
+workspace = true

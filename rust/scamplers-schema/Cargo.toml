@@ -5,7 +5,6 @@ edition.workspace = true
 
 [dependencies]
 diesel = { workspace = true }
-diesel-async = { workspace = true }
 
 [build-dependencies]
 camino = { workspace = true }

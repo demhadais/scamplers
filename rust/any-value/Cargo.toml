@@ -9,7 +9,6 @@ crate-type = ["cdylib", "lib"]
 [dependencies]
 serde_json = { workspace = true }
 serde = { workspace = true }
-diesel-async = { workspace = true, optional = true }
 diesel = { workspace = true, optional = true }
 valuable = { workspace = true }
 pyo3 = { workspace = true, optional = true }
@@ -22,5 +21,5 @@ wasm-bindgen = { workspace = true }
 serde-wasm-bindgen = { workspace = true }
 
 [features]
-backend = ["diesel"]
+app = ["diesel"]
 python = ["pyo3"]

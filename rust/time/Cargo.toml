@@ -7,10 +7,9 @@ edition.workspace = true
 crate-type = ["cdylib", "lib"]
 
 [dependencies]
+diesel = { workspace = true, optional = true }
 _time = { workspace = true }
 serde = { workspace = true }
-diesel = { workspace = true, optional = true }
-diesel-async = { workspace = true, optional = true }
 valuable = { workspace = true }
 pyo3 = { workspace = true, optional = true }
 
@@ -23,5 +22,5 @@ js-sys = { workspace = true }
 wasm-bindgen = { workspace = true }
 
 [features]
-backend = ["diesel", "diesel-async"]
+app = ["diesel"]
 python = ["pyo3"]

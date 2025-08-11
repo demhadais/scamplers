@@ -10,10 +10,10 @@ crate-type = ["cdylib", "lib"]
 garde = { workspace = true }
 serde = { workspace = true }
 diesel = { workspace = true, optional = true }
-diesel-async = { workspace = true, optional = true }
 valuable = { workspace = true }
 thiserror = { workspace = true }
 pyo3 = { workspace = true, optional = true }
+pyo3-stub-gen = { workspace = true, optional = true }
 
 [lints]
 workspace = true
@@ -22,5 +22,5 @@ workspace = true
 wasm-bindgen = { workspace = true }
 
 [features]
-backend = ["diesel", "diesel-async"]
-python = ["pyo3"]
+app = ["diesel"]
+python = ["pyo3", "pyo3-stub-gen"]

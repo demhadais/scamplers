@@ -1,6 +1,6 @@
 use std::{fmt::Display, str::FromStr};
 
-#[cfg(feature = "backend")]
+#[cfg(feature = "app")]
 use diesel::{deserialize::FromSqlRow, expression::AsExpression, sql_types};
 #[cfg(feature = "python")]
 use pyo3::prelude::*;
@@ -25,8 +25,8 @@ use serde::{Deserialize, Serialize};
 #[garde(transparent)]
 #[serde(transparent)]
 #[cfg_attr(feature = "python", pyo3(transparent))]
-#[cfg_attr(feature = "backend", derive(FromSqlRow, AsExpression))]
-#[cfg_attr(feature = "backend", diesel(sql_type = sql_types::Text))]
+#[cfg_attr(feature = "app", derive(FromSqlRow, AsExpression))]
+#[cfg_attr(feature = "app", diesel(sql_type = sql_types::Text))]
 pub struct ValidString(#[garde(length(min = 1))] String);
 
 impl Display for ValidString {
@@ -196,7 +196,19 @@ mod wasm32 {
     }
 }
 
-#[cfg(feature = "backend")]
+#[cfg(feature = "python")]
+mod python {
+    use super::ValidString;
+    use pyo3_stub_gen::PyStubType;
+
+    impl PyStubType for ValidString {
+        fn type_output() -> pyo3_stub_gen::TypeInfo {
+            String::type_output()
+        }
+    }
+}
+
+#[cfg(feature = "app")]
 mod backend {
     use diesel::{
         backend::Backend,

@@ -1,21 +1,13 @@
-use macro_rules_attribute::{attribute_alias, derive_alias};
-use scamplers_schema::institution::name;
-
-derive_alias! {
-    #[derive(ApiModel!)] = #[derive(Debug, Clone, ::serde::Serialize, ::serde::Deserialize, ::garde::Validate, ::valuable::Valuable)];
-}
-
+#[macro_export]
 macro_rules! define_ordering_enum {
-    ($name:ident; $wasm_python_orderby:path; $($column:ident),*; default = $default_variant:ident; $($enum_attribute:meta),*) => {
-        #[derive(Clone, Debug, ::serde::Serialize, ::serde::Deserialize, ::strum::EnumString, ::strum::Display)]
-        #[serde(tag = "field")]
+    ($name:ident; $wasm_python_orderby:path; $($variant:ident),*; default = $default_variant:ident; $($enum_attribute:meta),*) => {
+        #[derive(Clone, Debug, PartialEq, ::serde::Serialize, ::serde::Deserialize, ::strum::EnumString, ::strum::Display, ::valuable::Valuable)]
+        #[serde(tag = "field", rename_all = "snake_case")]
+        #[strum(serialize_all = "snake_case")]
         $(#[$enum_attribute])*
         pub enum $name {
             $(
-                #[allow(non_camel_case_types)]
-                $column {
-                    #[serde(skip)]
-                    field: $column,
+                $variant {
                     descending: bool
                 },
             )*
@@ -24,12 +16,12 @@ macro_rules! define_ordering_enum {
         impl Default for $name {
             fn default() -> Self {
                 Self::$default_variant {
-                    field: Default::default(),
                     descending: false
                 }
             }
         }
 
+        #[allow(dead_code)]
         impl $name {
             fn new(field: &str, descending: bool) -> Result<Self, ::strum::ParseError> {
                 use std::str::FromStr;
@@ -42,13 +34,13 @@ macro_rules! define_ordering_enum {
 
             fn set_descending(&mut self, descending: bool) {
                 match self {
-                    $( Self::$column{ descending: current, ..} )|* => { *current = descending; }
+                    $( Self::$variant{ descending: current, ..} )|* => { *current = descending; }
                 }
             }
 
             fn descending(&self) -> bool {
                 match self {
-                    $( Self::$column{ descending, ..} )|* => *descending
+                    $( Self::$variant{ descending, ..} )|* => *descending
                 }
             }
         }
@@ -73,5 +65,3 @@ macro_rules! define_ordering_enum {
         }
     };
 }
-
-define_ordering_enum!(InstitutionOrderBy; super::routes::WasmPythonOrderBy; name; default = name;);
