@@ -1,12 +1,13 @@
 use diesel::{PgTextExpressionMethods, RunQueryDsl, SelectableHelper, prelude::*};
 use scamplers_schema::institution;
 
+use super::InstitutionOrderBy;
 use crate::{
     app::DbOperation,
     db::util::AsIlike,
     init_stmt,
     result::ScamplersResult,
-    routes::institution::{Institution, InstitutionOrderBy, InstitutionQuery},
+    routes::institution::{Institution, InstitutionQuery},
 };
 
 impl DbOperation<Vec<Institution>> for InstitutionQuery {

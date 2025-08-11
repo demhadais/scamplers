@@ -7,7 +7,7 @@ use uuid::Uuid;
 use valid_string::ValidString;
 
 use crate::{
-    define_ordering_enum,
+    define_ordering_enum, impl_order_by, impl_python_order_by, impl_wasm_order_by,
     routes::{Jsonify, Pagination},
 };
 
@@ -52,7 +52,7 @@ pub struct Institution {
     pub name: String,
 }
 
-define_ordering_enum!(InstitutionOrderBy; super::WasmPythonOrderBy; Name; default = Name;);
+define_ordering_enum!(InstitutionOrderBy; Name; default = Name;);
 
 #[db_query]
 pub struct InstitutionQuery {
@@ -65,3 +65,7 @@ pub struct InstitutionQuery {
     #[builder(default)]
     pub pagination: Pagination,
 }
+
+impl_order_by!(InstitutionQuery);
+impl_wasm_order_by!(InstitutionQuery);
+impl_python_order_by!(InstitutionQuery);

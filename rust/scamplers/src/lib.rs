@@ -6,6 +6,5 @@ pub mod app;
 mod client;
 #[cfg(feature = "app")]
 pub mod db;
-mod macros;
 pub mod result;
 pub mod routes;
