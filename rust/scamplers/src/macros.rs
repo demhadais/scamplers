@@ -1,5 +1,12 @@
+use macro_rules_attribute::{attribute_alias, derive_alias};
+use scamplers_schema::institution::name;
+
+derive_alias! {
+    #[derive(ApiModel!)] = #[derive(Debug, Clone, ::serde::Serialize, ::serde::Deserialize, ::garde::Validate, ::valuable::Valuable)];
+}
+
 macro_rules! define_ordering_enum {
-    ($name:ident; $wasm_order_by:path; $($column:ident),*; default = $default_variant:ident; $($enum_attribute:meta),*) => {
+    ($name:ident; $wasm_python_orderby:path; $($column:ident),*; default = $default_variant:ident; $($enum_attribute:meta),*) => {
         #[derive(Clone, Debug, ::serde::Serialize, ::serde::Deserialize, ::strum::EnumString, ::strum::Display)]
         #[serde(tag = "field")]
         $(#[$enum_attribute])*
@@ -8,7 +15,7 @@ macro_rules! define_ordering_enum {
                 #[allow(non_camel_case_types)]
                 $column {
                     #[serde(skip)]
-                    column: $column,
+                    field: $column,
                     descending: bool
                 },
             )*
@@ -17,27 +24,22 @@ macro_rules! define_ordering_enum {
         impl Default for $name {
             fn default() -> Self {
                 Self::$default_variant {
-                    column: Default::default(),
+                    field: Default::default(),
                     descending: false
                 }
             }
         }
 
-        #[cfg(feature = "python")]
-        #[::pyo3::prelude::pymethods]
         impl $name {
-            #[getter(name = "descending")]
-            fn py_descending(&self) -> bool {
-                self.descending()
+            fn new(field: &str, descending: bool) -> Result<Self, ::strum::ParseError> {
+                use std::str::FromStr;
+
+                let mut orderby = Self::from_str(field)?;
+                orderby.set_descending(descending);
+
+                Ok(orderby)
             }
 
-            #[setter]
-            fn py_set_descending(&mut self, descending: bool) {
-                self.set_descending(descending)
-            }
-        }
-
-        impl $name {
             fn set_descending(&mut self, descending: bool) {
                 match self {
                     $( Self::$column{ descending: current, ..} )|* => { *current = descending; }
@@ -49,32 +51,27 @@ macro_rules! define_ordering_enum {
                     $( Self::$column{ descending, ..} )|* => *descending
                 }
             }
-
-            fn from_pair((column, descending): &(&str, bool)) -> Self {
-                use std::str::FromStr;
-
-                let mut s = Self::from_str(column).unwrap();
-                s.set_descending(*descending);
-
-                s
-            }
         }
 
         #[cfg(target_arch = "wasm32")]
-        impl From<$wasm_order_by> for $name {
-            fn from(wasm: $wasm_order_by) -> Self {
-                Self::from_pair(&wasm.as_tuple())
+        impl From<$wasm_python_orderby> for $name {
+            fn from(wasm: $wasm_python_orderby) -> Self {
+                use wasm_bindgen::prelude::*;
+
+                Self::new(&wasm.field, wasm.descending).unwrap_throw()
             }
         }
 
-        #[cfg(target_arch = "wasm32")]
-        impl From<$name> for $wasm_order_by {
-            fn from(order_by: $name) -> $wasm_order_by {
-                $wasm_order_by {
-                    column: order_by.to_string(),
+        #[cfg(any(target_arch = "wasm32", feature = "python"))]
+        impl From<$name> for $wasm_python_orderby {
+            fn from(order_by: $name) -> $wasm_python_orderby {
+                $wasm_python_orderby {
+                    field: order_by.to_string(),
                     descending: order_by.descending()
                 }
             }
         }
     };
 }
+
+define_ordering_enum!(InstitutionOrderBy; super::routes::WasmPythonOrderBy; name; default = name;);

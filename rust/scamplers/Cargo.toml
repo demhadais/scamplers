@@ -12,7 +12,7 @@ required-features = ["python"]
 
 [dependencies]
 strum = { workspace = true }
-scamplers-schema = { path = "../scamplers-schema", optional = true }
+scamplers-schema = { path = "../scamplers-schema" }
 snafu = { workspace = true }
 base64 = { workspace = true }
 heck = { workspace = true }
@@ -22,7 +22,7 @@ csv = { workspace = true }
 camino = { workspace = true, optional = true }
 clap = { workspace = true, optional = true }
 serde_json = { workspace = true, optional = true }
-diesel = { workspace = true, optional = true }
+diesel = { workspace = true }
 serde = { workspace = true }
 garde = { workspace = true }
 uuid = { path = "../uuid" }
@@ -59,13 +59,12 @@ time = { path = "../time", features = ["backend"] }
 
 [features]
 app = [
-    "scamplers-schema",
     "axum",
     "any-value/backend",
     "camino",
     "clap",
     "serde_json",
-    "diesel",
+    "diesel/postgres",
     "uuid/backend",
     "regex",
     "futures",
