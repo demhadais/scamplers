@@ -5,7 +5,7 @@ use super::{Institution, InstitutionOrderBy, InstitutionQuery};
 use crate::{
     db::{DbOperation, models::institution::InstitutionId, util::AsIlike},
     init_stmt,
-    result::{ScamplersErrorResponse, ScamplersResult},
+    result::{ResourceNotFoundError, ScamplersResult},
 };
 
 impl DbOperation<Vec<Institution>> for InstitutionQuery {
@@ -29,7 +29,7 @@ impl DbOperation<Vec<Institution>> for InstitutionQuery {
 impl DbOperation<Institution> for InstitutionId {
     fn execute(self, db_conn: &mut PgConnection) -> ScamplersResult<Institution> {
         let mut res = InstitutionQuery::builder()
-            .ids(self)
+            .ids(&self)
             .build()
             .execute(db_conn)?;
 
@@ -37,6 +37,9 @@ impl DbOperation<Institution> for InstitutionId {
             return Ok(res.remove(0));
         }
 
-        todo!()
+        Err(ResourceNotFoundError {
+            requested_resource_id: *self.as_ref(),
+        }
+        .into())
     }
 }

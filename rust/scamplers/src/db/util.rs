@@ -192,5 +192,11 @@ macro_rules! uuid_newtype {
                 vec![val.0]
             }
         }
+
+        impl From<&$name> for Vec<uuid::Uuid> {
+            fn from(val: &$name) -> Vec<uuid::Uuid> {
+                vec![val.0]
+            }
+        }
     };
 }

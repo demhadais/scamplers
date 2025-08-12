@@ -12,6 +12,16 @@ use crate::{
     result::{MalformedRequestError, ScamplersErrorResponse},
 };
 
+pub trait RequestExtractorExt<T> {
+    fn inner(self) -> T;
+}
+
+impl<T> RequestExtractorExt<T> for ValidJsonBody<T> {
+    fn inner(self) -> T {
+        self.0
+    }
+}
+
 #[derive(Default)]
 pub struct ValidJsonBody<T>(T);
 

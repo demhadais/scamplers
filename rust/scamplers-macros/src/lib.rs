@@ -131,7 +131,7 @@ pub fn scamplers_error(_attr: TokenStream, input: TokenStream) -> TokenStream {
         #[::scamplers_macros::base_model]
         #[cfg_attr(target_arch = "wasm32", ::wasm_bindgen::prelude::wasm_bindgen(getter_with_clone))]
         #[cfg_attr(feature = "python", ::pyo3::pyclass(get_all))]
-        #[derive(::scamplers_macros::Jsonify, ::scamplers_macros::WasmJsonify, ::scamplers_macros::PyJsonify, ::thiserror::Error, ::bon::Builder)]
+        #[derive(Default, ::scamplers_macros::Jsonify, ::scamplers_macros::WasmJsonify, ::scamplers_macros::PyJsonify, ::thiserror::Error, ::bon::Builder)]
         #[builder(on(_, into))]
         #item
     };

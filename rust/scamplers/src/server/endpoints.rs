@@ -13,22 +13,30 @@ pub trait ApiEndpoint {
     const METHOD: Method;
     const PATH: &str;
     const SUCCESS_STATUS_CODE: StatusCode;
+    type RequestExtractor;
+    type ResponseWrapper;
 }
 
-impl ApiEndpoint for (ValidJsonBody<NewInstitution>, Json<Institution>) {
+impl ApiEndpoint for (NewInstitution, Institution) {
     const METHOD: Method = Method::POST;
     const PATH: &str = "/institutions";
     const SUCCESS_STATUS_CODE: StatusCode = StatusCode::CREATED;
+    type RequestExtractor = ValidJsonBody<NewInstitution>;
+    type ResponseWrapper = Json<Institution>;
 }
 
-impl ApiEndpoint for (Path<InstitutionId>, Json<Institution>) {
+impl ApiEndpoint for (InstitutionId, Institution) {
     const METHOD: Method = Method::GET;
     const PATH: &str = "/institutions/{id}";
     const SUCCESS_STATUS_CODE: StatusCode = StatusCode::OK;
+    type RequestExtractor = Path<InstitutionId>;
+    type ResponseWrapper = Json<Institution>;
 }
 
-impl ApiEndpoint for (Base64JsonQuery<InstitutionQuery>, Json<Vec<Institution>>) {
+impl ApiEndpoint for (InstitutionQuery, Vec<Institution>) {
     const METHOD: Method = Method::GET;
     const PATH: &str = "/institutions";
     const SUCCESS_STATUS_CODE: StatusCode = StatusCode::OK;
+    type RequestExtractor = Base64JsonQuery<InstitutionQuery>;
+    type ResponseWrapper = Json<Institution>;
 }

@@ -59,6 +59,7 @@ pub struct PermissionDeniedError {
 #[error("{self:#?}")]
 pub struct ServerError {
     pub message: String,
+    #[builder(default)]
     pub raw_response_body: String,
 }
 
@@ -239,24 +240,21 @@ mod app {
         }
     }
 
-    impl From<diesel::result::Error> for ScamplersErrorResponse {
+    impl From<diesel::result::Error> for ScamplersError {
         fn from(err: diesel::result::Error) -> Self {
             use diesel::result::Error::{DatabaseError, NotFound};
 
             match err {
                 DatabaseError(kind, info) => Self::from((kind, info)),
-                NotFound => {
-                    let inner = ResourceNotFoundError::builder()
-                        .requested_resource_id(Uuid::default())
-                        .build();
-
-                    ScamplersErrorResponse::builder()
-                        .status(StatusCode::NOT_FOUND)
-                        .error(inner)
-                        .build()
-                        .into()
+                NotFound => ResourceNotFoundError::builder()
+                    .requested_resource_id(Uuid::default())
+                    .build()
+                    .into(),
+                err => ServerError {
+                    message: err.to_string(),
+                    ..Default::default()
                 }
-                err => ScamplersErrorResponse::new_server_error(&err.to_string()),
+                .into(),
             }
         }
     }
@@ -264,7 +262,7 @@ mod app {
         From<(
             diesel::result::DatabaseErrorKind,
             Box<dyn diesel::result::DatabaseErrorInformation + Send + Sync>,
-        )> for ScamplersErrorResponse
+        )> for ScamplersError
     {
         fn from(
             (kind, info): (
@@ -299,18 +297,12 @@ mod app {
             let values = into_split_vecs(&field_value, 2);
 
             match kind {
-                UniqueViolation => {
-                    let err = DuplicateResourceError {
-                        entity: entity.to_string(),
-                        fields,
-                        values,
-                    };
-
-                    ScamplersErrorResponse::builder()
-                        .status(StatusCode::CONFLICT)
-                        .error(err)
-                        .build()
+                UniqueViolation => DuplicateResourceError {
+                    entity: entity.to_string(),
+                    fields,
+                    values,
                 }
+                .into(),
 
                 ForeignKeyViolation => {
                     let referenced_entity = details
@@ -320,20 +312,18 @@ mod app {
                         .replace('"', "");
                     let referenced_entity = referenced_entity.strip_suffix(".").unwrap_or_default();
 
-                    let err = InvalidReferenceError {
+                    InvalidReferenceError {
                         entity: entity.to_string(),
                         referenced_entity: referenced_entity.to_string(),
                         value: values.first().cloned(),
-                    };
-
-                    ScamplersErrorResponse::builder()
-                        .status(StatusCode::UNPROCESSABLE_ENTITY)
-                        .error(err)
-                        .build()
+                    }
+                    .into()
                 }
-                _ => ScamplersErrorResponse::new_server_error(
-                    &diesel::result::Error::DatabaseError(kind, info).to_string(),
-                ),
+                _ => ServerError {
+                    message: diesel::result::Error::DatabaseError(kind, info).to_string(),
+                    ..Default::default()
+                }
+                .into(),
             }
         }
     }
@@ -386,4 +376,10 @@ mod app {
     }
 }
 
-pub type ScamplersResult<T> = Result<T, ScamplersErrorResponse>;
+impl From<ScamplersError> for ScamplersErrorResponse {
+    fn from(value: ScamplersError) -> Self {
+        todo!()
+    }
+}
+
+pub type ScamplersResult<T> = Result<T, ScamplersError>;
