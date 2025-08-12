@@ -8,8 +8,8 @@ use garde::Validate;
 use serde::{Serialize, de::DeserializeOwned};
 
 use crate::{
+    db::models::Jsonify,
     result::{MalformedRequestError, ScamplersErrorResponse},
-    routes::Jsonify,
 };
 
 #[derive(Default)]
@@ -55,14 +55,6 @@ where
         data.validate()?;
 
         Ok(Some(Self(data)))
-    }
-}
-
-impl<T: Serialize> IntoResponse for ValidJsonBody<T> {
-    fn into_response(self) -> Response {
-        let Self(inner) = self;
-
-        axum::Json(inner).into_response()
     }
 }
 

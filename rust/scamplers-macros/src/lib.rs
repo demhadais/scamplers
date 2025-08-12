@@ -20,7 +20,7 @@ pub fn derive_jsonify(input: TokenStream) -> TokenStream {
     let name = &derive_input.ident;
 
     quote! {
-        impl crate::routes::Jsonify for #name {}
+        impl crate::db::models::Jsonify for #name {}
     }
     .into()
 }

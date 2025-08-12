@@ -7,8 +7,8 @@ use uuid::Uuid;
 use valid_string::ValidString;
 
 use crate::{
-    define_ordering_enum, impl_order_by, impl_python_order_by, impl_wasm_order_by,
-    routes::{Jsonify, Pagination},
+    db::models::{Jsonify, Pagination},
+    define_ordering_enum, impl_order_by, impl_python_order_by, impl_wasm_order_by, uuid_newtype,
 };
 
 #[cfg(feature = "app")]
@@ -36,6 +36,8 @@ impl NewInstitution {
     }
 }
 
+uuid_newtype!(InstitutionId);
+
 #[db_selection]
 #[cfg_attr(feature = "app", diesel(table_name = institution))]
 pub struct InstitutionHandle {
@@ -60,6 +62,7 @@ pub struct InstitutionQuery {
     #[builder(default)]
     pub ids: Vec<Uuid>,
     pub name: Option<String>,
+    #[builder(default)]
     #[cfg_attr(target_arch = "wasm32", wasm_bindgen(skip))]
     pub order_by: Vec<InstitutionOrderBy>,
     #[builder(default)]

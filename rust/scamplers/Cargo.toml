@@ -6,10 +6,6 @@ edition.workspace = true
 [lib]
 crate-type = ["cdylib", "lib"]
 
-[[bin]]
-name = "py-stubs"
-required-features = ["python"]
-
 [dependencies]
 anyhow = { workspace = true }
 strum = { workspace = true }

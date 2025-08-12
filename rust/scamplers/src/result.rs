@@ -7,7 +7,7 @@ use valuable::Valuable;
 #[cfg(target_arch = "wasm32")]
 use wasm_bindgen::prelude::*;
 
-use crate::routes::{Jsonify, library_type_specification::LibraryType};
+use crate::db::models::{Jsonify, library_type_specification::LibraryType};
 
 #[scamplers_error]
 #[error("{self:#?}")]

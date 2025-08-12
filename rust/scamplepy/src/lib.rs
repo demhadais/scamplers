@@ -8,7 +8,7 @@ mod scamplepy {
     #[pymodule]
     mod requests {
         #[pymodule_export]
-        use scamplers::routes::institution::NewInstitution;
+        use scamplers::db::models::institution::NewInstitution;
     }
 }
 

@@ -1,13 +1,11 @@
-use diesel::{PgTextExpressionMethods, RunQueryDsl, SelectableHelper, prelude::*};
+use diesel::{PgTextExpressionMethods, RunQueryDsl, prelude::*};
 use scamplers_schema::institution;
 
-use super::InstitutionOrderBy;
+use super::{Institution, InstitutionOrderBy, InstitutionQuery};
 use crate::{
-    app::DbOperation,
-    db::util::AsIlike,
+    db::{DbOperation, models::institution::InstitutionId, util::AsIlike},
     init_stmt,
-    result::ScamplersResult,
-    routes::institution::{Institution, InstitutionQuery},
+    result::{ScamplersErrorResponse, ScamplersResult},
 };
 
 impl DbOperation<Vec<Institution>> for InstitutionQuery {
@@ -25,5 +23,20 @@ impl DbOperation<Vec<Institution>> for InstitutionQuery {
         }
 
         Ok(stmt.load(db_conn)?)
+    }
+}
+
+impl DbOperation<Institution> for InstitutionId {
+    fn execute(self, db_conn: &mut PgConnection) -> ScamplersResult<Institution> {
+        let mut res = InstitutionQuery::builder()
+            .ids(self)
+            .build()
+            .execute(db_conn)?;
+
+        if res.len() > 0 {
+            return Ok(res.remove(0));
+        }
+
+        todo!()
     }
 }

@@ -4,52 +4,22 @@ use scamplers_macros::{db_enum, db_insertion};
 #[cfg(feature = "app")]
 use scamplers_schema::library_type_specification;
 
-use crate::routes::Jsonify;
+use crate::db::models::Jsonify;
 
 #[cfg_attr(target_arch = "wasm32", wasm_bindgen::prelude::wasm_bindgen)]
 #[db_enum]
 #[derive(PartialOrd, Eq, Ord)]
 pub enum LibraryType {
-    #[serde(rename = "Antibody Capture")]
-    #[strum(serialize = "Antibody Capture")]
     AntibodyCapture,
-
-    #[serde(rename = "Antigen Capture")]
-    #[strum(serialize = "Antigen Capture")]
     AntigenCapture,
-
-    #[serde(rename = "Chromatin Accessibility")]
-    #[strum(serialize = "Chromatin Accessibility")]
     ChromatinAccessibility,
-
-    #[serde(rename = "CRISPR Guide Capture")]
-    #[strum(serialize = "CRISPR Guide Capture")]
     CrisprGuideCapture,
-
     Custom,
-
-    #[serde(rename = "Gene Expression")]
-    #[strum(serialize = "Gene Expression")]
     GeneExpression,
-
-    #[serde(rename = "Multiplexing Capture")]
-    #[strum(serialize = "Multiplexing Capture")]
     MultiplexingCapture,
-
-    #[serde(rename = "VDJ")]
-    #[strum(serialize = "VDJ")]
     Vdj,
-
-    #[serde(rename = "VDJ-B")]
-    #[strum(serialize = "VDJ-B")]
     VdjB,
-
-    #[serde(rename = "VDJ-T")]
-    #[strum(serialize = "VDJ-T")]
     VdjT,
-
-    #[serde(rename = "VDJ-T-GD")]
-    #[strum(serialize = "VDJ-T-GD")]
     VdjTGd,
 }
 
