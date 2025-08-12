@@ -1,3 +1,5 @@
+#[cfg(feature = "app")]
+use axum::http::StatusCode;
 #[cfg(feature = "python")]
 use pyo3::{exceptions::PyException, prelude::*};
 use scamplers_macros::scamplers_error;
@@ -211,6 +213,8 @@ mod python {
 #[cfg(feature = "app")]
 mod app {
     use axum::{extract::rejection::JsonRejection, http::StatusCode, response::IntoResponse};
+    use axum_extra::routing::Resource;
+    use deadpool_diesel::Status;
     use regex::Regex;
 
     use super::*;
@@ -374,11 +378,33 @@ mod app {
             (status, axum::Json(self)).into_response()
         }
     }
-}
 
-impl From<ScamplersError> for ScamplersErrorResponse {
-    fn from(value: ScamplersError) -> Self {
-        todo!()
+    impl From<ScamplersError> for ScamplersErrorResponse {
+        fn from(mut err: ScamplersError) -> Self {
+            use ScamplersError::*;
+            let status = match &mut err {
+                Client(_) => None,
+                DuplicateResource(_) => Some(StatusCode::CONFLICT),
+                ResourceNotFound(_) => Some(StatusCode::NOT_FOUND),
+                MalformedRequest(_) => Some(StatusCode::BAD_REQUEST),
+                PermissionDenied(_) => Some(StatusCode::UNAUTHORIZED),
+                CdnaGems(_)
+                | InvalidReference(_)
+                | InvalidData(_)
+                | DatasetCmdline(_)
+                | DatasetNMetricsFiles(_)
+                | DatasetMetricsFileParse(_)
+                | CdnaLibraryType(_)
+                | InvalidMeasurement(_)
+                | LibraryIndexSet(_) => Some(StatusCode::UNPROCESSABLE_ENTITY),
+                Server(e) => {
+                    e.message = "".to_string();
+                    Some(StatusCode::INTERNAL_SERVER_ERROR)
+                }
+            };
+
+            Self::builder().maybe_status(status).error(err).build()
+        }
     }
 }
 

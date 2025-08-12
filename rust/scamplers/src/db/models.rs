@@ -8,6 +8,7 @@ use wasm_bindgen::prelude::*;
 pub mod chemistry;
 pub mod chromium_run;
 pub mod dataset;
+pub mod index_set;
 pub mod institution;
 pub mod lab;
 pub mod library_type_specification;

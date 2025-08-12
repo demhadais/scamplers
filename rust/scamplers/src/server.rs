@@ -1,8 +1,5 @@
-use axum::RequestExt;
 use axum::extract::{FromRequest, State};
 use axum::http::StatusCode;
-use diesel::PgConnection;
-use uuid::Uuid;
 
 use crate::server::extract::RequestExtractorExt;
 use crate::{
@@ -39,15 +36,6 @@ macro_rules! router {
         router
     }};
 }
-
-#[derive(Clone)]
-struct AppState;
-impl AppState {
-    fn db_conn(&self) -> &mut PgConnection {
-        todo!()
-    }
-}
-struct User(Uuid);
 
 type ApiResponse<T> = Result<T, ScamplersErrorResponse>;
 
