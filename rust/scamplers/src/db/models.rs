@@ -1,7 +1,16 @@
+use std::collections::HashMap;
+
+#[cfg(feature = "app")]
+use diesel::{
+    backend::Backend,
+    deserialize::{FromSql, FromSqlRow},
+    pg::Pg,
+    sql_types,
+};
 #[cfg(feature = "python")]
 use pyo3::prelude::*;
 use scamplers_macros::base_model;
-use serde::{Serialize, de::DeserializeOwned};
+use serde::{Deserialize, Serialize, de::DeserializeOwned};
 #[cfg(target_arch = "wasm32")]
 use wasm_bindgen::prelude::*;
 
@@ -46,6 +55,51 @@ impl Default for Pagination {
             limit: 500,
             offset: 0,
         }
+    }
+}
+
+#[derive(Clone, Debug, Default, PartialEq, Eq, Deserialize, Serialize)]
+#[cfg_attr(feature = "app", derive(FromSqlRow))]
+#[serde(transparent)]
+#[cfg_attr(feature = "python", derive(IntoPyObject, FromPyObject))]
+#[cfg_attr(feature = "python", pyo3(transparent))]
+struct Links(HashMap<String, String>);
+
+impl<'a> IntoIterator for &'a Links {
+    type IntoIter = <&'a HashMap<String, String> as IntoIterator>::IntoIter;
+    type Item = <&'a HashMap<String, String> as IntoIterator>::Item;
+
+    fn into_iter(self) -> Self::IntoIter {
+        self.0.iter()
+    }
+}
+
+#[cfg(feature = "app")]
+impl FromSql<sql_types::Jsonb, Pg> for Links {
+    fn from_sql(bytes: <Pg as Backend>::RawValue<'_>) -> diesel::deserialize::Result<Self> {
+        let json = <serde_json::Value as FromSql<sql_types::Jsonb, Pg>>::from_sql(bytes)?;
+        Ok(Self(json.into()))
+    }
+}
+
+#[cfg(target_arch = "wasm32")]
+impl wasm_bindgen::convert::WasmDescribe for Links {
+    fn describe() {
+        js_sys::Map::describe();
+    }
+}
+
+#[cfg(target_arch = "wasm32")]
+impl wasm_bindgen::convert::IntoWasmAbi for Links {
+    type Abi = <js_sys::Map as wasm_bindgen::convert::IntoWasmAbi>::Abi;
+
+    fn into_abi(self) -> Self::Abi {
+        let map = js_sys::Map::new();
+        for (key, val) in &self {
+            map.set(&JsValue::from_str(key), &JsValue::from_str(val));
+        }
+
+        map.into_abi()
     }
 }
 

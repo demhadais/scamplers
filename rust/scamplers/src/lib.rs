@@ -9,6 +9,7 @@ mod config;
 pub mod db;
 #[cfg(feature = "app")]
 pub mod dev_container;
+mod endpoints;
 pub mod result;
 #[cfg(feature = "app")]
 pub mod server;

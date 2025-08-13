@@ -7,7 +7,7 @@ use scamplers_schema::library_type_specification;
 use crate::db::models::Jsonify;
 
 #[cfg_attr(target_arch = "wasm32", wasm_bindgen::prelude::wasm_bindgen)]
-#[db_enum]
+#[db_simple_enum]
 #[derive(PartialOrd, Eq, Ord)]
 pub enum LibraryType {
     AntibodyCapture,

@@ -1,6 +1,6 @@
 create table library (
     id uuid primary key default uuidv7(),
-    link text generated always as ('/libraries/' || id) stored not null,
+    links jsonb generated always as (construct_links('libraries', id)) stored not null,
     readable_id text unique not null,
     cdna_id uuid references cdna on delete restrict on update restrict not null,
     single_index_set_name text references single_index_set on delete restrict on update restrict,

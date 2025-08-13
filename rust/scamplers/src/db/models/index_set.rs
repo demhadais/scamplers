@@ -3,10 +3,7 @@ use std::collections::HashMap;
 use garde::Validate;
 use serde::Deserialize;
 
-use crate::db::{
-    DbOperation,
-    models::index_set::{dual::NewDualIndexSet, single::NewSingleIndexSet},
-};
+use crate::db::models::index_set::{dual::NewDualIndexSet, single::NewSingleIndexSet};
 
 mod common;
 mod dual;

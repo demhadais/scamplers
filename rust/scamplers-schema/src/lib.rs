@@ -9,7 +9,7 @@ pub mod sql_types {
 diesel::table! {
     cdna (id) {
         id -> Uuid,
-        link -> Text,
+        links -> Jsonb,
         library_type -> Text,
         readable_id -> Text,
         prepared_at -> Timestamptz,
@@ -60,7 +60,7 @@ diesel::table! {
 diesel::table! {
     chromium_run (id) {
         id -> Uuid,
-        link -> Text,
+        links -> Jsonb,
         readable_id -> Text,
         chip -> Text,
         run_at -> Timestamptz,
@@ -82,7 +82,7 @@ diesel::table! {
 diesel::table! {
     dataset (id) {
         id -> Uuid,
-        link -> Text,
+        links -> Jsonb,
         name -> Text,
         lab_id -> Uuid,
         data_path -> Text,
@@ -107,7 +107,7 @@ diesel::table! {
 diesel::table! {
     gems (id) {
         id -> Uuid,
-        link -> Text,
+        links -> Jsonb,
         readable_id -> Text,
         chemistry -> Nullable<Text>,
         chromium_run_id -> Uuid,
@@ -123,7 +123,7 @@ diesel::table! {
 diesel::table! {
     institution (id) {
         id -> Uuid,
-        link -> Text,
+        links -> Jsonb,
         name -> Text,
     }
 }
@@ -131,7 +131,7 @@ diesel::table! {
 diesel::table! {
     lab (id) {
         id -> Uuid,
-        link -> Text,
+        links -> Jsonb,
         name -> Text,
         pi_id -> Uuid,
         delivery_dir -> Text,
@@ -148,7 +148,7 @@ diesel::table! {
 diesel::table! {
     library (id) {
         id -> Uuid,
-        link -> Text,
+        links -> Jsonb,
         readable_id -> Text,
         cdna_id -> Uuid,
         single_index_set_name -> Nullable<Text>,
@@ -203,7 +203,7 @@ diesel::table! {
 
     person (id) {
         id -> Uuid,
-        link -> Text,
+        links -> Jsonb,
         name -> Text,
         email -> Nullable<Text>,
         institution_id -> Uuid,
@@ -216,7 +216,7 @@ diesel::table! {
 diesel::table! {
     sequencing_run (id) {
         id -> Uuid,
-        link -> Text,
+        links -> Jsonb,
         readable_id -> Text,
         begun_at -> Timestamptz,
         finished_at -> Nullable<Timestamptz>,
@@ -246,7 +246,7 @@ diesel::table! {
     specimen (id) {
         id -> Uuid,
         readable_id -> Text,
-        link -> Text,
+        links -> Jsonb,
         name -> Text,
         submitted_by -> Uuid,
         lab_id -> Uuid,
@@ -277,7 +277,7 @@ diesel::table! {
 diesel::table! {
     suspension (id) {
         id -> Uuid,
-        link -> Text,
+        links -> Jsonb,
         readable_id -> Text,
         parent_specimen_id -> Uuid,
         biological_material -> Text,
@@ -303,7 +303,7 @@ diesel::table! {
 diesel::table! {
     suspension_pool (id) {
         id -> Uuid,
-        link -> Text,
+        links -> Jsonb,
         name -> Text,
         readable_id -> Text,
         pooled_at -> Timestamptz,

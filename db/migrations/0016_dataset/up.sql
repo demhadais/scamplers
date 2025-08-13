@@ -1,6 +1,6 @@
 create table dataset (
     id uuid primary key default uuidv7(),
-    link text generated always as ('/datasets/' || id) stored not null,
+    links jsonb generated always as (construct_links('datasets', id)) stored not null,
     name text not null,
     lab_id uuid references lab on delete restrict on update restrict not null,
     data_path text not null,

@@ -1,6 +1,6 @@
 create table chromium_run (
     id uuid primary key default uuidv7(),
-    link text generated always as ('/chromium-runs/' || id) stored not null,
+    links jsonb generated always as (construct_links('chromium-runs', id)) stored not null,
     readable_id text unique not null,
     chip text not null,
     run_at timestamptz not null,
@@ -11,7 +11,7 @@ create table chromium_run (
 
 create table gems (
     id uuid primary key default uuidv7(),
-    link text generated always as ('/gems/' || id) stored not null,
+    links jsonb generated always as (construct_links('gems', id)) stored not null,
     readable_id text unique not null,
     chemistry text references chemistry on delete restrict on update restrict,
     chromium_run_id uuid not null references chromium_run on delete restrict on update restrict

@@ -144,8 +144,8 @@ pub fn db_insertion(_attr: TokenStream, input: TokenStream) -> TokenStream {
     let struct_item = parse_macro_input!(input as Item);
 
     let output = quote! {
-        #[cfg_attr(feature = "python", ::pyo3_stub_gen::derive::gen_stub_pyclass)]
         #[::scamplers_macros::base_model]
+        #[cfg_attr(feature = "python", ::pyo3_stub_gen::derive::gen_stub_pyclass)]
         #[cfg_attr(feature = "python", ::pyo3::pyclass(get_all, set_all, eq))]
         #[cfg_attr(
             feature = "app",
@@ -167,9 +167,9 @@ pub fn db_query(_attr: TokenStream, input: TokenStream) -> TokenStream {
     let struct_name = &struct_item.ident;
 
     let output = quote! {
-        #[cfg_attr(feature = "python", ::pyo3_stub_gen::derive::gen_stub_pyclass)]
         #[::scamplers_macros::base_model]
         #[cfg_attr(target_arch = "wasm32", ::wasm_bindgen::prelude::wasm_bindgen(getter_with_clone))]
+        #[cfg_attr(feature = "python", ::pyo3_stub_gen::derive::gen_stub_pyclass)]
         #[cfg_attr(feature = "python", ::pyo3::pyclass(eq))]
         #[derive(Default, ::bon::Builder, ::scamplers_macros::Jsonify, ::scamplers_macros::WasmJsonify, ::scamplers_macros::PyJsonify)]
         #[builder(on(_, into), derive(Clone, Debug, Into))]
@@ -193,9 +193,9 @@ pub fn db_selection(_attr: TokenStream, input: TokenStream) -> TokenStream {
     let struct_item = parse_macro_input!(input as ItemStruct);
 
     let output = quote! {
-        #[cfg_attr(feature = "python", ::pyo3_stub_gen::derive::gen_stub_pyclass)]
         #[::scamplers_macros::base_model]
         #[cfg_attr(target_arch = "wasm32", ::wasm_bindgen::prelude::wasm_bindgen(getter_with_clone))]
+        #[cfg_attr(feature = "python", ::pyo3_stub_gen::derive::gen_stub_pyclass)]
         #[cfg_attr(feature = "python", ::pyo3::pyclass(get_all, eq))]
         #[derive(::scamplers_macros::Jsonify, ::scamplers_macros::WasmJsonify, ::scamplers_macros::PyJsonify)]
         #[cfg_attr(feature = "app", derive(::diesel::Selectable, ::diesel::Queryable), diesel(check_for_backend(::diesel::pg::Pg)))]
@@ -210,8 +210,8 @@ pub fn db_update(_attr: TokenStream, input: TokenStream) -> TokenStream {
     let struct_item = parse_macro_input!(input as ItemStruct);
 
     let output = quote! {
-        #[cfg_attr(feature = "python", ::pyo3_stub_gen::derive::gen_stub_pyclass)]
         #[::scamplers_macros::base_model]
+        #[cfg_attr(feature = "python", ::pyo3_stub_gen::derive::gen_stub_pyclass)]
         #[cfg_attr(feature = "python", ::pyo3::pyclass(get_all, set_all, eq))]
         #[cfg_attr(
             feature = "app",
@@ -227,14 +227,14 @@ pub fn db_update(_attr: TokenStream, input: TokenStream) -> TokenStream {
 }
 
 #[proc_macro_attribute]
-pub fn db_enum(_attr: TokenStream, input: TokenStream) -> TokenStream {
+pub fn db_simple_enum(_attr: TokenStream, input: TokenStream) -> TokenStream {
     let enum_item = parse_macro_input!(input as ItemEnum);
 
     let ItemEnum { ident, .. } = &enum_item;
 
     let output = quote! {
-        #[cfg_attr(feature = "python", ::pyo3_stub_gen::derive::gen_stub_pyclass_enum)]
         #[::scamplers_macros::base_model]
+        #[cfg_attr(feature = "python", ::pyo3_stub_gen::derive::gen_stub_pyclass_enum)]
         #[cfg_attr(feature = "python", ::pyo3::pyclass(eq))]
         #[derive(Copy, ::strum::EnumString, ::strum::IntoStaticStr)]
         #[cfg_attr(feature = "app", derive(::diesel::deserialize::FromSqlRow, ::diesel::expression::AsExpression))]

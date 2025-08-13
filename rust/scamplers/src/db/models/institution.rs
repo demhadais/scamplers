@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 #[cfg(feature = "python")]
 use pyo3::prelude::*;
 use scamplers_macros::{db_insertion, db_query, db_selection};
@@ -7,7 +9,7 @@ use uuid::Uuid;
 use valid_string::ValidString;
 
 use crate::{
-    db::models::{Jsonify, Pagination},
+    db::models::{Jsonify, Links, Pagination},
     define_ordering_enum, impl_order_by, impl_python_order_by, impl_wasm_order_by, uuid_newtype,
 };
 
@@ -40,17 +42,9 @@ uuid_newtype!(InstitutionId);
 
 #[db_selection]
 #[cfg_attr(feature = "app", diesel(table_name = institution))]
-pub struct InstitutionHandle {
-    pub id: Uuid,
-    pub link: String,
-}
-
-#[db_selection]
-#[cfg_attr(feature = "app", diesel(table_name = institution))]
 pub struct Institution {
-    #[serde(flatten)]
-    #[cfg_attr(feature = "app", diesel(embed))]
-    pub handle: InstitutionHandle,
+    pub id: Uuid,
+    pub links: Links,
     pub name: String,
 }
 

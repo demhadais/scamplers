@@ -104,6 +104,22 @@ create function get_user_roles(
     end;
 $$;
 
+create function construct_links(
+    self_name text,
+    id uuid,
+    children text [] default '{}'
+) returns jsonb language plpgsql immutable strict as $$
+    declare links jsonb;
+    declare child text;
+    begin
+        select json_object('self_': concat('/', self_name, '/', id)) into links;
+        foreach child in array children loop
+            select links || json_object(child: concat('/', self_name, '/', id, '/', child))::jsonb into links;
+        end loop;
+        return links;
+    end;
+$$;
+
 select create_role_if_not_exists('app_admin');
 select create_role_if_not_exists('biology_staff');
 select create_role_if_not_exists('computational_staff');

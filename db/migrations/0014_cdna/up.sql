@@ -1,6 +1,6 @@
 create table cdna (
     id uuid primary key default uuidv7(),
-    link text generated always as ('/cdna/' || id) stored not null,
+    links jsonb generated always as (construct_links('cdna', id)) stored not null,
     library_type text not null,
     readable_id text unique not null,
     prepared_at timestamptz not null,
