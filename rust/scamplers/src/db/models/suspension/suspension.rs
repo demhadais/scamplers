@@ -1,49 +1,25 @@
 #[cfg(feature = "python")]
 use pyo3::prelude::*;
-use scamplers_macros::{db_enum, db_insertion, db_json, db_selection};
-#[cfg(feature = "backend")]
-use scamplers_schema::{
-    multiplexing_tag, suspension, suspension_measurement, suspension_preparers,
-};
+use scamplers_macros::{base_model, db_insertion, db_json, db_selection};
 use time::OffsetDateTime;
 use uuid::Uuid;
 use valid_string::ValidString;
 
-use crate::model::{
-    person::PersonHandle,
+use crate::db::models::{
+    Links,
+    multiplexing_tag::MultiplexingTag,
+    person::PersonSummary,
     specimen::SpecimenSummary,
     suspension::common::{BiologicalMaterial, MeasurementDataCore},
 };
 
-#[db_enum]
-#[derive(strum::VariantArray)]
-pub enum MultiplexingTagType {
-    FlexBarcode,
-    Ocm,
-    #[serde(rename = "TotalSeq-A")]
-    #[strum(serialize = "TotalSeq-A")]
-    TotalSeqA,
-    #[serde(rename = "TotalSeq-B")]
-    #[strum(serialize = "TotalSeq-B")]
-    TotalSeqB,
-    #[serde(rename = "TotalSeq-C")]
-    #[strum(serialize = "TotalSeq-C")]
-    TotalSeqC,
-}
-
-#[cfg_attr(
-    not(target_arch = "wasm32"),
-    derive(scamplers_macros::FromJson, scamplers_macros::ToJson)
-)]
-#[db_insertion]
-#[cfg_attr(feature = "app", diesel(table_name = multiplexing_tag))]
-pub struct NewMultiplexingTag {
-    pub tag_id: ValidString,
-    pub type_: MultiplexingTagType,
-}
+#[cfg(feature = "app")]
+mod create;
+#[cfg(feature = "app")]
+mod read;
 
 #[db_json]
-#[cfg_attr(feature = "python", pyo3(name = "_SuspensionMeasurementData", set_all))]
+#[cfg_attr(feature = "python", pyo3(name = "_SuspensionMeasurementData"))]
 pub struct SuspensionMeasurementData {
     #[serde(flatten)]
     #[garde(dive)]
@@ -51,12 +27,8 @@ pub struct SuspensionMeasurementData {
     pub is_post_hybridization: bool,
 }
 
-#[cfg_attr(
-    not(target_arch = "wasm32"),
-    derive(scamplers_macros::FromJson, scamplers_macros::ToJson)
-)]
 #[db_insertion]
-#[cfg_attr(feature = "app", diesel(table_name = suspension_measurement))]
+#[cfg_attr(feature = "app", diesel(table_name = scamplers_schema::suspension_measurement))]
 pub struct NewSuspensionMeasurement {
     #[serde(default)]
     #[builder(default)]
@@ -89,13 +61,8 @@ impl NewSuspensionMeasurement {
     }
 }
 
-#[cfg_attr(
-    not(target_arch = "wasm32"),
-    derive(scamplers_macros::FromJson, scamplers_macros::ToJson)
-)]
-#[cfg_attr(not(target_arch = "wasm32"), json(python))]
 #[db_insertion]
-#[cfg_attr(feature = "app", diesel(table_name = suspension))]
+#[cfg_attr(feature = "app", diesel(table_name = scamplers_schema::suspension))]
 pub struct NewSuspension {
     pub readable_id: ValidString,
     pub parent_specimen_id: Uuid,
@@ -155,34 +122,11 @@ impl NewSuspension {
     }
 }
 
-#[db_insertion]
-#[cfg_attr(feature = "app", diesel(table_name = suspension_preparers))]
-pub struct SuspensionPreparer {
-    pub suspension_id: Uuid,
-    pub prepared_by: Uuid,
-}
-
-#[cfg_attr(
-    not(target_arch = "wasm32"),
-    derive(scamplers_macros::FromJson, scamplers_macros::ToJson)
-)]
 #[db_selection]
-#[cfg_attr(feature = "app", diesel(table_name = suspension))]
-pub struct SuspensionHandle {
-    pub id: Uuid,
-    pub link: String,
-}
-
-#[cfg_attr(
-    not(target_arch = "wasm32"),
-    derive(scamplers_macros::FromJson, scamplers_macros::ToJson)
-)]
-#[db_selection]
-#[cfg_attr(feature = "app", diesel(table_name = suspension))]
+#[cfg_attr(feature = "app", diesel(table_name = scamplers_schema::suspension))]
 pub struct SuspensionSummary {
-    #[serde(flatten)]
-    #[cfg_attr(feature = "app", diesel(embed))]
-    pub handle: SuspensionHandle,
+    pub id: Uuid,
+    pub links: Links,
     pub readable_id: String,
     pub biological_material: String,
     pub created_at: Option<OffsetDateTime>,
@@ -193,15 +137,7 @@ pub struct SuspensionSummary {
 }
 
 #[db_selection]
-#[cfg_attr(feature = "app", diesel(table_name = multiplexing_tag))]
-pub struct MultiplexingTag {
-    pub id: Uuid,
-    pub tag_id: String,
-    pub type_: String,
-}
-
-#[db_selection]
-#[cfg_attr(feature = "app", diesel(table_name = suspension))]
+#[cfg_attr(feature = "app", diesel(table_name = scamplers_schema::suspension))]
 pub struct SuspensionCore {
     #[serde(flatten)]
     #[cfg_attr(feature = "app", diesel(embed))]
@@ -213,24 +149,20 @@ pub struct SuspensionCore {
 }
 
 #[db_selection]
-#[cfg_attr(feature = "app", diesel(table_name = suspension_measurement))]
+#[cfg_attr(feature = "app", diesel(table_name = scamplers_schema::suspension_measurement))]
 pub struct SuspensionMeasurement {
     #[cfg_attr(feature = "app", diesel(embed))]
-    pub measured_by: PersonHandle,
+    pub measured_by: PersonSummary,
     #[serde(flatten)]
     #[cfg_attr(target_arch = "wasm32", wasm_bindgen(skip))]
     pub data: SuspensionMeasurementData,
 }
 
-#[cfg_attr(
-    not(target_arch = "wasm32"),
-    derive(scamplers_macros::FromJson, scamplers_macros::ToJson)
-)]
-#[cfg_attr(feature = "python", pyclass)]
-#[derive(serde::Deserialize, serde::Serialize)]
+#[cfg_attr(feature = "python", pyclass(get_all))]
+#[base_model]
 pub struct Suspension {
     #[serde(flatten)]
     pub core: SuspensionCore,
-    pub preparers: Vec<PersonHandle>,
+    pub preparers: Vec<PersonSummary>,
     pub measurements: Vec<SuspensionMeasurement>,
 }

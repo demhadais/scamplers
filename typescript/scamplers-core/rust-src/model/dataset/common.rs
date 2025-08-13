@@ -6,7 +6,7 @@ use uuid::Uuid;
 use valid_string::ValidString;
 
 #[db_insertion]
-#[cfg_attr(feature = "backend", diesel(table_name = dataset))]
+#[cfg_attr(feature = "app", diesel(table_name = dataset))]
 #[cfg_attr(feature = "python", pyo3(name = "_NewDatasetCommon"))]
 pub struct NewDatasetCommon {
     #[garde(dive)]

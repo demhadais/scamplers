@@ -16,14 +16,14 @@ use crate::model::{
     derive(scamplers_macros::FromJson, scamplers_macros::ToJson)
 )]
 #[db_insertion]
-#[cfg_attr(feature = "backend", diesel(table_name = cdna_measurement))]
+#[cfg_attr(feature = "app", diesel(table_name = cdna_measurement))]
 pub struct NewCdnaMeasurement {
     #[serde(default)]
     pub cdna_id: Uuid,
     pub measured_by: Uuid,
     #[serde(flatten)]
     #[garde(dive)]
-    #[cfg_attr(feature = "backend", diesel(skip_insertion))]
+    #[cfg_attr(feature = "app", diesel(skip_insertion))]
     pub data: ElectrophoreticMeasurementData,
 }
 
@@ -47,7 +47,7 @@ impl NewCdnaMeasurement {
 )]
 #[cfg_attr(not(target_arch = "wasm32"), json(python))]
 #[db_insertion]
-#[cfg_attr(feature = "backend", diesel(table_name = cdna))]
+#[cfg_attr(feature = "app", diesel(table_name = cdna))]
 pub struct NewCdna {
     pub library_type: LibraryType,
     pub readable_id: ValidString,
@@ -55,13 +55,13 @@ pub struct NewCdna {
     pub gems_id: Uuid,
     #[garde(range(min = 1))]
     pub n_amplification_cycles: i32,
-    #[cfg_attr(feature = "backend", diesel(skip_insertion))]
+    #[cfg_attr(feature = "app", diesel(skip_insertion))]
     pub volume_µl: f32,
     #[garde(length(min = 1))]
-    #[cfg_attr(feature = "backend", diesel(skip_insertion))]
+    #[cfg_attr(feature = "app", diesel(skip_insertion))]
     pub preparer_ids: Vec<Uuid>,
     #[garde(dive)]
-    #[cfg_attr(feature = "backend", diesel(skip_insertion))]
+    #[cfg_attr(feature = "app", diesel(skip_insertion))]
     pub measurements: Vec<NewCdnaMeasurement>,
     #[garde(dive)]
     pub storage_location: Option<ValidString>,
@@ -111,7 +111,7 @@ pub enum NewCdnaGroup {
 }
 
 #[db_insertion]
-#[cfg_attr(feature = "backend", diesel(table_name = cdna_preparers))]
+#[cfg_attr(feature = "app", diesel(table_name = cdna_preparers))]
 pub struct NewCdnaPreparer {
     pub cdna_id: Uuid,
     pub prepared_by: Uuid,
@@ -122,7 +122,7 @@ pub struct NewCdnaPreparer {
     derive(scamplers_macros::FromJson, scamplers_macros::ToJson)
 )]
 #[db_selection]
-#[cfg_attr(feature = "backend", diesel(table_name = cdna))]
+#[cfg_attr(feature = "app", diesel(table_name = cdna))]
 pub struct CdnaHandle {
     pub id: Uuid,
     pub link: ValidString,

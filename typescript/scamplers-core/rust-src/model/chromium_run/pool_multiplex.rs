@@ -8,18 +8,18 @@ use uuid::Uuid;
 use {pyo3::prelude::*, valid_string::ValidString};
 
 use crate::model::chromium_run::common::{
-    MAX_GEMS_IN_NON_OCM_RUN, NewChipLoadingCommon, NewChromiumRunCommon, NewGemsCommon,
+    NewChipLoadingCommon, NewChromiumRunCommon, NewGemsCommon, MAX_GEMS_IN_NON_OCM_RUN,
 };
 #[cfg(feature = "python")]
 use crate::model::suspension::MeasurementDataCore;
 
 #[db_insertion]
-#[cfg_attr(feature = "backend", diesel(table_name = chip_loading))]
+#[cfg_attr(feature = "app", diesel(table_name = chip_loading))]
 pub struct NewPoolMultiplexChipLoading {
     pub suspension_pool_id: Uuid,
     #[serde(flatten)]
     #[garde(dive)]
-    #[cfg_attr(feature = "backend", diesel(embed))]
+    #[cfg_attr(feature = "app", diesel(embed))]
     pub inner: NewChipLoadingCommon,
 }
 
@@ -47,13 +47,13 @@ impl NewPoolMultiplexChipLoading {
 }
 
 #[db_insertion]
-#[cfg_attr(feature = "backend", diesel(table_name = gems))]
+#[cfg_attr(feature = "app", diesel(table_name = gems))]
 pub struct NewPoolMultiplexGems {
     #[serde(flatten)]
     #[garde(dive)]
-    #[cfg_attr(feature = "backend", diesel(embed))]
+    #[cfg_attr(feature = "app", diesel(embed))]
     pub inner: NewGemsCommon,
-    #[cfg_attr(feature = "backend", diesel(skip_insertion))]
+    #[cfg_attr(feature = "app", diesel(skip_insertion))]
     pub loading: NewPoolMultiplexChipLoading,
 }
 
@@ -93,15 +93,15 @@ pub enum PoolMultiplexChromiumChip {
     derive(scamplers_macros::FromJson, scamplers_macros::ToJson)
 )]
 #[db_insertion]
-#[cfg_attr(feature = "backend", diesel(table_name = chromium_run))]
+#[cfg_attr(feature = "app", diesel(table_name = chromium_run))]
 #[cfg_attr(not(target_arch = "wasm32"), json(wrapper = super::NewChromiumRun, python))]
 pub struct NewPoolMultiplexChromiumRun {
     #[serde(flatten)]
     #[garde(dive)]
-    #[cfg_attr(feature = "backend", diesel(embed))]
+    #[cfg_attr(feature = "app", diesel(embed))]
     pub inner: NewChromiumRunCommon,
     pub chip: PoolMultiplexChromiumChip,
-    #[cfg_attr(feature = "backend", diesel(skip_insertion))]
+    #[cfg_attr(feature = "app", diesel(skip_insertion))]
     #[garde(dive, length(min = 1, max = MAX_GEMS_IN_NON_OCM_RUN))]
     pub gems: Vec<NewPoolMultiplexGems>,
 }

@@ -36,7 +36,7 @@ pub enum ComplianceCommitteeType {
     derive(scamplers_macros::FromJson, scamplers_macros::ToJson)
 )]
 #[db_insertion]
-#[cfg_attr(feature = "backend", diesel(table_name = committee_approval))]
+#[cfg_attr(feature = "app", diesel(table_name = committee_approval))]
 pub struct NewCommitteeApproval {
     #[serde(default)]
     pub specimen_id: Uuid,
@@ -67,9 +67,9 @@ impl NewCommitteeApproval {
 }
 
 #[db_selection]
-#[cfg_attr(feature = "backend", diesel(table_name = committee_approval))]
+#[cfg_attr(feature = "app", diesel(table_name = committee_approval))]
 pub struct CommitteeApproval {
-    #[cfg_attr(feature = "backend", diesel(embed))]
+    #[cfg_attr(feature = "app", diesel(embed))]
     pub institution: InstitutionHandle,
     pub committee_type: String,
     pub compliance_identifier: String,
@@ -104,7 +104,7 @@ pub enum MeasurementData {
     derive(scamplers_macros::FromJson, scamplers_macros::ToJson)
 )]
 #[db_insertion]
-#[cfg_attr(feature = "backend", diesel(table_name = specimen_measurement))]
+#[cfg_attr(feature = "app", diesel(table_name = specimen_measurement))]
 pub struct NewSpecimenMeasurement {
     #[serde(default)]
     #[builder(default)]
@@ -130,7 +130,7 @@ impl NewSpecimenMeasurement {
 }
 
 #[db_insertion]
-#[cfg_attr(feature = "backend", diesel(table_name = specimen))]
+#[cfg_attr(feature = "app", diesel(table_name = specimen))]
 #[cfg_attr(feature = "python", pyo3(name = "_NewSpecimenCommon"))]
 pub struct NewSpecimenCommon {
     #[garde(dive)]
@@ -145,7 +145,7 @@ pub struct NewSpecimenCommon {
     #[serde(default)]
     #[builder(default)]
     #[garde(dive)]
-    #[cfg_attr(feature = "backend", diesel(skip_insertion))]
+    #[cfg_attr(feature = "app", diesel(skip_insertion))]
     pub committee_approvals: Vec<NewCommitteeApproval>,
     #[garde(dive)]
     pub notes: Option<ValidString>,
@@ -154,7 +154,7 @@ pub struct NewSpecimenCommon {
     #[serde(default)]
     #[garde(dive)]
     #[builder(default)]
-    #[cfg_attr(feature = "backend", diesel(skip_insertion))]
+    #[cfg_attr(feature = "app", diesel(skip_insertion))]
     pub measurements: Vec<NewSpecimenMeasurement>,
 }
 

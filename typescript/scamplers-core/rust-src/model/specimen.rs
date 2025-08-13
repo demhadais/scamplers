@@ -1,5 +1,5 @@
 #[cfg(feature = "python")]
-use pyo3::{FromPyObject, prelude::*};
+use pyo3::{prelude::*, FromPyObject};
 use scamplers_macros::{base_api_model, db_enum, db_query, db_selection};
 #[cfg(feature = "backend")]
 use scamplers_schema::{specimen, specimen_measurement};
@@ -7,7 +7,7 @@ use time::OffsetDateTime;
 use uuid::Uuid;
 
 use super::{lab::LabSummary, person::PersonSummary};
-use crate::model::{Pagination, SortByGroup, person::PersonHandle};
+use crate::model::{person::PersonHandle, Pagination, SortByGroup};
 
 pub mod block;
 pub mod common;
@@ -32,7 +32,7 @@ pub enum NewSpecimen {
     derive(scamplers_macros::FromJson, scamplers_macros::ToJson)
 )]
 #[db_selection]
-#[cfg_attr(feature = "backend", diesel(table_name = specimen))]
+#[cfg_attr(feature = "app", diesel(table_name = specimen))]
 pub struct SpecimenHandle {
     pub id: Uuid,
     pub link: String,
@@ -43,10 +43,10 @@ pub struct SpecimenHandle {
     derive(scamplers_macros::FromJson, scamplers_macros::ToJson)
 )]
 #[db_selection]
-#[cfg_attr(feature = "backend", diesel(table_name = specimen))]
+#[cfg_attr(feature = "app", diesel(table_name = specimen))]
 pub struct SpecimenSummary {
     #[serde(flatten)]
-    #[cfg_attr(feature = "backend", diesel(embed))]
+    #[cfg_attr(feature = "app", diesel(embed))]
     pub handle: SpecimenHandle,
     pub readable_id: String,
     pub name: String,
@@ -64,9 +64,9 @@ pub struct SpecimenSummary {
 }
 
 #[db_selection]
-#[cfg_attr(feature = "backend", diesel(table_name = specimen_measurement))]
+#[cfg_attr(feature = "app", diesel(table_name = specimen_measurement))]
 pub struct SpecimenMeasurement {
-    #[cfg_attr(feature = "backend", diesel(embed))]
+    #[cfg_attr(feature = "app", diesel(embed))]
     pub measured_by: PersonHandle,
     #[serde(flatten)]
     #[cfg_attr(target_arch = "wasm32", wasm_bindgen(skip))]
@@ -74,16 +74,16 @@ pub struct SpecimenMeasurement {
 }
 
 #[db_selection]
-#[cfg_attr(feature = "backend", diesel(table_name = specimen))]
+#[cfg_attr(feature = "app", diesel(table_name = specimen))]
 pub struct SpecimenCore {
     #[serde(flatten)]
-    #[cfg_attr(feature = "backend", diesel(embed))]
+    #[cfg_attr(feature = "app", diesel(embed))]
     pub summary: SpecimenSummary,
-    #[cfg_attr(feature = "backend", diesel(embed))]
+    #[cfg_attr(feature = "app", diesel(embed))]
     pub lab: LabSummary,
-    #[cfg_attr(feature = "backend", diesel(embed))]
+    #[cfg_attr(feature = "app", diesel(embed))]
     pub submitted_by: PersonSummary,
-    // #[cfg_attr(feature = "backend", diesel(embed))]
+    // #[cfg_attr(feature = "app", diesel(embed))]
     // pub returned_by: PersonSummary,
 }
 
@@ -171,7 +171,7 @@ mod tests {
 
     use pretty_assertions::assert_eq;
     use rstest::rstest;
-    use serde_json::{Value, json};
+    use serde_json::{json, Value};
     use uuid::Uuid;
 
     use crate::model::specimen::NewSpecimen;

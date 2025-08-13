@@ -12,7 +12,7 @@ use valid_string::ValidString;
     derive(scamplers_macros::FromJson, scamplers_macros::ToJson)
 )]
 #[db_insertion]
-#[cfg_attr(feature = "backend", diesel(table_name = sequencing_submissions))]
+#[cfg_attr(feature = "app", diesel(table_name = sequencing_submissions))]
 pub struct NewSequencingSubmission {
     #[serde(default)]
     pub sequencing_run_id: Uuid,
@@ -46,13 +46,13 @@ impl NewSequencingSubmission {
     derive(scamplers_macros::FromJson, scamplers_macros::ToJson)
 )]
 #[db_insertion]
-#[cfg_attr(feature = "backend", diesel(table_name = sequencing_run))]
+#[cfg_attr(feature = "app", diesel(table_name = sequencing_run))]
 pub struct NewSequencingRun {
     #[garde(dive)]
     pub readable_id: ValidString,
     pub begun_at: OffsetDateTime,
     #[garde(dive)]
-    #[cfg_attr(feature = "backend", diesel(skip_insertion))]
+    #[cfg_attr(feature = "app", diesel(skip_insertion))]
     pub libraries: Vec<NewSequencingSubmission>,
     pub finished_at: Option<OffsetDateTime>,
     #[garde(dive)]
@@ -86,7 +86,7 @@ impl NewSequencingRun {
     derive(scamplers_macros::FromJson, scamplers_macros::ToJson)
 )]
 #[db_selection]
-#[cfg_attr(feature = "backend", diesel(table_name = sequencing_run))]
+#[cfg_attr(feature = "app", diesel(table_name = sequencing_run))]
 pub struct SequencingRunHandle {
     pub id: Uuid,
     pub link: String,
@@ -97,10 +97,10 @@ pub struct SequencingRunHandle {
     derive(scamplers_macros::FromJson, scamplers_macros::ToJson)
 )]
 #[db_selection]
-#[cfg_attr(feature = "backend", diesel(table_name = sequencing_run))]
+#[cfg_attr(feature = "app", diesel(table_name = sequencing_run))]
 pub struct SequencingRunSummary {
     #[serde(flatten)]
-    #[cfg_attr(feature = "backend", diesel(embed))]
+    #[cfg_attr(feature = "app", diesel(embed))]
     pub handle: SequencingRunHandle,
     pub readable_id: String,
     pub begun_at: OffsetDateTime,

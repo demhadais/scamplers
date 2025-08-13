@@ -12,8 +12,15 @@ use wasm_bindgen::prelude::*;
 
 use crate::{
     db::models::{Links, Pagination, institution::Institution},
-    define_ordering_enum, impl_order_by, impl_python_order_by, impl_wasm_order_by,
+    define_ordering_enum, impl_order_by, impl_python_order_by, impl_wasm_order_by, uuid_newtype,
 };
+
+#[cfg(feature = "app")]
+mod create;
+#[cfg(feature = "app")]
+mod read;
+#[cfg(feature = "app")]
+mod update;
 
 #[db_simple_enum]
 pub enum UserRole {
@@ -94,6 +101,8 @@ pub struct PersonCore {
     #[cfg_attr(feature = "app", diesel(embed))]
     pub institution: Institution,
 }
+
+uuid_newtype!(PersonId);
 
 #[cfg_attr(target_arch = "wasm32", wasm_bindgen(getter_with_clone))]
 #[cfg_attr(feature = "python", pyclass(get_all, str))]

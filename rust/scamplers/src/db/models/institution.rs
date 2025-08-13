@@ -1,10 +1,6 @@
-use std::collections::HashMap;
-
 #[cfg(feature = "python")]
 use pyo3::prelude::*;
 use scamplers_macros::{db_insertion, db_query, db_selection};
-#[cfg(feature = "app")]
-use scamplers_schema::institution;
 use uuid::Uuid;
 use valid_string::ValidString;
 
@@ -21,7 +17,7 @@ mod read;
 mod update;
 
 #[db_insertion]
-#[cfg_attr(feature = "app", diesel(table_name = institution))]
+#[cfg_attr(feature = "app", diesel(table_name = scamplers_schema::institution))]
 pub struct NewInstitution {
     pub id: Uuid,
     #[garde(dive)]
@@ -41,7 +37,7 @@ impl NewInstitution {
 uuid_newtype!(InstitutionId);
 
 #[db_selection]
-#[cfg_attr(feature = "app", diesel(table_name = institution))]
+#[cfg_attr(feature = "app", diesel(table_name = scamplers_schema::institution))]
 pub struct Institution {
     pub id: Uuid,
     pub links: Links,

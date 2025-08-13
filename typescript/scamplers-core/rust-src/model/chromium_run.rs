@@ -33,7 +33,7 @@ pub enum NewChromiumRun {
 }
 
 #[db_selection]
-#[cfg_attr(feature = "backend", diesel(table_name = chromium_run))]
+#[cfg_attr(feature = "app", diesel(table_name = chromium_run))]
 pub struct ChromiumRunHandle {
     pub id: Uuid,
     pub link: String,
@@ -45,10 +45,10 @@ pub struct ChromiumRunHandle {
     derive(scamplers_macros::FromJson, scamplers_macros::ToJson)
 )]
 #[cfg_attr(not(target_arch = "wasm32"), json(python))]
-#[cfg_attr(feature = "backend", diesel(table_name = chromium_run))]
+#[cfg_attr(feature = "app", diesel(table_name = chromium_run))]
 pub struct ChromiumRunSummary {
     #[serde(flatten)]
-    #[cfg_attr(feature = "backend", diesel(embed))]
+    #[cfg_attr(feature = "app", diesel(embed))]
     pub handle: ChromiumRunHandle,
     pub readable_id: String,
     pub chip: String,
@@ -58,7 +58,7 @@ pub struct ChromiumRunSummary {
 }
 
 #[db_selection]
-#[cfg_attr(feature = "backend", diesel(table_name = gems))]
+#[cfg_attr(feature = "app", diesel(table_name = gems))]
 pub struct GemsHandle {
     pub id: Uuid,
     pub link: String,

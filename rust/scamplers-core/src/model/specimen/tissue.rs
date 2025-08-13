@@ -29,11 +29,11 @@ pub enum TissueType {
 )]
 #[cfg_attr(not(target_arch = "wasm32"), json(wrapper = super::NewSpecimen, python))]
 #[db_insertion]
-#[cfg_attr(feature = "backend", diesel(table_name = specimen))]
+#[cfg_attr(feature = "app", diesel(table_name = specimen))]
 pub struct NewCryopreservedTissue {
     #[serde(flatten)]
     #[garde(dive)]
-    #[cfg_attr(feature = "backend", diesel(embed))]
+    #[cfg_attr(feature = "app", diesel(embed))]
     pub inner: NewSpecimenCommon,
     #[serde(skip)]
     #[builder(default)]
@@ -97,11 +97,11 @@ pub enum TissueFixative {
 )]
 #[cfg_attr(not(target_arch = "wasm32"), json(wrapper = super::NewSpecimen, python))]
 #[db_insertion]
-#[cfg_attr(feature = "backend", diesel(table_name = specimen))]
+#[cfg_attr(feature = "app", diesel(table_name = specimen))]
 pub struct NewFixedTissue {
     #[serde(flatten)]
     #[garde(dive)]
-    #[cfg_attr(feature = "backend", diesel(embed))]
+    #[cfg_attr(feature = "app", diesel(embed))]
     pub inner: NewSpecimenCommon,
     #[serde(skip)]
     #[builder(default)]
@@ -158,11 +158,11 @@ impl NewFixedTissue {
 )]
 #[cfg_attr(not(target_arch = "wasm32"), json(wrapper = super::NewSpecimen, python))]
 #[db_insertion]
-#[cfg_attr(feature = "backend", diesel(table_name = specimen))]
+#[cfg_attr(feature = "app", diesel(table_name = specimen))]
 pub struct NewFrozenTissue {
     #[serde(flatten)]
     #[garde(dive)]
-    #[cfg_attr(feature = "backend", diesel(embed))]
+    #[cfg_attr(feature = "app", diesel(embed))]
     pub inner: NewSpecimenCommon,
     #[serde(skip)]
     #[builder(default)]

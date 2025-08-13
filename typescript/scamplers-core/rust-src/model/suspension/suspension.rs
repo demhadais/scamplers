@@ -36,7 +36,7 @@ pub enum MultiplexingTagType {
     derive(scamplers_macros::FromJson, scamplers_macros::ToJson)
 )]
 #[db_insertion]
-#[cfg_attr(feature = "backend", diesel(table_name = multiplexing_tag))]
+#[cfg_attr(feature = "app", diesel(table_name = multiplexing_tag))]
 pub struct NewMultiplexingTag {
     pub tag_id: ValidString,
     pub type_: MultiplexingTagType,
@@ -56,7 +56,7 @@ pub struct SuspensionMeasurementData {
     derive(scamplers_macros::FromJson, scamplers_macros::ToJson)
 )]
 #[db_insertion]
-#[cfg_attr(feature = "backend", diesel(table_name = suspension_measurement))]
+#[cfg_attr(feature = "app", diesel(table_name = suspension_measurement))]
 pub struct NewSuspensionMeasurement {
     #[serde(default)]
     #[builder(default)]
@@ -95,7 +95,7 @@ impl NewSuspensionMeasurement {
 )]
 #[cfg_attr(not(target_arch = "wasm32"), json(python))]
 #[db_insertion]
-#[cfg_attr(feature = "backend", diesel(table_name = suspension))]
+#[cfg_attr(feature = "app", diesel(table_name = suspension))]
 pub struct NewSuspension {
     pub readable_id: ValidString,
     pub parent_specimen_id: Uuid,
@@ -104,11 +104,11 @@ pub struct NewSuspension {
     pub target_cell_recovery: f32,
     #[garde(range(min = 0))]
     pub target_reads_per_cell: i32,
-    #[cfg_attr(feature = "backend", diesel(skip_insertion))]
+    #[cfg_attr(feature = "app", diesel(skip_insertion))]
     pub preparer_ids: Vec<Uuid>,
     #[garde(dive)]
     #[serde(default)]
-    #[cfg_attr(feature = "backend", diesel(skip_insertion))]
+    #[cfg_attr(feature = "app", diesel(skip_insertion))]
     pub measurements: Vec<NewSuspensionMeasurement>,
     pub created_at: Option<OffsetDateTime>,
     pub pooled_into_id: Option<Uuid>,
@@ -156,7 +156,7 @@ impl NewSuspension {
 }
 
 #[db_insertion]
-#[cfg_attr(feature = "backend", diesel(table_name = suspension_preparers))]
+#[cfg_attr(feature = "app", diesel(table_name = suspension_preparers))]
 pub struct SuspensionPreparer {
     pub suspension_id: Uuid,
     pub prepared_by: Uuid,
@@ -167,7 +167,7 @@ pub struct SuspensionPreparer {
     derive(scamplers_macros::FromJson, scamplers_macros::ToJson)
 )]
 #[db_selection]
-#[cfg_attr(feature = "backend", diesel(table_name = suspension))]
+#[cfg_attr(feature = "app", diesel(table_name = suspension))]
 pub struct SuspensionHandle {
     pub id: Uuid,
     pub link: String,
@@ -178,10 +178,10 @@ pub struct SuspensionHandle {
     derive(scamplers_macros::FromJson, scamplers_macros::ToJson)
 )]
 #[db_selection]
-#[cfg_attr(feature = "backend", diesel(table_name = suspension))]
+#[cfg_attr(feature = "app", diesel(table_name = suspension))]
 pub struct SuspensionSummary {
     #[serde(flatten)]
-    #[cfg_attr(feature = "backend", diesel(embed))]
+    #[cfg_attr(feature = "app", diesel(embed))]
     pub handle: SuspensionHandle,
     pub readable_id: String,
     pub biological_material: String,
@@ -193,7 +193,7 @@ pub struct SuspensionSummary {
 }
 
 #[db_selection]
-#[cfg_attr(feature = "backend", diesel(table_name = multiplexing_tag))]
+#[cfg_attr(feature = "app", diesel(table_name = multiplexing_tag))]
 pub struct MultiplexingTag {
     pub id: Uuid,
     pub tag_id: String,
@@ -201,21 +201,21 @@ pub struct MultiplexingTag {
 }
 
 #[db_selection]
-#[cfg_attr(feature = "backend", diesel(table_name = suspension))]
+#[cfg_attr(feature = "app", diesel(table_name = suspension))]
 pub struct SuspensionCore {
     #[serde(flatten)]
-    #[cfg_attr(feature = "backend", diesel(embed))]
+    #[cfg_attr(feature = "app", diesel(embed))]
     pub summary: SuspensionSummary,
-    #[cfg_attr(feature = "backend", diesel(embed))]
+    #[cfg_attr(feature = "app", diesel(embed))]
     pub parent_specimen: SpecimenSummary,
-    #[cfg_attr(feature = "backend", diesel(embed))]
+    #[cfg_attr(feature = "app", diesel(embed))]
     pub multiplexing_tag: MultiplexingTag,
 }
 
 #[db_selection]
-#[cfg_attr(feature = "backend", diesel(table_name = suspension_measurement))]
+#[cfg_attr(feature = "app", diesel(table_name = suspension_measurement))]
 pub struct SuspensionMeasurement {
-    #[cfg_attr(feature = "backend", diesel(embed))]
+    #[cfg_attr(feature = "app", diesel(embed))]
     pub measured_by: PersonHandle,
     #[serde(flatten)]
     #[cfg_attr(target_arch = "wasm32", wasm_bindgen(skip))]

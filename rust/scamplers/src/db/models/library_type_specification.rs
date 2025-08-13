@@ -1,6 +1,6 @@
 #[cfg(feature = "python")]
 use pyo3::prelude::*;
-use scamplers_macros::{db_enum, db_insertion};
+use scamplers_macros::{db_insertion, db_simple_enum};
 #[cfg(feature = "app")]
 use scamplers_schema::library_type_specification;
 
@@ -8,7 +8,7 @@ use crate::db::models::Jsonify;
 
 #[cfg_attr(target_arch = "wasm32", wasm_bindgen::prelude::wasm_bindgen)]
 #[db_simple_enum]
-#[derive(PartialOrd, Eq, Ord)]
+#[derive(Eq, PartialOrd, Ord)]
 pub enum LibraryType {
     AntibodyCapture,
     AntigenCapture,

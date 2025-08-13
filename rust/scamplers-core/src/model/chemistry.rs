@@ -7,8 +7,8 @@ use valid_string::ValidString;
     Debug, ::serde::Deserialize, ::serde::Serialize, Clone, ::garde::Validate, ::valuable::Valuable,
 )]
 #[garde(allow_unvalidated)]
-#[cfg_attr(feature = "backend", derive(::diesel::Insertable))]
-#[cfg_attr(feature = "backend", diesel(check_for_backend(diesel::pg::Pg), table_name = chemistry))]
+#[cfg_attr(feature = "app", derive(::diesel::Insertable))]
+#[cfg_attr(feature = "app", diesel(check_for_backend(diesel::pg::Pg), table_name = chemistry))]
 pub struct Chemistry {
     #[garde(dive)]
     pub name: ValidString,

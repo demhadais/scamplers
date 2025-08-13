@@ -3,9 +3,10 @@ use scamplers_schema::institution;
 
 use super::{Institution, InstitutionOrderBy, InstitutionQuery};
 use crate::{
-    db::{DbOperation, models::institution::InstitutionId, util::AsIlike},
-    init_stmt,
-    result::{ResourceNotFoundError, ScamplersResult},
+    apply_eq_any_filters, apply_ilike_filters,
+    db::{DbOperation, models::institution::InstitutionId},
+    impl_id_db_operation, init_stmt,
+    result::ScamplersResult,
 };
 
 impl DbOperation<Vec<Institution>> for InstitutionQuery {
@@ -14,32 +15,11 @@ impl DbOperation<Vec<Institution>> for InstitutionQuery {
 
         let Self { ids, name, .. } = &self;
 
-        if !ids.is_empty() {
-            stmt = stmt.filter(institution::id.eq_any(ids));
-        }
-
-        if let Some(name) = name {
-            stmt = stmt.filter(institution::name.ilike(name.as_ilike()));
-        }
+        stmt = apply_eq_any_filters!(stmt; institution::id, ids);
+        stmt = apply_ilike_filters!(stmt; institution::name, name);
 
         Ok(stmt.load(db_conn)?)
     }
 }
 
-impl DbOperation<Institution> for InstitutionId {
-    fn execute(self, db_conn: &mut PgConnection) -> ScamplersResult<Institution> {
-        let mut res = InstitutionQuery::builder()
-            .ids(&self)
-            .build()
-            .execute(db_conn)?;
-
-        if res.len() > 0 {
-            return Ok(res.remove(0));
-        }
-
-        Err(ResourceNotFoundError {
-            requested_resource_id: *self.as_ref(),
-        }
-        .into())
-    }
-}
+impl_id_db_operation!(InstitutionId, InstitutionQuery, Institution);

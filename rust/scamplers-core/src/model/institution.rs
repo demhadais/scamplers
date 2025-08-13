@@ -13,7 +13,7 @@ use wasm_bindgen::prelude::*;
 use crate::model::{Pagination, SortByGroup};
 
 #[db_insertion]
-#[cfg_attr(feature = "backend", diesel(table_name = institution))]
+#[cfg_attr(feature = "app", diesel(table_name = institution))]
 #[derive(ToJson, FromJson)]
 #[cfg_attr(not(target_arch = "wasm32"), json(python))]
 pub struct NewInstitution {
@@ -33,7 +33,7 @@ impl NewInstitution {
 }
 
 #[db_selection]
-#[cfg_attr(feature = "backend", diesel(table_name = institution))]
+#[cfg_attr(feature = "app", diesel(table_name = institution))]
 #[derive(ToJson, FromJson)]
 #[cfg_attr(not(target_arch = "wasm32"), json(python))]
 pub struct InstitutionHandle {
@@ -42,12 +42,12 @@ pub struct InstitutionHandle {
 }
 
 #[db_selection]
-#[cfg_attr(feature = "backend", diesel(table_name = institution))]
+#[cfg_attr(feature = "app", diesel(table_name = institution))]
 #[derive(ToJson, FromJson)]
 #[cfg_attr(not(target_arch = "wasm32"), json(python))]
 pub struct Institution {
     #[serde(flatten)]
-    #[cfg_attr(feature = "backend", diesel(embed))]
+    #[cfg_attr(feature = "app", diesel(embed))]
     pub handle: InstitutionHandle,
     pub name: String,
 }

@@ -1,23 +1,75 @@
+use anyhow::ensure;
+use axum_extra::headers::Server;
 use garde::Validate;
-use serde::Deserialize;
+use scamplers_macros::base_model;
+use url::Url;
 
-use crate::db::{models::institution::NewInstitution, seed_data::index_set::IndexSetFileUrl};
+use crate::{
+    db::{
+        DbOperation,
+        models::{
+            chemistry::Chemistry,
+            institution::NewInstitution,
+            library_type_specification::NewLibraryTypeSpecification,
+            multiplexing_tag::NewMultiplexingTag,
+            person::{NewPerson, UserRole},
+        },
+        seed_data::index_set::is_10x_genomics_url,
+    },
+    result::{ScamplersError, ServerError},
+};
 mod index_set;
 
-#[derive(Clone, Deserialize, Validate)]
+#[base_model]
 pub struct SeedData {
     #[garde(dive)]
     institution: NewInstitution,
     #[garde(dive)]
     app_admin: NewPerson,
+    #[garde(inner(custom(is_10x_genomics_url)))]
+    index_set_urls: Vec<Url>,
     #[garde(dive)]
-    index_set_urls: Vec<IndexSetFileUrl>,
-    #[garde(skip)]
     chemistries: Vec<Chemistry>,
     #[garde(dive)]
     multiplexing_tags: Vec<NewMultiplexingTag>,
     #[garde(dive)]
     library_type_specifications: Vec<NewLibraryTypeSpecification>,
+}
+
+impl DbOperation<()> for SeedData {
+    fn execute(self, db_conn: &mut diesel::PgConnection) -> crate::result::ScamplersResult<()> {
+        self.validate().map_err(|e| ServerError {
+            message: e.to_string(),
+            ..Default::default()
+        })?;
+
+        let Self {
+            institution,
+            mut app_admin,
+            index_set_urls,
+            chemistries,
+            multiplexing_tags,
+            library_type_specifications,
+        } = self;
+
+        let institution_result = institution.execute(db_conn);
+        if let Err(error) = &institution_result
+            && matches!(error, ScamplersError::DuplicateResource(_))
+        {
+        } else {
+            institution_result?;
+        }
+
+        ensure!(
+            app_admin.ms_user_id.is_some(),
+            ServerError {
+                message: "app admin must have ms_user_id".to_string(),
+                ..Default::default()
+            }
+        );
+        app_admin.roles.push(UserRole::AppAdmin);
+        app_admin
+    }
 }
 
 impl SeedData {

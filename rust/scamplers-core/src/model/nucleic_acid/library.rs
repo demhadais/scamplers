@@ -28,7 +28,7 @@ pub enum MeasurementData {
     derive(scamplers_macros::FromJson, scamplers_macros::ToJson)
 )]
 #[db_insertion]
-#[cfg_attr(feature = "backend", diesel(table_name = library_measurement))]
+#[cfg_attr(feature = "app", diesel(table_name = library_measurement))]
 pub struct NewLibraryMeasurement {
     #[serde(default)]
     pub library_id: Uuid,
@@ -58,7 +58,7 @@ impl NewLibraryMeasurement {
 )]
 #[cfg_attr(not(target_arch = "wasm32"), json(python))]
 #[db_insertion]
-#[cfg_attr(feature = "backend", diesel(table_name = library))]
+#[cfg_attr(feature = "app", diesel(table_name = library))]
 pub struct NewLibrary {
     #[garde(dive)]
     pub readable_id: ValidString,
@@ -72,10 +72,10 @@ pub struct NewLibrary {
     #[garde(range(min = 1000))]
     pub target_reads_per_cell: i32,
     pub prepared_at: OffsetDateTime,
-    #[cfg_attr(feature = "backend", diesel(skip_insertion))]
+    #[cfg_attr(feature = "app", diesel(skip_insertion))]
     #[garde(length(min = 1))]
     pub preparer_ids: Vec<Uuid>,
-    #[cfg_attr(feature = "backend", diesel(skip_insertion))]
+    #[cfg_attr(feature = "app", diesel(skip_insertion))]
     pub measurements: Vec<NewLibraryMeasurement>,
     #[garde(dive)]
     pub notes: Option<ValidString>,
@@ -114,7 +114,7 @@ impl NewLibrary {
 }
 
 #[db_insertion]
-#[cfg_attr(feature = "backend", diesel(table_name = library_preparers))]
+#[cfg_attr(feature = "app", diesel(table_name = library_preparers))]
 pub struct NewLibraryPreparer {
     pub library_id: Uuid,
     pub prepared_by: Uuid,
@@ -125,7 +125,7 @@ pub struct NewLibraryPreparer {
     derive(scamplers_macros::FromJson, scamplers_macros::ToJson)
 )]
 #[db_selection]
-#[cfg_attr(feature = "backend", diesel(table_name = library))]
+#[cfg_attr(feature = "app", diesel(table_name = library))]
 pub struct LibraryHandle {
     pub id: Uuid,
     pub link: String,

@@ -56,16 +56,16 @@ pub enum LibraryType {
     derive(scamplers_macros::FromJson, scamplers_macros::ToJson)
 )]
 #[db_insertion]
-#[cfg_attr(feature = "backend", diesel(table_name = library_type_specification))]
+#[cfg_attr(feature = "app", diesel(table_name = library_type_specification))]
 pub struct NewLibraryTypeSpecification {
     pub chemistry: String,
     pub library_type: LibraryType,
     pub index_kit: String,
     #[garde(range(min = 0.0))]
-    #[cfg_attr(feature = "backend", diesel(column_name = cdna_volume_l))]
+    #[cfg_attr(feature = "app", diesel(column_name = cdna_volume_l))]
     pub cdna_volume_µl: f32,
     #[garde(range(min = 0.0))]
-    #[cfg_attr(feature = "backend", diesel(column_name = library_volume_l))]
+    #[cfg_attr(feature = "app", diesel(column_name = library_volume_l))]
     pub library_volume_µl: f32,
 }
 

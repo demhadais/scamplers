@@ -11,7 +11,7 @@ use valid_string::ValidString;
 #[cfg(target_arch = "wasm32")]
 use wasm_bindgen::prelude::*;
 
-use crate::model::{Pagination, SortByGroup, institution::Institution};
+use crate::model::{institution::Institution, Pagination, SortByGroup};
 
 #[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
 #[db_enum]
@@ -27,7 +27,7 @@ pub enum UserRole {
 )]
 #[cfg_attr(not(target_arch = "wasm32"), json(python))]
 #[db_insertion]
-#[cfg_attr(feature = "backend", diesel(table_name = person))]
+#[cfg_attr(feature = "app", diesel(table_name = person))]
 pub struct NewPerson {
     #[garde(dive)]
     pub name: ValidString,
@@ -39,7 +39,7 @@ pub struct NewPerson {
     pub ms_user_id: Option<Uuid>,
     #[serde(default)]
     #[builder(default)]
-    #[cfg_attr(feature = "backend", diesel(skip_insertion))]
+    #[cfg_attr(feature = "app", diesel(skip_insertion))]
     pub roles: Vec<UserRole>,
 }
 
@@ -190,7 +190,7 @@ impl NewPersonInstitutionId {
     derive(scamplers_macros::FromJson, scamplers_macros::ToJson)
 )]
 #[db_selection]
-#[cfg_attr(feature = "backend", diesel(table_name = person))]
+#[cfg_attr(feature = "app", diesel(table_name = person))]
 pub struct PersonHandle {
     pub id: Uuid,
     pub link: String,
@@ -201,10 +201,10 @@ pub struct PersonHandle {
     derive(scamplers_macros::FromJson, scamplers_macros::ToJson)
 )]
 #[db_selection]
-#[cfg_attr(feature = "backend", diesel(table_name = person))]
+#[cfg_attr(feature = "app", diesel(table_name = person))]
 pub struct PersonSummary {
     #[serde(flatten)]
-    #[cfg_attr(feature = "backend", diesel(embed))]
+    #[cfg_attr(feature = "app", diesel(embed))]
     pub handle: PersonHandle,
     pub name: String,
     pub email: Option<String>,
@@ -212,12 +212,12 @@ pub struct PersonSummary {
 }
 
 #[db_selection]
-#[cfg_attr(feature = "backend", diesel(table_name = person))]
+#[cfg_attr(feature = "app", diesel(table_name = person))]
 pub struct PersonCore {
     #[serde(flatten)]
-    #[cfg_attr(feature = "backend", diesel(embed))]
+    #[cfg_attr(feature = "app", diesel(embed))]
     pub summary: PersonSummary,
-    #[cfg_attr(feature = "backend", diesel(embed))]
+    #[cfg_attr(feature = "app", diesel(embed))]
     pub institution: Institution,
 }
 
@@ -243,7 +243,7 @@ pub struct CreatedUser {
 }
 
 #[db_update]
-#[cfg_attr(feature = "backend", diesel(table_name = person))]
+#[cfg_attr(feature = "app", diesel(table_name = person))]
 pub struct PersonUpdateCore {
     pub id: Uuid,
     #[garde(dive)]

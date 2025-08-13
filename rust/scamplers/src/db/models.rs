@@ -21,12 +21,13 @@ pub mod index_set;
 pub mod institution;
 pub mod lab;
 pub mod library_type_specification;
+pub mod multiplexing_tag;
 pub mod nucleic_acid;
 pub mod person;
 pub mod sequencing_run;
 pub mod specimen;
 pub mod suspension;
-pub mod suspension_pool;
+pub mod units;
 
 #[cfg_attr(feature = "python", pyo3_stub_gen::derive::gen_stub_pyclass)]
 #[cfg_attr(

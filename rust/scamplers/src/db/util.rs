@@ -16,7 +16,7 @@ impl AsIlike for String {
 
 #[macro_export]
 macro_rules! init_stmt {
-    (stmt = $stmt_base:expr, query = $query:expr, output = $output_struct:ident; $($enum_variant:path => $db_col:expr)*) => {
+    (stmt = $stmt_base:expr, query = $query:expr, output = $output_struct:ident; $($enum_variant:path => $db_col:expr),*) => {
         {
             let mut stmt = $stmt_base
             .select($output_struct::as_select())
@@ -28,13 +28,52 @@ macro_rules! init_stmt {
                 stmt = match ordering {
                     $(
                         $enum_variant { descending: true } => stmt.then_order_by($db_col.desc()),
-                        $enum_variant { .. } => stmt.then_order_by($db_col.asc())
+                        $enum_variant { .. } => stmt.then_order_by($db_col.asc()),
                     )*
                 }
             }
             stmt
         }
     };
+}
+
+#[macro_export]
+macro_rules! apply_eq_any_filters {
+    ($stmt:expr; $($col:expr, $values:expr);*) => {{
+        $(
+            if !$values.is_empty() {
+                $stmt = $stmt.filter($col.eq_any($values));
+            }
+        )*
+
+        $stmt
+    }};
+}
+
+#[macro_export]
+macro_rules! apply_eq_filters {
+    ($stmt:expr; $($col:expr, $value:expr);*) => {{
+        $(
+            if let Some(value) = $value {
+                $stmt = $stmt.filter($col.eq(value));
+            }
+        )*
+
+        $stmt
+    }};
+}
+
+#[macro_export]
+macro_rules! apply_ilike_filters {
+    ($stmt:expr; $($col:expr, $string:expr);*) => {{
+        $(
+            if let Some(string) = $string {
+                $stmt = $stmt.filter($col.ilike(string));
+            }
+        )*
+
+        $stmt
+    }};
 }
 
 #[macro_export]
@@ -171,7 +210,7 @@ macro_rules! impl_python_order_by {
 #[macro_export]
 macro_rules! uuid_newtype {
     ($name:ident) => {
-        #[derive(serde::Deserialize)]
+        #[derive(Clone, Copy, serde::Deserialize)]
         #[serde(transparent)]
         pub struct $name(uuid::Uuid);
 
@@ -192,10 +231,24 @@ macro_rules! uuid_newtype {
                 vec![val.0]
             }
         }
+    };
+}
 
-        impl From<&$name> for Vec<uuid::Uuid> {
-            fn from(val: &$name) -> Vec<uuid::Uuid> {
-                vec![val.0]
+#[macro_export]
+macro_rules! impl_id_db_operation {
+    ($type_:ty, $delegated:ident, $ret:ty) => {
+        impl crate::db::DbOperation<$ret> for $type_ {
+            fn execute(
+                self,
+                db_conn: &mut diesel::PgConnection,
+            ) -> crate::result::ScamplersResult<$ret> {
+                let results = $delegated::builder().ids(self).build().execute(db_conn)?;
+
+                return Ok(results.into_iter().next().ok_or(
+                    crate::result::ResourceNotFoundError::builder()
+                        .requested_resource_id(self)
+                        .build(),
+                )?);
             }
         }
     };

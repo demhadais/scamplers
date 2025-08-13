@@ -10,7 +10,7 @@ use valid_string::ValidString;
 #[cfg(target_arch = "wasm32")]
 use wasm_bindgen::prelude::*;
 
-use crate::model::{Pagination, SortByGroup, person::PersonSummary};
+use crate::model::{person::PersonSummary, Pagination, SortByGroup};
 
 #[cfg_attr(
     not(target_arch = "wasm32"),
@@ -18,14 +18,14 @@ use crate::model::{Pagination, SortByGroup, person::PersonSummary};
 )]
 #[cfg_attr(not(target_arch = "wasm32"), json(python))]
 #[db_insertion]
-#[cfg_attr(feature = "backend", diesel(table_name = lab))]
+#[cfg_attr(feature = "app", diesel(table_name = lab))]
 pub struct NewLab {
     #[garde(dive)]
     pub name: ValidString,
     pub pi_id: Uuid,
     #[garde(dive)]
     pub delivery_dir: ValidString,
-    #[cfg_attr(feature = "backend", diesel(skip_insertion))]
+    #[cfg_attr(feature = "app", diesel(skip_insertion))]
     #[builder(default)]
     pub member_ids: Vec<Uuid>,
 }
@@ -55,7 +55,7 @@ impl NewLab {
     derive(scamplers_macros::FromJson, scamplers_macros::ToJson)
 )]
 #[db_selection]
-#[cfg_attr(feature = "backend", diesel(table_name = lab))]
+#[cfg_attr(feature = "app", diesel(table_name = lab))]
 pub struct LabHandle {
     pub id: Uuid,
     pub link: String,
@@ -66,22 +66,22 @@ pub struct LabHandle {
     derive(scamplers_macros::FromJson, scamplers_macros::ToJson)
 )]
 #[db_selection]
-#[cfg_attr(feature = "backend", diesel(table_name = lab))]
+#[cfg_attr(feature = "app", diesel(table_name = lab))]
 pub struct LabSummary {
     #[serde(flatten)]
-    #[cfg_attr(feature = "backend", diesel(embed))]
+    #[cfg_attr(feature = "app", diesel(embed))]
     pub handle: LabHandle,
     pub name: String,
     pub delivery_dir: String,
 }
 
 #[db_selection]
-#[cfg_attr(feature = "backend", diesel(table_name = lab))]
+#[cfg_attr(feature = "app", diesel(table_name = lab))]
 pub struct LabCore {
     #[serde(flatten)]
-    #[cfg_attr(feature = "backend", diesel(embed))]
+    #[cfg_attr(feature = "app", diesel(embed))]
     pub summary: LabSummary,
-    #[cfg_attr(feature = "backend", diesel(embed))]
+    #[cfg_attr(feature = "app", diesel(embed))]
     pub pi: PersonSummary,
 }
 
@@ -102,7 +102,7 @@ pub struct Lab {
 }
 
 #[db_update]
-#[cfg_attr(feature = "backend", diesel(table_name = lab))]
+#[cfg_attr(feature = "app", diesel(table_name = lab))]
 pub struct LabUpdateCore {
     pub id: Uuid,
     #[garde(dive)]

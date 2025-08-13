@@ -44,11 +44,11 @@ pub enum BlockFixative {
 )]
 #[cfg_attr(not(target_arch = "wasm32"), json(wrapper = super::NewSpecimen, python))]
 #[db_insertion]
-#[cfg_attr(feature = "backend", diesel(table_name = specimen))]
+#[cfg_attr(feature = "app", diesel(table_name = specimen))]
 pub struct NewFixedBlock {
     #[serde(flatten)]
     #[garde(dive)]
-    #[cfg_attr(feature = "backend", diesel(embed))]
+    #[cfg_attr(feature = "app", diesel(embed))]
     pub inner: NewSpecimenCommon,
     #[serde(skip)]
     #[builder(default)]
@@ -111,11 +111,11 @@ pub enum FrozenBlockEmbeddingMatrix {
 )]
 #[cfg_attr(not(target_arch = "wasm32"), json(wrapper = super::NewSpecimen, python))]
 #[db_insertion]
-#[cfg_attr(feature = "backend", diesel(table_name = specimen))]
+#[cfg_attr(feature = "app", diesel(table_name = specimen))]
 pub struct NewFrozenBlock {
     #[serde(flatten)]
     #[garde(dive)]
-    #[cfg_attr(feature = "backend", diesel(embed))]
+    #[cfg_attr(feature = "app", diesel(embed))]
     pub inner: NewSpecimenCommon,
     #[serde(skip)]
     #[builder(default)]

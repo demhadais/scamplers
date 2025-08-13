@@ -26,7 +26,7 @@ pub struct SuspensionPoolMeasurementData {
     derive(scamplers_macros::FromJson, scamplers_macros::ToJson)
 )]
 #[db_insertion]
-#[cfg_attr(feature = "backend", diesel(table_name = suspension_pool_measurement))]
+#[cfg_attr(feature = "app", diesel(table_name = suspension_pool_measurement))]
 pub struct NewSuspensionPoolMeasurement {
     #[serde(default)]
     #[builder(default)]
@@ -65,7 +65,7 @@ impl NewSuspensionPoolMeasurement {
 )]
 #[cfg_attr(not(target_arch = "wasm32"), json(python))]
 #[db_insertion]
-#[cfg_attr(feature = "backend", diesel(table_name = suspension_pool))]
+#[cfg_attr(feature = "app", diesel(table_name = suspension_pool))]
 pub struct NewSuspensionPool {
     #[garde(dive)]
     pub readable_id: ValidString,
@@ -73,13 +73,13 @@ pub struct NewSuspensionPool {
     pub name: ValidString,
     pub pooled_at: OffsetDateTime,
     #[garde(dive)]
-    #[cfg_attr(feature = "backend", diesel(skip_insertion))]
+    #[cfg_attr(feature = "app", diesel(skip_insertion))]
     pub suspensions: Vec<NewSuspension>,
-    #[cfg_attr(feature = "backend", diesel(skip_insertion))]
+    #[cfg_attr(feature = "app", diesel(skip_insertion))]
     pub preparer_ids: Vec<Uuid>,
     #[garde(dive)]
     #[serde(default)]
-    #[cfg_attr(feature = "backend", diesel(skip_insertion))]
+    #[cfg_attr(feature = "app", diesel(skip_insertion))]
     pub measurements: Vec<NewSuspensionPoolMeasurement>,
     #[garde(dive)]
     pub notes: Option<ValidString>,
@@ -122,7 +122,7 @@ pub struct SuspensionPoolPreparer {
     derive(scamplers_macros::FromJson, scamplers_macros::ToJson)
 )]
 #[db_selection]
-#[cfg_attr(feature = "backend", diesel(table_name = suspension_pool))]
+#[cfg_attr(feature = "app", diesel(table_name = suspension_pool))]
 pub struct SuspensionPoolHandle {
     pub id: Uuid,
     pub link: String,
@@ -133,10 +133,10 @@ pub struct SuspensionPoolHandle {
     derive(scamplers_macros::FromJson, scamplers_macros::ToJson)
 )]
 #[db_selection]
-#[cfg_attr(feature = "backend", diesel(table_name = suspension_pool))]
+#[cfg_attr(feature = "app", diesel(table_name = suspension_pool))]
 pub struct SuspensionPoolSummary {
     #[serde(flatten)]
-    #[cfg_attr(feature = "backend", diesel(embed))]
+    #[cfg_attr(feature = "app", diesel(embed))]
     pub handle: SuspensionPoolHandle,
     pub readable_id: String,
     pub pooled_at: OffsetDateTime,

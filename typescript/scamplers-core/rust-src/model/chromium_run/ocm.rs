@@ -47,13 +47,13 @@ impl NewOcmChipLoading {
 }
 
 #[db_insertion]
-#[cfg_attr(feature = "backend", diesel(table_name = gems))]
+#[cfg_attr(feature = "app", diesel(table_name = gems))]
 pub struct NewOcmGems {
     #[serde(flatten)]
     #[garde(dive)]
-    #[cfg_attr(feature = "backend", diesel(embed))]
+    #[cfg_attr(feature = "app", diesel(embed))]
     pub inner: NewGemsCommon,
-    #[cfg_attr(feature = "backend", diesel(skip_insertion))]
+    #[cfg_attr(feature = "app", diesel(skip_insertion))]
     #[garde(length(min = 1, max = 4))]
     pub loading: Vec<NewOcmChipLoading>,
 }
@@ -91,15 +91,15 @@ pub enum OcmChromiumChip {
     derive(scamplers_macros::FromJson, scamplers_macros::ToJson)
 )]
 #[db_insertion]
-#[cfg_attr(feature = "backend", diesel(table_name = chromium_run))]
+#[cfg_attr(feature = "app", diesel(table_name = chromium_run))]
 #[cfg_attr(not(target_arch = "wasm32"), json(wrapper = super::NewChromiumRun, python))]
 pub struct NewOcmChromiumRun {
     #[serde(flatten)]
     #[garde(dive)]
-    #[cfg_attr(feature = "backend", diesel(embed))]
+    #[cfg_attr(feature = "app", diesel(embed))]
     pub inner: NewChromiumRunCommon,
     pub chip: OcmChromiumChip,
-    #[cfg_attr(feature = "backend", diesel(skip_insertion))]
+    #[cfg_attr(feature = "app", diesel(skip_insertion))]
     #[garde(length(min = 1, max = 2))]
     pub gems: Vec<NewOcmGems>,
 }

@@ -116,12 +116,12 @@ pub struct JsonMetricsFile {
 impl_metrics_methods!(JsonMetricsFile);
 
 #[db_insertion]
-#[cfg_attr(feature = "backend", diesel(table_name = dataset))]
+#[cfg_attr(feature = "app", diesel(table_name = dataset))]
 #[cfg_attr(feature = "python", pyo3(name = "_NewChromiumDatasetCore"))]
 pub struct NewChromiumDatasetCore {
     #[serde(flatten)]
     #[garde(dive)]
-    #[cfg_attr(feature = "backend", diesel(embed))]
+    #[cfg_attr(feature = "app", diesel(embed))]
     pub inner: NewDatasetCommon,
     pub gems_id: Uuid,
     #[garde(custom(validate_html))]

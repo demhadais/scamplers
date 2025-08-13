@@ -10,7 +10,7 @@ use crate::model::suspension::MeasurementDataCore;
 pub(super) const MAX_GEMS_IN_NON_OCM_RUN: usize = 8;
 
 #[db_insertion]
-#[cfg_attr(feature = "backend", diesel(table_name = gems))]
+#[cfg_attr(feature = "app", diesel(table_name = gems))]
 #[cfg_attr(feature = "python", pyo3(name = "_NewGemsCommon"))]
 pub struct NewGemsCommon {
     #[garde(dive)]
@@ -23,7 +23,7 @@ pub struct NewGemsCommon {
 }
 
 #[db_insertion]
-#[cfg_attr(feature = "backend", diesel(table_name = chip_loading))]
+#[cfg_attr(feature = "app", diesel(table_name = chip_loading))]
 #[cfg_attr(feature = "python", pyo3(name = "_NewChipLoadingCommon"))]
 pub struct NewChipLoadingCommon {
     #[serde(skip)]
@@ -38,7 +38,7 @@ pub struct NewChipLoadingCommon {
 }
 
 #[db_insertion]
-#[cfg_attr(feature = "backend", diesel(table_name = chromium_run))]
+#[cfg_attr(feature = "app", diesel(table_name = chromium_run))]
 pub struct NewChromiumRunCommon {
     #[garde(dive)]
     pub readable_id: ValidString,

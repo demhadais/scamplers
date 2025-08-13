@@ -32,7 +32,7 @@ pub enum NewSpecimen {
     derive(scamplers_macros::FromJson, scamplers_macros::ToJson)
 )]
 #[db_selection]
-#[cfg_attr(feature = "backend", diesel(table_name = specimen))]
+#[cfg_attr(feature = "app", diesel(table_name = specimen))]
 pub struct SpecimenHandle {
     pub id: Uuid,
     pub link: String,
@@ -43,10 +43,10 @@ pub struct SpecimenHandle {
     derive(scamplers_macros::FromJson, scamplers_macros::ToJson)
 )]
 #[db_selection]
-#[cfg_attr(feature = "backend", diesel(table_name = specimen))]
+#[cfg_attr(feature = "app", diesel(table_name = specimen))]
 pub struct SpecimenSummary {
     #[serde(flatten)]
-    #[cfg_attr(feature = "backend", diesel(embed))]
+    #[cfg_attr(feature = "app", diesel(embed))]
     pub handle: SpecimenHandle,
     pub readable_id: String,
     pub name: String,
@@ -64,9 +64,9 @@ pub struct SpecimenSummary {
 }
 
 #[db_selection]
-#[cfg_attr(feature = "backend", diesel(table_name = specimen_measurement))]
+#[cfg_attr(feature = "app", diesel(table_name = specimen_measurement))]
 pub struct SpecimenMeasurement {
-    #[cfg_attr(feature = "backend", diesel(embed))]
+    #[cfg_attr(feature = "app", diesel(embed))]
     pub measured_by: PersonHandle,
     #[serde(flatten)]
     #[cfg_attr(target_arch = "wasm32", wasm_bindgen(skip))]
@@ -74,16 +74,16 @@ pub struct SpecimenMeasurement {
 }
 
 #[db_selection]
-#[cfg_attr(feature = "backend", diesel(table_name = specimen))]
+#[cfg_attr(feature = "app", diesel(table_name = specimen))]
 pub struct SpecimenCore {
     #[serde(flatten)]
-    #[cfg_attr(feature = "backend", diesel(embed))]
+    #[cfg_attr(feature = "app", diesel(embed))]
     pub summary: SpecimenSummary,
-    #[cfg_attr(feature = "backend", diesel(embed))]
+    #[cfg_attr(feature = "app", diesel(embed))]
     pub lab: LabSummary,
-    #[cfg_attr(feature = "backend", diesel(embed))]
+    #[cfg_attr(feature = "app", diesel(embed))]
     pub submitted_by: PersonSummary,
-    // #[cfg_attr(feature = "backend", diesel(embed))]
+    // #[cfg_attr(feature = "app", diesel(embed))]
     // pub returned_by: PersonSummary,
 }
 

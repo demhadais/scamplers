@@ -43,7 +43,7 @@ pub enum ParsedMetricsFile {
     derive(scamplers_macros::FromJson, scamplers_macros::ToJson)
 )]
 #[db_selection]
-#[cfg_attr(feature = "backend", diesel(table_name = dataset))]
+#[cfg_attr(feature = "app", diesel(table_name = dataset))]
 pub struct DatasetHandle {
     pub id: Uuid,
     pub link: String,
@@ -54,10 +54,10 @@ pub struct DatasetHandle {
     derive(scamplers_macros::FromJson, scamplers_macros::ToJson)
 )]
 #[db_selection]
-#[cfg_attr(feature = "backend", diesel(table_name = dataset))]
+#[cfg_attr(feature = "app", diesel(table_name = dataset))]
 pub struct DatasetSummary {
     #[serde(flatten)]
-    #[cfg_attr(feature = "backend", diesel(embed))]
+    #[cfg_attr(feature = "app", diesel(embed))]
     pub handle: DatasetHandle,
     pub data_path: String,
     pub delivered_at: OffsetDateTime,
