@@ -4,8 +4,6 @@ members = [
     "any-value",
     "scamplepy",
     "scamplers",
-    # "scamplers-backend",
-    # "scamplers-core",
     "scamplers-macros",
     "scamplers-schema",
     "time",

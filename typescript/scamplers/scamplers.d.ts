@@ -314,6 +314,10 @@ export class ResourceNotFoundError {
   static from_base64_json(base64_json_bytes: string): ResourceNotFoundError;
   requested_resource_id: string;
 }
+export class ScamplersClient {
+  free(): void;
+  constructor(api_base_url: string, frontend_token?: string | null, api_key?: string | null, accept_invalid_certificates?: boolean | null);
+}
 export class ScamplersErrorResponse {
   private constructor();
   free(): void;

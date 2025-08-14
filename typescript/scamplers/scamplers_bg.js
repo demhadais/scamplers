@@ -3076,6 +3076,43 @@ export class ResourceNotFoundError {
     }
 }
 
+const ScamplersClientFinalization = (typeof FinalizationRegistry === 'undefined')
+    ? { register: () => {}, unregister: () => {} }
+    : new FinalizationRegistry(ptr => wasm.__wbg_scamplersclient_free(ptr >>> 0, 1));
+
+export class ScamplersClient {
+
+    __destroy_into_raw() {
+        const ptr = this.__wbg_ptr;
+        this.__wbg_ptr = 0;
+        ScamplersClientFinalization.unregister(this);
+        return ptr;
+    }
+
+    free() {
+        const ptr = this.__destroy_into_raw();
+        wasm.__wbg_scamplersclient_free(ptr, 0);
+    }
+    /**
+     * @param {string} api_base_url
+     * @param {string | null} [frontend_token]
+     * @param {string | null} [api_key]
+     * @param {boolean | null} [accept_invalid_certificates]
+     */
+    constructor(api_base_url, frontend_token, api_key, accept_invalid_certificates) {
+        const ptr0 = passStringToWasm0(api_base_url, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+        const len0 = WASM_VECTOR_LEN;
+        var ptr1 = isLikeNone(frontend_token) ? 0 : passStringToWasm0(frontend_token, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+        var len1 = WASM_VECTOR_LEN;
+        var ptr2 = isLikeNone(api_key) ? 0 : passStringToWasm0(api_key, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+        var len2 = WASM_VECTOR_LEN;
+        const ret = wasm.scamplersclient_new(ptr0, len0, ptr1, len1, ptr2, len2, isLikeNone(accept_invalid_certificates) ? 0xFFFFFF : accept_invalid_certificates ? 1 : 0);
+        this.__wbg_ptr = ret >>> 0;
+        ScamplersClientFinalization.register(this, this.__wbg_ptr, this);
+        return this;
+    }
+}
+
 const ScamplersErrorResponseFinalization = (typeof FinalizationRegistry === 'undefined')
     ? { register: () => {}, unregister: () => {} }
     : new FinalizationRegistry(ptr => wasm.__wbg_scamplerserrorresponse_free(ptr >>> 0, 1));

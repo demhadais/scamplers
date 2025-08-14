@@ -2263,7 +2263,6 @@ dependencies = [
  "dotenvy",
  "futures",
  "garde",
- "getrandom 0.3.3",
  "heck",
  "js-sys",
  "pretty_assertions",
@@ -2292,6 +2291,7 @@ dependencies = [
  "valid-string",
  "valuable",
  "wasm-bindgen",
+ "wasm-bindgen-futures",
 ]
 
 [[package]]

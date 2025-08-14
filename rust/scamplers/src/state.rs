@@ -1,21 +1,20 @@
 use std::sync::Arc;
 
 use anyhow::Context;
+use anyhow::anyhow;
 use deadpool_diesel::Runtime;
 use deadpool_diesel::postgres::Manager as PoolManager;
 use deadpool_diesel::postgres::Pool;
 use diesel::PgConnection;
 use diesel::prelude::*;
+use diesel_migrations::EmbeddedMigrations;
+use diesel_migrations::MigrationHarness;
+use diesel_migrations::embed_migrations;
 use uuid::Uuid;
 
 use crate::db::seed_data::insert_seed_data;
 use crate::result::ScamplersResult;
-use crate::{
-    auth::User,
-    config::Config,
-    db::{DbOperation, models::institution::NewInstitution},
-    dev_container::DevContainer,
-};
+use crate::{config::Config, dev_container::DevContainer};
 
 #[derive(Clone)]
 pub struct AppStateCore {
@@ -126,14 +125,14 @@ impl InitialAppState {
         }
     }
 
-    pub async fn db_conn(&self) -> ScamplersResult<deadpool_diesel::postgres::Connection> {
+    async fn db_conn(&self) -> ScamplersResult<deadpool_diesel::postgres::Connection> {
         match self {
             Self::Dev(s) => s.db_conn().await,
             Self::Prod(s) => s.db_conn().await,
         }
     }
 
-    pub async fn db_root_conn(&self) -> ScamplersResult<deadpool_diesel::postgres::Connection> {
+    async fn db_root_conn(&self) -> ScamplersResult<deadpool_diesel::postgres::Connection> {
         match self {
             Self::Dev(s) => s.db_conn().await,
             Self::Prod(s) => Ok(s.db_root_pool.get().await?),
@@ -187,6 +186,23 @@ impl InitialAppState {
 
         Ok(())
     }
+
+    /// # Panics
+    /// # Errors
+    async fn run_migrations(&self) -> anyhow::Result<()> {
+        const MIGRATIONS: EmbeddedMigrations = embed_migrations!("../../db/migrations");
+
+        let db_conn = self.db_root_conn().await.map_err(|e| anyhow!("{e}"))?;
+
+        db_conn
+            .interact(move |db_conn| {
+                db_conn.run_pending_migrations(MIGRATIONS).unwrap();
+            })
+            .await
+            .unwrap();
+
+        Ok(())
+    }
 }
 
 #[derive(Clone)]
@@ -196,6 +212,24 @@ pub enum AppState {
 }
 
 impl AppState {
+    pub async fn initialize(config: Config) -> anyhow::Result<Self> {
+        let app_state = InitialAppState::new(config).await?;
+
+        app_state.run_migrations().await?;
+        tracing::info!("ran database migrations");
+
+        app_state.set_login_user_password().await?;
+
+        app_state.write_seed_data().await?;
+        tracing::info!("inserted seed data");
+
+        let app_state = match app_state {
+            InitialAppState::Dev(s) => Self::Dev(s),
+            InitialAppState::Prod(InitialAppStateCore { core, .. }) => Self::Prod(core),
+        };
+
+        Ok(app_state)
+    }
     pub async fn db_conn(&self) -> ScamplersResult<deadpool_diesel::postgres::Connection> {
         match self {
             Self::Dev(s) => s.db_conn().await,

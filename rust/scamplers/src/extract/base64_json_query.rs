@@ -4,12 +4,11 @@ use serde::{Serialize, Serializer, de::DeserializeOwned};
 
 use crate::{
     db::models::Jsonify,
-    extract::RequestExtractorExt,
     result::{MalformedRequestError, ScamplersErrorResponse},
 };
 
 #[derive(Default, Serialize)]
-pub struct Base64JsonQuery<T: Jsonify>(#[serde(serialize_with = "serialize_base64_json")] T);
+pub struct Base64JsonQuery<T: Jsonify>(#[serde(serialize_with = "serialize_base64_json")] pub T);
 
 fn serialize_base64_json<Q: Jsonify, S: Serializer>(
     query: &Q,
@@ -47,17 +46,5 @@ where
         let extracted = Q::from_base64_json(raw).map_err(err)?;
 
         Ok(Self(extracted))
-    }
-}
-
-impl<T> RequestExtractorExt<T> for Base64JsonQuery<T>
-where
-    T: Serialize + Jsonify,
-{
-    fn inner(self) -> T {
-        self.0
-    }
-    fn request_builder() -> impl Fn(reqwest::RequestBuilder, &T) -> reqwest::RequestBuilder {
-        reqwest::RequestBuilder::query
     }
 }

@@ -1,5 +1,5 @@
 import { env } from '$env/dynamic/private';
-import { ScamplersClient } from 'scamplers-core';
+import { ScamplersClient } from 'scamplers';
 import { FRONTEND_TOKEN } from './secrets';
 
 const BACKEND_HOST = env.SCAMPLERS_BACKEND_HOST ?? env.BACKEND_HOST;

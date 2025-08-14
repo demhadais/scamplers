@@ -6,6 +6,10 @@ edition.workspace = true
 [lib]
 crate-type = ["cdylib", "lib"]
 
+[[bin]]
+name = "scamplers"
+required-features = ["app"]
+
 [dependencies]
 deadpool-diesel = { workspace = true, optional = true }
 anyhow = { workspace = true }
@@ -51,8 +55,7 @@ time = { path = "../time" }
 [target.'cfg(target_arch = "wasm32")'.dependencies]
 wasm-bindgen = { workspace = true }
 js-sys = { workspace = true }
-reqwest = { workspace = true, features = [] }
-getrandom = { workspace = true, features = ["wasm_js"] }
+wasm-bindgen-futures = { workspace = true }
 
 [dev-dependencies]
 pretty_assertions = { workspace = true }
@@ -88,6 +91,7 @@ python = [
     "valid-string/python",
     "any-value/python",
     "time/python",
+    "tokio",
 ]
 
 

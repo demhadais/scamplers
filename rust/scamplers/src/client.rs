@@ -1,29 +1,25 @@
-use std::error::Error;
 #[cfg(feature = "python")]
 use std::sync::Arc;
 
 #[cfg(feature = "python")]
 use pyo3::prelude::*;
-use reqwest::Method;
 use serde::{Serialize, de::DeserializeOwned};
 #[cfg(feature = "python")]
 use tokio::runtime::Runtime;
 #[cfg(target_arch = "wasm32")]
-use {
-    crate::model::person::{CreatedUser, NewMsLogin},
-    wasm_bindgen::prelude::*,
-};
+use wasm_bindgen::prelude::*;
 
 #[cfg(feature = "python")]
-use crate::db::models::{
-    institution::{Institution, InstitutionId, InstitutionQuery, NewInstitution},
-    person::{NewPerson, Person},
-};
+use crate::db::models::institution::NewInstitution;
+#[cfg(target_arch = "wasm32")]
+use crate::db::models::person::CreatedUser;
 use crate::{
-    db::models::person::{CreatedUser, PersonId, PersonQuery},
-    endpoints::ApiEndpoint,
-    extract::RequestExtractorExt,
-    result::{ClientError, ScamplersError, ScamplersErrorResponse, ServerError},
+    db::models::{
+        institution::{Institution, InstitutionId, InstitutionQuery},
+        person::{NewPerson, Person, PersonId, PersonQuery},
+    },
+    endpoints::{Api, Endpoint},
+    result::{ScamplersErrorResponse, ServerError},
 };
 
 #[allow(dead_code)]
@@ -107,10 +103,8 @@ impl ScamplersClient {
     #[allow(dead_code)]
     async fn send_request<Req, Resp>(&self, data: Req) -> Result<Resp, ScamplersErrorResponse>
     where
-        Req: Serialize,
+        Api: Endpoint<Req, Resp>,
         Resp: DeserializeOwned,
-        (Req, Resp): ApiEndpoint,
-        <(Req, Resp) as ApiEndpoint>::RequestExtractor: RequestExtractorExt<Req>,
     {
         let Self {
             backend_base_url,
@@ -119,19 +113,7 @@ impl ScamplersClient {
             ..
         } = self;
 
-        let url = format!("{backend_base_url}{}", <(Req, Resp)>::PATH);
-        let method = <(Req, Resp)>::METHOD;
-
-        let mut request = match method {
-            Method::GET => client.get(url),
-            Method::POST => client.post(url),
-            Method::PATCH => client.patch(url),
-            Method::DELETE => client.delete(url),
-            _ => unreachable!(),
-        };
-
-        let build_request = <(Req, Resp) as ApiEndpoint>::RequestExtractor::request_builder();
-        request = build_request(request, &data);
+        let mut request = Api::request(client, backend_base_url, data);
 
         if let Some(api_key) = api_key {
             request = request.header("X-API-Key", api_key);
@@ -170,10 +152,8 @@ impl ScamplersClient {
     #[cfg(target_arch = "wasm32")]
     async fn send_request_wasm<Req, Resp>(&self, data: Req) -> Result<Resp, ScamplersErrorResponse>
     where
-        Req: Serialize,
+        Api: Endpoint<Req, Resp>,
         Resp: DeserializeOwned,
-        (Req, Resp): ApiEndpoint,
-        <(Req, Resp) as ApiEndpoint>::RequestExtractor: RequestExtractorExt<Req>,
     {
         self.send_request(data).await
     }
@@ -181,10 +161,9 @@ impl ScamplersClient {
     #[cfg(feature = "python")]
     async fn send_request_python<Req, Resp>(self, data: Req) -> Result<Resp, ScamplersErrorResponse>
     where
-        Req: Serialize + Send + 'static,
+        Api: Endpoint<Req, Resp>,
+        Req: Send + 'static,
         Resp: DeserializeOwned + Send + 'static,
-        (Req, Resp): ApiEndpoint,
-        <(Req, Resp) as ApiEndpoint>::RequestExtractor: RequestExtractorExt<Req>,
     {
         let runtime = self.runtime.clone();
 
@@ -195,21 +174,11 @@ impl ScamplersClient {
     }
 }
 
-#[cfg(target_arch = "wasm32")]
-#[wasm_bindgen]
-impl ScamplersClient {
-    /// # Errors
-    #[wasm_bindgen]
-    pub async fn ms_login(&self, data: NewPerson) -> Result<CreatedUser, ScamplersErrorResponse> {
-        self.send_request_wasm(data).await
-    }
-}
-
 macro_rules! impl_wasm_client_methods {
     ($(($method_name:ident, $request_type:path, $response_type:path));*) => {
         $(
             #[cfg(target_arch = "wasm32")]
-            #[wasm_bindgen::wasm_bindgen]
+            #[wasm_bindgen::prelude::wasm_bindgen]
             impl ScamplersClient {
                 async fn $method_name(
                     &self,
@@ -225,6 +194,7 @@ macro_rules! impl_wasm_client_methods {
 macro_rules! impl_python_client_methods {
     ($(($method_name:ident, $request_type:path, $response_type:path));*) => {
         $(
+            #[cfg(feature = "python")]
             #[pyo3::pymethods]
             impl ScamplersClient {
                 async fn $method_name(

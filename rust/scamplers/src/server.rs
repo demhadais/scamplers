@@ -1,68 +1,103 @@
-use axum::Router;
-use axum::extract::{FromRequest, State};
-use axum::http::StatusCode;
+#![allow(async_fn_in_trait)]
+use std::sync::Arc;
 
-use crate::auth::User;
-use crate::db::models::institution::{InstitutionId, InstitutionQuery};
-use crate::db::models::person::{NewPerson, Person, PersonId, PersonQuery};
-use crate::extract::RequestExtractorExt;
-use crate::state::AppState;
-use crate::{
-    db::{
-        DbOperation,
-        models::institution::{Institution, NewInstitution},
-    },
-    endpoints::ApiEndpoint,
-    result::ScamplersErrorResponse,
-};
+use crate::{dev_container::DevContainer, state::AppState};
+use anyhow::{Context, anyhow, bail};
+use axum::{Router, routing::get};
+use camino::Utf8PathBuf;
+use diesel::PgConnection;
+use diesel_migrations::{EmbeddedMigrations, MigrationHarness, embed_migrations};
+use tokio::{net::TcpListener, signal};
+use tower_http::trace::TraceLayer;
+use uuid::Uuid;
 
-type ApiResponse<Req, Resp> =
-    Result<(StatusCode, <(Req, Resp) as ApiEndpoint>::ResponseWrapper), ScamplersErrorResponse>;
+use crate::{config::Config, result::ScamplersResult};
+mod api;
 
-macro_rules! router {
-    ($(($handler_name:ident, $request:ty, $response:ty));*) => {{
-        use crate::endpoints::ApiEndpoint;
-        use axum::{http::Method, routing::*};
+/// # Errors
+pub async fn serve(mut config: Config, log_dir: Option<Utf8PathBuf>) -> anyhow::Result<()> {
+    initialize_logging(log_dir);
 
-        let mut router = axum::Router::new();
+    config
+        .read_secrets()
+        .context("failed to read secrets directory")?;
+    let app_addr = config.app_address();
 
-        $(
-            let method = <($request, $response)>::METHOD;
-            let path = <($request, $response)>::PATH;
+    let mut app_state = AppState::initialize(config)
+        .await
+        .context("failed to initialize app state")?;
+    tracing::info!("initialized app state");
 
-            #[axum::debug_handler]
-            async fn $handler_name(State(state): State<AppState>, User(user_id): User, request: <($request, $response) as ApiEndpoint>::RequestExtractor) -> ApiResponse<$request, $response> {
-                let db_conn = state.db_conn().await?;
-                let request = request.inner();
-                let success = <($request, $response)>::SUCCESS_STATUS_CODE;
+    let app = app(app_state.clone());
 
-                let response: $response = db_conn
-                    .interact(move |db_conn| request.execute_as_user(user_id, db_conn))
-                    .await??;
+    let listener = TcpListener::bind(&app_addr)
+        .await
+        .context(format!("failed to listen on {app_addr}"))?;
+    tracing::info!("scamplers listening on {app_addr}");
 
-                Ok((success, response.into()))
-            }
+    axum::serve(listener, app)
+        .with_graceful_shutdown(shutdown_signal(app_state))
+        .await
+        .context("failed to serve app")?;
 
-            router = match method {
-                Method::GET => router.route(path, get($handler_name)),
-                Method::POST => router.route(path, post($handler_name)),
-                Method::PATCH => router.route(path, patch($handler_name)),
-                Method::DELETE => router.route(path, delete($handler_name)),
-                _ => {anyhow::bail!("unexpected method: {method}")}
-            };
-        )*
-
-        router
-    }};
+    Ok(())
 }
 
-fn app() -> anyhow::Result<Router<AppState>> {
-    Ok(router!(
-        (create_institution, NewInstitution, Institution);
-        (read_institution, InstitutionId, Institution);
-        (read_institutions, InstitutionQuery, Vec<Institution>);
-        (create_person, NewPerson, Person);
-        (read_person, PersonId, Person);
-        (read_people, PersonQuery, Vec<Person>)
-    ))
+fn initialize_logging(log_dir: Option<Utf8PathBuf>) {
+    use tracing::Level;
+    use tracing_subscriber::{filter::Targets, prelude::*};
+
+    let log_layer = tracing_subscriber::fmt::layer();
+
+    match log_dir {
+        None => {
+            let dev_test_log_filter = Targets::new()
+                .with_target("scamplers_backend", Level::DEBUG)
+                .with_target("tower_http", Level::TRACE);
+            let log_layer = log_layer.pretty().with_filter(dev_test_log_filter);
+
+            tracing_subscriber::registry().with(log_layer).init();
+        }
+        Some(path) => {
+            let log_writer = tracing_appender::rolling::daily(path, "scamplers.log");
+            let prod_log_filter = Targets::new().with_target("scamplers", Level::INFO);
+            let log_layer = log_layer
+                .json()
+                .with_writer(log_writer)
+                .with_filter(prod_log_filter);
+
+            tracing_subscriber::registry().with(log_layer).init();
+        }
+    }
+}
+
+fn app(app_state: AppState) -> Router {
+    let api_router = api::router()
+        .layer(TraceLayer::new_for_http())
+        .route("/health", get(async || ()))
+        .with_state(app_state);
+
+    Router::new()
+        .merge(api_router.clone())
+        .nest("/api", api_router)
+}
+
+async fn shutdown_signal(app_state: AppState) {
+    let ctrl_c = async {
+        signal::ctrl_c()
+            .await
+            .expect("failed to install Ctrl+C handler");
+    };
+
+    let terminate = async {
+        signal::unix::signal(signal::unix::SignalKind::terminate())
+            .expect("failed to install signal handler")
+            .recv()
+            .await;
+    };
+
+    tokio::select! {
+        () = ctrl_c => {drop(app_state);},
+        () = terminate => {drop(app_state)},
+    }
 }

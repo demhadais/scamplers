@@ -34,7 +34,7 @@ pub mod units;
 #[cfg_attr(feature = "python", pyo3_stub_gen::derive::gen_stub_pyclass)]
 #[cfg_attr(
     target_arch = "wasm32",
-    wasm_bindgen(getter_with_clone, setter, js_name = "OrderBy")
+    wasm_bindgen(getter_with_clone, js_name = "OrderBy")
 )]
 #[cfg_attr(feature = "python", pyclass(name = "OrderBy", get_all, set_all))]
 #[derive(Clone)]

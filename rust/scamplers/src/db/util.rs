@@ -211,8 +211,9 @@ macro_rules! impl_python_order_by {
 macro_rules! uuid_newtype {
     ($name:ident) => {
         #[cfg_attr(feature = "python", pyo3::pyclass)]
-        #[derive(Clone, Copy, serde::Deserialize, serde::Serialize)]
+        #[derive(Clone, Copy, serde::Deserialize, serde::Serialize, valuable::Valuable)]
         #[serde(transparent)]
+        #[valuable(transparent)]
         pub struct $name(uuid::Uuid);
 
         impl AsRef<uuid::Uuid> for $name {

@@ -84,7 +84,9 @@ pub fn derive_py_jsonify(input: TokenStream) -> TokenStream {
 
     quote! {
         use crate::db::models::Jsonify as _;
+
         #[cfg(feature = "python")]
+        #[::pyo3_stub_gen::derive::gen_stub_pymethods]
         #[::pyo3::pymethods]
         impl #name {
             #[pyo3(name = "to_json_bytes")]
@@ -104,8 +106,8 @@ pub fn derive_py_jsonify(input: TokenStream) -> TokenStream {
 
             #[pyo3(name = "from_json_bytes")]
             #[staticmethod]
-            pub fn py_from_json_bytes(json_bytes: &[u8]) -> ::anyhow::Result<Self> {
-                Self::from_json_bytes(json_bytes)
+            pub fn py_from_json_bytes(json_bytes: Vec<u8>) -> ::anyhow::Result<Self> {
+                Self::from_json_bytes(&json_bytes)
             }
 
             #[pyo3(name = "from_json_string")]
@@ -129,7 +131,7 @@ pub fn scamplers_error(_attr: TokenStream, input: TokenStream) -> TokenStream {
     let item = parse_macro_input!(input as Item);
 
     let output = quote! {
-        #[cfg_attr(feature = "python", ::pyo3_stub_gen::derive::gen_stub_pyclass)]
+        #[cfg_attr(feature = "python", ::pyo3_stub_gen::derive::gen_stub_pyclass(module = "errors"))]
         #[::scamplers_macros::base_model]
         #[cfg_attr(target_arch = "wasm32", ::wasm_bindgen::prelude::wasm_bindgen(getter_with_clone))]
         #[cfg_attr(feature = "python", ::pyo3::pyclass(get_all))]
@@ -148,7 +150,7 @@ pub fn db_insertion(_attr: TokenStream, input: TokenStream) -> TokenStream {
     let output = quote! {
         #[::scamplers_macros::base_model]
         #[cfg_attr(feature = "python", ::pyo3_stub_gen::derive::gen_stub_pyclass)]
-        #[cfg_attr(feature = "python", ::pyo3::pyclass(get_all, set_all, eq))]
+        #[cfg_attr(feature = "python", ::pyo3::pyclass(get_all, set_all, eq, module = "scamplepy.requests.create"))]
         #[cfg_attr(
             feature = "app",
             derive(::diesel::Insertable),
@@ -172,7 +174,7 @@ pub fn db_query(_attr: TokenStream, input: TokenStream) -> TokenStream {
         #[::scamplers_macros::base_model]
         #[cfg_attr(target_arch = "wasm32", ::wasm_bindgen::prelude::wasm_bindgen(getter_with_clone))]
         #[cfg_attr(feature = "python", ::pyo3_stub_gen::derive::gen_stub_pyclass)]
-        #[cfg_attr(feature = "python", ::pyo3::pyclass(eq))]
+        #[cfg_attr(feature = "python", ::pyo3::pyclass(eq, module = "scamplepy.requests.query"))]
         #[derive(Default, ::bon::Builder, ::scamplers_macros::Jsonify, ::scamplers_macros::WasmJsonify, ::scamplers_macros::PyJsonify)]
         #[builder(on(_, into), derive(Clone, Debug, Into))]
         #struct_item
@@ -198,7 +200,7 @@ pub fn db_selection(_attr: TokenStream, input: TokenStream) -> TokenStream {
         #[::scamplers_macros::base_model]
         #[cfg_attr(target_arch = "wasm32", ::wasm_bindgen::prelude::wasm_bindgen(getter_with_clone, readonly))]
         #[cfg_attr(feature = "python", ::pyo3_stub_gen::derive::gen_stub_pyclass)]
-        #[cfg_attr(feature = "python", ::pyo3::pyclass(get_all, eq))]
+        #[cfg_attr(feature = "python", ::pyo3::pyclass(get_all, eq, module = "scamplepy.requests.read"))]
         #[derive(::scamplers_macros::Jsonify, ::scamplers_macros::WasmJsonify, ::scamplers_macros::PyJsonify)]
         #[cfg_attr(feature = "app", derive(::diesel::Selectable, ::diesel::Queryable), diesel(check_for_backend(::diesel::pg::Pg)))]
         #struct_item
@@ -233,7 +235,7 @@ pub fn db_update(_attr: TokenStream, input: TokenStream) -> TokenStream {
     let output = quote! {
         #[::scamplers_macros::base_model]
         #[cfg_attr(feature = "python", ::pyo3_stub_gen::derive::gen_stub_pyclass)]
-        #[cfg_attr(feature = "python", ::pyo3::pyclass(get_all, set_all, eq))]
+        #[cfg_attr(feature = "python", ::pyo3::pyclass(get_all, set_all, eq, module = "scamplepy.requests.update"))]
         #[cfg_attr(
             feature = "app",
             derive(::diesel::AsChangeset, ::diesel::Identifiable),
@@ -262,6 +264,7 @@ pub fn db_simple_enum(_attr: TokenStream, input: TokenStream) -> TokenStream {
         #[derive(Copy, ::strum::EnumString, ::strum::IntoStaticStr)]
         #[cfg_attr(feature = "app", derive(::diesel::deserialize::FromSqlRow, ::diesel::expression::AsExpression))]
         #[cfg_attr(feature = "app", diesel(sql_type = ::diesel::sql_types::Text))]
+        #[serde(rename_all = "snake_case")]
         #[strum(serialize_all = "snake_case")]
         #enum_item
 

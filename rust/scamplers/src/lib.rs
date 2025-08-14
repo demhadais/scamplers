@@ -3,9 +3,9 @@
 #[cfg(feature = "app")]
 mod auth;
 #[cfg(any(target_arch = "wasm32", feature = "python"))]
-mod client;
+pub mod client;
 #[cfg(feature = "app")]
-mod config;
+pub mod config;
 pub mod db;
 #[cfg(feature = "app")]
 pub mod dev_container;
