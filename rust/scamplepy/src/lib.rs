@@ -3,7 +3,7 @@ use pyo3_stub_gen::define_stub_info_gatherer;
 
 #[pymodule]
 mod scamplepy {
-    use super::*;
+    use super::pymodule;
 
     #[pymodule]
     mod requests {

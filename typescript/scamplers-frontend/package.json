@@ -49,6 +49,6 @@
 		"@auth/core": "^0.39.0",
 		"@auth/sveltekit": "^1.9.1",
 		"@types/node": "^24.0.2",
-		"scamplers-core": "file:../scamplers-core"
+		"scamplers": "file:../scamplers"
 	}
 }

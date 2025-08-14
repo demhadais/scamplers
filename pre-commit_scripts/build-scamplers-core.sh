@@ -2,8 +2,8 @@
 
 set -euo pipefail
 
-cd rust/scamplers-core
-wasm-pack build --release --out-dir ../../typescript/scamplers-core
-cd ../../typescript/scamplers-core
+cd rust/scamplers
+wasm-pack build --release --out-dir ../../typescript/scamplers
+cd ../../typescript/scamplers
 rm -r .gitignore rust-src
-cp -r ../../rust/scamplers-core/src rust-src
+cp -r ../../rust/scamplers/src rust-src
