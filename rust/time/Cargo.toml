@@ -12,6 +12,7 @@ _time = { workspace = true }
 serde = { workspace = true }
 valuable = { workspace = true }
 pyo3 = { workspace = true, optional = true }
+pyo3-stub-gen = { workspace = true, optional = true }
 
 [lints]
 workspace = true
@@ -23,4 +24,4 @@ wasm-bindgen = { workspace = true }
 
 [features]
 app = ["diesel"]
-python = ["pyo3"]
+python = ["pyo3", "pyo3-stub-gen"]

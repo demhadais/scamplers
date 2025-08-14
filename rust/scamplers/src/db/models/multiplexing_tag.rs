@@ -4,6 +4,11 @@ use scamplers_schema::{multiplexing_tag, suspension, suspension_measurement};
 use uuid::Uuid;
 use valid_string::ValidString;
 
+#[cfg(feature = "app")]
+mod create;
+#[cfg(feature = "app")]
+mod read;
+
 #[db_simple_enum]
 pub enum MultiplexingTagType {
     FlexBarcode,

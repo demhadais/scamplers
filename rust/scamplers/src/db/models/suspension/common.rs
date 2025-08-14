@@ -17,6 +17,10 @@ pub enum BiologicalMaterial {
     Nuclei,
 }
 
+#[cfg_attr(
+    feature = "python",
+    pyo3_stub_gen::derive::gen_stub_pyclass_complex_enum
+)]
 #[db_json]
 #[cfg_attr(feature = "python", pyo3(name = "SuspensionMeasurementDataCommon"))]
 pub enum MeasurementDataCore {

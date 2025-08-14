@@ -1,10 +1,13 @@
 #[cfg(feature = "python")]
 use pyo3::prelude::*;
+#[cfg(feature = "python")]
+use scamplers_macros::db_selection;
 use scamplers_macros::{db_insertion, db_simple_enum};
-#[cfg(feature = "app")]
-use scamplers_schema::library_type_specification;
 
-use crate::db::models::Jsonify;
+use crate::db::models::{Jsonify, chemistry::Chemistry};
+
+#[cfg(feature = "app")]
+mod create;
 
 #[cfg_attr(target_arch = "wasm32", wasm_bindgen::prelude::wasm_bindgen)]
 #[db_simple_enum]
@@ -24,8 +27,9 @@ pub enum LibraryType {
 }
 
 #[db_insertion]
-#[cfg_attr(feature = "app", diesel(table_name = library_type_specification))]
-pub struct NewLibraryTypeSpecification {
+#[cfg_attr(feature = "app", derive(diesel::Selectable, diesel::Queryable))]
+#[cfg_attr(feature = "app", diesel(table_name = scamplers_schema::library_type_specification))]
+pub struct LibraryTypeSpecification {
     pub chemistry: String,
     pub library_type: LibraryType,
     pub index_kit: String,
@@ -39,7 +43,7 @@ pub struct NewLibraryTypeSpecification {
 
 #[cfg(feature = "python")]
 #[pymethods]
-impl NewLibraryTypeSpecification {
+impl LibraryTypeSpecification {
     #[new]
     #[pyo3(signature = (*, chemistry, library_type, index_kit, cdna_volume_µl, library_volume_µl))]
     fn new(

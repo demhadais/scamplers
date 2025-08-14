@@ -5,7 +5,7 @@ use serde::Deserialize;
 mod create;
 
 #[derive(Clone, Validate, Deserialize)]
-pub(super) struct NewSingleIndexSet(
+pub struct NewSingleIndexSet(
     #[garde(pattern(INDEX_SET_NAME_REGEX))] String,
     #[garde(inner(pattern(DNA_REGEX)))] [String; 4],
 );

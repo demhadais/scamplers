@@ -30,7 +30,6 @@ axum = { version = "0.8.4", default-features = false, features = [
     "json",
     "macros",
     "query",
-    "tokio",
 ] }
 tokio = { version = "1.45.1", features = [
     "macros",

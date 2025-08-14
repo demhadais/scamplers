@@ -18,6 +18,7 @@ mod create;
 #[cfg(feature = "app")]
 mod read;
 
+#[cfg_attr(feature = "python", pyo3_stub_gen::derive::gen_stub_pyclass)]
 #[db_json]
 #[cfg_attr(feature = "python", pyo3(name = "_SuspensionMeasurementData"))]
 pub struct SuspensionMeasurementData {
@@ -126,6 +127,7 @@ impl NewSuspension {
 #[cfg_attr(feature = "app", diesel(table_name = scamplers_schema::suspension))]
 pub struct SuspensionSummary {
     pub id: Uuid,
+    #[cfg_attr(target_arch = "wasm32", wasm_bindgen(readonly))]
     pub links: Links,
     pub readable_id: String,
     pub biological_material: String,

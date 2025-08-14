@@ -1,6 +1,9 @@
-use scamplers_macros::base_model;
+use scamplers_macros::{base_model, db_insertion, db_selection};
 use serde_json::Value;
 use valid_string::ValidString;
+
+#[cfg(feature = "app")]
+mod create;
 
 #[base_model]
 #[cfg_attr(feature = "app", derive(::diesel::Insertable))]

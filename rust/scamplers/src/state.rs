@@ -1,173 +1,205 @@
 use std::sync::Arc;
 
+use anyhow::Context;
+use deadpool_diesel::Runtime;
+use deadpool_diesel::postgres::Manager as PoolManager;
+use deadpool_diesel::postgres::Pool;
 use diesel::PgConnection;
-use futures::lock::Mutex;
+use diesel::prelude::*;
+use uuid::Uuid;
 
+use crate::db::seed_data::insert_seed_data;
+use crate::result::ScamplersResult;
 use crate::{
     auth::User,
+    config::Config,
     db::{DbOperation, models::institution::NewInstitution},
     dev_container::DevContainer,
 };
 
 #[derive(Clone)]
-enum AppState {
-    Dev {
-        db_pool: deadpool_diesel::postgres::Pool,
-        _pg_container: Arc<DevContainer>,
-        user_id: User,
-        http_client: reqwest::Client,
-        config: Arc<Config>,
-    },
-    Prod {
-        db_pool: Pool<AsyncPgConnection>,
-        db_root_pool: Option<Pool<AsyncPgConnection>>,
-        http_client: reqwest::Client,
-        config: Arc<Config>,
-    },
+pub struct AppStateCore {
+    db_pool: Pool,
+    http_client: reqwest::Client,
+    config: Arc<Config>,
 }
-impl AppState {
-    async fn new(config: Config) -> anyhow::Result<Self> {
-        let manager = deadpool_diesel::postgres::Manager::new(
-            "database_url",
-            deadpool_diesel::Runtime::Tokio1,
-        );
-        let pool = deadpool_diesel::postgres::Pool::builder(manager)
-            .build()
-            .unwrap();
-        let mut x = pool.get().await.unwrap();
-        let y = x
-            .interact(|conn| NewInstitution {}.execute_as_user("user", conn).unwrap())
-            .await
-            .unwrap();
-        NewInstitution::execute_as_user(self, "user", &mut x).unwrap();
-        let container_err = "failed to start postgres container instance";
 
-        let state = if config.is_dev() {
-            let pg_container = DevContainer::new("scamplers-dev", false)
-                .await
-                .context(container_err)?;
-            let db_root_url = pg_container.db_url().await?;
-
-            let mut db_conn = AsyncPgConnection::establish(&db_root_url).await?;
-            let user_id = Uuid::now_v7();
-            diesel::sql_query(format!(r#"create user "{user_id}" with superuser"#))
-                .execute(&mut db_conn)
-                .await
-                .context("failed to create dev superuser")?;
-
-            let db_config = AsyncDieselConnectionManager::<AsyncPgConnection>::new(&db_root_url);
-            let db_pool = Pool::builder(db_config).build()?;
-
-            Self::Dev {
-                db_pool,
-                _pg_container: Arc::new(pg_container),
-                user_id,
-                http_client: reqwest::Client::new(),
-                config: Arc::new(config),
-            }
-        } else {
-            let db_config =
-                AsyncDieselConnectionManager::<AsyncPgConnection>::new(config.db_login_url());
-            let db_pool = Pool::builder(db_config).build()?;
-
-            let db_root_config =
-                AsyncDieselConnectionManager::<AsyncPgConnection>::new(config.db_root_url());
-            let db_root_pool = Some(Pool::builder(db_root_config).max_size(1).build()?);
-
-            Self::Prod {
-                db_pool,
-                db_root_pool,
-                http_client: reqwest::Client::new(),
-                config: Arc::new(config),
-            }
-        };
-
-        Ok(state)
-    }
-
-    pub async fn db_conn(
-        &self,
-    ) -> db::error::Result<diesel_async::pooled_connection::deadpool::Object<AsyncPgConnection>>
-    {
-        use AppState::{Dev, Prod};
-
-        match self {
-            Dev { db_pool, .. } | Prod { db_pool, .. } => Ok(db_pool.get().await?),
+impl AppStateCore {
+    fn new(db_pool: deadpool_diesel::postgres::Pool, config: Config) -> Self {
+        Self {
+            db_pool,
+            http_client: reqwest::Client::new(),
+            config: Arc::new(config),
         }
     }
 
-    async fn db_root_conn(
-        &self,
-    ) -> db::error::Result<diesel_async::pooled_connection::deadpool::Object<AsyncPgConnection>>
-    {
-        use AppState::Prod;
-
-        let Prod { db_root_pool, .. } = self else {
-            return self.db_conn().await;
-        };
-
-        let Some(db_root_pool) = db_root_pool else {
-            return Err(db::error::Error::Other {
-                message: "root user connection to database should not be required at this stage"
-                    .to_string(),
-            });
-        };
-
-        Ok(db_root_pool.get().await?)
+    async fn db_conn(&self) -> ScamplersResult<deadpool_diesel::postgres::Connection> {
+        Ok(self.db_pool.get().await?)
     }
 
-    // In theory, this should be two separate functions - one that actually does the password setting, and one that
-    // constructs the arguments. This is the only time this sequence of events happens, so we can keep it as is.
-    // Also, this shouldn't be a method of `AppState`
+    pub fn frontend_token(&self) -> &str {
+        self.config.frontend_token()
+    }
+}
+
+#[derive(Clone)]
+struct InitialAppStateCore {
+    core: AppStateCore,
+    db_root_pool: Pool,
+}
+impl InitialAppStateCore {
+    async fn db_conn(&self) -> ScamplersResult<deadpool_diesel::postgres::Connection> {
+        self.core.db_conn().await
+    }
+}
+
+#[derive(Clone)]
+pub struct DevAppState {
+    _pg_container: Arc<DevContainer>,
+    core: InitialAppStateCore,
+    user_id: Uuid,
+}
+impl DevAppState {
+    async fn db_conn(&self) -> ScamplersResult<deadpool_diesel::postgres::Connection> {
+        self.core.db_conn().await
+    }
+
+    pub fn user_id(&self) -> Uuid {
+        self.user_id
+    }
+}
+
+enum InitialAppState {
+    Dev(DevAppState),
+    Prod(InitialAppStateCore),
+}
+
+fn create_dev_superuser(db_conn: &mut PgConnection) -> anyhow::Result<Uuid> {
+    let user_id = Uuid::now_v7();
+
+    diesel::sql_query(format!(r#"create user "{user_id}" with superuser"#))
+        .execute(db_conn)
+        .context("failed to create dev superuser")?;
+
+    Ok(user_id)
+}
+
+fn create_db_pool(db_url: &str) -> anyhow::Result<Pool> {
+    let manager = PoolManager::new(db_url, Runtime::Tokio1);
+    Ok(Pool::builder(manager).build()?)
+}
+
+impl InitialAppState {
+    async fn new(config: Config) -> anyhow::Result<Self> {
+        if config.is_dev() {
+            let pg_container = DevContainer::new("scamplers-dev", false)
+                .await
+                .context("failed to start postgres container instance")?;
+
+            let db_root_url = pg_container.db_url().await?;
+
+            let db_root_pool = create_db_pool(&db_root_url)?;
+
+            let user_id = db_root_pool
+                .get()
+                .await?
+                .interact(create_dev_superuser)
+                .await
+                .unwrap()?;
+
+            let db_pool = create_db_pool(&db_root_url)?;
+
+            let core = AppStateCore::new(db_pool, config);
+
+            Ok(Self::Dev(DevAppState {
+                _pg_container: Arc::new(pg_container),
+                core: InitialAppStateCore { core, db_root_pool },
+                user_id,
+            }))
+        } else {
+            let db_pool = create_db_pool(&config.db_login_url())?;
+            let db_root_pool = create_db_pool(&config.db_root_url())?;
+
+            let core = AppStateCore::new(db_pool, config);
+
+            Ok(Self::Prod(InitialAppStateCore { core, db_root_pool }))
+        }
+    }
+
+    pub async fn db_conn(&self) -> ScamplersResult<deadpool_diesel::postgres::Connection> {
+        match self {
+            Self::Dev(s) => s.db_conn().await,
+            Self::Prod(s) => s.db_conn().await,
+        }
+    }
+
+    pub async fn db_root_conn(&self) -> ScamplersResult<deadpool_diesel::postgres::Connection> {
+        match self {
+            Self::Dev(s) => s.db_conn().await,
+            Self::Prod(s) => Ok(s.db_root_pool.get().await?),
+        }
+    }
+
+    fn http_client(&self) -> reqwest::Client {
+        match self {
+            Self::Dev(s) => s.core.core.http_client.clone(),
+            Self::Prod(s) => s.core.http_client.clone(),
+        }
+    }
+
+    fn login_user_password(&self) -> String {
+        match self {
+            Self::Dev(_) => Uuid::now_v7().to_string(),
+            Self::Prod(state) => state.core.config.db_login_user_password().to_string(),
+        }
+    }
+
     async fn set_login_user_password(&self) -> anyhow::Result<()> {
         const LOGIN_USER: &str = "login_user";
 
-        let password = match self {
-            AppState::Dev { .. } => Uuid::now_v7().to_string(),
-            AppState::Prod { config, .. } => config.db_login_user_password().to_string(),
-        };
+        let password = self.login_user_password();
 
-        let mut db_conn = self.db_root_conn().await?;
-        diesel::sql_query(format!(
-            r#"alter user "{LOGIN_USER}" with password '{password}'"#
-        ))
-        .execute(&mut db_conn)
-        .await?;
+        let db_conn = self.db_root_conn().await?;
+        db_conn
+            .interact(move |db_conn| {
+                diesel::sql_query(format!(
+                    r#"alter user "{LOGIN_USER}" with password '{password}'"#
+                ))
+                .execute(db_conn)
+            })
+            .await
+            .unwrap()?;
 
         Ok(())
     }
 
-    // TODO: This also shouldn't be a method of `AppState`
     async fn write_seed_data(&self) -> anyhow::Result<()> {
-        use AppState::{Dev, Prod};
+        let seed_data = match self {
+            Self::Dev(s) => s.core.core.config.seed_data()?,
+            Self::Prod(s) => s.core.config.seed_data()?,
+        };
 
-        let mut db_conn = self.db_root_conn().await?;
+        let db_conn = self.db_root_conn().await?;
+        let http_client = self.http_client();
 
-        match self {
-            Dev {
-                http_client,
-                config,
-                ..
-            }
-            | Prod {
-                http_client,
-                config,
-                ..
-            } => {
-                let seed_data = config.seed_data()?;
-                seed_data.write(&mut db_conn, http_client.clone()).await
-            }
-        }
+        let mut db_conn = db_conn.lock().unwrap();
+        insert_seed_data(seed_data, http_client, &mut db_conn).await?;
+
+        Ok(())
     }
+}
 
-    fn drop_db_root_pool(&mut self) {
-        use AppState::{Dev, Prod};
+#[derive(Clone)]
+pub enum AppState {
+    Dev(DevAppState),
+    Prod(AppStateCore),
+}
 
+impl AppState {
+    pub async fn db_conn(&self) -> ScamplersResult<deadpool_diesel::postgres::Connection> {
         match self {
-            Dev { .. } => (),
-            Prod { db_root_pool, .. } => {
-                *db_root_pool = None;
-            }
+            Self::Dev(s) => s.db_conn().await,
+            Self::Prod(s) => s.db_conn().await,
         }
     }
 }

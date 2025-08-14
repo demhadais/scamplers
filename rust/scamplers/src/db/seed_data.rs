@@ -1,5 +1,5 @@
 use anyhow::ensure;
-use axum_extra::headers::Server;
+use diesel::PgConnection;
 use garde::Validate;
 use scamplers_macros::base_model;
 use url::Url;
@@ -10,13 +10,13 @@ use crate::{
         models::{
             chemistry::Chemistry,
             institution::NewInstitution,
-            library_type_specification::NewLibraryTypeSpecification,
+            library_type_specification::LibraryTypeSpecification,
             multiplexing_tag::NewMultiplexingTag,
-            person::{NewPerson, UserRole},
+            person::{CreatedUser, NewPerson, Person, UserRole},
         },
-        seed_data::index_set::is_10x_genomics_url,
+        seed_data::index_set::{download_and_insert_index_sets, is_10x_genomics_url},
     },
-    result::{ScamplersError, ServerError},
+    result::{ScamplersError, ScamplersResult, ServerError},
 };
 mod index_set;
 
@@ -26,6 +26,7 @@ pub struct SeedData {
     institution: NewInstitution,
     #[garde(dive)]
     app_admin: NewPerson,
+    #[valuable(skip)]
     #[garde(inner(custom(is_10x_genomics_url)))]
     index_set_urls: Vec<Url>,
     #[garde(dive)]
@@ -33,77 +34,57 @@ pub struct SeedData {
     #[garde(dive)]
     multiplexing_tags: Vec<NewMultiplexingTag>,
     #[garde(dive)]
-    library_type_specifications: Vec<NewLibraryTypeSpecification>,
+    library_type_specifications: Vec<LibraryTypeSpecification>,
 }
 
-impl DbOperation<()> for SeedData {
-    fn execute(self, db_conn: &mut diesel::PgConnection) -> crate::result::ScamplersResult<()> {
-        self.validate().map_err(|e| ServerError {
-            message: e.to_string(),
-            ..Default::default()
-        })?;
-
-        let Self {
-            institution,
-            mut app_admin,
-            index_set_urls,
-            chemistries,
-            multiplexing_tags,
-            library_type_specifications,
-        } = self;
-
-        let institution_result = institution.execute(db_conn);
-        if let Err(error) = &institution_result
-            && matches!(error, ScamplersError::DuplicateResource(_))
-        {
+pub async fn insert_seed_data(
+    seed_data: SeedData,
+    http_client: reqwest::Client,
+    db_conn: &mut PgConnection,
+) -> anyhow::Result<()> {
+    fn duplicate_resource_ok<T>(result: ScamplersResult<T>) -> ScamplersResult<()> {
+        if !matches!(result, Err(ScamplersError::DuplicateResource(_))) {
+            result?;
         } else {
-            institution_result?;
         }
-
-        ensure!(
-            app_admin.ms_user_id.is_some(),
-            ServerError {
-                message: "app admin must have ms_user_id".to_string(),
-                ..Default::default()
-            }
-        );
-        app_admin.roles.push(UserRole::AppAdmin);
-        app_admin
-    }
-}
-
-impl SeedData {
-    /// # Errors
-    pub async fn write(
-        self,
-        db_conn: &mut AsyncPgConnection,
-        http_client: reqwest::Client,
-    ) -> anyhow::Result<()> {
-        self.validate()?;
-
-        let Self {
-            institution,
-            app_admin,
-            index_set_urls,
-            chemistries,
-            multiplexing_tags,
-            library_type_specifications,
-        } = self;
-
-        let institution_result = institution.write_to_db(db_conn).await;
-        if let Err(error) = &institution_result
-            && matches!(error.inner(), ScamplersCoreError::DuplicateResource(_))
-        {
-        } else {
-            institution_result?;
-        }
-
-        app_admin.write(db_conn).await?;
-        download_and_insert_index_sets(db_conn, http_client, &index_set_urls).await?;
-        chemistries.write_to_db(db_conn).await?;
-        multiplexing_tags.write_to_db(db_conn).await?;
-        library_type_specifications.write_to_db(db_conn).await?;
 
         Ok(())
     }
+
+    seed_data.validate().map_err(|e| ServerError {
+        message: e.to_string(),
+        ..Default::default()
+    })?;
+
+    let SeedData {
+        institution,
+        mut app_admin,
+        index_set_urls,
+        chemistries,
+        multiplexing_tags,
+        library_type_specifications,
+    } = seed_data;
+
+    duplicate_resource_ok(institution.execute(db_conn))?;
+
+    if app_admin.ms_user_id.is_none() {
+        return Err(ServerError {
+            message: "app admin must have ms_user_id".to_string(),
+            ..Default::default()
+        })?;
+    }
+
+    app_admin.roles.push(UserRole::AppAdmin);
+    let result: ScamplersResult<Person> = app_admin.execute(db_conn);
+    duplicate_resource_ok(result)?;
+
+    download_and_insert_index_sets(&index_set_urls, http_client, db_conn).await?;
+
+    chemistries.execute(db_conn)?;
+
+    multiplexing_tags.execute(db_conn)?;
+
+    library_type_specifications.execute(db_conn)?;
+
+    Ok(())
 }

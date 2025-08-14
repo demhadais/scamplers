@@ -30,9 +30,9 @@ async fn download_index_set(
 // We use anyhow::Result here because we just want to know what went wrong, we
 // don't care about serializing structured errors to a client
 pub(super) async fn download_and_insert_index_sets(
-    db_conn: &mut PgConnection,
-    http_client: reqwest::Client,
     file_urls: &[Url],
+    http_client: reqwest::Client,
+    db_conn: &mut PgConnection,
 ) -> anyhow::Result<()> {
     let downloads = file_urls
         .iter()

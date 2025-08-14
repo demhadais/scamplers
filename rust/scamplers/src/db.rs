@@ -1,8 +1,10 @@
-use diesel::{Connection, PgConnection, RunQueryDsl};
 #[cfg(feature = "app")]
-use diesel::{query_builder::SqlQuery, query_dsl::methods::ExecuteDsl};
 use std::fmt::Display;
 
+#[cfg(feature = "app")]
+use diesel::{PgConnection, prelude::*};
+
+#[cfg(feature = "app")]
 use crate::result::ScamplersResult;
 
 pub mod models;
@@ -14,7 +16,7 @@ pub mod util;
 pub trait DbOperation<Output>: Sized {
     fn execute(self, db_conn: &mut PgConnection) -> ScamplersResult<Output>;
 
-    fn execute_as_user<UserId, Conn>(
+    fn execute_as_user<UserId>(
         self,
         user_id: UserId,
         db_conn: &mut PgConnection,

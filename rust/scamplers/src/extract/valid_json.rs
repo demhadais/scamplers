@@ -2,7 +2,7 @@ use axum::{Json, extract::FromRequest};
 use garde::Validate;
 use serde::de::DeserializeOwned;
 
-use crate::result::ScamplersErrorResponse;
+use crate::{extract::RequestExtractorExt, result::ScamplersErrorResponse};
 
 #[derive(Default)]
 pub struct ValidJsonBody<T>(T);
@@ -23,5 +23,11 @@ where
         data.validate()?;
 
         Ok(Self(data))
+    }
+}
+
+impl<T> RequestExtractorExt<T> for ValidJsonBody<T> {
+    fn inner(self) -> T {
+        self.0
     }
 }

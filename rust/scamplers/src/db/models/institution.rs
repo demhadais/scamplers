@@ -40,6 +40,7 @@ uuid_newtype!(InstitutionId);
 #[cfg_attr(feature = "app", diesel(table_name = scamplers_schema::institution))]
 pub struct Institution {
     pub id: Uuid,
+    #[cfg_attr(target_arch = "wasm32", wasm_bindgen(readonly))]
     pub links: Links,
     pub name: String,
 }

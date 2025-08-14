@@ -14,22 +14,24 @@ use crate::{
     },
 };
 
+define_sql_function! {fn create_user_if_not_exists(user_id: Text, roles: Array<Text>)}
+
 impl DbOperation<Person> for NewPerson {
     fn execute(self, db_conn: &mut diesel::PgConnection) -> crate::result::ScamplersResult<Person> {
-        let id: PersonId = diesel::insert_into(person::table)
-            .values(self)
+        let id: Uuid = diesel::insert_into(person::table)
+            .values(&self)
             .returning(person::id)
             .get_result(db_conn)?;
 
-        PersonQuery::builder()
+        diesel::select(create_user_if_not_exists(id.to_string(), &self.roles)).execute(db_conn)?;
+
+        Ok(PersonQuery::builder()
             .ids(id)
             .build()
             .execute(db_conn)?
-            .remove(0)
+            .remove(0))
     }
 }
-
-define_sql_function! {fn create_user_if_not_exists(user_id: Text, roles: Array<Text>)}
 
 impl DbOperation<CreatedUser> for NewPerson {
     fn execute(
@@ -54,6 +56,13 @@ impl DbOperation<CreatedUser> for NewPerson {
             ..
         } = &self;
 
+        // We know that whoever just logged in is the actual owner of this email
+        // address. Anyone else that has this email should have it removed from them
+        diesel::update(person::table)
+            .filter(person::email.eq(email))
+            .set(person::email.eq(None::<String>))
+            .execute(db_conn)?;
+
         // TODO: We shouldn't overwrite the user's API key on every single login
         let api_key = ApiKey::new();
         let hashed_api_key = api_key.hash();
@@ -65,13 +74,6 @@ impl DbOperation<CreatedUser> for NewPerson {
             hashed_api_key: &hashed_api_key,
             institution_id,
         };
-
-        // We know that whoever just logged in is the actual owner of this email
-        // address. Anyone else that has this email should have it removed from them
-        diesel::update(person::table)
-            .filter(person::email.eq(email))
-            .set(person::email.eq(None::<String>))
-            .execute(db_conn)?;
 
         let id: Uuid = diesel::insert_into(person::table)
             .values(upsert)
@@ -85,7 +87,7 @@ impl DbOperation<CreatedUser> for NewPerson {
         let empty_roles: Vec<UserRole> = Vec::with_capacity(0);
         diesel::select(create_user_if_not_exists(id.to_string(), empty_roles)).execute(db_conn)?;
 
-        let person = PersonQuery::builder();
+        let person = PersonId(id).execute(db_conn)?;
 
         Ok(CreatedUser {
             person,

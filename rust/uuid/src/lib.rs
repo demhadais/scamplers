@@ -32,6 +32,12 @@ impl FromStr for Uuid {
     }
 }
 
+impl From<Uuid> for Vec<Uuid> {
+    fn from(value: Uuid) -> Self {
+        vec![value]
+    }
+}
+
 impl Uuid {
     #[must_use]
     pub fn as_bytes(&self) -> &Bytes {

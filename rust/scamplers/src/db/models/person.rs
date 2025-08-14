@@ -22,6 +22,7 @@ mod read;
 #[cfg(feature = "app")]
 mod update;
 
+#[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
 #[db_simple_enum]
 pub enum UserRole {
     AppAdmin,
@@ -31,7 +32,7 @@ pub enum UserRole {
 
 #[db_insertion]
 #[cfg_attr(target_arch = "wasm32", wasm_bindgen(getter_with_clone, setter))]
-#[diesel(table_name = person)]
+#[cfg_attr(feature = "app", diesel(table_name = scamplers_schema::person))]
 pub struct NewPerson {
     #[garde(dive)]
     pub name: ValidString,
@@ -86,6 +87,7 @@ impl NewPerson {
 #[cfg_attr(feature = "app", diesel(table_name = person))]
 pub struct PersonSummary {
     pub id: Uuid,
+    #[cfg_attr(target_arch = "wasm32", wasm_bindgen(readonly))]
     pub links: Links,
     pub name: String,
     pub email: Option<String>,
@@ -105,7 +107,7 @@ pub struct PersonCore {
 uuid_newtype!(PersonId);
 
 #[cfg_attr(target_arch = "wasm32", wasm_bindgen(getter_with_clone))]
-#[cfg_attr(feature = "python", pyclass(get_all, str))]
+#[cfg_attr(feature = "python", pyclass(get_all))]
 #[base_model]
 pub struct Person {
     #[serde(flatten)]
@@ -135,7 +137,7 @@ pub struct PersonUpdateCore {
     pub institution_id: Option<Uuid>,
 }
 
-#[cfg_attr(feature = "python", pyclass(get_all, set_all, str))]
+#[cfg_attr(feature = "python", pyclass(get_all, set_all))]
 #[base_model]
 #[derive(Default)]
 pub struct PersonUpdate {
@@ -158,7 +160,7 @@ pub struct PersonQuery {
     pub ms_user_id: Option<Uuid>,
     #[builder(default)]
     #[cfg_attr(target_arch = "wasm32", wasm_bindgen(skip))]
-    pub order_by: PersonOrderBy,
+    pub order_by: Vec<PersonOrderBy>,
     #[builder(default)]
     pub pagination: Pagination,
 }

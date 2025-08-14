@@ -46,6 +46,10 @@ impl ValidString {
     pub fn as_bytes(&self) -> &[u8] {
         self.0.as_bytes()
     }
+
+    pub fn new() -> Self {
+        Self::default()
+    }
 }
 
 #[cfg_attr(target_arch = "wasm32", wasm_bindgen::prelude::wasm_bindgen)]

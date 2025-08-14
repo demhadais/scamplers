@@ -5,8 +5,11 @@ use axum::{
 };
 
 use crate::{
-    db::models::institution::{Institution, InstitutionId, InstitutionQuery, NewInstitution},
-    server::extract::{Base64JsonQuery, ValidJsonBody},
+    db::models::{
+        institution::{Institution, InstitutionId, InstitutionQuery, NewInstitution},
+        person::{NewPerson, Person},
+    },
+    extract::{Base64JsonQuery, ValidJsonBody},
 };
 
 pub trait ApiEndpoint {
@@ -39,4 +42,12 @@ impl ApiEndpoint for (InstitutionQuery, Vec<Institution>) {
     const SUCCESS_STATUS_CODE: StatusCode = StatusCode::OK;
     type RequestExtractor = Base64JsonQuery<InstitutionQuery>;
     type ResponseWrapper = Json<Institution>;
+}
+
+impl ApiEndpoint for (NewPerson, Person) {
+    const METHOD: Method = Method::POST;
+    const PATH: &str = "/people";
+    const SUCCESS_STATUS_CODE: StatusCode = StatusCode::CREATED;
+    type RequestExtractor = ValidJsonBody<NewPerson>;
+    type ResponseWrapper = Json<Person>;
 }

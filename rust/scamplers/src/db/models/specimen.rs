@@ -8,11 +8,13 @@ use crate::db::models::Links;
 #[cfg_attr(feature = "app", diesel(table_name = scamplers_schema::specimen))]
 pub struct SpecimenSummary {
     pub id: Uuid,
+    #[cfg_attr(target_arch = "wasm32", wasm_bindgen(readonly))]
     pub links: Links,
     pub readable_id: String,
     pub name: String,
     pub received_at: OffsetDateTime,
-    pub species: Vec<Option<String>>,
+    #[cfg_attr(target_arch = "wasm32", wasm_bindgen(skip))]
+    pub species: Vec<Option<String>>, // Option<String> doesn't implement VectorFromWasmAbi :)
     pub notes: Option<String>,
     pub returned_at: Option<OffsetDateTime>,
     pub type_: String,

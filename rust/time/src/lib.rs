@@ -135,6 +135,13 @@ mod wasm32 {
     }
 }
 
+#[cfg(feature = "python")]
+impl pyo3_stub_gen::PyStubType for OffsetDateTime {
+    fn type_output() -> pyo3_stub_gen::TypeInfo {
+        pyo3_stub_gen::TypeInfo::with_module("datetime.datetime", "datetime".into())
+    }
+}
+
 #[cfg(feature = "app")]
 mod backend {
     use diesel::{

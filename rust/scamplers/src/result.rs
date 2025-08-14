@@ -1,5 +1,4 @@
-#[cfg(feature = "app")]
-use axum::http::StatusCode;
+use axum::{extract::rejection::JsonRejection, http::StatusCode, response::IntoResponse};
 #[cfg(feature = "python")]
 use pyo3::{exceptions::PyException, prelude::*};
 use scamplers_macros::scamplers_error;
@@ -152,6 +151,227 @@ pub struct ScamplersErrorResponse {
     pub error: ScamplersError,
 }
 
+impl ScamplersErrorResponse {
+    fn new(status: StatusCode, err: impl Into<ScamplersError>) -> Self {
+        ScamplersErrorResponse::builder()
+            .status(status)
+            .error(err)
+            .build()
+            .into()
+    }
+
+    #[must_use]
+    pub fn new_server_error(message: &str) -> Self {
+        Self::new(
+            StatusCode::INTERNAL_SERVER_ERROR,
+            ServerError::builder()
+                .raw_response_body("")
+                .message(message)
+                .build(),
+        )
+    }
+
+    pub fn new_unprocessable_entity_error(err: impl Into<ScamplersError>) -> Self {
+        Self::new(StatusCode::UNPROCESSABLE_ENTITY, err)
+    }
+}
+
+#[cfg(feature = "app")]
+impl From<diesel::result::Error> for ScamplersError {
+    fn from(err: diesel::result::Error) -> Self {
+        use diesel::result::Error::{DatabaseError, NotFound};
+
+        match err {
+            DatabaseError(kind, info) => Self::from((kind, info)),
+            NotFound => ResourceNotFoundError::builder()
+                .requested_resource_id(Uuid::default())
+                .build()
+                .into(),
+            err => ServerError {
+                message: err.to_string(),
+                ..Default::default()
+            }
+            .into(),
+        }
+    }
+}
+
+#[cfg(feature = "app")]
+impl
+    From<(
+        diesel::result::DatabaseErrorKind,
+        Box<dyn diesel::result::DatabaseErrorInformation + Send + Sync>,
+    )> for ScamplersError
+{
+    fn from(
+        (kind, info): (
+            diesel::result::DatabaseErrorKind,
+            Box<dyn diesel::result::DatabaseErrorInformation + Send + Sync>,
+        ),
+    ) -> Self {
+        use diesel::result::DatabaseErrorKind::{ForeignKeyViolation, UniqueViolation};
+        use regex::Regex;
+
+        let entity = info.table_name().unwrap_or_default();
+
+        let detail_regex = Regex::new(r"Key \((.+)\)=\((.+)\).+").unwrap(); // This isn't perfect
+        let details = info.details().unwrap_or_default();
+        let field_value: Vec<String> = detail_regex
+            .captures(details)
+            .and_then(|cap| {
+                cap.iter()
+                    .take(3)
+                    .map(|m| m.map(|s| s.as_str().to_string()))
+                    .collect()
+            })
+            .unwrap_or_default();
+
+        let into_split_vecs = |v: &[String], i: usize| {
+            v.get(i)
+                .cloned()
+                .unwrap_or_default()
+                .split(", ")
+                .map(str::to_string)
+                .collect()
+        };
+        let fields = into_split_vecs(&field_value, 1);
+        let values = into_split_vecs(&field_value, 2);
+
+        match kind {
+            UniqueViolation => DuplicateResourceError {
+                entity: entity.to_string(),
+                fields,
+                values,
+            }
+            .into(),
+
+            ForeignKeyViolation => {
+                let referenced_entity = details
+                    .split_whitespace()
+                    .last()
+                    .unwrap_or_default()
+                    .replace('"', "");
+                let referenced_entity = referenced_entity.strip_suffix(".").unwrap_or_default();
+
+                InvalidReferenceError {
+                    entity: entity.to_string(),
+                    referenced_entity: referenced_entity.to_string(),
+                    value: values.first().cloned(),
+                }
+                .into()
+            }
+            _ => ServerError {
+                message: diesel::result::Error::DatabaseError(kind, info).to_string(),
+                ..Default::default()
+            }
+            .into(),
+        }
+    }
+}
+
+#[cfg(feature = "app")]
+impl From<deadpool_diesel::PoolError> for ScamplersError {
+    fn from(value: deadpool_diesel::PoolError) -> Self {
+        ServerError::builder()
+            .message(value.to_string())
+            .build()
+            .into()
+    }
+}
+
+#[cfg(feature = "app")]
+impl From<deadpool_diesel::InteractError> for ScamplersError {
+    fn from(value: deadpool_diesel::InteractError) -> Self {
+        ServerError::builder()
+            .message(value.to_string())
+            .build()
+            .into()
+    }
+}
+
+#[cfg(feature = "app")]
+impl From<deadpool_diesel::InteractError> for ScamplersErrorResponse {
+    fn from(value: deadpool_diesel::InteractError) -> Self {
+        ScamplersError::from(value).into()
+    }
+}
+
+impl From<JsonRejection> for ScamplersErrorResponse {
+    fn from(err: JsonRejection) -> Self {
+        let error = MalformedRequestError::builder()
+            .message(err.body_text())
+            .build();
+
+        ScamplersErrorResponse::builder()
+            .status(err.status())
+            .error(error)
+            .build()
+    }
+}
+
+impl From<garde::Report> for ScamplersErrorResponse {
+    fn from(err: garde::Report) -> Self {
+        let error = InvalidDataError::builder()
+            .message(format!("{err}"))
+            .build();
+
+        ScamplersErrorResponse::builder()
+            .status(StatusCode::UNPROCESSABLE_ENTITY)
+            .error(error)
+            .build()
+    }
+}
+
+impl IntoResponse for ScamplersErrorResponse {
+    fn into_response(mut self) -> axum::response::Response {
+        #[cfg(feature = "app")]
+        tracing::error!(error = self.as_value());
+
+        let status = self
+            .status
+            .and_then(|s| StatusCode::from_u16(s).ok())
+            .unwrap_or(StatusCode::INTERNAL_SERVER_ERROR);
+
+        if let Self {
+            error: ScamplersError::Server(ServerError { message, .. }),
+            ..
+        } = &mut self
+        {
+            *message = "something went wrong".to_string();
+        }
+
+        (status, axum::Json(self)).into_response()
+    }
+}
+
+impl From<ScamplersError> for ScamplersErrorResponse {
+    fn from(mut err: ScamplersError) -> Self {
+        use ScamplersError::*;
+        let status = match &mut err {
+            Client(_) => None,
+            DuplicateResource(_) => Some(StatusCode::CONFLICT),
+            ResourceNotFound(_) => Some(StatusCode::NOT_FOUND),
+            MalformedRequest(_) => Some(StatusCode::BAD_REQUEST),
+            PermissionDenied(_) => Some(StatusCode::UNAUTHORIZED),
+            CdnaGems(_)
+            | InvalidReference(_)
+            | InvalidData(_)
+            | DatasetCmdline(_)
+            | DatasetNMetricsFiles(_)
+            | DatasetMetricsFileParse(_)
+            | CdnaLibraryType(_)
+            | InvalidMeasurement(_)
+            | LibraryIndexSet(_) => Some(StatusCode::UNPROCESSABLE_ENTITY),
+            Server(e) => {
+                e.message = "".to_string();
+                Some(StatusCode::INTERNAL_SERVER_ERROR)
+            }
+        };
+
+        Self::builder().maybe_status(status).error(err).build()
+    }
+}
+
 #[cfg(target_arch = "wasm32")]
 mod wasm32 {
     use wasm_bindgen::{JsValue, convert::IntoWasmAbi, describe::WasmDescribe};
@@ -206,204 +426,6 @@ mod python {
     impl From<ScamplersErrorResponse> for PyErr {
         fn from(ScamplersErrorResponse { status, error }: ScamplersErrorResponse) -> Self {
             Self::new::<ScamplersErrorResponse, _>((error, status))
-        }
-    }
-}
-
-#[cfg(feature = "app")]
-mod app {
-    use axum::{extract::rejection::JsonRejection, http::StatusCode, response::IntoResponse};
-    use axum_extra::routing::Resource;
-    use deadpool_diesel::Status;
-    use regex::Regex;
-
-    use super::*;
-
-    impl ScamplersErrorResponse {
-        fn new(status: StatusCode, err: impl Into<ScamplersError>) -> Self {
-            ScamplersErrorResponse::builder()
-                .status(status)
-                .error(err)
-                .build()
-                .into()
-        }
-
-        #[must_use]
-        pub fn new_server_error(message: &str) -> Self {
-            Self::new(
-                StatusCode::INTERNAL_SERVER_ERROR,
-                ServerError::builder()
-                    .raw_response_body("")
-                    .message(message)
-                    .build(),
-            )
-        }
-
-        pub fn new_unprocessable_entity_error(err: impl Into<ScamplersError>) -> Self {
-            Self::new(StatusCode::UNPROCESSABLE_ENTITY, err)
-        }
-    }
-
-    impl From<diesel::result::Error> for ScamplersError {
-        fn from(err: diesel::result::Error) -> Self {
-            use diesel::result::Error::{DatabaseError, NotFound};
-
-            match err {
-                DatabaseError(kind, info) => Self::from((kind, info)),
-                NotFound => ResourceNotFoundError::builder()
-                    .requested_resource_id(Uuid::default())
-                    .build()
-                    .into(),
-                err => ServerError {
-                    message: err.to_string(),
-                    ..Default::default()
-                }
-                .into(),
-            }
-        }
-    }
-    impl
-        From<(
-            diesel::result::DatabaseErrorKind,
-            Box<dyn diesel::result::DatabaseErrorInformation + Send + Sync>,
-        )> for ScamplersError
-    {
-        fn from(
-            (kind, info): (
-                diesel::result::DatabaseErrorKind,
-                Box<dyn diesel::result::DatabaseErrorInformation + Send + Sync>,
-            ),
-        ) -> Self {
-            use diesel::result::DatabaseErrorKind::{ForeignKeyViolation, UniqueViolation};
-            let entity = info.table_name().unwrap_or_default();
-
-            let detail_regex = Regex::new(r"Key \((.+)\)=\((.+)\).+").unwrap(); // This isn't perfect
-            let details = info.details().unwrap_or_default();
-            let field_value: Vec<String> = detail_regex
-                .captures(details)
-                .and_then(|cap| {
-                    cap.iter()
-                        .take(3)
-                        .map(|m| m.map(|s| s.as_str().to_string()))
-                        .collect()
-                })
-                .unwrap_or_default();
-
-            let into_split_vecs = |v: &[String], i: usize| {
-                v.get(i)
-                    .cloned()
-                    .unwrap_or_default()
-                    .split(", ")
-                    .map(str::to_string)
-                    .collect()
-            };
-            let fields = into_split_vecs(&field_value, 1);
-            let values = into_split_vecs(&field_value, 2);
-
-            match kind {
-                UniqueViolation => DuplicateResourceError {
-                    entity: entity.to_string(),
-                    fields,
-                    values,
-                }
-                .into(),
-
-                ForeignKeyViolation => {
-                    let referenced_entity = details
-                        .split_whitespace()
-                        .last()
-                        .unwrap_or_default()
-                        .replace('"', "");
-                    let referenced_entity = referenced_entity.strip_suffix(".").unwrap_or_default();
-
-                    InvalidReferenceError {
-                        entity: entity.to_string(),
-                        referenced_entity: referenced_entity.to_string(),
-                        value: values.first().cloned(),
-                    }
-                    .into()
-                }
-                _ => ServerError {
-                    message: diesel::result::Error::DatabaseError(kind, info).to_string(),
-                    ..Default::default()
-                }
-                .into(),
-            }
-        }
-    }
-
-    impl From<JsonRejection> for ScamplersErrorResponse {
-        fn from(err: JsonRejection) -> Self {
-            let error = MalformedRequestError::builder()
-                .message(err.body_text())
-                .build();
-
-            ScamplersErrorResponse::builder()
-                .status(err.status())
-                .error(error)
-                .build()
-        }
-    }
-
-    impl From<garde::Report> for ScamplersErrorResponse {
-        fn from(err: garde::Report) -> Self {
-            let error = InvalidDataError::builder()
-                .message(format!("{err}"))
-                .build();
-
-            ScamplersErrorResponse::builder()
-                .status(StatusCode::UNPROCESSABLE_ENTITY)
-                .error(error)
-                .build()
-        }
-    }
-
-    impl IntoResponse for ScamplersErrorResponse {
-        fn into_response(mut self) -> axum::response::Response {
-            tracing::error!(error = self.as_value());
-
-            let status = self
-                .status
-                .and_then(|s| StatusCode::from_u16(s).ok())
-                .unwrap_or(StatusCode::INTERNAL_SERVER_ERROR);
-
-            if let Self {
-                error: ScamplersError::Server(ServerError { message, .. }),
-                ..
-            } = &mut self
-            {
-                *message = "something went wrong".to_string();
-            }
-
-            (status, axum::Json(self)).into_response()
-        }
-    }
-
-    impl From<ScamplersError> for ScamplersErrorResponse {
-        fn from(mut err: ScamplersError) -> Self {
-            use ScamplersError::*;
-            let status = match &mut err {
-                Client(_) => None,
-                DuplicateResource(_) => Some(StatusCode::CONFLICT),
-                ResourceNotFound(_) => Some(StatusCode::NOT_FOUND),
-                MalformedRequest(_) => Some(StatusCode::BAD_REQUEST),
-                PermissionDenied(_) => Some(StatusCode::UNAUTHORIZED),
-                CdnaGems(_)
-                | InvalidReference(_)
-                | InvalidData(_)
-                | DatasetCmdline(_)
-                | DatasetNMetricsFiles(_)
-                | DatasetMetricsFileParse(_)
-                | CdnaLibraryType(_)
-                | InvalidMeasurement(_)
-                | LibraryIndexSet(_) => Some(StatusCode::UNPROCESSABLE_ENTITY),
-                Server(e) => {
-                    e.message = "".to_string();
-                    Some(StatusCode::INTERNAL_SERVER_ERROR)
-                }
-            };
-
-            Self::builder().maybe_status(status).error(err).build()
         }
     }
 }

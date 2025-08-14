@@ -32,6 +32,7 @@ pub fn derive_wasm_jsonify(input: TokenStream) -> TokenStream {
     let name = &derive_input.ident;
 
     quote! {
+        use crate::db::models::Jsonify as _;
         #[cfg(target_arch = "wasm32")]
         #[::wasm_bindgen::prelude::wasm_bindgen]
         impl #name {
@@ -82,6 +83,7 @@ pub fn derive_py_jsonify(input: TokenStream) -> TokenStream {
     let name = &derive_input.ident;
 
     quote! {
+        use crate::db::models::Jsonify as _;
         #[cfg(feature = "python")]
         #[::pyo3::pymethods]
         impl #name {
@@ -194,7 +196,7 @@ pub fn db_selection(_attr: TokenStream, input: TokenStream) -> TokenStream {
 
     let output = quote! {
         #[::scamplers_macros::base_model]
-        #[cfg_attr(target_arch = "wasm32", ::wasm_bindgen::prelude::wasm_bindgen(getter_with_clone))]
+        #[cfg_attr(target_arch = "wasm32", ::wasm_bindgen::prelude::wasm_bindgen(getter_with_clone, readonly))]
         #[cfg_attr(feature = "python", ::pyo3_stub_gen::derive::gen_stub_pyclass)]
         #[cfg_attr(feature = "python", ::pyo3::pyclass(get_all, eq))]
         #[derive(::scamplers_macros::Jsonify, ::scamplers_macros::WasmJsonify, ::scamplers_macros::PyJsonify)]
@@ -237,7 +239,7 @@ pub fn db_update(_attr: TokenStream, input: TokenStream) -> TokenStream {
             derive(::diesel::AsChangeset, ::diesel::Identifiable),
             diesel(check_for_backend(::diesel::pg::Pg))
         )]
-        #[derive(::scamplers_macros::Jsonify, ::scamplers_macros::PyJsonify, ::bon::Builder)]
+        #[derive(Default, ::scamplers_macros::Jsonify, ::scamplers_macros::PyJsonify, ::bon::Builder)]
         #[builder(on(_, into), derive(Clone, Debug, Into))]
         #struct_item
 

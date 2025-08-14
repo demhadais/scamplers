@@ -9,8 +9,10 @@ use diesel::{
 };
 #[cfg(feature = "python")]
 use pyo3::prelude::*;
+#[cfg(feature = "python")]
+use pyo3_stub_gen::PyStubType;
 use scamplers_macros::base_model;
-use serde::{Deserialize, Serialize, de::DeserializeOwned};
+use serde::{Serialize, de::DeserializeOwned};
 #[cfg(target_arch = "wasm32")]
 use wasm_bindgen::prelude::*;
 
@@ -59,12 +61,13 @@ impl Default for Pagination {
     }
 }
 
-#[derive(Clone, Debug, Default, PartialEq, Eq, Deserialize, Serialize)]
-#[cfg_attr(feature = "app", derive(FromSqlRow))]
+#[base_model]
 #[serde(transparent)]
+#[valuable(transparent)]
+#[cfg_attr(feature = "app", derive(FromSqlRow))]
 #[cfg_attr(feature = "python", derive(IntoPyObject, FromPyObject))]
 #[cfg_attr(feature = "python", pyo3(transparent))]
-struct Links(HashMap<String, String>);
+pub struct Links(HashMap<String, String>);
 
 impl<'a> IntoIterator for &'a Links {
     type IntoIter = <&'a HashMap<String, String> as IntoIterator>::IntoIter;
@@ -79,12 +82,12 @@ impl<'a> IntoIterator for &'a Links {
 impl FromSql<sql_types::Jsonb, Pg> for Links {
     fn from_sql(bytes: <Pg as Backend>::RawValue<'_>) -> diesel::deserialize::Result<Self> {
         let json = <serde_json::Value as FromSql<sql_types::Jsonb, Pg>>::from_sql(bytes)?;
-        Ok(Self(json.into()))
+        Ok(Self(serde_json::from_value(json).unwrap()))
     }
 }
 
 #[cfg(target_arch = "wasm32")]
-impl wasm_bindgen::convert::WasmDescribe for Links {
+impl wasm_bindgen::describe::WasmDescribe for Links {
     fn describe() {
         js_sys::Map::describe();
     }
@@ -101,6 +104,13 @@ impl wasm_bindgen::convert::IntoWasmAbi for Links {
         }
 
         map.into_abi()
+    }
+}
+
+#[cfg(feature = "python")]
+impl PyStubType for Links {
+    fn type_output() -> pyo3_stub_gen::TypeInfo {
+        HashMap::<String, String>::type_output()
     }
 }
 

@@ -1,6 +1,9 @@
 use std::{fmt::Debug, str::FromStr};
 
-use crate::result::{PermissionDeniedError, ScamplersError, ScamplersResult};
+use crate::{
+    result::{PermissionDeniedError, ScamplersError, ScamplersErrorResponse, ScamplersResult},
+    state::AppState,
+};
 use argon2::{
     Argon2, PasswordHash, PasswordVerifier,
     password_hash::{PasswordHasher, SaltString},
@@ -162,7 +165,7 @@ impl ScamplersError {
 #[derive(Clone, Copy, Valuable)]
 pub(super) struct User(pub(super) Uuid);
 impl User {
-    async fn fetch_by_api_key(api_key: &ApiKey, conn: &mut PgConnection) -> ScamplersResult<Self> {
+    fn fetch_by_api_key(api_key: &ApiKey, conn: &mut PgConnection) -> ScamplersResult<Self> {
         use scamplers_schema::person::dsl::{hashed_api_key, id, person};
 
         let filter_query = diesel::dsl::sql::<Bool>("(hashed_api_key).prefix = ")
@@ -182,14 +185,14 @@ impl User {
 }
 
 impl FromRequestParts<AppState> for User {
-    type Rejection = ScamplersError;
+    type Rejection = ScamplersErrorResponse;
 
     async fn from_request_parts(
         parts: &mut axum::http::request::Parts,
         app_state: &AppState,
-    ) -> ScamplersResult<Self> {
-        if let AppState::Dev { user_id, .. } = app_state {
-            return Ok(Self(*user_id));
+    ) -> Result<Self, ScamplersErrorResponse> {
+        if let AppState::Dev(s) = app_state {
+            return Ok(Self(s.user_id()));
         }
 
         let Some(Ok(api_key)) = parts
@@ -197,25 +200,25 @@ impl FromRequestParts<AppState> for User {
             .get("X-API-Key")
             .map(|s| s.to_str().unwrap().parse())
         else {
-            return Err(ScamplersError::unauthorized("invalid API key"));
+            return Err(ScamplersError::unauthorized("invalid API key").into());
         };
 
-        let mut db_conn = app_state.db_conn().await?;
-
-        let user_result = User::fetch_by_api_key(&api_key, &mut db_conn).await;
+        let db_conn = app_state.db_conn().await?;
+        let user_result = db_conn
+            .interact(move |db_conn| User::fetch_by_api_key(&api_key, db_conn))
+            .await
+            .map_err(ScamplersError::from)?;
 
         let Err(error) = user_result else {
-            return user_result;
+            return Ok(user_result?);
         };
 
-        let error = match error.inner() {
-            ScamplersCoreError::ResourceNotFound(_) => {
-                ScamplersError::unauthorized("invalid API key")
-            }
+        let error = match error {
+            ScamplersError::ResourceNotFound(_) => ScamplersError::unauthorized("invalid API key"),
             _ => error,
         };
 
-        Err(error)
+        Err(error)?
     }
 }
 
@@ -236,14 +239,17 @@ impl OptionalFromRequestParts<AppState> for User {
 
 pub struct Frontend;
 impl FromRequestParts<AppState> for Frontend {
-    type Rejection = ScamplersError;
+    type Rejection = ScamplersErrorResponse;
 
     async fn from_request_parts(
         parts: &mut axum::http::request::Parts,
         state: &AppState,
     ) -> Result<Self, Self::Rejection> {
-        let AppState::Prod { config, .. } = state else {
-            return Ok(Self);
+        let frontend_token = match state {
+            AppState::Dev(_) => {
+                return Ok(Self);
+            }
+            AppState::Prod(s) => s.frontend_token(),
         };
 
         let err = ScamplersError::unauthorized("invalid frontend token");
@@ -252,11 +258,11 @@ impl FromRequestParts<AppState> for Frontend {
             .extract::<TypedHeader<headers::Authorization<Bearer>>>()
             .await
         else {
-            return Err(err);
+            return Err(err)?;
         };
 
-        if frontend_auth.token() != config.frontend_token() {
-            return Err(err);
+        if frontend_auth.token() != frontend_token {
+            return Err(err)?;
         }
 
         Ok(Self)
