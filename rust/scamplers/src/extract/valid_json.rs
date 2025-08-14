@@ -1,10 +1,10 @@
 use axum::{Json, extract::FromRequest};
 use garde::Validate;
-use serde::de::DeserializeOwned;
+use serde::{Serialize, de::DeserializeOwned};
 
 use crate::{extract::RequestExtractorExt, result::ScamplersErrorResponse};
 
-#[derive(Default)]
+#[derive(Default, Serialize)]
 pub struct ValidJsonBody<T>(T);
 
 impl<S, T> FromRequest<S> for ValidJsonBody<T>
@@ -26,8 +26,15 @@ where
     }
 }
 
-impl<T> RequestExtractorExt<T> for ValidJsonBody<T> {
+impl<T> RequestExtractorExt<T> for ValidJsonBody<T>
+where
+    T: Serialize,
+{
     fn inner(self) -> T {
         self.0
+    }
+
+    fn request_builder() -> impl Fn(reqwest::RequestBuilder, &T) -> reqwest::RequestBuilder {
+        reqwest::RequestBuilder::json
     }
 }

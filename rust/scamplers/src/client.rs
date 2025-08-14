@@ -1,249 +1,260 @@
-// #[cfg(feature = "python")]
-// use std::sync::Arc;
+use std::error::Error;
+#[cfg(feature = "python")]
+use std::sync::Arc;
 
-// #[cfg(feature = "python")]
-// use pyo3::prelude::*;
-// use reqwest::Method;
-// use serde::{Serialize, de::DeserializeOwned};
-// #[cfg(feature = "python")]
-// use tokio::runtime::Runtime;
-// #[cfg(target_arch = "wasm32")]
-// use {
-//     crate::model::person::{CreatedUser, NewMsLogin},
-//     wasm_bindgen::prelude::*,
-// };
+#[cfg(feature = "python")]
+use pyo3::prelude::*;
+use reqwest::Method;
+use serde::{Serialize, de::DeserializeOwned};
+#[cfg(feature = "python")]
+use tokio::runtime::Runtime;
+#[cfg(target_arch = "wasm32")]
+use {
+    crate::model::person::{CreatedUser, NewMsLogin},
+    wasm_bindgen::prelude::*,
+};
 
-// #[cfg(feature = "python")]
-// use crate::db::models::{
-//     institution::{Institution, NewInstitution},
-//     person::{NewPerson, Person},
-// };
-// use crate::{
-//     endpoints::ApiEndpoint,
-//     result::{ClientError, ScamplersErrorResponse, ServerError},
-// };
+#[cfg(feature = "python")]
+use crate::db::models::{
+    institution::{Institution, InstitutionId, InstitutionQuery, NewInstitution},
+    person::{NewPerson, Person},
+};
+use crate::{
+    db::models::person::{CreatedUser, PersonId, PersonQuery},
+    endpoints::ApiEndpoint,
+    extract::RequestExtractorExt,
+    result::{ClientError, ScamplersError, ScamplersErrorResponse, ServerError},
+};
 
-// #[allow(dead_code)]
-// #[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
-// #[cfg_attr(feature = "python", pyclass)]
-// #[derive(Clone)]
-// pub struct ScamplersClient {
-//     backend_base_url: String,
-//     client: reqwest::Client,
-//     api_key: Option<String>,
-//     #[cfg(feature = "python")]
-//     runtime: Arc<Runtime>,
-// }
+#[allow(dead_code)]
+#[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
+#[cfg_attr(feature = "python", pyclass)]
+#[derive(Clone)]
+pub struct ScamplersClient {
+    backend_base_url: String,
+    client: reqwest::Client,
+    api_key: Option<String>,
+    #[cfg(feature = "python")]
+    runtime: Arc<Runtime>,
+}
 
-// #[cfg(feature = "python")]
-// #[pymethods]
-// impl ScamplersClient {
-//     #[new]
-//     #[pyo3(signature = (*, api_base_url, api_key=None, accept_invalid_certificates=None))]
-//     fn py_new(
-//         api_base_url: String,
-//         api_key: Option<String>,
-//         accept_invalid_certificates: Option<bool>,
-//     ) -> Self {
-//         Self::new(api_base_url, None, api_key, accept_invalid_certificates)
-//     }
-// }
+#[cfg(feature = "python")]
+#[pymethods]
+impl ScamplersClient {
+    #[new]
+    #[pyo3(signature = (*, api_base_url, api_key=None, accept_invalid_certificates=None))]
+    fn py_new(
+        api_base_url: String,
+        api_key: Option<String>,
+        accept_invalid_certificates: Option<bool>,
+    ) -> Self {
+        Self::new(api_base_url, None, api_key, accept_invalid_certificates)
+    }
+}
 
-// #[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
-// impl ScamplersClient {
-//     #[cfg_attr(target_arch = "wasm32", wasm_bindgen(constructor))]
-//     #[must_use]
-//     pub fn new(
-//         api_base_url: String,
-//         frontend_token: Option<String>,
-//         api_key: Option<String>,
-//         #[allow(unused_variables)] accept_invalid_certificates: Option<bool>,
-//     ) -> Self {
-//         use reqwest::{
-//             ClientBuilder,
-//             header::{AUTHORIZATION, HeaderMap, HeaderValue},
-//         };
+#[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
+impl ScamplersClient {
+    #[cfg_attr(target_arch = "wasm32", wasm_bindgen(constructor))]
+    #[must_use]
+    pub fn new(
+        api_base_url: String,
+        frontend_token: Option<String>,
+        api_key: Option<String>,
+        #[allow(unused_variables)] accept_invalid_certificates: Option<bool>,
+    ) -> Self {
+        use reqwest::{
+            ClientBuilder,
+            header::{AUTHORIZATION, HeaderMap, HeaderValue},
+        };
 
-//         let token = frontend_token.unwrap_or_default();
+        let token = frontend_token.unwrap_or_default();
 
-//         let mut auth = HeaderValue::from_str(&format!("Bearer {token}")).unwrap();
-//         auth.set_sensitive(true);
+        let mut auth = HeaderValue::from_str(&format!("Bearer {token}")).unwrap();
+        auth.set_sensitive(true);
 
-//         let headers = HeaderMap::from_iter([(AUTHORIZATION, auth)]);
+        let headers = HeaderMap::from_iter([(AUTHORIZATION, auth)]);
 
-//         #[allow(unused_mut)]
-//         let mut client = ClientBuilder::new().default_headers(headers);
+        #[allow(unused_mut)]
+        let mut client = ClientBuilder::new().default_headers(headers);
 
-//         #[cfg(not(target_arch = "wasm32"))]
-//         {
-//             if let Some(accept_invalid_certs) = accept_invalid_certificates {
-//                 client = client.danger_accept_invalid_certs(accept_invalid_certs);
-//             }
-//         }
+        #[cfg(not(target_arch = "wasm32"))]
+        {
+            if let Some(accept_invalid_certs) = accept_invalid_certificates {
+                client = client.danger_accept_invalid_certs(accept_invalid_certs);
+            }
+        }
 
-//         let client = client.build().unwrap();
+        let client = client.build().unwrap();
 
-//         #[cfg(not(feature = "python"))]
-//         return Self {
-//             backend_base_url: api_base_url,
-//             client,
-//             api_key,
-//         };
+        #[cfg(not(feature = "python"))]
+        return Self {
+            backend_base_url: api_base_url,
+            client,
+            api_key,
+        };
 
-//         #[cfg(feature = "python")]
-//         return Self {
-//             backend_base_url: api_base_url,
-//             client,
-//             api_key,
-//             runtime: Arc::new(Runtime::new().unwrap()),
-//         };
-//     }
-// }
+        #[cfg(feature = "python")]
+        return Self {
+            backend_base_url: api_base_url,
+            client,
+            api_key,
+            runtime: Arc::new(Runtime::new().unwrap()),
+        };
+    }
+}
 
-// impl ScamplersClient {
-//     #[allow(dead_code)]
-//     async fn send_request_with_body<Req, Resp>(
-//         &self,
-//         data: Req,
-//         method: Method,
-//     ) -> Result<Resp, ScamplersErrorResponse>
-//     where
-//         Req: Serialize,
-//         Resp: DeserializeOwned,
-//         (Req, Resp): ApiEndpoint,
-//     {
-//         let Self {
-//             backend_base_url,
-//             client,
-//             api_key,
-//             ..
-//         } = self;
+impl ScamplersClient {
+    #[allow(dead_code)]
+    async fn send_request<Req, Resp>(&self, data: Req) -> Result<Resp, ScamplersErrorResponse>
+    where
+        Req: Serialize,
+        Resp: DeserializeOwned,
+        (Req, Resp): ApiEndpoint,
+        <(Req, Resp) as ApiEndpoint>::RequestExtractor: RequestExtractorExt<Req>,
+    {
+        let Self {
+            backend_base_url,
+            client,
+            api_key,
+            ..
+        } = self;
 
-//         let route = <(Req, Resp)>::to_api_path();
+        let url = format!("{backend_base_url}{}", <(Req, Resp)>::PATH);
+        let method = <(Req, Resp)>::METHOD;
 
-//         let mut request = match method {
-//             Method::POST => client
-//                 .post(format!("{backend_base_url}{route}"))
-//                 .json(&data),
-//             _ => {
-//                 return Err(ScamplersCoreErrorResponse::builder()
-//                     .error(ClientError {
-//                         message: format!("unexpected HTTP method {method}"),
-//                     })
-//                     .build());
-//             }
-//         };
+        let mut request = match method {
+            Method::GET => client.get(url),
+            Method::POST => client.post(url),
+            Method::PATCH => client.patch(url),
+            Method::DELETE => client.delete(url),
+            _ => unreachable!(),
+        };
 
-//         if let Some(api_key) = api_key {
-//             request = request.header("X-API-Key", api_key);
-//         }
+        let build_request = <(Req, Resp) as ApiEndpoint>::RequestExtractor::request_builder();
+        request = build_request(request, &data);
 
-//         let response = request.send().await.unwrap();
-//         let status = Some(response.status().as_u16());
-//         let raw_response = response.bytes().await.unwrap();
+        if let Some(api_key) = api_key {
+            request = request.header("X-API-Key", api_key);
+        }
 
-//         let deserialized_success_response = serde_json::from_slice(&raw_response);
+        let response = request.send().await.unwrap();
+        let status = response.status().as_u16();
+        let raw_response = response.bytes().await.unwrap();
 
-//         let Err(deserialization_failure1) = deserialized_success_response else {
-//             return Ok(deserialized_success_response.unwrap());
-//         };
+        let deserialized_success_response = serde_json::from_slice(&raw_response);
 
-//         let deserialized_failure_response = serde_json::from_slice(&raw_response);
+        let Err(deserialization_failure1) = deserialized_success_response else {
+            return Ok(deserialized_success_response.unwrap());
+        };
 
-//         let Err(deserialization_failure2) = deserialized_failure_response else {
-//             return Err(deserialized_failure_response.unwrap());
-//         };
+        let deserialized_failure_response = serde_json::from_slice(&raw_response);
 
-//         let inner_error = ServerError {
-//             message: format!(
-//                 "failed to deserialize response body as success and as failure: \
-//                  {deserialization_failure1} / {deserialization_failure2}"
-//             ),
-//             raw_response_body: String::from_utf8(raw_response.to_vec()).unwrap_or_default(),
-//         };
+        let Err(deserialization_failure2) = deserialized_failure_response else {
+            return Err(deserialized_failure_response.unwrap());
+        };
 
-//         Err(ScamplersCoreErrorResponse {
-//             status,
-//             error: ScamplersCoreError::Server(inner_error),
-//         })
-//     }
+        let error = ServerError {
+            message: format!(
+                "failed to deserialize response body as success and as failure: \
+                 {deserialization_failure1} / {deserialization_failure2}"
+            ),
+            raw_response_body: String::from_utf8(raw_response.to_vec()).unwrap(),
+        };
 
-//     #[cfg(target_arch = "wasm32")]
-//     async fn send_request_wasm<Req, Resp>(
-//         &self,
-//         data: Req,
-//         method: Method,
-//     ) -> Result<Resp, ScamplersCoreErrorResponse>
-//     where
-//         Req: Serialize,
-//         Resp: DeserializeOwned,
-//         (Req, Resp): ToApiPath,
-//     {
-//         self.send_request_with_body(data, method).await
-//     }
+        Err(ScamplersErrorResponse::builder()
+            .status(status)
+            .error(error)
+            .build())
+    }
 
-//     #[cfg(feature = "python")]
-//     async fn send_request_python<Req, Resp>(
-//         self,
-//         data: Req,
-//         method: Method,
-//     ) -> Result<Resp, ScamplersCoreErrorResponse>
-//     where
-//         Req: Serialize + Send + 'static,
-//         Resp: DeserializeOwned + Send + 'static,
-//         (Req, Resp): ToApiPath,
-//     {
-//         let runtime = self.runtime.clone();
+    #[cfg(target_arch = "wasm32")]
+    async fn send_request_wasm<Req, Resp>(&self, data: Req) -> Result<Resp, ScamplersErrorResponse>
+    where
+        Req: Serialize,
+        Resp: DeserializeOwned,
+        (Req, Resp): ApiEndpoint,
+        <(Req, Resp) as ApiEndpoint>::RequestExtractor: RequestExtractorExt<Req>,
+    {
+        self.send_request(data).await
+    }
 
-//         runtime
-//             .spawn(async move { self.send_request_with_body(data, method).await })
-//             .await
-//             .unwrap()
-//     }
-// }
+    #[cfg(feature = "python")]
+    async fn send_request_python<Req, Resp>(self, data: Req) -> Result<Resp, ScamplersErrorResponse>
+    where
+        Req: Serialize + Send + 'static,
+        Resp: DeserializeOwned + Send + 'static,
+        (Req, Resp): ApiEndpoint,
+        <(Req, Resp) as ApiEndpoint>::RequestExtractor: RequestExtractorExt<Req>,
+    {
+        let runtime = self.runtime.clone();
 
-// #[cfg(target_arch = "wasm32")]
-// #[wasm_bindgen]
-// impl ScamplersClient {
-//     /// # Errors
-//     #[wasm_bindgen]
-//     pub async fn ms_login(
-//         &self,
-//         data: NewMsLogin,
-//     ) -> Result<CreatedUser, ScamplersCoreErrorResponse> {
-//         self.send_request_wasm(data, Method::POST).await
-//     }
-// }
+        runtime
+            .spawn(async move { self.send_request(data).await })
+            .await
+            .unwrap()
+    }
+}
 
-// #[cfg(feature = "python")]
-// macro_rules! impl_client_methods {
-//     ($(($method_name:ident, $request_type:path, $response_type:path, $http_method:expr));*) => {
-//         $(#[::pyo3::pymethods]
-//         impl ScamplersClient {
-//             async fn $method_name(
-//                 &self,
-//                 data: $request_type,
-//             ) -> Result<$response_type, ScamplersCoreErrorResponse> {
-//                 let client = self.clone();
-//                 client.send_request_python(data, $http_method).await
-//             }
-//         })*
-//     };
-// }
+#[cfg(target_arch = "wasm32")]
+#[wasm_bindgen]
+impl ScamplersClient {
+    /// # Errors
+    #[wasm_bindgen]
+    pub async fn ms_login(&self, data: NewPerson) -> Result<CreatedUser, ScamplersErrorResponse> {
+        self.send_request_wasm(data).await
+    }
+}
 
-// #[cfg(feature = "python")]
-// impl_client_methods!(
-//     (create_institution, NewInstitution, Institution, Method::POST);
-//     (create_person, NewPerson, Person, Method::POST);
-//     (create_lab, NewLab, Lab, Method::POST);
-//     (create_specimen, NewSpecimen, Specimen, Method::POST);
-//     (create_suspension_pool, NewSuspensionPool, SuspensionPoolHandle, Method::POST);
-//     (create_suspension, NewSuspension, Suspension, Method::POST);
-//     (create_sequencing_run, NewSequencingRun, SequencingRunSummary, Method::POST);
-//     (create_chromium_run, NewChromiumRun, ChromiumRun, Method::POST);
-//     (create_cdna, NewCdnaGroup, Vec<CdnaHandle>, Method::POST);
-//     (create_library, NewLibrary, LibraryHandle, Method::POST)
-// );
+macro_rules! impl_wasm_client_methods {
+    ($(($method_name:ident, $request_type:path, $response_type:path));*) => {
+        $(
+            #[cfg(target_arch = "wasm32")]
+            #[wasm_bindgen::wasm_bindgen]
+            impl ScamplersClient {
+                async fn $method_name(
+                    &self,
+                    data: $request_type,
+                ) -> Result<$response_type, ScamplersErrorResponse> {
+                    self.send_request_wasm(data).await
+                }
+            }
+        )*
+    };
+}
+
+macro_rules! impl_python_client_methods {
+    ($(($method_name:ident, $request_type:path, $response_type:path));*) => {
+        $(
+            #[pyo3::pymethods]
+            impl ScamplersClient {
+                async fn $method_name(
+                    &self,
+                    data: $request_type,
+                ) -> Result<$response_type, ScamplersErrorResponse> {
+                    let client = self.clone();
+                    client.send_request_python(data).await
+                }
+            }
+        )*
+    };
+}
+
+impl_wasm_client_methods!(
+    (institution, InstitutionId, Institution);
+    (fetch_institutions, InstitutionQuery, Vec<Institution>);
+    (ms_login, NewPerson, CreatedUser);
+    (person, PersonId, Person);
+    (fetch_people, PersonQuery, Vec<Person>)
+);
+
+impl_python_client_methods!(
+    (create_institution, NewInstitution, Institution);
+    (institution, InstitutionId, Institution);
+    (fetch_institutions, InstitutionQuery, Vec<Institution>);
+    (create_person, NewPerson, Person);
+    (person, PersonId, Person);
+    (fetch_people, PersonQuery, Vec<Person>)
+);
 
 // #[cfg(feature = "python")]
 // macro_rules! impl_chromium_dataset_creation {

@@ -25,11 +25,7 @@ impl DbOperation<Person> for NewPerson {
 
         diesel::select(create_user_if_not_exists(id.to_string(), &self.roles)).execute(db_conn)?;
 
-        Ok(PersonQuery::builder()
-            .ids(id)
-            .build()
-            .execute(db_conn)?
-            .remove(0))
+        PersonId(id).execute(db_conn)
     }
 }
 

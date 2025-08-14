@@ -210,7 +210,8 @@ macro_rules! impl_python_order_by {
 #[macro_export]
 macro_rules! uuid_newtype {
     ($name:ident) => {
-        #[derive(Clone, Copy, serde::Deserialize)]
+        #[cfg_attr(feature = "python", pyo3::pyclass)]
+        #[derive(Clone, Copy, serde::Deserialize, serde::Serialize)]
         #[serde(transparent)]
         pub struct $name(uuid::Uuid);
 
@@ -229,6 +230,12 @@ macro_rules! uuid_newtype {
         impl From<$name> for Vec<uuid::Uuid> {
             fn from(val: $name) -> Vec<uuid::Uuid> {
                 vec![val.0]
+            }
+        }
+
+        impl std::fmt::Display for $name {
+            fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+                self.0.fmt(f)
             }
         }
     };
