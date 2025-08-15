@@ -25,6 +25,7 @@ pub struct NewInstitution {
 }
 
 #[cfg(feature = "python")]
+#[pyo3_stub_gen::derive::gen_stub_pymethods]
 #[pymethods]
 impl NewInstitution {
     #[new]

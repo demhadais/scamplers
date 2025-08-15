@@ -14,41 +14,97 @@ use scamplers::{
     },
 };
 
-const ERRORS_SUBMODULE_NAME: &'static str = "errors";
-const REQUESTS_SUBMODULE_NAME: &'static str = "requests";
+#[pymodule]
+fn scamplepy(module: &Bound<'_, PyModule>) -> PyResult<()> {
+    use scamplers::client::ScamplersClient;
 
-fn errors_submodule(parent: &Bound<PyModule>) -> PyResult<()> {
-    let errors = PyModule::new(parent.py(), ERRORS_SUBMODULE_NAME)?;
+    module.add_class::<ScamplersClient>()?;
 
-    errors.add_class::<ClientError>()?;
-    errors.add_class::<DuplicateResourceError>()?;
-    errors.add_class::<InvalidReferenceError>()?;
-    errors.add_class::<ResourceNotFoundError>()?;
-    errors.add_class::<InvalidDataError>()?;
-    errors.add_class::<MalformedRequestError>()?;
-    errors.add_class::<PermissionDeniedError>()?;
-    errors.add_class::<ServerError>()?;
-    errors.add_class::<CdnaGemsError>()?;
-    errors.add_class::<CdnaLibraryTypeError>()?;
-    errors.add_class::<DatasetCmdlineError>()?;
-    errors.add_class::<DatasetNMetricsFilesError>()?;
-    errors.add_class::<DatasetMetricsFileParseError>()?;
-    errors.add_class::<InvalidMeasurementError>()?;
+    let submodules = [
+        register_errors_submodule(module)?,
+        register_units_submodule(module)?,
+        register_create_submodule(module)?,
+    ];
 
-    errors.add_class::<ScamplersErrorResponse>()?;
+    let python = module.py();
 
-    parent.add_submodule(&errors)?;
+    for (submodule_name, submodule) in &submodules {
+        add_module_to_sys_modules(python, submodule_name, submodule)?;
+    }
 
     Ok(())
 }
 
-fn requests_create_subsubmodule(parent: &Bound<PyModule>) -> PyResult<()> {
-    let create = PyModule::new(parent.py(), "create")?;
+fn add_module_to_sys_modules(
+    python: Python<'_>,
+    module_name: &str,
+    submodule: &Bound<'_, PyModule>,
+) -> anyhow::Result<()> {
+    let sys_modules = python.import("sys")?.getattr("modules")?;
 
-    create.add_class::<NewInstitution>()?;
+    sys_modules.set_item(module_name, submodule)?;
 
-    create.add_class::<UserRole>()?;
-    create.add_class::<NewPerson>()?;
+    Ok(())
+}
+
+type ModuleWithName<'a> = (&'static str, Bound<'a, PyModule>);
+
+trait NewScamplepyModule {
+    fn new_scamplepy_module<'py>(py: Python<'py>, name: &str) -> PyResult<Bound<'py, PyModule>>;
+}
+
+impl NewScamplepyModule for PyModule {
+    fn new_scamplepy_module<'py>(py: Python<'py>, name: &str) -> PyResult<Bound<'py, PyModule>> {
+        Self::new(py, name.trim_start_matches("scamplepy."))
+    }
+}
+
+fn register_errors_submodule<'a>(parent: &'a Bound<PyModule>) -> PyResult<ModuleWithName<'a>> {
+    let errors_module =
+        PyModule::new_scamplepy_module(parent.py(), scamplers::ERRORS_SUBMODULE_NAME)?;
+
+    errors_module.add_class::<ClientError>()?;
+    errors_module.add_class::<DuplicateResourceError>()?;
+    errors_module.add_class::<InvalidReferenceError>()?;
+    errors_module.add_class::<ResourceNotFoundError>()?;
+    errors_module.add_class::<InvalidDataError>()?;
+    errors_module.add_class::<MalformedRequestError>()?;
+    errors_module.add_class::<PermissionDeniedError>()?;
+    errors_module.add_class::<ServerError>()?;
+    errors_module.add_class::<CdnaGemsError>()?;
+    errors_module.add_class::<CdnaLibraryTypeError>()?;
+    errors_module.add_class::<DatasetCmdlineError>()?;
+    errors_module.add_class::<DatasetNMetricsFilesError>()?;
+    errors_module.add_class::<DatasetMetricsFileParseError>()?;
+    errors_module.add_class::<InvalidMeasurementError>()?;
+
+    errors_module.add_class::<ScamplersErrorResponse>()?;
+
+    parent.add_submodule(&errors_module)?;
+
+    Ok((scamplers::ERRORS_SUBMODULE_NAME, errors_module))
+}
+
+fn register_units_submodule<'a>(parent: &'a Bound<PyModule>) -> PyResult<ModuleWithName<'a>> {
+    let units_module =
+        PyModule::new_scamplepy_module(parent.py(), scamplers::COMMON_SUBMODULE_NAME)?;
+
+    units_module.add_class::<MassUnit>()?;
+    units_module.add_class::<VolumeUnit>()?;
+    units_module.add_class::<LengthUnit>()?;
+
+    parent.add_submodule(&units_module)?;
+
+    Ok((scamplers::COMMON_SUBMODULE_NAME, units_module))
+}
+
+fn register_create_submodule<'a>(parent: &'a Bound<PyModule>) -> PyResult<ModuleWithName<'a>> {
+    let create_submodule = PyModule::new(parent.py(), scamplers::CREATE_SUBMODULE_NAME)?;
+
+    create_submodule.add_class::<NewInstitution>()?;
+
+    create_submodule.add_class::<UserRole>()?;
+    create_submodule.add_class::<NewPerson>()?;
 
     // requests.add_class::<NewLab>()?;
 
@@ -112,44 +168,9 @@ fn requests_create_subsubmodule(parent: &Bound<PyModule>) -> PyResult<()> {
     // requests.add_class::<dataset::chromium::CellrangerVdjDataset>()?;
     // requests.add_class::<dataset::chromium::CellrangeratacCountDataset>()?;
 
-    parent.add_submodule(&create)?;
+    parent.add_submodule(&create_submodule)?;
 
-    Ok(())
-}
-
-fn requests_submodule(parent: &Bound<PyModule>) -> PyResult<()> {
-    let requests = PyModule::new(parent.py(), REQUESTS_SUBMODULE_NAME)?;
-
-    requests_create_subsubmodule(&requests)?;
-
-    parent.add_submodule(&requests)?;
-
-    Ok(())
-}
-
-fn units_submodule(parent: &Bound<PyModule>) -> PyResult<()> {
-    let units = PyModule::new(parent.py(), "units")?;
-
-    units.add_class::<MassUnit>()?;
-    units.add_class::<VolumeUnit>()?;
-    units.add_class::<LengthUnit>()?;
-
-    parent.add_submodule(&units)?;
-
-    Ok(())
-}
-
-#[pymodule]
-fn scamplepy(module: &Bound<'_, PyModule>) -> PyResult<()> {
-    use scamplers::client::ScamplersClient;
-
-    module.add_class::<ScamplersClient>()?;
-
-    errors_submodule(module)?;
-    requests_submodule(module)?;
-    units_submodule(module)?;
-
-    Ok(())
+    Ok((scamplers::CREATE_SUBMODULE_NAME, create_submodule))
 }
 
 define_stub_info_gatherer!(stub_info);

@@ -16,3 +16,16 @@ pub mod result;
 pub mod server;
 #[cfg(feature = "app")]
 mod state;
+
+#[cfg(feature = "python")]
+pub mod module_names {
+    pub const COMMON_SUBMODULE_NAME: &str = "scamplepy.common";
+    pub const CREATE_SUBMODULE_NAME: &str = "scamplepy.create";
+    pub const QUERY_SUBMODULE_NAME: &str = "scamplepy.query";
+    pub const UPDATE_SUBMODULE_NAME: &str = "scamplepy.update";
+    pub const ERRORS_SUBMODULE_NAME: &str = "scamplepy.errors";
+    pub const RESPONSES_SUBMODULE_NAME: &str = "scamplepy.responses";
+}
+
+#[cfg(feature = "python")]
+pub use module_names::*;

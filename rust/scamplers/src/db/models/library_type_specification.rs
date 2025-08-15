@@ -11,6 +11,7 @@ mod create;
 
 #[cfg_attr(target_arch = "wasm32", wasm_bindgen::prelude::wasm_bindgen)]
 #[db_simple_enum]
+#[cfg_attr(feature = "python", pyo3(module = "scamplepy.common"))]
 #[derive(Eq, PartialOrd, Ord)]
 pub enum LibraryType {
     AntibodyCapture,

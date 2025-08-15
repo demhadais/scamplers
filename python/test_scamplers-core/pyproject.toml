@@ -11,7 +11,7 @@ dependencies = [
     "pyright>=1.1.403",
     "pytest>=8.4.1",
     "pytest-asyncio>=1.1.0",
-    "scamplers-core",
+    "scamplepy",
 ]
 
 [build-system]
@@ -19,7 +19,7 @@ requires = ["uv_build>=0.8.3,<0.9.0"]
 build-backend = "uv_build"
 
 [tool.uv.sources]
-scamplers-core = { path = "../../rust/scamplers-core", editable = true }
+scamplepy = { path = "../../rust/scamplepy", editable = true }
 
 [tool.pyright]
 venvPath = "."

@@ -24,6 +24,7 @@ mod update;
 
 #[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
 #[db_simple_enum]
+#[cfg_attr(feature = "python", pyo3(module = "scamplepy.common"))]
 pub enum UserRole {
     AppAdmin,
     BiologyStaff,
@@ -51,6 +52,7 @@ pub struct NewPerson {
 }
 
 #[cfg(feature = "python")]
+#[pyo3_stub_gen::derive::gen_stub_pymethods]
 #[pymethods]
 impl NewPerson {
     #[new]
@@ -137,7 +139,11 @@ pub struct PersonUpdateCore {
     pub institution_id: Option<Uuid>,
 }
 
-#[cfg_attr(feature = "python", pyclass(get_all, set_all))]
+#[cfg_attr(feature = "python", pyo3_stub_gen::derive::gen_stub_pyclass)]
+#[cfg_attr(
+    feature = "python",
+    pyclass(get_all, set_all, module = "scamplepy.update")
+)]
 #[base_model]
 #[derive(Default)]
 pub struct PersonUpdate {

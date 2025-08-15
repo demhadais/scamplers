@@ -10,6 +10,7 @@ mod create;
 mod read;
 
 #[db_simple_enum]
+#[cfg_attr(feature = "python", pyo3(module = "scamplepy.responses"))]
 pub enum MultiplexingTagType {
     FlexBarcode,
     Ocm,

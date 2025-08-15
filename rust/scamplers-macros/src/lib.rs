@@ -131,10 +131,10 @@ pub fn scamplers_error(_attr: TokenStream, input: TokenStream) -> TokenStream {
     let item = parse_macro_input!(input as Item);
 
     let output = quote! {
-        #[cfg_attr(feature = "python", ::pyo3_stub_gen::derive::gen_stub_pyclass(module = "errors"))]
+        #[cfg_attr(feature = "python", ::pyo3_stub_gen::derive::gen_stub_pyclass)]
         #[::scamplers_macros::base_model]
         #[cfg_attr(target_arch = "wasm32", ::wasm_bindgen::prelude::wasm_bindgen(getter_with_clone))]
-        #[cfg_attr(feature = "python", ::pyo3::pyclass(get_all))]
+        #[cfg_attr(feature = "python", ::pyo3::pyclass(get_all, module = "scamplepy.errors"))]
         #[derive(Default, ::scamplers_macros::Jsonify, ::scamplers_macros::WasmJsonify, ::scamplers_macros::PyJsonify, ::thiserror::Error, ::bon::Builder)]
         #[builder(on(_, into))]
         #item
@@ -150,7 +150,7 @@ pub fn db_insertion(_attr: TokenStream, input: TokenStream) -> TokenStream {
     let output = quote! {
         #[::scamplers_macros::base_model]
         #[cfg_attr(feature = "python", ::pyo3_stub_gen::derive::gen_stub_pyclass)]
-        #[cfg_attr(feature = "python", ::pyo3::pyclass(get_all, set_all, eq, module = "scamplepy.requests.create"))]
+        #[cfg_attr(feature = "python", ::pyo3::pyclass(get_all, set_all, eq, module = "scamplepy.create"))]
         #[cfg_attr(
             feature = "app",
             derive(::diesel::Insertable),
@@ -174,7 +174,7 @@ pub fn db_query(_attr: TokenStream, input: TokenStream) -> TokenStream {
         #[::scamplers_macros::base_model]
         #[cfg_attr(target_arch = "wasm32", ::wasm_bindgen::prelude::wasm_bindgen(getter_with_clone))]
         #[cfg_attr(feature = "python", ::pyo3_stub_gen::derive::gen_stub_pyclass)]
-        #[cfg_attr(feature = "python", ::pyo3::pyclass(eq, module = "scamplepy.requests.query"))]
+        #[cfg_attr(feature = "python", ::pyo3::pyclass(eq, module = "scamplepy.query"))]
         #[derive(Default, ::bon::Builder, ::scamplers_macros::Jsonify, ::scamplers_macros::WasmJsonify, ::scamplers_macros::PyJsonify)]
         #[builder(on(_, into), derive(Clone, Debug, Into))]
         #struct_item
@@ -200,7 +200,7 @@ pub fn db_selection(_attr: TokenStream, input: TokenStream) -> TokenStream {
         #[::scamplers_macros::base_model]
         #[cfg_attr(target_arch = "wasm32", ::wasm_bindgen::prelude::wasm_bindgen(getter_with_clone, readonly))]
         #[cfg_attr(feature = "python", ::pyo3_stub_gen::derive::gen_stub_pyclass)]
-        #[cfg_attr(feature = "python", ::pyo3::pyclass(get_all, eq, module = "scamplepy.requests.read"))]
+        #[cfg_attr(feature = "python", ::pyo3::pyclass(get_all, eq, module = "scamplepy.responses"))]
         #[derive(::scamplers_macros::Jsonify, ::scamplers_macros::WasmJsonify, ::scamplers_macros::PyJsonify)]
         #[cfg_attr(feature = "app", derive(::diesel::Selectable, ::diesel::Queryable), diesel(check_for_backend(::diesel::pg::Pg)))]
         #struct_item
@@ -235,7 +235,7 @@ pub fn db_update(_attr: TokenStream, input: TokenStream) -> TokenStream {
     let output = quote! {
         #[::scamplers_macros::base_model]
         #[cfg_attr(feature = "python", ::pyo3_stub_gen::derive::gen_stub_pyclass)]
-        #[cfg_attr(feature = "python", ::pyo3::pyclass(get_all, set_all, eq, module = "scamplepy.requests.update"))]
+        #[cfg_attr(feature = "python", ::pyo3::pyclass(get_all, set_all, eq, module = "scamplepy.update"))]
         #[cfg_attr(
             feature = "app",
             derive(::diesel::AsChangeset, ::diesel::Identifiable),

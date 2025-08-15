@@ -8,7 +8,10 @@ use valuable::Valuable;
 #[cfg(target_arch = "wasm32")]
 use wasm_bindgen::prelude::*;
 
-use crate::db::models::{Jsonify, library_type_specification::LibraryType};
+use crate::db::models::{
+    Jsonify,
+    library_type_specification::{LibraryType, LibraryTypeSpecification},
+};
 
 #[scamplers_error]
 #[error("{self:#?}")]
@@ -88,10 +91,7 @@ pub struct DatasetMetricsFileParseError {
 #[scamplers_error]
 #[error("{self:#?}")]
 pub struct CdnaLibraryTypeError {
-    pub expected_library_types: Vec<LibraryType>,
-    pub found_library_types: Vec<LibraryType>,
-    pub expected_volumes: Vec<f32>,
-    pub found_volumes: Vec<f32>,
+    pub expected_specifications: Vec<LibraryTypeSpecification>,
 }
 
 #[scamplers_error]

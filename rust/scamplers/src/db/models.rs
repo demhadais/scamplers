@@ -31,20 +31,27 @@ pub mod specimen;
 pub mod suspension;
 pub mod units;
 
-#[cfg_attr(feature = "python", pyo3_stub_gen::derive::gen_stub_pyclass)]
 #[cfg_attr(
     target_arch = "wasm32",
     wasm_bindgen(getter_with_clone, js_name = "OrderBy")
 )]
-#[cfg_attr(feature = "python", pyclass(name = "OrderBy", get_all, set_all))]
+#[cfg_attr(feature = "python", pyo3_stub_gen::derive::gen_stub_pyclass)]
+#[cfg_attr(
+    feature = "python",
+    pyclass(name = "OrderBy", get_all, set_all, module = "scamplepy.query")
+)]
 #[derive(Clone)]
 pub struct WasmPythonOrderBy {
     pub field: String,
     pub descending: bool,
 }
 
-#[cfg_attr(feature = "python", pyclass(get_all, set_all))]
 #[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
+#[cfg_attr(feature = "python", pyo3_stub_gen::derive::gen_stub_pyclass)]
+#[cfg_attr(
+    feature = "python",
+    pyclass(get_all, set_all, module = "scamplepy.query")
+)]
 #[base_model]
 pub struct Pagination {
     pub limit: i64,
