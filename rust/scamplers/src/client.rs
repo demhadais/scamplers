@@ -16,8 +16,8 @@ use crate::db::models::person::CreatedUser;
 use crate::{
     db::models::{
         institution::{Institution, InstitutionId, InstitutionQuery},
-        lab::{Lab, LabId, LabQuery, NewLab},
-        person::{NewPerson, Person, PersonId, PersonQuery},
+        lab::{Lab, LabId, LabQuery, LabUpdate, NewLab},
+        person::{NewPerson, Person, PersonId, PersonQuery, PersonUpdate},
     },
     endpoints::{Api, Endpoint},
     result::{ScamplersErrorResponse, ServerError},
@@ -227,9 +227,11 @@ impl_python_client_methods!(
     (create_person, NewPerson, Person);
     (fetch_person, PersonId, Person);
     (list_people, PersonQuery, Vec<Person>);
+    (update_person, PersonUpdate, Person);
     (create_lab, NewLab, Lab);
     (get_lab, LabId, Lab);
-    (list_labs, LabQuery, Vec<Lab>)
+    (list_labs, LabQuery, Vec<Lab>);
+    (update_lab, LabUpdate, Lab)
 );
 
 // #[cfg(feature = "python")]
