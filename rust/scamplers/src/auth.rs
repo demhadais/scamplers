@@ -1,9 +1,5 @@
 use std::{fmt::Debug, str::FromStr};
 
-use crate::{
-    result::{PermissionDeniedError, ScamplersError, ScamplersErrorResponse, ScamplersResult},
-    state::AppState,
-};
 use argon2::{
     Argon2, PasswordHash, PasswordVerifier,
     password_hash::{PasswordHasher, SaltString},
@@ -32,6 +28,11 @@ use rand::{
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 use valuable::Valuable;
+
+use crate::{
+    result::{PermissionDeniedError, ScamplersError, ScamplersErrorResponse, ScamplersResult},
+    state::AppState,
+};
 
 const KEY_PREFIX_LENGTH: usize = 8;
 const KEY_LENGTH: usize = 32;

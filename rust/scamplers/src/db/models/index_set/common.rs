@@ -1,10 +1,11 @@
+use std::{fmt::Display, sync::LazyLock};
+
 use anyhow::anyhow;
 #[cfg(feature = "app")]
 use diesel::{PgConnection, prelude::*};
 use regex::Regex;
 #[cfg(feature = "app")]
 use scamplers_schema::index_kit;
-use std::{fmt::Display, sync::LazyLock};
 
 use crate::result::ServerError;
 

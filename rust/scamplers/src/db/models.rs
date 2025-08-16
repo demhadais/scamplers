@@ -152,3 +152,54 @@ pub trait Jsonify: DeserializeOwned + Serialize {
         Ok(Self::from_json_bytes(&decoded)?)
     }
 }
+#[cfg(test)]
+mod tests {
+    use pretty_assertions::assert_eq;
+    use rstest::{fixture, rstest};
+    use serde::{Deserialize, Serialize};
+    use time::OffsetDateTime;
+    use uuid::Uuid;
+
+    use crate::db::models::Jsonify;
+
+    #[derive(Debug, PartialEq, Serialize, Deserialize)]
+    struct Data {
+        field1: String,
+        field2: Option<String>,
+        field3: Uuid,
+        field4: OffsetDateTime,
+    }
+
+    impl Jsonify for Data {}
+
+    #[fixture]
+    fn data() -> Data {
+        Data {
+            field1: "foo".to_string(),
+            field2: Some("bar".to_string()),
+            field3: Uuid::now_v7(),
+            field4: OffsetDateTime::now_utc(),
+        }
+    }
+
+    #[rstest]
+    fn jsonify_str_round_trip(data: Data) {
+        let json = data.to_json_string();
+        let deserialized = Data::from_json_string(&json).unwrap();
+        assert_eq!(data, deserialized);
+    }
+
+    #[rstest]
+    fn jsonify_bytes_round_trip(data: Data) {
+        let json = data.to_json_bytes();
+        let deserialized = Data::from_json_bytes(&json).unwrap();
+        assert_eq!(data, deserialized);
+    }
+
+    #[rstest]
+    fn jsonify_base64(data: Data) {
+        let json = data.to_base64_json();
+        let deserialized = Data::from_base64_json(&json).unwrap();
+        assert_eq!(data, deserialized);
+    }
+}

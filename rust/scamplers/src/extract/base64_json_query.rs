@@ -1,5 +1,7 @@
-use axum::extract::{FromRequestParts, OptionalFromRequestParts};
-use axum::http::StatusCode;
+use axum::{
+    extract::{FromRequestParts, OptionalFromRequestParts},
+    http::StatusCode,
+};
 use serde::{Serialize, Serializer, de::DeserializeOwned};
 
 use crate::{

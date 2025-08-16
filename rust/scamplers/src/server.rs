@@ -1,7 +1,6 @@
 #![allow(async_fn_in_trait)]
 use std::sync::Arc;
 
-use crate::{dev_container::DevContainer, state::AppState};
 use anyhow::{Context, anyhow, bail};
 use axum::{Router, routing::get};
 use camino::Utf8PathBuf;
@@ -11,7 +10,9 @@ use tokio::{net::TcpListener, signal};
 use tower_http::trace::TraceLayer;
 use uuid::Uuid;
 
-use crate::{config::Config, result::ScamplersResult};
+use crate::{
+    config::Config, dev_container::DevContainer, result::ScamplersResult, state::AppState,
+};
 mod api;
 
 /// # Errors
@@ -97,7 +98,7 @@ async fn shutdown_signal(app_state: AppState) {
     };
 
     tokio::select! {
-        () = ctrl_c => {drop(app_state);},
+        () = ctrl_c => {drop(app_state)},
         () = terminate => {drop(app_state)},
     }
 }

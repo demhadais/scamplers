@@ -1,21 +1,20 @@
-use axum::extract::State;
-use axum::http::StatusCode;
-use axum::{Json, Router};
+use axum::{Json, Router, extract::State, http::StatusCode};
 use valuable::Valuable;
 
-use crate::auth::{Frontend, User};
-use crate::db::models::institution::{InstitutionId, InstitutionQuery};
-use crate::db::models::person::{CreatedUser, NewPerson, Person, PersonId, PersonQuery};
-use crate::endpoints::Api;
-use crate::extract::ValidJsonBody;
-use crate::state::AppState;
 use crate::{
+    auth::{Frontend, User},
     db::{
         DbOperation,
-        models::institution::{Institution, NewInstitution},
+        models::{
+            institution::{Institution, InstitutionId, InstitutionQuery, NewInstitution},
+            lab::{Lab, LabId, LabQuery, LabUpdate, NewLab},
+            person::{CreatedUser, NewPerson, Person, PersonId, PersonQuery, PersonUpdate},
+        },
     },
-    endpoints::Endpoint,
+    endpoints::{Api, Endpoint},
+    extract::ValidJsonBody,
     result::ScamplersErrorResponse,
+    state::AppState,
 };
 
 type ScamplersApiResponse<Request, Response> = Result<
@@ -100,7 +99,12 @@ pub fn router() -> Router<AppState> {
         (read_institutions, InstitutionQuery, Vec<Institution>);
         (create_person, NewPerson, Person);
         (read_person, PersonId, Person);
-        (read_people, PersonQuery, Vec<Person>)
+        (read_people, PersonQuery, Vec<Person>);
+        (update_person, PersonUpdate, Person);
+        (create_lab, NewLab, Lab);
+        (read_lab, LabId, Lab);
+        (read_labs, LabQuery, Vec<Lab>);
+        (update_lab, LabUpdate, Lab)
     );
 
     router

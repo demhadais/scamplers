@@ -1,20 +1,18 @@
 use std::sync::Arc;
 
-use anyhow::Context;
-use anyhow::anyhow;
-use deadpool_diesel::Runtime;
-use deadpool_diesel::postgres::Manager as PoolManager;
-use deadpool_diesel::postgres::Pool;
-use diesel::PgConnection;
-use diesel::prelude::*;
-use diesel_migrations::EmbeddedMigrations;
-use diesel_migrations::MigrationHarness;
-use diesel_migrations::embed_migrations;
+use anyhow::{Context, anyhow};
+use deadpool_diesel::{
+    Runtime,
+    postgres::{Manager as PoolManager, Pool},
+};
+use diesel::{PgConnection, prelude::*};
+use diesel_migrations::{EmbeddedMigrations, MigrationHarness, embed_migrations};
 use uuid::Uuid;
 
-use crate::db::seed_data::insert_seed_data;
-use crate::result::ScamplersResult;
-use crate::{config::Config, dev_container::DevContainer};
+use crate::{
+    config::Config, db::seed_data::insert_seed_data, dev_container::DevContainer,
+    result::ScamplersResult,
+};
 
 #[derive(Clone)]
 pub struct AppStateCore {
@@ -230,6 +228,7 @@ impl AppState {
 
         Ok(app_state)
     }
+
     pub async fn db_conn(&self) -> ScamplersResult<deadpool_diesel::postgres::Connection> {
         match self {
             Self::Dev(s) => s.db_conn().await,

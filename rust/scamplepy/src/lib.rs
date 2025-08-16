@@ -149,8 +149,8 @@ fn register_create_submodule<'a>(parent: &'a Bound<PyModule>) -> PyResult<Module
     // requests.add_class::<LibraryType>()?;
     // requests.add_class::<NewLibraryTypeSpecification>()?;
 
-    // requests.add_class::<nucleic_acid::common::ElectrophoreticMeasurementData>()?;
-    // requests.add_class::<nucleic_acid::common::Concentration>()?;
+    // requests.add_class::<nucleic_acid::common::ElectrophoreticMeasurementData>()?
+    // ; requests.add_class::<nucleic_acid::common::Concentration>()?;
     // requests.add_class::<NewCdnaMeasurement>()?;
     // requests.add_class::<NewCdna>()?;
     // requests.add_class::<NewCdnaGroup>()?;

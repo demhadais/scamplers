@@ -47,7 +47,8 @@ impl ValidString {
         self.0.as_bytes()
     }
 
-    #[must_use] pub fn new() -> Self {
+    #[must_use]
+    pub fn new() -> Self {
         Self::default()
     }
 }
@@ -202,8 +203,9 @@ mod wasm32 {
 
 #[cfg(feature = "python")]
 mod python {
-    use super::ValidString;
     use pyo3_stub_gen::PyStubType;
+
+    use super::ValidString;
 
     impl PyStubType for ValidString {
         fn type_output() -> pyo3_stub_gen::TypeInfo {

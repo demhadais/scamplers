@@ -155,8 +155,9 @@ mod wasm32 {
 
 #[cfg(feature = "python")]
 mod python {
-    use super::Uuid;
     use pyo3_stub_gen::{PyStubType, TypeInfo};
+
+    use super::Uuid;
 
     impl PyStubType for Uuid {
         fn type_output() -> TypeInfo {

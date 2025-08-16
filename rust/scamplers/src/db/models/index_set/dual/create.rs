@@ -1,13 +1,21 @@
 use std::collections::HashMap;
 
-use crate::db::models::index_set::common::{
-    INDEX_SET_NAME_ERROR_MESSAGE, INDEX_SET_NAME_REGEX, IndexSetName, insert_kit_name, map_err,
-};
-use crate::db::{DbOperation, models::index_set::dual::NewDualIndexSet};
-use crate::result::ServerError;
-use diesel::RunQueryDsl;
-use diesel::prelude::*;
+use diesel::{RunQueryDsl, prelude::*};
 use scamplers_schema::dual_index_set;
+
+use crate::{
+    db::{
+        DbOperation,
+        models::index_set::{
+            common::{
+                INDEX_SET_NAME_ERROR_MESSAGE, INDEX_SET_NAME_REGEX, IndexSetName, insert_kit_name,
+                map_err,
+            },
+            dual::NewDualIndexSet,
+        },
+    },
+    result::ServerError,
+};
 
 impl DbOperation<()> for HashMap<String, NewDualIndexSet> {
     fn execute(self, db_conn: &mut diesel::PgConnection) -> crate::result::ScamplersResult<()> {

@@ -3,7 +3,7 @@ use std::sync::Arc;
 
 #[cfg(feature = "python")]
 use pyo3::prelude::*;
-use serde::{Serialize, de::DeserializeOwned};
+use serde::de::DeserializeOwned;
 #[cfg(feature = "python")]
 use tokio::runtime::Runtime;
 #[cfg(target_arch = "wasm32")]
@@ -16,6 +16,7 @@ use crate::db::models::person::CreatedUser;
 use crate::{
     db::models::{
         institution::{Institution, InstitutionId, InstitutionQuery},
+        lab::{Lab, LabId, LabQuery, NewLab},
         person::{NewPerson, Person, PersonId, PersonQuery},
     },
     endpoints::{Api, Endpoint},
@@ -210,20 +211,25 @@ macro_rules! impl_python_client_methods {
 }
 
 impl_wasm_client_methods!(
-    (institution, InstitutionId, Institution);
-    (fetch_institutions, InstitutionQuery, Vec<Institution>);
+    (fetch_institution, InstitutionId, Institution);
+    (list_institutions, InstitutionQuery, Vec<Institution>);
     (ms_login, NewPerson, CreatedUser);
-    (person, PersonId, Person);
-    (fetch_people, PersonQuery, Vec<Person>)
+    (fetch_person, PersonId, Person);
+    (list_people, PersonQuery, Vec<Person>);
+    (get_lab, LabId, Lab);
+    (list_labs, LabQuery, Vec<Lab>)
 );
 
 impl_python_client_methods!(
     (create_institution, NewInstitution, Institution);
-    (institution, InstitutionId, Institution);
-    (fetch_institutions, InstitutionQuery, Vec<Institution>);
+    (fetch_institution, InstitutionId, Institution);
+    (list_institutions, InstitutionQuery, Vec<Institution>);
     (create_person, NewPerson, Person);
-    (person, PersonId, Person);
-    (fetch_people, PersonQuery, Vec<Person>)
+    (fetch_person, PersonId, Person);
+    (list_people, PersonQuery, Vec<Person>);
+    (create_lab, NewLab, Lab);
+    (get_lab, LabId, Lab);
+    (list_labs, LabQuery, Vec<Lab>)
 );
 
 // #[cfg(feature = "python")]
@@ -236,8 +242,8 @@ impl_python_client_methods!(
 //                 data: $request_type,
 //             ) -> Result<DatasetSummary, ScamplersCoreErrorResponse> {
 //                 let client = self.clone();
-//                 client.send_request_python(NewDataset::from(data), Method::POST).await
-//             }
+//                 client.send_request_python(NewDataset::from(data),
+// Method::POST).await             }
 //         })*
 //     };
 // }

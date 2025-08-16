@@ -1,6 +1,7 @@
-use crate::db::models::index_set::common::{DNA_REGEX, INDEX_SET_NAME_REGEX};
 use garde::Validate;
 use serde::Deserialize;
+
+use crate::db::models::index_set::common::{DNA_REGEX, INDEX_SET_NAME_REGEX};
 #[cfg(feature = "app")]
 mod create;
 

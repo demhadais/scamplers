@@ -1,5 +1,8 @@
 use std::fmt::Display;
 
+use diesel::prelude::*;
+use scamplers_schema::single_index_set;
+
 use crate::{
     db::{
         DbOperation,
@@ -10,8 +13,6 @@ use crate::{
     },
     result::{ScamplersError, ScamplersResult, ServerError},
 };
-use diesel::prelude::*;
-use scamplers_schema::single_index_set;
 
 impl DbOperation<()> for Vec<NewSingleIndexSet> {
     fn execute(self, db_conn: &mut PgConnection) -> ScamplersResult<()> {
