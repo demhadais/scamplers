@@ -9,7 +9,7 @@ impl<T> AsIlike for T where T: Display {}
 
 #[macro_export]
 macro_rules! init_stmt {
-    (stmt = $stmt_base:expr, query = $query:expr, output = $output_struct:ident; $($enum_variant:path => $db_col:expr),*) => {
+    (stmt = $stmt_base:expr, query = $query:expr, output_type = $output_struct:ident, orderby_spec = {$($enum_variant:path => $db_col:expr),*}) => {
         {
             let mut stmt = $stmt_base
             .select($output_struct::as_select())
@@ -32,7 +32,7 @@ macro_rules! init_stmt {
 
 #[macro_export]
 macro_rules! apply_eq_any_filters {
-    ($stmt:expr; $($col:expr, $values:expr);*) => {{
+    ($stmt:expr, filters = {$($col:expr => $values:expr),*}) => {{
         $(
             if !$values.is_empty() {
                 $stmt = $stmt.filter($col.eq_any($values));
@@ -45,7 +45,7 @@ macro_rules! apply_eq_any_filters {
 
 #[macro_export]
 macro_rules! apply_eq_filters {
-    ($stmt:expr; $($col:expr, $value:expr);*) => {{
+    ($stmt:expr, filters = {$($col:expr => $value:expr),*}) => {{
         $(
             if let Some(value) = $value {
                 $stmt = $stmt.filter($col.eq(value));
@@ -58,7 +58,7 @@ macro_rules! apply_eq_filters {
 
 #[macro_export]
 macro_rules! apply_ilike_filters {
-    ($stmt:expr; $($col:expr, $string:expr);*) => {{
+    ($stmt:expr, filters = {$($col:expr => $string:expr),*}) => {{
         use crate::db::util::AsIlike;
         $(
             if let Some(string) = $string {
@@ -72,7 +72,7 @@ macro_rules! apply_ilike_filters {
 
 #[macro_export]
 macro_rules! define_ordering_enum {
-    ($name:ident; $($variant:ident),*; default = $default_variant:ident; $($enum_attribute:meta),*) => {
+    {$name:ident {$($variant:ident),*}, default = $default_variant:ident$(, attributes = [$($enum_attribute:meta),*])?} => {
         #[derive(Clone, Debug, PartialEq, ::serde::Serialize, ::serde::Deserialize, ::strum::EnumString, ::strum::Display, ::valuable::Valuable)]
         #[serde(tag = "field", rename_all = "snake_case")]
         #[strum(serialize_all = "snake_case")]
@@ -238,7 +238,7 @@ macro_rules! uuid_newtype {
 
 #[macro_export]
 macro_rules! impl_id_db_operation {
-    ($type_:ty, $delegated:ident, $ret:ty) => {
+    (id_type = $type_:ty, delegate_to = $delegated:ident, returns = $ret:ty) => {
         impl crate::db::DbOperation<$ret> for $type_ {
             fn execute(
                 self,
@@ -258,7 +258,7 @@ macro_rules! impl_id_db_operation {
 
 #[macro_export]
 macro_rules! attach_children_to_parents {
-    ($parents:expr, $children:expr, $parent_with_children:expr) => {{
+    (parents = $parents:expr, children = $children:expr, transform_fn = $parent_with_children:expr) => {{
         let children = $children
             .grouped_by(&$parents)
             .into_iter()

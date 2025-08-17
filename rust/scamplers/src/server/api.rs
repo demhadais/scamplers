@@ -49,7 +49,7 @@ where
 }
 
 macro_rules! router {
-    ($router:expr; $(($handler_name:ident, $request_type:ty, $response_type:ty));*) => {{
+    (router = $router:expr, $($handler_name:ident($request_type:ty) -> $response_type:ty;)*) => {{
         use crate::endpoints::{Api, Endpoint};
         use axum::{http::Method, routing::*};
 
@@ -93,18 +93,18 @@ pub fn router() -> Router<AppState> {
     let mut router = Router::new();
 
     router = router!(
-        router;
-        (create_institution, NewInstitution, Institution);
-        (fetch_institution, InstitutionId, Institution);
-        (list_institutions, InstitutionQuery, Vec<Institution>);
-        (create_person, NewPerson, Person);
-        (fetch_person, PersonId, Person);
-        (list_people, PersonQuery, Vec<Person>);
-        (update_person, PersonUpdate, Person);
-        (create_lab, NewLab, Lab);
-        (fetch_lab, LabId, Lab);
-        (list_labs, LabQuery, Vec<Lab>);
-        (update_lab, LabUpdate, Lab)
+        router = router,
+        create_institution(NewInstitution) -> Institution;
+        fetch_institution(InstitutionId) -> Institution;
+        list_institutions(InstitutionQuery) -> Vec<Institution>;
+        create_person(NewPerson) -> Person;
+        fetch_person(PersonId) -> Person;
+        list_people(PersonQuery) -> Vec<Person>;
+        update_person(PersonUpdate) -> Person;
+        create_lab(NewLab) -> Lab;
+        fetch_lab(LabId) -> Lab;
+        list_labs(LabQuery) -> Vec<Lab>;
+        update_lab(LabUpdate) -> Lab;
     );
 
     router

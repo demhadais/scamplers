@@ -156,7 +156,7 @@ pub struct PersonUpdate {
     pub core: PersonUpdateCore,
 }
 
-define_ordering_enum!(PersonOrderBy; Name, Email; default = Name;);
+define_ordering_enum! {PersonOrderBy { Name, Email }, default = Name}
 
 #[db_query]
 pub struct PersonQuery {

@@ -109,7 +109,7 @@ pub struct LabUpdate {
     pub remove_members: Vec<Uuid>,
 }
 
-define_ordering_enum!(LabOrderBy; Name; default = Name;);
+define_ordering_enum! {LabOrderBy { Name }, default = Name}
 
 #[db_query]
 pub struct LabQuery {

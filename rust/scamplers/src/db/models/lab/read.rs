@@ -23,18 +23,18 @@ impl DbOperation<Vec<Lab>> for LabQuery {
             member_id: Uuid,
         }
 
-        let mut stmt = init_stmt!(stmt = lab::table.inner_join(person::table), query = &self, output = LabCore; LabOrderBy::Name => lab::name);
+        let mut stmt = init_stmt!(stmt = lab::table.inner_join(person::table), query = &self, output_type = LabCore, orderby_spec = { LabOrderBy::Name => lab::name });
 
         let Self { ids, name, .. } = &self;
 
         stmt = apply_eq_any_filters!(
-            stmt;
-            lab::id, ids
+            stmt,
+            filters = {lab::id => ids}
         );
 
         stmt = apply_ilike_filters!(
-            stmt;
-            lab::name, name
+            stmt,
+            filters = {lab::name => name}
         );
 
         let labs: Vec<LabCore> = stmt.load(db_conn)?;
@@ -43,14 +43,12 @@ impl DbOperation<Vec<Lab>> for LabQuery {
             .select((LabMembership::as_select(), PersonSummary::as_select()))
             .load(db_conn)?;
 
-        Ok(attach_children_to_parents!(labs, members, |(
-            core,
-            members,
-        )| Lab {
-            core,
-            members
-        }))
+        Ok(attach_children_to_parents!(
+            parents = labs,
+            children = members,
+            transform_fn = |(core, members)| Lab { core, members }
+        ))
     }
 }
 
-impl_id_db_operation!(LabId, LabQuery, Lab);
+impl_id_db_operation!(id_type = LabId, delegate_to = LabQuery, returns = Lab);

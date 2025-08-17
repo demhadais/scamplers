@@ -17,7 +17,7 @@ impl DbOperation<Vec<Person>> for PersonQuery {
         self,
         db_conn: &mut diesel::PgConnection,
     ) -> crate::result::ScamplersResult<Vec<Person>> {
-        let mut stmt = init_stmt!(stmt = person::table.inner_join(institution::table), query = &self, output = PersonCore; PersonOrderBy::Name => person::name, PersonOrderBy::Email => person::email);
+        let mut stmt = init_stmt!(stmt = person::table.inner_join(institution::table), query = &self, output_type = PersonCore, orderby_spec = {PersonOrderBy::Name => person::name, PersonOrderBy::Email => person::email });
 
         let Self {
             ids,
@@ -29,20 +29,24 @@ impl DbOperation<Vec<Person>> for PersonQuery {
         } = &self;
 
         stmt = apply_eq_any_filters!(
-            stmt;
-            person::id, ids
+            stmt,
+            filters = {person::id => ids}
         );
 
         stmt = apply_ilike_filters!(
-            stmt;
-            person::name, name;
-            person::email, email
+            stmt,
+            filters = {
+                person::name => name,
+                person::email => email
+            }
         );
 
         stmt = apply_eq_filters!(
-            stmt;
-            person::orcid, orcid;
-            person::ms_user_id, ms_user_id
+            stmt,
+            filters = {
+                person::orcid => orcid,
+                person::ms_user_id => ms_user_id
+            }
         );
 
         let person_cores: Vec<PersonCore> = stmt.load(db_conn)?;
@@ -58,4 +62,8 @@ impl DbOperation<Vec<Person>> for PersonQuery {
     }
 }
 
-impl_id_db_operation!(PersonId, PersonQuery, Person);
+impl_id_db_operation!(
+    id_type = PersonId,
+    delegate_to = PersonQuery,
+    returns = Person
+);

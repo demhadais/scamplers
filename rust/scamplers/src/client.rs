@@ -175,8 +175,8 @@ impl ScamplersClient {
     }
 }
 
-macro_rules! impl_wasm_client_methods {
-    ($(($method_name:ident, $request_type:path, $response_type:path));*) => {
+macro_rules! wasm_client_methods {
+    {$($method_name:ident($request_type:path) -> $response_type:path;)*} => {
         $(
             #[cfg(target_arch = "wasm32")]
             #[wasm_bindgen::prelude::wasm_bindgen]
@@ -192,8 +192,8 @@ macro_rules! impl_wasm_client_methods {
     };
 }
 
-macro_rules! impl_python_client_methods {
-    ($(($method_name:ident, $request_type:path, $response_type:path));*) => {
+macro_rules! python_client_methods {
+    {$($method_name:ident($request_type:path) -> $response_type:path;)*} => {
         $(
             #[cfg(feature = "python")]
             #[pyo3::pymethods]
@@ -210,29 +210,31 @@ macro_rules! impl_python_client_methods {
     };
 }
 
-impl_wasm_client_methods!(
-    (fetch_institution, InstitutionId, Institution);
-    (list_institutions, InstitutionQuery, Vec<Institution>);
-    (ms_login, NewPerson, CreatedUser);
-    (fetch_person, PersonId, Person);
-    (list_people, PersonQuery, Vec<Person>);
-    (get_lab, LabId, Lab);
-    (list_labs, LabQuery, Vec<Lab>)
-);
+wasm_client_methods! {
+    fetch_institution(InstitutionId) -> Institution;
+    list_institutions(InstitutionQuery) -> Vec<Institution>;
+    fetch_person(PersonId) -> Person;
+    list_people(PersonQuery) -> Vec<Person>;
+    update_person(PersonUpdate) -> Person;
+    create_lab(NewLab) -> Lab;
+    fetch_lab(LabId) -> Lab;
+    list_labs(LabQuery) -> Vec<Lab>;
+    update_lab(LabUpdate) -> Lab;
+}
 
-impl_python_client_methods!(
-    (create_institution, NewInstitution, Institution);
-    (fetch_institution, InstitutionId, Institution);
-    (list_institutions, InstitutionQuery, Vec<Institution>);
-    (create_person, NewPerson, Person);
-    (fetch_person, PersonId, Person);
-    (list_people, PersonQuery, Vec<Person>);
-    (update_person, PersonUpdate, Person);
-    (create_lab, NewLab, Lab);
-    (get_lab, LabId, Lab);
-    (list_labs, LabQuery, Vec<Lab>);
-    (update_lab, LabUpdate, Lab)
-);
+python_client_methods! {
+    create_institution(NewInstitution) -> Institution;
+    fetch_institution(InstitutionId) -> Institution;
+    list_institutions(InstitutionQuery) -> Vec<Institution>;
+    create_person(NewPerson) -> Person;
+    fetch_person(PersonId) -> Person;
+    list_people(PersonQuery) -> Vec<Person>;
+    update_person(PersonUpdate) -> Person;
+    create_lab(NewLab) -> Lab;
+    fetch_lab(LabId) -> Lab;
+    list_labs(LabQuery) -> Vec<Lab>;
+    update_lab(LabUpdate) -> Lab;
+}
 
 // #[cfg(feature = "python")]
 // macro_rules! impl_chromium_dataset_creation {

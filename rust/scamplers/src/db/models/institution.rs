@@ -46,7 +46,7 @@ pub struct Institution {
     pub name: String,
 }
 
-define_ordering_enum!(InstitutionOrderBy; Name; default = Name;);
+define_ordering_enum! {InstitutionOrderBy { Name }, default = Name}
 
 #[db_query]
 pub struct InstitutionQuery {

@@ -11,15 +11,19 @@ use crate::{
 
 impl DbOperation<Vec<Institution>> for InstitutionQuery {
     fn execute(self, db_conn: &mut diesel::PgConnection) -> ScamplersResult<Vec<Institution>> {
-        let mut stmt = init_stmt!(stmt = institution::table, query = &self, output = Institution; InstitutionOrderBy::Name => institution::name);
+        let mut stmt = init_stmt!(stmt = institution::table, query = &self, output_type = Institution, orderby_spec = { InstitutionOrderBy::Name => institution::name });
 
         let Self { ids, name, .. } = &self;
 
-        stmt = apply_eq_any_filters!(stmt; institution::id, ids);
-        stmt = apply_ilike_filters!(stmt; institution::name, name);
+        stmt = apply_eq_any_filters!(stmt, filters = { institution::id => ids });
+        stmt = apply_ilike_filters!(stmt, filters = { institution::name => name });
 
         Ok(stmt.load(db_conn)?)
     }
 }
 
-impl_id_db_operation!(InstitutionId, InstitutionQuery, Institution);
+impl_id_db_operation!(
+    id_type = InstitutionId,
+    delegate_to = InstitutionQuery,
+    returns = Institution
+);
