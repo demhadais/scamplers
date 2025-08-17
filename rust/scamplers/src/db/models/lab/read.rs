@@ -1,34 +1,56 @@
 use diesel::prelude::*;
 use scamplers_schema::{lab, lab_membership, person};
+use uuid::Uuid;
 
-use crate::db::{
-    DbOperation,
-    models::{
-        lab::{Lab, LabCore, LabId, LabQuery},
-        person::PersonSummary,
+use crate::{
+    apply_eq_any_filters, apply_ilike_filters, attach_children_to_parents,
+    db::{
+        DbOperation,
+        models::{
+            lab::{Lab, LabCore, LabId, LabOrderBy, LabQuery},
+            person::PersonSummary,
+        },
     },
+    impl_id_db_operation, init_stmt,
 };
-
-impl DbOperation<Lab> for LabId {
-    fn execute(self, db_conn: &mut diesel::PgConnection) -> crate::result::ScamplersResult<Lab> {
-        let core = lab::table
-            .inner_join(person::table)
-            .filter(lab::id.eq(&self.0))
-            .select(LabCore::as_select())
-            .first(db_conn)?;
-
-        let members = lab_membership::table
-            .filter(lab_membership::lab_id.eq(&self.0))
-            .inner_join(person::table)
-            .select(PersonSummary::as_select())
-            .load(db_conn)?;
-
-        Ok(Lab { core, members })
-    }
-}
 
 impl DbOperation<Vec<Lab>> for LabQuery {
     fn execute(self, db_conn: &mut PgConnection) -> crate::result::ScamplersResult<Vec<Lab>> {
-        todo!()
+        #[derive(Identifiable, Associations, Selectable, Queryable)]
+        #[diesel(table_name = lab_membership, belongs_to(LabCore, foreign_key = lab_id), belongs_to(PersonSummary, foreign_key = member_id), primary_key(lab_id, member_id), check_for_backend(diesel::pg::Pg))]
+        struct LabMembership {
+            lab_id: Uuid,
+            member_id: Uuid,
+        }
+
+        let mut stmt = init_stmt!(stmt = lab::table.inner_join(person::table), query = &self, output = LabCore; LabOrderBy::Name => lab::name);
+
+        let Self { ids, name, .. } = &self;
+
+        stmt = apply_eq_any_filters!(
+            stmt;
+            lab::id, ids
+        );
+
+        stmt = apply_ilike_filters!(
+            stmt;
+            lab::name, name
+        );
+
+        let labs: Vec<LabCore> = stmt.load(db_conn)?;
+        let members = LabMembership::belonging_to(&labs)
+            .inner_join(person::table)
+            .select((LabMembership::as_select(), PersonSummary::as_select()))
+            .load(db_conn)?;
+
+        Ok(attach_children_to_parents!(labs, members, |(
+            core,
+            members,
+        )| Lab {
+            core,
+            members
+        }))
     }
 }
+
+impl_id_db_operation!(LabId, LabQuery, Lab);

@@ -1,18 +1,11 @@
-pub trait AsIlike {
-    fn as_ilike(&self) -> String;
-}
+use std::fmt::Display;
 
-impl AsIlike for &str {
+pub trait AsIlike: Display {
     fn as_ilike(&self) -> String {
         format!("%{self}%")
     }
 }
-
-impl AsIlike for String {
-    fn as_ilike(&self) -> String {
-        self.as_str().as_ilike()
-    }
-}
+impl<T> AsIlike for T where T: Display {}
 
 #[macro_export]
 macro_rules! init_stmt {
@@ -66,9 +59,10 @@ macro_rules! apply_eq_filters {
 #[macro_export]
 macro_rules! apply_ilike_filters {
     ($stmt:expr; $($col:expr, $string:expr);*) => {{
+        use crate::db::util::AsIlike;
         $(
             if let Some(string) = $string {
-                $stmt = $stmt.filter($col.ilike(string));
+                $stmt = $stmt.filter($col.ilike(string.as_ilike()));
             }
         )*
 
@@ -260,4 +254,20 @@ macro_rules! impl_id_db_operation {
             }
         }
     };
+}
+
+#[macro_export]
+macro_rules! attach_children_to_parents {
+    ($parents:expr, $children:expr, $parent_with_children:expr) => {{
+        let children = $children
+            .grouped_by(&$parents)
+            .into_iter()
+            .map(|map_children_tuples| map_children_tuples.into_iter().map(|(_, child)| child));
+
+        $parents
+            .into_iter()
+            .zip(children)
+            .map(|(parent, children)| $parent_with_children((parent, children.collect())))
+            .collect()
+    }};
 }

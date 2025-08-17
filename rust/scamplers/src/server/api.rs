@@ -95,15 +95,15 @@ pub fn router() -> Router<AppState> {
     router = router!(
         router;
         (create_institution, NewInstitution, Institution);
-        (read_institution, InstitutionId, Institution);
-        (read_institutions, InstitutionQuery, Vec<Institution>);
+        (fetch_institution, InstitutionId, Institution);
+        (list_institutions, InstitutionQuery, Vec<Institution>);
         (create_person, NewPerson, Person);
-        (read_person, PersonId, Person);
-        (read_people, PersonQuery, Vec<Person>);
+        (fetch_person, PersonId, Person);
+        (list_people, PersonQuery, Vec<Person>);
         (update_person, PersonUpdate, Person);
         (create_lab, NewLab, Lab);
-        (read_lab, LabId, Lab);
-        (read_labs, LabQuery, Vec<Lab>);
+        (fetch_lab, LabId, Lab);
+        (list_labs, LabQuery, Vec<Lab>);
         (update_lab, LabUpdate, Lab)
     );
 

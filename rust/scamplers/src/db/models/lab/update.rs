@@ -21,7 +21,10 @@ impl DbOperation<Lab> for LabUpdate {
         } = self;
 
         if core.is_update() {
-            diesel::update(&core).set(&core).execute(db_conn)?;
+            diesel::update(&core)
+                .set(&core)
+                .returning((lab::pi_id))
+                .execute(db_conn)?;
         }
 
         let member_additions: Vec<_> = add_members

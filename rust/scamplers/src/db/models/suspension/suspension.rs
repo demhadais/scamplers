@@ -141,6 +141,8 @@ pub struct SuspensionSummary {
 #[db_selection]
 #[cfg_attr(feature = "app", diesel(table_name = scamplers_schema::suspension))]
 pub struct SuspensionCore {
+    #[serde(skip)]
+    pub id: Uuid,
     #[serde(flatten)]
     #[cfg_attr(feature = "app", diesel(embed))]
     pub summary: SuspensionSummary,
@@ -153,6 +155,8 @@ pub struct SuspensionCore {
 #[db_selection]
 #[cfg_attr(feature = "app", diesel(table_name = scamplers_schema::suspension_measurement))]
 pub struct SuspensionMeasurement {
+    #[serde(skip)]
+    pub id: Uuid,
     #[cfg_attr(feature = "app", diesel(embed))]
     pub measured_by: PersonSummary,
     #[serde(flatten)]

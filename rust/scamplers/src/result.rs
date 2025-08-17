@@ -114,6 +114,7 @@ pub struct LibraryIndexSetError {
 
 #[cfg_attr(feature = "python", pyclass(get_all, str))]
 #[derive(Debug, Clone, PartialEq, Deserialize, Serialize, thiserror::Error, Valuable)]
+#[serde(tag = "type", rename_all = "snake_case")]
 #[error(transparent)]
 pub enum ScamplersError {
     Client(#[from] ClientError),

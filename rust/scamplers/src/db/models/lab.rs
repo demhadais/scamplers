@@ -11,8 +11,11 @@ use crate::{
     define_ordering_enum, impl_order_by, impl_python_order_by, impl_wasm_order_by, uuid_newtype,
 };
 
+#[cfg(feature = "app")]
 mod create;
+#[cfg(feature = "app")]
 mod read;
+#[cfg(feature = "app")]
 mod update;
 
 #[db_insertion]
@@ -61,6 +64,9 @@ pub struct LabSummary {
 #[db_selection]
 #[cfg_attr(feature = "app", diesel(table_name = scamplers_schema::lab))]
 pub struct LabCore {
+    // We include the ID even though it's already in `LabSummary` so that we can have `diesel::Identifiable` on this struct. Consequently, we skip serializing it since it's already in `LabSummary`
+    #[serde(skip)]
+    pub id: Uuid,
     #[serde(flatten)]
     #[cfg_attr(feature = "app", diesel(embed))]
     pub summary: LabSummary,
@@ -107,10 +113,13 @@ define_ordering_enum!(LabOrderBy; Name; default = Name;);
 
 #[db_query]
 pub struct LabQuery {
+    #[builder(default)]
     pub ids: Vec<Uuid>,
     pub name: Option<String>,
+    #[builder(default)]
     #[cfg_attr(target_arch = "wasm32", wasm_bindgen(skip))]
     pub order_by: Vec<LabOrderBy>,
+    #[builder(default)]
     pub pagination: Pagination,
 }
 

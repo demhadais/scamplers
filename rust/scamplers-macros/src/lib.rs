@@ -176,6 +176,7 @@ pub fn db_query(_attr: TokenStream, input: TokenStream) -> TokenStream {
         #[cfg_attr(feature = "python", ::pyo3_stub_gen::derive::gen_stub_pyclass)]
         #[cfg_attr(feature = "python", ::pyo3::pyclass(eq, module = "scamplepy.query"))]
         #[derive(Default, ::bon::Builder, ::scamplers_macros::Jsonify, ::scamplers_macros::WasmJsonify, ::scamplers_macros::PyJsonify)]
+        #[serde(default)]
         #[builder(on(_, into), derive(Clone, Debug, Into))]
         #struct_item
 
@@ -202,7 +203,7 @@ pub fn db_selection(_attr: TokenStream, input: TokenStream) -> TokenStream {
         #[cfg_attr(feature = "python", ::pyo3_stub_gen::derive::gen_stub_pyclass)]
         #[cfg_attr(feature = "python", ::pyo3::pyclass(get_all, eq, module = "scamplepy.responses"))]
         #[derive(::scamplers_macros::Jsonify, ::scamplers_macros::WasmJsonify, ::scamplers_macros::PyJsonify)]
-        #[cfg_attr(feature = "app", derive(::diesel::Selectable, ::diesel::Queryable), diesel(check_for_backend(::diesel::pg::Pg)))]
+        #[cfg_attr(feature = "app", derive(::diesel::Identifiable, ::diesel::Selectable, ::diesel::Queryable), diesel(check_for_backend(::diesel::pg::Pg)))]
         #struct_item
     };
 

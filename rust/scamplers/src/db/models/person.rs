@@ -99,6 +99,8 @@ pub struct PersonSummary {
 #[db_selection]
 #[cfg_attr(feature = "app", diesel(table_name = person))]
 pub struct PersonCore {
+    #[serde(skip)]
+    pub id: Uuid,
     #[serde(flatten)]
     #[cfg_attr(feature = "app", diesel(embed))]
     pub summary: PersonSummary,

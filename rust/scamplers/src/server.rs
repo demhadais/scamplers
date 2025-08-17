@@ -53,7 +53,7 @@ fn initialize_logging(log_dir: Option<Utf8PathBuf>) {
     match log_dir {
         None => {
             let dev_test_log_filter = Targets::new()
-                .with_target("scamplers_backend", Level::DEBUG)
+                .with_target("scamplers", Level::DEBUG)
                 .with_target("tower_http", Level::TRACE);
             let log_layer = log_layer.pretty().with_filter(dev_test_log_filter);
 
