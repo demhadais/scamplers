@@ -1,3 +1,5 @@
+#[cfg(feature = "app")]
+use crate::db::models::specimen::common::{AsGenericNewSpecimen, VariableFields};
 #[cfg(feature = "python")]
 use crate::db::models::specimen::{
     Species,
@@ -39,6 +41,30 @@ pub struct NewVirtualSpecimen {
 }
 
 impl_constrained_py_setter! { NewVirtualSpecimen::set_type_(SpecimenType) = SpecimenType::Suspension }
+
+#[cfg(feature = "app")]
+impl AsGenericNewSpecimen for NewVirtualSpecimen {
+    fn inner(&self) -> &NewSpecimenCommon {
+        &self.inner
+    }
+
+    fn variable_fields(&self) -> VariableFields<'_> {
+        use crate::db::models::specimen::Fixative;
+
+        let Self {
+            type_, fixative, ..
+        } = self;
+
+        VariableFields {
+            type_: *type_,
+            fixative: fixative.map(Fixative::Suspension),
+            embedded_in: None,
+            cryopreserved: false,
+            frozen: false,
+            storage_buffer: None,
+        }
+    }
+}
 
 #[cfg(feature = "python")]
 #[pymethods]

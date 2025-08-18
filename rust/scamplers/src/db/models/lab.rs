@@ -1,6 +1,8 @@
 #[cfg(feature = "python")]
 use pyo3::prelude::*;
-use scamplers_macros::{base_model, db_insertion, db_query, db_selection, db_update};
+use scamplers_macros::{
+    Jsonify, PyJsonify, WasmJsonify, base_model, db_insertion, db_query, db_selection, db_update,
+};
 use uuid::Uuid;
 use valid_string::ValidString;
 #[cfg(target_arch = "wasm32")]
@@ -84,6 +86,7 @@ pub struct LabSummaryWithRelations {
 #[cfg_attr(feature = "python", pyo3_stub_gen::derive::gen_stub_pyclass)]
 #[cfg_attr(feature = "python", pyclass(get_all, module = "scamplepy.responses"))]
 #[base_model]
+#[derive(Jsonify, WasmJsonify, PyJsonify)]
 pub struct Lab {
     #[serde(flatten)]
     pub info: LabSummaryWithRelations,

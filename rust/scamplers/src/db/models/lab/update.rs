@@ -23,7 +23,7 @@ impl DbOperation<Lab> for LabUpdate {
         if core.is_update() {
             diesel::update(&core)
                 .set(&core)
-                .returning((lab::pi_id))
+                .returning(lab::pi_id)
                 .execute(db_conn)?;
         }
 

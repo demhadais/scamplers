@@ -11,6 +11,8 @@ use valid_string::ValidString;
 #[cfg(target_arch = "wasm32")]
 use wasm_bindgen::prelude::*;
 
+#[cfg(feature = "app")]
+use crate::db::models::specimen::{BlockEmbeddingMatrix, Fixative, SpecimenType};
 use crate::db::models::{institution::Institution, specimen::Species};
 
 #[db_simple_enum]
@@ -73,6 +75,7 @@ pub struct CommitteeApproval {
     pyo3(name = "SpecimenMeasurementData", module = "scamplepy.common")
 )]
 pub enum MeasurementData {
+    #[serde(rename = "RIN")]
     Rin {
         measured_at: OffsetDateTime,
         #[garde(dive)]
@@ -80,6 +83,7 @@ pub enum MeasurementData {
         #[garde(range(min = 1.0, max = 10.0))]
         value: f32,
     },
+    #[serde(rename = "DV200")]
     Dv200 {
         measured_at: OffsetDateTime,
         #[garde(dive)]
@@ -151,5 +155,31 @@ pub(super) fn is_true(value: &bool, _: &()) -> garde::Result {
         Ok(())
     } else {
         Err(garde::Error::new("value must be true"))
+    }
+}
+
+#[cfg(feature = "app")]
+#[derive(Insertable)]
+#[diesel(table_name = scamplers_schema::specimen)]
+pub struct VariableFields<'a> {
+    pub type_: SpecimenType,
+    pub embedded_in: Option<BlockEmbeddingMatrix>,
+    pub fixative: Option<Fixative>,
+    pub cryopreserved: bool,
+    pub frozen: bool,
+    pub storage_buffer: Option<&'a ValidString>,
+}
+
+#[cfg(feature = "app")]
+pub type GenericNewSpecimen<'a> = (&'a NewSpecimenCommon, VariableFields<'a>);
+
+#[cfg(feature = "app")]
+pub trait AsGenericNewSpecimen {
+    fn inner(&self) -> &NewSpecimenCommon;
+
+    fn variable_fields(&self) -> VariableFields<'_>;
+
+    fn as_generic(&self) -> GenericNewSpecimen<'_> {
+        (self.inner(), self.variable_fields())
     }
 }

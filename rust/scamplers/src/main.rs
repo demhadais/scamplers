@@ -1,12 +1,12 @@
 use clap::Parser;
-use scamplers::{config::Cli, server::serve};
+use scamplers::{config::Cli, server::serve_app};
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
     dotenvy::dotenv().unwrap_or_default();
     let Cli { config, log_dir } = Cli::parse();
 
-    serve(config, log_dir).await?;
+    serve_app(config, log_dir).await?;
 
     Ok(())
 }

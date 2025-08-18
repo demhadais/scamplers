@@ -1,30 +1,20 @@
-#![allow(async_fn_in_trait)]
-use std::sync::Arc;
-
-use anyhow::{Context, anyhow, bail};
+use anyhow::Context;
 use axum::{Router, routing::get};
 use camino::Utf8PathBuf;
-use diesel::PgConnection;
-use diesel_migrations::{EmbeddedMigrations, MigrationHarness, embed_migrations};
 use tokio::{net::TcpListener, signal};
 use tower_http::trace::TraceLayer;
-use uuid::Uuid;
 
-use crate::{
-    config::Config, dev_container::DevContainer, result::ScamplersResult, state::AppState,
-};
+use crate::{config::Config, state::AppState};
 mod api;
 
 /// # Errors
-pub async fn serve(mut config: Config, log_dir: Option<Utf8PathBuf>) -> anyhow::Result<()> {
-    initialize_logging(log_dir);
-
+async fn serve(mut config: Config) -> anyhow::Result<()> {
     config
         .read_secrets()
         .context("failed to read secrets directory")?;
     let app_addr = config.app_address();
 
-    let mut app_state = AppState::initialize(config)
+    let app_state = AppState::initialize(config)
         .await
         .context("failed to initialize app state")?;
     tracing::info!("initialized app state");
@@ -42,6 +32,15 @@ pub async fn serve(mut config: Config, log_dir: Option<Utf8PathBuf>) -> anyhow::
         .context("failed to serve app")?;
 
     Ok(())
+}
+
+pub async fn serve_integration_test(config: Config) -> anyhow::Result<()> {
+    serve(config).await
+}
+
+pub async fn serve_app(config: Config, log_dir: Option<Utf8PathBuf>) -> anyhow::Result<()> {
+    initialize_logging(log_dir);
+    serve(config).await
 }
 
 fn initialize_logging(log_dir: Option<Utf8PathBuf>) {

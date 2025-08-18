@@ -95,7 +95,7 @@ fn correct_parent_module_typestubs(
 ) -> anyhow::Result<()> {
     let module_path = module_name_to_path(typestub_dir, parent_module_name);
 
-    create_initdotpy(&module_path, &[parent_module_name]).context(format!(
+    create_initdotpy(&module_path, &[&format!(".{parent_module_name}")]).context(format!(
         "failed to create __init__.py for {parent_module_name} in {module_path}"
     ))?;
 

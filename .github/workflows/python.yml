@@ -21,7 +21,7 @@ jobs:
         run: uv run --module pytest
 
       - name: Analyze types
-        working-directory: python/test_scamplers-core
+        working-directory: python/test_scamplepy
         run: uv run --module pyright
 
       - name: Lint and format

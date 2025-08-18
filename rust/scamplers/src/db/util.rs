@@ -210,7 +210,7 @@ macro_rules! uuid_newtype {
         #[derive(Clone, Copy, serde::Deserialize, serde::Serialize, valuable::Valuable)]
         #[serde(transparent)]
         #[valuable(transparent)]
-        pub struct $name(uuid::Uuid);
+        pub struct $name(pub uuid::Uuid);
 
         impl AsRef<uuid::Uuid> for $name {
             fn as_ref(&self) -> &uuid::Uuid {
@@ -330,16 +330,16 @@ pub trait SetParentId {
     }
 }
 
-pub trait ChildrenWithSelfId<Children: SetParentId> {
-    fn children(&mut self) -> &mut [Children];
+pub trait ChildrenWithSelfId<Child: SetParentId> {
+    fn children(&mut self) -> &mut [Child];
 
-    fn children_with_self_id(&mut self, self_id: Uuid) -> &[Children] {
-        let measurements = self.children();
+    fn children_with_self_id(&mut self, self_id: Uuid) -> &[Child] {
+        let children = self.children();
 
-        for m in &mut *measurements {
-            m.set_parent_id(self_id);
+        for child in &mut *children {
+            child.set_parent_id(self_id);
         }
 
-        measurements
+        children
     }
 }

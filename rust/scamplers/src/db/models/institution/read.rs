@@ -27,3 +27,55 @@ impl_id_db_operation!(
     delegate_to = InstitutionQuery,
     returns = Institution
 );
+
+#[cfg(test)]
+mod tests {
+    use deadpool_diesel::postgres::Connection;
+    use std::cmp::Ordering;
+
+    use rstest::rstest;
+
+    use crate::db::{
+        models::institution::{Institution, InstitutionOrderBy, InstitutionQuery},
+        test_util::{db_conn, institutions, test_query},
+    };
+
+    fn sort_by_name(i1: &Institution, i2: &Institution) -> Ordering {
+        i1.name.cmp(&i2.name)
+    }
+
+    #[rstest]
+    #[awt]
+    #[tokio::test]
+    async fn default_institution_query(
+        #[future] db_conn: Connection,
+        #[future] institutions: Vec<Institution>,
+    ) {
+        test_query::<InstitutionQuery, _>()
+            .all_data(institutions)
+            .sort_by(sort_by_name)
+            .run(db_conn)
+            .await;
+    }
+
+    #[rstest]
+    #[awt]
+    #[tokio::test]
+    async fn specific_institution_query(
+        #[future] db_conn: Connection,
+        #[future] institutions: Vec<Institution>,
+    ) {
+        let query = InstitutionQuery::builder()
+            .name("institution1")
+            .order_by([InstitutionOrderBy::Name { descending: true }])
+            .build();
+
+        test_query()
+            .all_data(institutions)
+            .filter(|i| i.name.starts_with("institution1"))
+            .sort_by(|i1, i2| sort_by_name(i1, i2).reverse())
+            .db_query(query)
+            .run(db_conn)
+            .await;
+    }
+}

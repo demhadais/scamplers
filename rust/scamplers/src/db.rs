@@ -10,6 +10,8 @@ use crate::result::ScamplersResult;
 pub mod models;
 #[cfg(feature = "app")]
 pub mod seed_data;
+#[cfg(all(feature = "app", test))]
+pub mod test_util;
 pub mod util;
 
 #[cfg(feature = "app")]

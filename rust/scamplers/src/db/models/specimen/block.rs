@@ -1,3 +1,7 @@
+#[cfg(feature = "app")]
+use crate::db::models::specimen::common::{
+    AsGenericNewSpecimen, GenericNewSpecimen, VariableFields,
+};
 #[cfg(feature = "python")]
 use crate::db::models::specimen::{
     Species,
@@ -48,6 +52,33 @@ pub struct NewFixedBlock {
 }
 
 impl_constrained_py_setter! { NewFixedBlock::set_type_(SpecimenType) = SpecimenType::Block }
+
+#[cfg(feature = "app")]
+impl AsGenericNewSpecimen for NewFixedBlock {
+    fn inner(&self) -> &NewSpecimenCommon {
+        &self.inner
+    }
+
+    fn variable_fields(&self) -> VariableFields<'_> {
+        use crate::db::models::specimen::{BlockEmbeddingMatrix, Fixative};
+
+        let Self {
+            type_,
+            embedded_in,
+            fixative,
+            ..
+        } = self;
+
+        VariableFields {
+            type_: *type_,
+            embedded_in: Some(BlockEmbeddingMatrix::Fixed(*embedded_in)),
+            fixative: Some(Fixative::Block(*fixative)),
+            frozen: false,
+            cryopreserved: false,
+            storage_buffer: None,
+        }
+    }
+}
 
 #[cfg(feature = "python")]
 #[pyo3_stub_gen::derive::gen_stub_pymethods]
@@ -118,6 +149,34 @@ pub struct NewFrozenBlock {
 impl_constrained_py_setter! { NewFrozenBlock::set_type_(SpecimenType) = SpecimenType::Block }
 
 impl_constrained_py_setter! { NewFrozenBlock::set_frozen(bool) = true }
+
+#[cfg(feature = "app")]
+impl AsGenericNewSpecimen for NewFrozenBlock {
+    fn inner(&self) -> &NewSpecimenCommon {
+        &self.inner
+    }
+
+    fn variable_fields(&self) -> VariableFields<'_> {
+        use crate::db::models::specimen::{BlockEmbeddingMatrix, Fixative};
+
+        let Self {
+            type_,
+            embedded_in,
+            fixative,
+            frozen,
+            ..
+        } = self;
+
+        VariableFields {
+            type_: *type_,
+            embedded_in: Some(BlockEmbeddingMatrix::Frozen(*embedded_in)),
+            fixative: fixative.map(Fixative::Block),
+            frozen: *frozen,
+            cryopreserved: false,
+            storage_buffer: None,
+        }
+    }
+}
 
 #[cfg(feature = "python")]
 #[pyo3_stub_gen::derive::gen_stub_pymethods]

@@ -5,81 +5,65 @@ use crate::db::{
     DbOperation,
     models::specimen::{
         NewSpecimen, Specimen, SpecimenId,
-        block::{NewFixedBlock, NewFrozenBlock},
-        common::{NewCommitteeApproval, NewSpecimenCommon, NewSpecimenMeasurement},
-        tissue::{NewCryopreservedTissue, NewFixedTissue, NewFrozenTissue},
-        virtual_::NewVirtualSpecimen,
+        common::{
+            AsGenericNewSpecimen, GenericNewSpecimen, NewCommitteeApproval, NewSpecimenCommon,
+            NewSpecimenMeasurement, VariableFields,
+        },
     },
     util::{ChildrenWithSelfId, SetParentId},
 };
 
+impl NewSpecimen {
+    fn inner_mut(&mut self) -> &mut NewSpecimenCommon {
+        match self {
+            Self::FixedBlock(b) => &mut b.inner,
+            Self::FrozenBlock(b) => &mut b.inner,
+            Self::CryopreservedTissue(t) => &mut t.inner,
+            Self::FixedTissue(t) => &mut t.inner,
+            Self::FrozenTissue(t) => &mut t.inner,
+            Self::Suspension(s) => &mut s.inner,
+        }
+    }
+}
+
+impl AsGenericNewSpecimen for NewSpecimen {
+    fn inner(&self) -> &NewSpecimenCommon {
+        match self {
+            Self::CryopreservedTissue(s) => s.inner(),
+            Self::FixedBlock(s) => s.inner(),
+            Self::FixedTissue(s) => s.inner(),
+            Self::FrozenBlock(s) => s.inner(),
+            Self::FrozenTissue(s) => s.inner(),
+            Self::Suspension(s) => s.inner(),
+        }
+    }
+
+    fn variable_fields(&self) -> VariableFields<'_> {
+        match self {
+            Self::CryopreservedTissue(s) => s.variable_fields(),
+            Self::FixedBlock(s) => s.variable_fields(),
+            Self::FixedTissue(s) => s.variable_fields(),
+            Self::FrozenBlock(s) => s.variable_fields(),
+            Self::FrozenTissue(s) => s.variable_fields(),
+            Self::Suspension(s) => s.variable_fields(),
+        }
+    }
+}
+
 impl<'a> Insertable<specimen::table> for &'a NewSpecimen {
-    type Values = <(
-        Option<&'a NewFixedBlock>,
-        Option<&'a NewFrozenBlock>,
-        Option<&'a NewCryopreservedTissue>,
-        Option<&'a NewFixedTissue>,
-        Option<&'a NewFrozenTissue>,
-        Option<&'a NewVirtualSpecimen>,
-    ) as Insertable<specimen::table>>::Values;
+    type Values = <GenericNewSpecimen<'a> as Insertable<specimen::table>>::Values;
 
     fn values(self) -> Self::Values {
-        match self {
-            NewSpecimen::FixedBlock(f) => (
-                Some(f),
-                None::<&NewFrozenBlock>,
-                None::<&NewCryopreservedTissue>,
-                None::<&NewFixedTissue>,
-                None::<&NewFrozenTissue>,
-                None::<&NewVirtualSpecimen>,
-            )
-                .values(),
-            NewSpecimen::FrozenBlock(f) => (
-                None::<&NewFixedBlock>,
-                Some(f),
-                None::<&NewCryopreservedTissue>,
-                None::<&NewFixedTissue>,
-                None::<&NewFrozenTissue>,
-                None::<&NewVirtualSpecimen>,
-            )
-                .values(),
-            NewSpecimen::CryopreservedTissue(f) => (
-                None::<&NewFixedBlock>,
-                None::<&NewFrozenBlock>,
-                Some(f),
-                None::<&NewFixedTissue>,
-                None::<&NewFrozenTissue>,
-                None::<&NewVirtualSpecimen>,
-            )
-                .values(),
-            NewSpecimen::FixedTissue(f) => (
-                None::<&NewFixedBlock>,
-                None::<&NewFrozenBlock>,
-                None::<&NewCryopreservedTissue>,
-                Some(f),
-                None::<&NewFrozenTissue>,
-                None::<&NewVirtualSpecimen>,
-            )
-                .values(),
-            NewSpecimen::FrozenTissue(f) => (
-                None::<&NewFixedBlock>,
-                None::<&NewFrozenBlock>,
-                None::<&NewCryopreservedTissue>,
-                None::<&NewFixedTissue>,
-                Some(f),
-                None::<&NewVirtualSpecimen>,
-            )
-                .values(),
-            NewSpecimen::Suspension(f) => (
-                None::<&NewFixedBlock>,
-                None::<&NewFrozenBlock>,
-                None::<&NewCryopreservedTissue>,
-                None::<&NewFixedTissue>,
-                None::<&NewFrozenTissue>,
-                Some(f),
-            )
-                .values(),
-        }
+        let generic = match self {
+            NewSpecimen::CryopreservedTissue(s) => s.as_generic(),
+            NewSpecimen::FixedBlock(s) => s.as_generic(),
+            NewSpecimen::FixedTissue(s) => s.as_generic(),
+            NewSpecimen::FrozenBlock(s) => s.as_generic(),
+            NewSpecimen::FrozenTissue(s) => s.as_generic(),
+            NewSpecimen::Suspension(s) => s.as_generic(),
+        };
+
+        generic.values()
     }
 }
 
@@ -112,19 +96,6 @@ impl SetParentId for NewCommitteeApproval {
 impl SetParentId for NewSpecimenMeasurement {
     fn parent_id_mut(&mut self) -> &mut uuid::Uuid {
         &mut self.specimen_id
-    }
-}
-
-impl NewSpecimen {
-    fn inner_mut(&mut self) -> &mut NewSpecimenCommon {
-        match self {
-            Self::FixedBlock(b) => &mut b.inner,
-            Self::FrozenBlock(b) => &mut b.inner,
-            Self::CryopreservedTissue(t) => &mut t.inner,
-            Self::FixedTissue(t) => &mut t.inner,
-            Self::FrozenTissue(t) => &mut t.inner,
-            Self::Suspension(s) => &mut s.inner,
-        }
     }
 }
 

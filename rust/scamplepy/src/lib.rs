@@ -11,6 +11,7 @@ use scamplers::{
                 BlockFixative, FixedBlockEmbeddingMatrix, FrozenBlockEmbeddingMatrix,
                 NewFixedBlock, NewFrozenBlock,
             },
+            common::{ComplianceCommitteeType, NewCommitteeApproval, NewSpecimenMeasurement},
             tissue::{NewCryopreservedTissue, NewFixedTissue, NewFrozenTissue, TissueFixative},
             virtual_::{NewVirtualSpecimen, SuspensionFixative},
         },

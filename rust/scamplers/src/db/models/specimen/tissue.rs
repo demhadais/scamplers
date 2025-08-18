@@ -1,3 +1,5 @@
+#[cfg(feature = "app")]
+use crate::db::models::specimen::common::{AsGenericNewSpecimen, VariableFields};
 #[cfg(feature = "python")]
 use crate::db::models::specimen::{
     Species,
@@ -35,6 +37,31 @@ pub struct NewCryopreservedTissue {
 impl_constrained_py_setter! { NewCryopreservedTissue::set_type_(SpecimenType) = SpecimenType::Tissue }
 
 impl_constrained_py_setter! { NewCryopreservedTissue::set_cryopreserved(bool) = true }
+
+#[cfg(feature = "app")]
+impl AsGenericNewSpecimen for NewCryopreservedTissue {
+    fn inner(&self) -> &NewSpecimenCommon {
+        &self.inner
+    }
+
+    fn variable_fields(&self) -> VariableFields<'_> {
+        let Self {
+            type_,
+            cryopreserved,
+            storage_buffer,
+            ..
+        } = self;
+
+        VariableFields {
+            type_: *type_,
+            cryopreserved: *cryopreserved,
+            storage_buffer: storage_buffer.as_ref(),
+            fixative: None,
+            embedded_in: None,
+            frozen: false,
+        }
+    }
+}
 
 #[cfg(feature = "python")]
 #[pyo3_stub_gen::derive::gen_stub_pymethods]
@@ -102,6 +129,33 @@ pub struct NewFixedTissue {
 
 impl_constrained_py_setter! { NewFixedTissue::set_type_(SpecimenType) = SpecimenType::Tissue }
 
+#[cfg(feature = "app")]
+impl AsGenericNewSpecimen for NewFixedTissue {
+    fn inner(&self) -> &NewSpecimenCommon {
+        &self.inner
+    }
+
+    fn variable_fields(&self) -> VariableFields<'_> {
+        use crate::db::models::specimen::Fixative;
+
+        let Self {
+            type_,
+            fixative,
+            storage_buffer,
+            ..
+        } = self;
+
+        VariableFields {
+            type_: *type_,
+            fixative: Some(Fixative::Tissue(*fixative)),
+            storage_buffer: storage_buffer.as_ref(),
+            embedded_in: None,
+            cryopreserved: false,
+            frozen: false,
+        }
+    }
+}
+
 #[cfg(feature = "python")]
 #[pyo3_stub_gen::derive::gen_stub_pymethods]
 #[pymethods]
@@ -163,6 +217,31 @@ pub struct NewFrozenTissue {
 impl_constrained_py_setter! { NewFrozenTissue::set_type_(SpecimenType) = SpecimenType::Tissue }
 
 impl_constrained_py_setter! { NewFrozenTissue::set_frozen(bool) = true }
+
+#[cfg(feature = "app")]
+impl AsGenericNewSpecimen for NewFrozenTissue {
+    fn inner(&self) -> &NewSpecimenCommon {
+        &self.inner
+    }
+
+    fn variable_fields(&self) -> VariableFields<'_> {
+        let Self {
+            type_,
+            storage_buffer,
+            frozen,
+            ..
+        } = self;
+
+        VariableFields {
+            type_: *type_,
+            frozen: *frozen,
+            storage_buffer: storage_buffer.as_ref(),
+            fixative: None,
+            embedded_in: None,
+            cryopreserved: false,
+        }
+    }
+}
 
 #[cfg(feature = "python")]
 #[pyo3_stub_gen::derive::gen_stub_pymethods]

@@ -4,7 +4,9 @@ use diesel::{expression::AsExpression, prelude::*};
 use pyo3::prelude::*;
 #[cfg(feature = "python")]
 use pyo3_stub_gen::{derive::gen_stub_pymethods, impl_stub_type};
-use scamplers_macros::{base_model, db_query, db_selection, db_simple_enum};
+use scamplers_macros::{
+    Jsonify, PyJsonify, WasmJsonify, base_model, db_query, db_selection, db_simple_enum,
+};
 use time::OffsetDateTime;
 use uuid::Uuid;
 #[cfg(target_arch = "wasm32")]
@@ -30,7 +32,7 @@ use crate::{
 };
 
 pub mod block;
-mod common;
+pub mod common;
 #[cfg(feature = "app")]
 mod create;
 #[cfg(feature = "app")]
@@ -39,7 +41,7 @@ pub mod tissue;
 pub mod virtual_;
 
 #[base_model]
-#[serde(tag = "type")]
+#[serde(tag = "type", rename_all = "snake_case")]
 #[cfg_attr(feature = "python", derive(FromPyObject))]
 pub enum NewSpecimen {
     CryopreservedTissue(#[garde(dive)] NewCryopreservedTissue),
@@ -77,19 +79,13 @@ pub enum Species {
 }
 
 #[db_simple_enum]
-#[derive(strum::Display, strum::EnumIs)]
+#[derive(strum::Display)]
 #[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
 #[cfg_attr(feature = "python", pyo3(module = "scamplepy.common"))]
 pub enum SpecimenType {
     Block,
     Suspension,
     Tissue,
-}
-
-impl Default for SpecimenType {
-    fn default() -> Self {
-        unreachable!()
-    }
 }
 
 impl SpecimenType {
@@ -170,6 +166,7 @@ pub struct SpecimenMeasurement {
 )]
 #[cfg_attr(feature = "python", pyo3_stub_gen::derive::gen_stub_pyclass)]
 #[cfg_attr(feature = "python", pyclass(get_all, module = "scamplepy.responses"))]
+#[derive(Jsonify, WasmJsonify, PyJsonify)]
 pub struct Specimen {
     #[serde(flatten)]
     pub info: SpecimenSummaryWithRelations,

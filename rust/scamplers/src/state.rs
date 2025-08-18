@@ -81,7 +81,7 @@ fn create_dev_superuser(db_conn: &mut PgConnection) -> anyhow::Result<Uuid> {
     Ok(user_id)
 }
 
-fn create_db_pool(db_url: &str) -> anyhow::Result<Pool> {
+pub fn create_db_pool(db_url: &str) -> anyhow::Result<Pool> {
     let manager = PoolManager::new(db_url, Runtime::Tokio1);
     Ok(Pool::builder(manager).build()?)
 }
@@ -120,13 +120,6 @@ impl InitialAppState {
             let core = AppStateCore::new(db_pool, config);
 
             Ok(Self::Prod(InitialAppStateCore { core, db_root_pool }))
-        }
-    }
-
-    async fn db_conn(&self) -> ScamplersResult<deadpool_diesel::postgres::Connection> {
-        match self {
-            Self::Dev(s) => s.db_conn().await,
-            Self::Prod(s) => s.db_conn().await,
         }
     }
 
@@ -178,9 +171,21 @@ impl InitialAppState {
 
         let db_conn = self.db_root_conn().await?;
         let http_client = self.http_client();
+        dbg!("reachine here");
 
-        let mut db_conn = db_conn.lock().unwrap();
-        insert_seed_data(seed_data, http_client, &mut db_conn).await?;
+        // Thanks AI! Just have to block on the async future
+        db_conn
+            .interact(|db_conn: &mut PgConnection| {
+                tokio::runtime::Handle::current().block_on(insert_seed_data(
+                    seed_data,
+                    http_client,
+                    db_conn,
+                ))
+            })
+            .await
+            .unwrap()?;
+
+        dbg!("not rech here");
 
         Ok(())
     }
