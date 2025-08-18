@@ -11,8 +11,8 @@ use wasm_bindgen::prelude::*;
 use wasm_bindgen::prelude::*;
 
 use crate::{
-    db::models::{Links, Pagination, person::PersonSummary},
-    define_ordering_enum, impl_order_by, impl_wasm_order_by, uuid_newtype,
+    db::models::{DefaultVec, Links, Pagination, person::PersonSummary},
+    define_ordering_enum, uuid_newtype,
 };
 
 #[cfg(feature = "app")]
@@ -121,7 +121,7 @@ pub struct LabUpdate {
     pub remove_members: Vec<Uuid>,
 }
 
-define_ordering_enum! { LabOrderBy { Name } }
+define_ordering_enum! { LabOrderBy { Name }, default = Name }
 
 #[db_query]
 pub struct LabQuery {
@@ -129,13 +129,9 @@ pub struct LabQuery {
     pub ids: Vec<Uuid>,
     pub name: Option<String>,
     #[builder(default)]
-    #[cfg_attr(target_arch = "wasm32", wasm_bindgen(skip))]
-    pub order_by: Vec<LabOrderBy>,
+    pub order_by: DefaultVec<LabOrderBy>,
     #[builder(default)]
     pub pagination: Pagination,
 }
-
-impl_order_by!(LabQuery);
-impl_wasm_order_by!(LabQuery);
 
 uuid_newtype!(LabId);

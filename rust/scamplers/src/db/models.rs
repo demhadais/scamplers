@@ -12,7 +12,8 @@ use pyo3::prelude::*;
 #[cfg(feature = "python")]
 use pyo3_stub_gen::PyStubType;
 use scamplers_macros::base_model;
-use serde::{Serialize, de::DeserializeOwned};
+use serde::{Deserialize, Serialize, de::DeserializeOwned};
+use valuable::Valuable;
 #[cfg(target_arch = "wasm32")]
 use wasm_bindgen::prelude::*;
 
@@ -65,6 +66,139 @@ impl Default for Pagination {
             limit: 500,
             offset: 0,
         }
+    }
+}
+
+#[derive(Clone, Debug, PartialEq, Deserialize, Serialize, Valuable)]
+#[serde(transparent)]
+#[valuable(transparent)]
+pub struct DefaultVec<O>(Vec<O>)
+where
+    O: Valuable;
+
+impl<O> Default for DefaultVec<O>
+where
+    O: Default,
+    O: Valuable,
+{
+    fn default() -> Self {
+        Self(vec![O::default()])
+    }
+}
+
+impl<O> IntoIterator for DefaultVec<O>
+where
+    O: Valuable,
+{
+    type IntoIter = <Vec<O> as IntoIterator>::IntoIter;
+    type Item = <Vec<O> as IntoIterator>::Item;
+
+    fn into_iter(self) -> Self::IntoIter {
+        self.0.into_iter()
+    }
+}
+
+impl<'a, O> IntoIterator for &'a DefaultVec<O>
+where
+    O: Valuable,
+{
+    type IntoIter = <&'a Vec<O> as IntoIterator>::IntoIter;
+    type Item = <&'a Vec<O> as IntoIterator>::Item;
+
+    fn into_iter(self) -> Self::IntoIter {
+        (&self.0).into_iter()
+    }
+}
+
+impl<O> From<O> for DefaultVec<O>
+where
+    O: Valuable,
+{
+    fn from(value: O) -> Self {
+        Self(vec![value])
+    }
+}
+
+impl<O> From<Vec<WasmPythonOrderBy>> for DefaultVec<O>
+where
+    O: From<WasmPythonOrderBy>,
+    O: Valuable,
+{
+    fn from(value: Vec<WasmPythonOrderBy>) -> Self {
+        Self(value.into_iter().map(O::from).collect())
+    }
+}
+
+impl<O> From<DefaultVec<O>> for Vec<WasmPythonOrderBy>
+where
+    WasmPythonOrderBy: From<O>,
+    O: Valuable,
+{
+    fn from(value: DefaultVec<O>) -> Self {
+        value.into_iter().map(WasmPythonOrderBy::from).collect()
+    }
+}
+
+#[cfg(target_arch = "wasm32")]
+impl<O> wasm_bindgen::describe::WasmDescribe for DefaultVec<O> {
+    fn describe() {
+        Vec::<WasmPythonOrderBy>::describe();
+    }
+}
+
+#[cfg(target_arch = "wasm32")]
+impl<O> wasm_bindgen::convert::IntoWasmAbi for DefaultVec<O> {
+    type Abi = <Vec<WasmPythonOrderBy> as wasm_bindgen::convert::IntoWasmAbi>::Abi;
+
+    fn into_abi(self) -> Self::Abi {
+        let as_wasm: Vec<WasmPythonOrderBy> = self.into();
+        as_wasm.into_abi()
+    }
+}
+
+#[cfg(target_arch = "wasm32")]
+impl<O> FromWasmAbi for DefaultVec<O> {
+    type Abi = <Self as IntoWasmAbi>::Abi;
+
+    unsafe fn from_abi(js: Self::Abi) -> Self {
+        unsafe { Vec::<WasmPythonOrderBy>::from_abi(js).into() }
+    }
+}
+
+#[cfg(feature = "python")]
+impl<O> PyStubType for DefaultVec<O>
+where
+    O: Valuable,
+{
+    fn type_output() -> pyo3_stub_gen::TypeInfo {
+        <Vec<WasmPythonOrderBy> as PyStubType>::type_output()
+    }
+}
+
+#[cfg(feature = "python")]
+impl<O> FromPyObject<'_> for DefaultVec<O>
+where
+    O: From<WasmPythonOrderBy>,
+    O: Valuable,
+{
+    fn extract_bound(ob: &Bound<'_, PyAny>) -> PyResult<Self> {
+        Ok(<Vec<WasmPythonOrderBy> as FromPyObject>::extract_bound(ob)?.into())
+    }
+}
+
+#[cfg(feature = "python")]
+impl<'py, O> IntoPyObject<'py> for DefaultVec<O>
+where
+    WasmPythonOrderBy: From<O>,
+    O: Valuable,
+{
+    type Output = <Vec<WasmPythonOrderBy> as IntoPyObject<'py>>::Output;
+    type Target = <Vec<WasmPythonOrderBy> as IntoPyObject<'py>>::Target;
+    type Error = <Vec<WasmPythonOrderBy> as IntoPyObject<'py>>::Error;
+
+    fn into_pyobject(self, py: Python<'py>) -> Result<Self::Output, Self::Error> {
+        let as_py: Vec<WasmPythonOrderBy> = self.into();
+        as_py.into_pyobject(py)
     }
 }
 

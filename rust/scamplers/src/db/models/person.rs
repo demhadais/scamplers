@@ -12,8 +12,8 @@ use valid_string::ValidString;
 use wasm_bindgen::prelude::*;
 
 use crate::{
-    db::models::{Links, Pagination, institution::Institution},
-    define_ordering_enum, impl_order_by, impl_wasm_order_by, uuid_newtype,
+    db::models::{DefaultVec, Links, Pagination, institution::Institution},
+    define_ordering_enum, uuid_newtype,
 };
 
 #[cfg(feature = "app")]
@@ -159,7 +159,7 @@ pub struct PersonUpdate {
     pub fields: PersonUpdateFields,
 }
 
-define_ordering_enum! { PersonOrderBy { Name, Email } }
+define_ordering_enum! { PersonOrderBy { Name, Email }, default = Name }
 
 #[db_query]
 pub struct PersonQuery {
@@ -170,11 +170,7 @@ pub struct PersonQuery {
     pub orcid: Option<String>,
     pub ms_user_id: Option<Uuid>,
     #[builder(default)]
-    #[cfg_attr(target_arch = "wasm32", wasm_bindgen(skip))]
-    pub order_by: Vec<PersonOrderBy>,
+    pub order_by: DefaultVec<PersonOrderBy>,
     #[builder(default)]
     pub pagination: Pagination,
 }
-
-impl_order_by!(PersonQuery);
-impl_wasm_order_by!(PersonQuery);

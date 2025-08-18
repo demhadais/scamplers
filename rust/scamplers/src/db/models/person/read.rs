@@ -69,3 +69,179 @@ impl_id_db_operation!(
     delegate_to = PersonQuery,
     returns = Person
 );
+
+#[cfg(test)]
+mod tests {
+    use std::cmp::Ordering;
+
+    use deadpool_diesel::postgres::Connection;
+    use pretty_assertions::assert_eq;
+    use rstest::rstest;
+    use uuid::Uuid;
+
+    use crate::{
+        config::LOGIN_USER,
+        db::{
+            models::{
+                institution,
+                person::{Person, PersonOrderBy, PersonQuery, PersonSummary},
+            },
+            test_util::{db_conn, people, test_query},
+        },
+        result::ScamplersError,
+    };
+
+    fn sort_by_name(p1: &Person, p2: &Person) -> Ordering {
+        p1.info.summary.name.cmp(&p2.info.summary.name)
+    }
+
+    #[rstest]
+    #[awt]
+    #[tokio::test]
+    async fn default_person_query(#[future] db_conn: Connection, #[future] people: Vec<Person>) {
+        test_query::<PersonQuery, _>()
+            .all_data(people)
+            .sort_by(sort_by_name)
+            .run(db_conn)
+            .await;
+    }
+
+    #[rstest]
+    #[awt]
+    #[tokio::test]
+    async fn specific_person_query(#[future] db_conn: Connection, #[future] people: Vec<Person>) {
+        let query = PersonQuery::builder()
+            .name("person1")
+            .order_by(PersonOrderBy::Name { descending: true })
+            .build();
+
+        test_query()
+            .all_data(people)
+            .filter(|p| p.info.summary.name.starts_with("person1"))
+            .sort_by(|p1, p2| sort_by_name(p1, p2).reverse())
+            .db_query(query)
+            .run(db_conn)
+            .await;
+    }
+
+    #[rstest]
+    #[awt]
+    #[tokio::test]
+    async fn update_user_info(#[future] mut db_conn: Connection) {
+        db_conn
+            .test_transaction::<_, ScamplersError, _>(|tx| {
+                async move {
+                    let people = PersonSummary::fetch_by_query(&PersonQuery::default(), tx)
+                        .await
+                        .unwrap();
+
+                    let id = people.get(0).unwrap().handle.id;
+
+                    let new_name = "Thomas Anderson";
+                    let new_email = "neo@example.com";
+
+                    let updated_person = PersonUpdateCore::builder()
+                        .id(id)
+                        .name(new_name)
+                        .email(new_email)
+                        .build();
+                    assert!(updated_person.is_update());
+
+                    let updated_person = PersonUpdate {
+                        core: updated_person,
+                        ..Default::default()
+                    }
+                    .write_to_db(tx)
+                    .await
+                    .unwrap();
+
+                    assert_eq!(new_name, updated_person.core.summary.name);
+                    assert_eq!(new_email, updated_person.core.summary.email.unwrap());
+
+                    Ok(())
+                }
+                .scope_boxed()
+            })
+            .await;
+    }
+
+    #[rstest]
+    #[awt]
+    #[tokio::test]
+    async fn ms_login_with_roles_update(#[future] mut db_conn: DbConnection) {
+        db_conn
+            .test_transaction::<_, ScamplersError, _>(|tx| {
+                async move {
+                    tx.set_transaction_user(LOGIN_USER).await.unwrap();
+
+                    let institution_id =
+                        Institution::fetch_by_query(&InstitutionQuery::default(), tx)
+                            .await
+                            .unwrap()
+                            .get(0)
+                            .unwrap()
+                            .handle
+                            .id;
+
+                    // First, write a new user to the db as a login from the frontend
+                    let ms_user_id = Uuid::now_v7();
+
+                    let spiderman = NewPerson::builder()
+                        .name("Peter Parker")
+                        .email("peter.parker@example.com")
+                        .ms_user_id(ms_user_id)
+                        .institution_id(institution_id)
+                        .build();
+                    let mut new_ms_login = NewMsLogin(spiderman);
+
+                    let created_user = new_ms_login.clone().write_to_db(tx).await.unwrap();
+
+                    // The user logs out and changes their email address, then logs back in
+                    let new_email = "spider.man@example.com".to_string();
+                    new_ms_login.0.email = new_email.clone();
+                    let recreated_user = new_ms_login.write_to_db(tx).await.unwrap();
+
+                    assert_eq!(
+                        created_user.person.core.summary.handle.id,
+                        recreated_user.person.core.summary.handle.id
+                    );
+                    assert_eq!(
+                        new_email,
+                        *recreated_user.person.core.summary.email.as_ref().unwrap()
+                    );
+                    assert_eq!(recreated_user.person.roles, &[]);
+
+                    tx.set_transaction_user("postgres").await.unwrap();
+
+                    let core = PersonUpdateCore::builder()
+                        .id(created_user.person.core.summary.handle.id)
+                        .build();
+                    let person_with_granted_roles = PersonUpdate {
+                        core: core.clone(),
+                        grant_roles: vec![UserRole::AppAdmin],
+                        ..Default::default()
+                    }
+                    .write_to_db(tx)
+                    .await
+                    .unwrap();
+
+                    assert_eq!(person_with_granted_roles.roles, &[UserRole::AppAdmin]);
+
+                    let person_with_revoked_roles = PersonUpdate {
+                        core,
+                        revoke_roles: vec![UserRole::AppAdmin],
+                        ..Default::default()
+                    }
+                    .write_to_db(tx)
+                    .await
+                    .unwrap();
+
+                    assert_eq!(person_with_revoked_roles.roles, &[]);
+
+                    Ok(())
+                }
+                .scope_boxed()
+            })
+            .await;
+    }
+}

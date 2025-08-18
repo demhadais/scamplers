@@ -74,7 +74,7 @@ macro_rules! apply_ilike_filters {
 
 #[macro_export]
 macro_rules! define_ordering_enum {
-    {$name:ident { $($variant:ident),* }} => {
+    {$name:ident { $($variant:ident),* }, default = $default:ident} => {
         #[derive(Clone, Debug, PartialEq, ::serde::Serialize, ::serde::Deserialize, ::strum::EnumString, ::strum::Display, ::valuable::Valuable)]
         #[serde(tag = "field", rename_all = "snake_case")]
         #[strum(serialize_all = "snake_case")]
@@ -84,6 +84,12 @@ macro_rules! define_ordering_enum {
                     descending: bool
                 },
             )*
+        }
+
+        impl Default for $name {
+            fn default() -> Self {
+                Self::$default { descending: false }
+            }
         }
 
         #[allow(dead_code)]
@@ -110,52 +116,6 @@ macro_rules! define_ordering_enum {
             }
         }
 
-
-        #[cfg(feature = "python")]
-        impl pyo3::FromPyObject<'_> for $name {
-            fn extract_bound(ob: &Bound<'_, PyAny>) -> PyResult<Self> {
-                Ok(crate::db::models::WasmPythonOrderBy::extract_bound(ob)?.into())
-            }
-        }
-
-        #[cfg(feature = "python")]
-        impl<'py> pyo3::IntoPyObject<'py> for $name {
-            type Error = <crate::db::models::WasmPythonOrderBy as pyo3::IntoPyObject<'py>>::Error;
-            type Output = <crate::db::models::WasmPythonOrderBy as pyo3::IntoPyObject<'py>>::Output;
-            type Target = <crate::db::models::WasmPythonOrderBy as pyo3::IntoPyObject<'py>>::Target;
-
-            fn into_pyobject(self, py: Python<'py>) -> Result<Self::Output, Self::Error> {
-                let as_generic: crate::db::models::WasmPythonOrderBy = self.into();
-
-                as_generic.into_pyobject(py)
-            }
-        }
-
-
-        #[cfg(feature = "python")]
-        impl pyo3_stub_gen::PyStubType for $name {
-            fn type_output() -> pyo3_stub_gen::TypeInfo {
-                crate::db::models::WasmPythonOrderBy::type_output()
-            }
-        }
-
-        #[cfg(target_arch = "wasm32")]
-        impl From<crate::db::models::WasmPythonOrderBy> for $name {
-            fn from(wasm: crate::db::models::WasmPythonOrderBy) -> Self {
-                use wasm_bindgen::prelude::*;
-
-                Self::new(&wasm.field, wasm.descending).unwrap_throw()
-            }
-        }
-
-        #[cfg(feature = "python")]
-        impl From<crate::db::models::WasmPythonOrderBy> for $name {
-            fn from(py: crate::db::models::WasmPythonOrderBy) -> Self {
-                // TODO: bad unwrap
-                Self::new(&py.field, py.descending).unwrap()
-            }
-        }
-
         #[cfg(any(target_arch = "wasm32", feature = "python"))]
         impl From<$name> for crate::db::models::WasmPythonOrderBy {
             fn from(order_by: $name) -> crate::db::models::WasmPythonOrderBy {
@@ -165,20 +125,113 @@ macro_rules! define_ordering_enum {
                 }
             }
         }
-    };
-}
 
-#[macro_export]
-macro_rules! impl_order_by {
-    ($query_struct:ident) => {
-        #[cfg(any(target_arch = "wasm32", feature = "python"))]
-        impl $query_struct {
-            fn order_by_inner(&self) -> Vec<crate::db::models::WasmPythonOrderBy> {
-                self.order_by.clone().into_iter().map(Into::into).collect()
+        #[cfg(target_arch = "wasm32")]
+        mod wasm32 {
+            use super::$name;
+
+            use wasm_bindgen::{
+                JsValue,
+                convert::{
+                    FromWasmAbi, IntoWasmAbi, OptionFromWasmAbi, OptionIntoWasmAbi, TryFromJsValue,
+                    VectorFromWasmAbi, VectorIntoWasmAbi, js_value_vector_from_abi,
+                    js_value_vector_into_abi,
+                },
+                describe::{WasmDescribe, WasmDescribeVector},
+            };
+
+            use crate::db::models::WasmPythonOrderBy;
+
+            impl From<WasmPythonOrderBy> for $name {
+                fn from(wasm: crate::db::models::WasmPythonOrderBy) -> Self {
+                    use wasm_bindgen::prelude::*;
+
+                    Self::new(&wasm.field, wasm.descending).unwrap_throw()
+                }
             }
 
-            fn set_order_by_inner(&mut self, orderings: Vec<crate::db::models::WasmPythonOrderBy>) {
-                self.order_by = orderings.into_iter().map(From::from).collect();
+            // impl WasmDescribe for $name {
+            //     fn describe() {
+            //         WasmPythonOrderBy::describe();
+            //     }
+            // }
+
+            // impl IntoWasmAbi for $name {
+            //     type Abi = <WasmPythonOrderBy as IntoWasmAbi>::Abi;
+
+            //     fn into_abi(self) -> Self::Abi {
+            //         let as_wasm: WasmPythonOrderBy = self.into();
+            //     }
+            // }
+
+            // impl FromWasmAbi for $name {
+            //     type Abi = <Self as IntoWasmAbi>::Abi;
+
+            //     unsafe fn from_abi(js: Self::Abi) -> Self {
+            //         unsafe { WasmPythonOrderBy::from_abi(js).into() }
+            //     }
+            // }
+
+            // impl WasmDescribeVector for $name {
+            //     fn describe_vector() {
+            //         Vec::<WasmPythonOrderBy>::describe();
+            //     }
+            // }
+
+            // impl VectorIntoWasmAbi for $name {
+            //     type Abi = <WasmPythonOrderBy as VectorIntoWasmAbi>::Abi;
+
+            //     fn vector_into_abi(vector: Box<[Self]>) -> Self::Abi {
+            //         js_value_vector_into_abi(vector)
+            //     }
+            // }
+
+            // impl VectorFromWasmAbi for $name {
+            //     type Abi = <WasmPythonOrderBy as VectorFromWasmAbi>::Abi;
+
+            //     unsafe fn vector_from_abi(js: Self::Abi) -> Box<[Self]> {
+            //         unsafe { js_value_vector_from_abi(js) }
+            //     }
+            // }
+        }
+
+        #[cfg(feature = "python")]
+        mod python {
+            use super::$name;
+
+            use pyo3::prelude::*;
+
+            use crate::db::models::WasmPythonOrderBy;
+
+            impl From<WasmPythonOrderBy> for $name {
+                fn from(py: WasmPythonOrderBy) -> Self {
+                    // TODO: bad unwrap
+                    Self::new(&py.field, py.descending).unwrap()
+                }
+            }
+
+            impl pyo3::FromPyObject<'_> for $name {
+                fn extract_bound(ob: &Bound<'_, PyAny>) -> PyResult<Self> {
+                    Ok(crate::db::models::WasmPythonOrderBy::extract_bound(ob)?.into())
+                }
+            }
+
+            impl<'py> pyo3::IntoPyObject<'py> for $name {
+                type Error = <crate::db::models::WasmPythonOrderBy as pyo3::IntoPyObject<'py>>::Error;
+                type Output = <crate::db::models::WasmPythonOrderBy as pyo3::IntoPyObject<'py>>::Output;
+                type Target = <crate::db::models::WasmPythonOrderBy as pyo3::IntoPyObject<'py>>::Target;
+
+                fn into_pyobject(self, py: Python<'py>) -> Result<Self::Output, Self::Error> {
+                    let as_generic: crate::db::models::WasmPythonOrderBy = self.into();
+
+                    as_generic.into_pyobject(py)
+                }
+            }
+
+            impl pyo3_stub_gen::PyStubType for $name {
+                fn type_output() -> pyo3_stub_gen::TypeInfo {
+                    crate::db::models::WasmPythonOrderBy::type_output()
+                }
             }
         }
     };
@@ -192,12 +245,12 @@ macro_rules! impl_wasm_order_by {
         impl $query_struct {
             #[wasm_bindgen(getter)]
             pub fn get_order_by(&self) -> Vec<crate::db::models::WasmPythonOrderBy> {
-                self.order_by_inner()
+                self.order_by.clone().into_iter().map(Into::into).collect()
             }
 
             #[wasm_bindgen(setter)]
             pub fn set_order_by(&mut self, orderings: Vec<crate::db::models::WasmPythonOrderBy>) {
-                self.set_order_by_inner(orderings)
+                orderings.into_iter().map(From::from).collect();
             }
         }
     };

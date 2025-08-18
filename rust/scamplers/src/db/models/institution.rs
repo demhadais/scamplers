@@ -5,8 +5,8 @@ use uuid::Uuid;
 use valid_string::ValidString;
 
 use crate::{
-    db::models::{Jsonify, Links, Pagination},
-    define_ordering_enum, impl_order_by, impl_wasm_order_by, uuid_newtype,
+    db::models::{DefaultVec, Jsonify, Links, Pagination},
+    define_ordering_enum, impl_wasm_order_by, uuid_newtype,
 };
 
 #[cfg(feature = "app")]
@@ -46,7 +46,7 @@ pub struct Institution {
     pub name: String,
 }
 
-define_ordering_enum! { InstitutionOrderBy { Name } }
+define_ordering_enum! { InstitutionOrderBy { Name }, default = Name }
 
 #[db_query]
 pub struct InstitutionQuery {
@@ -55,11 +55,7 @@ pub struct InstitutionQuery {
     pub ids: Vec<Uuid>,
     pub name: Option<String>,
     #[builder(default)]
-    #[cfg_attr(target_arch = "wasm32", wasm_bindgen(skip))]
-    pub order_by: Vec<InstitutionOrderBy>,
+    pub order_by: DefaultVec<InstitutionOrderBy>,
     #[builder(default)]
     pub pagination: Pagination,
 }
-
-impl_order_by!(InstitutionQuery);
-impl_wasm_order_by!(InstitutionQuery);

@@ -12,6 +12,8 @@ use uuid::Uuid;
 #[cfg(target_arch = "wasm32")]
 use wasm_bindgen::prelude::*;
 
+#[cfg(feature = "python")]
+use crate::db::models::DefaultVec;
 use crate::db::models::specimen::{
     block::{NewFixedBlock, NewFrozenBlock},
     tissue::{NewCryopreservedTissue, NewFixedTissue, NewFrozenTissue},
@@ -28,7 +30,7 @@ use crate::{
             virtual_::SuspensionFixative,
         },
     },
-    define_ordering_enum, impl_order_by, impl_wasm_order_by, uuid_newtype,
+    define_ordering_enum, uuid_newtype,
 };
 
 pub mod block;
@@ -233,7 +235,7 @@ impl diesel::serialize::ToSql<::diesel::sql_types::Text, diesel::pg::Pg> for Fix
 #[cfg(feature = "python")]
 impl_stub_type!(Fixative = BlockFixative | SuspensionFixative | TissueFixative);
 
-define_ordering_enum! { SpecimenOrderBy { Name, ReceivedAt } }
+define_ordering_enum! { SpecimenOrderBy { Name, ReceivedAt }, default = ReceivedAt }
 
 #[db_query]
 pub struct SpecimenQuery {
@@ -260,9 +262,8 @@ pub struct SpecimenQuery {
     pub storage_buffer: Option<String>,
     pub frozen: Option<bool>,
     pub cryopreserved: Option<bool>,
-    #[cfg_attr(target_arch = "wasm32", wasm_bindgen(skip))]
     #[builder(default)]
-    pub order_by: Vec<SpecimenOrderBy>,
+    pub order_by: DefaultVec<SpecimenOrderBy>,
     #[builder(default)]
     pub pagination: Pagination,
 }
@@ -272,7 +273,7 @@ pub struct SpecimenQuery {
 #[pymethods]
 impl SpecimenQuery {
     #[new]
-    #[pyo3(signature = (*,ids = Vec::new(), name = None, submitters = Vec::new(), labs = Vec::new(), received_before = None, received_after = None, species = Vec::new(), notes = None, type_ = Vec::new(), embedded_in = Vec::new(), fixatives = Vec::new(), storage_buffer = None, frozen = None, cryopreserved = None, order_by = Vec::new(),pagination = Pagination::default()))]
+    #[pyo3(signature = (*,ids = Vec::new(), name = None, submitters = Vec::new(), labs = Vec::new(), received_before = None, received_after = None, species = Vec::new(), notes = None, type_ = Vec::new(), embedded_in = Vec::new(), fixatives = Vec::new(), storage_buffer = None, frozen = None, cryopreserved = None, order_by = DefaultVec::default(), pagination = Pagination::default()))]
     pub fn new(
         ids: Vec<Uuid>,
         name: Option<String>,
@@ -288,7 +289,7 @@ impl SpecimenQuery {
         storage_buffer: Option<String>,
         frozen: Option<bool>,
         cryopreserved: Option<bool>,
-        order_by: Vec<SpecimenOrderBy>,
+        order_by: DefaultVec<SpecimenOrderBy>,
         pagination: Pagination,
     ) -> Self {
         Self {
@@ -311,9 +312,6 @@ impl SpecimenQuery {
         }
     }
 }
-
-impl_order_by!(SpecimenQuery);
-impl_wasm_order_by!(SpecimenQuery);
 
 uuid_newtype!(SpecimenId);
 

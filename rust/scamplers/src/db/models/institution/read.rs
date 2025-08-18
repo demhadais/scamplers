@@ -67,7 +67,7 @@ mod tests {
     ) {
         let query = InstitutionQuery::builder()
             .name("institution1")
-            .order_by([InstitutionOrderBy::Name { descending: true }])
+            .order_by(InstitutionOrderBy::Name { descending: true })
             .build();
 
         test_query()
