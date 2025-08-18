@@ -6,7 +6,7 @@ use valid_string::ValidString;
 
 use crate::{
     db::models::{Jsonify, Links, Pagination},
-    define_ordering_enum, impl_order_by, impl_python_order_by, impl_wasm_order_by, uuid_newtype,
+    define_ordering_enum, impl_order_by, impl_wasm_order_by, uuid_newtype,
 };
 
 #[cfg(feature = "app")]
@@ -46,7 +46,7 @@ pub struct Institution {
     pub name: String,
 }
 
-define_ordering_enum! {InstitutionOrderBy { Name }, default = Name}
+define_ordering_enum! { InstitutionOrderBy { Name } }
 
 #[db_query]
 pub struct InstitutionQuery {
@@ -63,4 +63,3 @@ pub struct InstitutionQuery {
 
 impl_order_by!(InstitutionQuery);
 impl_wasm_order_by!(InstitutionQuery);
-impl_python_order_by!(InstitutionQuery);

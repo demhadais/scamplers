@@ -15,7 +15,7 @@ use crate::{
 impl DbOperation<Lab> for LabUpdate {
     fn execute(self, db_conn: &mut PgConnection) -> ScamplersResult<Lab> {
         let Self {
-            core,
+            fields: core,
             add_members,
             remove_members,
         } = self;

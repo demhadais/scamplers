@@ -5,7 +5,9 @@ use crate::{
     apply_eq_any_filters, apply_eq_filters, apply_ilike_filters,
     db::{
         DbOperation,
-        models::person::{Person, PersonCore, PersonId, PersonOrderBy, PersonQuery},
+        models::person::{
+            Person, PersonId, PersonOrderBy, PersonQuery, PersonSummaryWithRelations,
+        },
     },
     impl_id_db_operation, init_stmt,
 };
@@ -17,7 +19,7 @@ impl DbOperation<Vec<Person>> for PersonQuery {
         self,
         db_conn: &mut diesel::PgConnection,
     ) -> crate::result::ScamplersResult<Vec<Person>> {
-        let mut stmt = init_stmt!(stmt = person::table.inner_join(institution::table), query = &self, output_type = PersonCore, orderby_spec = {PersonOrderBy::Name => person::name, PersonOrderBy::Email => person::email });
+        let mut stmt = init_stmt!(stmt = person::table.inner_join(institution::table), query = &self, output_type = PersonSummaryWithRelations, orderby_spec = {PersonOrderBy::Name => person::name, PersonOrderBy::Email => person::email });
 
         let Self {
             ids,
@@ -49,13 +51,13 @@ impl DbOperation<Vec<Person>> for PersonQuery {
             }
         );
 
-        let person_cores: Vec<PersonCore> = stmt.load(db_conn)?;
+        let person_cores: Vec<PersonSummaryWithRelations> = stmt.load(db_conn)?;
 
         let mut people = Vec::with_capacity(person_cores.len());
         for core in person_cores {
             let roles =
                 diesel::select(get_user_roles(core.summary.id.to_string())).get_result(db_conn)?;
-            people.push(Person { core, roles });
+            people.push(Person { info: core, roles });
         }
 
         Ok(people)

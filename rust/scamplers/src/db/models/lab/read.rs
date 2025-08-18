@@ -3,11 +3,11 @@ use scamplers_schema::{lab, lab_membership, person};
 use uuid::Uuid;
 
 use crate::{
-    apply_eq_any_filters, apply_ilike_filters, attach_children_to_parents,
+    apply_eq_any_filters, apply_ilike_filters, attach_children_to_parents_mtm,
     db::{
         DbOperation,
         models::{
-            lab::{Lab, LabCore, LabId, LabOrderBy, LabQuery},
+            lab::{Lab, LabId, LabOrderBy, LabQuery, LabSummaryWithRelations},
             person::PersonSummary,
         },
     },
@@ -17,13 +17,13 @@ use crate::{
 impl DbOperation<Vec<Lab>> for LabQuery {
     fn execute(self, db_conn: &mut PgConnection) -> crate::result::ScamplersResult<Vec<Lab>> {
         #[derive(Identifiable, Associations, Selectable, Queryable)]
-        #[diesel(table_name = lab_membership, belongs_to(LabCore, foreign_key = lab_id), belongs_to(PersonSummary, foreign_key = member_id), primary_key(lab_id, member_id), check_for_backend(diesel::pg::Pg))]
+        #[diesel(table_name = lab_membership, belongs_to(LabSummaryWithRelations, foreign_key = lab_id), belongs_to(PersonSummary, foreign_key = member_id), primary_key(lab_id, member_id), check_for_backend(diesel::pg::Pg))]
         struct LabMembership {
             lab_id: Uuid,
             member_id: Uuid,
         }
 
-        let mut stmt = init_stmt!(stmt = lab::table.inner_join(person::table), query = &self, output_type = LabCore, orderby_spec = { LabOrderBy::Name => lab::name });
+        let mut stmt = init_stmt!(stmt = lab::table.inner_join(person::table), query = &self, output_type = LabSummaryWithRelations, orderby_spec = { LabOrderBy::Name => lab::name });
 
         let Self { ids, name, .. } = &self;
 
@@ -37,16 +37,16 @@ impl DbOperation<Vec<Lab>> for LabQuery {
             filters = {lab::name => name}
         );
 
-        let labs: Vec<LabCore> = stmt.load(db_conn)?;
+        let labs: Vec<LabSummaryWithRelations> = stmt.load(db_conn)?;
         let members = LabMembership::belonging_to(&labs)
             .inner_join(person::table)
             .select((LabMembership::as_select(), PersonSummary::as_select()))
             .load(db_conn)?;
 
-        Ok(attach_children_to_parents!(
+        Ok(attach_children_to_parents_mtm!(
             parents = labs,
             children = members,
-            transform_fn = |(core, members)| Lab { core, members }
+            transform_fn = |(info, members)| Lab { info, members }
         ))
     }
 }

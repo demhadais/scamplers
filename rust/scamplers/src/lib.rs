@@ -2,7 +2,6 @@
 
 #[cfg(feature = "app")]
 mod auth;
-#[cfg(any(target_arch = "wasm32", feature = "python"))]
 pub mod client;
 #[cfg(feature = "app")]
 pub mod config;
@@ -19,6 +18,7 @@ mod state;
 
 #[cfg(feature = "python")]
 pub mod module_names {
+    pub const PARENT_MODULE_NAME: &str = "scamplepy";
     pub const COMMON_SUBMODULE_NAME: &str = "scamplepy.common";
     pub const CREATE_SUBMODULE_NAME: &str = "scamplepy.create";
     pub const QUERY_SUBMODULE_NAME: &str = "scamplepy.query";

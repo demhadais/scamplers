@@ -10,7 +10,7 @@ mod create;
 mod read;
 
 #[db_simple_enum]
-#[cfg_attr(feature = "python", pyo3(module = "scamplepy.responses"))]
+#[cfg_attr(feature = "python", pyo3(module = "scamplepy.create"))]
 pub enum MultiplexingTagType {
     FlexBarcode,
     Ocm,
@@ -25,7 +25,19 @@ pub enum MultiplexingTagType {
     TotalSeqC,
 }
 
-#[db_insertion]
+#[::scamplers_macros::base_model]
+#[cfg_attr(feature = "python", ::pyo3_stub_gen::derive::gen_stub_pyclass)]
+#[cfg_attr(
+    feature = "python",
+    ::pyo3::pyclass(get_all, set_all, eq, module = "scamplepy.create")
+)]
+#[cfg_attr(
+    feature = "app",
+    derive(::diesel::Insertable),
+    diesel(check_for_backend(::diesel::pg::Pg))
+)]
+#[derive(::scamplers_macros::Jsonify, ::scamplers_macros::PyJsonify, ::bon::Builder)]
+#[builder(on(_, into), derive(Clone, Debug, Into))]
 #[cfg_attr(feature = "app", diesel(table_name = multiplexing_tag))]
 pub struct NewMultiplexingTag {
     #[garde(dive)]

@@ -13,13 +13,13 @@ define_sql_function! {fn revoke_roles_from_user(user_id: Text, roles: Array<Text
 
 impl DbOperation<Person> for PersonUpdate {
     fn execute(self, db_conn: &mut diesel::PgConnection) -> crate::result::ScamplersResult<Person> {
-        if self.core.is_update() {
-            diesel::update(&self.core)
-                .set(&self.core)
+        if self.fields.is_update() {
+            diesel::update(&self.fields)
+                .set(&self.fields)
                 .execute(db_conn)?;
         }
 
-        let user_id = &self.core.id;
+        let user_id = &self.fields.id;
         let user_id_str = user_id.to_string();
 
         diesel::select(grant_roles_to_user(&user_id_str, self.grant_roles)).execute(db_conn)?;

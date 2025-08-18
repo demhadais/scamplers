@@ -9,6 +9,7 @@ use crate::{
             institution::{Institution, InstitutionId, InstitutionQuery, NewInstitution},
             lab::{Lab, LabId, LabQuery, LabUpdate, NewLab},
             person::{CreatedUser, NewPerson, Person, PersonId, PersonQuery, PersonUpdate},
+            specimen::{NewSpecimen, Specimen, SpecimenId, SpecimenQuery},
         },
     },
     endpoints::{Api, Endpoint},
@@ -105,6 +106,9 @@ pub fn router() -> Router<AppState> {
         fetch_lab(LabId) -> Lab;
         list_labs(LabQuery) -> Vec<Lab>;
         update_lab(LabUpdate) -> Lab;
+        create_specimen(NewSpecimen) -> Specimen;
+        fetch_specimen(SpecimenId) -> Specimen;
+        list_specimens(SpecimenQuery) -> Vec<Specimen>;
     );
 
     router

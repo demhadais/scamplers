@@ -1,6 +1,6 @@
 use crate::db::{
     DbOperation,
-    models::lab::{Lab, LabUpdate, LabUpdateCore, NewLab},
+    models::lab::{Lab, LabUpdate, LabUpdateFields, NewLab},
 };
 use diesel::prelude::*;
 use scamplers_schema::lab;
@@ -16,14 +16,14 @@ impl DbOperation<Lab> for NewLab {
             .returning(lab::id)
             .get_result(db_conn)?;
 
-        let update_core = LabUpdateCore {
+        let update_core = LabUpdateFields {
             id,
             ..Default::default()
         };
 
         self.member_ids.push(self.pi_id);
         let update = LabUpdate {
-            core: update_core,
+            fields: update_core,
             add_members: self.member_ids,
             ..Default::default()
         };

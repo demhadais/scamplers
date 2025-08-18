@@ -18,6 +18,7 @@ use crate::{
         institution::{Institution, InstitutionId, InstitutionQuery},
         lab::{Lab, LabId, LabQuery, LabUpdate, NewLab},
         person::{NewPerson, Person, PersonId, PersonQuery, PersonUpdate},
+        specimen::{NewSpecimen, Specimen, SpecimenId, SpecimenQuery},
     },
     endpoints::{Api, Endpoint},
     result::{ScamplersErrorResponse, ServerError},
@@ -25,6 +26,7 @@ use crate::{
 
 #[allow(dead_code)]
 #[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
+#[cfg_attr(feature = "python", pyo3_stub_gen::derive::gen_stub_pyclass)]
 #[cfg_attr(feature = "python", pyclass)]
 #[derive(Clone)]
 pub struct ScamplersClient {
@@ -36,14 +38,15 @@ pub struct ScamplersClient {
 }
 
 #[cfg(feature = "python")]
+#[pyo3_stub_gen::derive::gen_stub_pymethods]
 #[pymethods]
 impl ScamplersClient {
     #[new]
-    #[pyo3(signature = (*, api_base_url, api_key=None, accept_invalid_certificates=None))]
+    #[pyo3(signature = (*, api_base_url, api_key=None, accept_invalid_certificates=false))]
     fn py_new(
         api_base_url: String,
         api_key: Option<String>,
-        accept_invalid_certificates: Option<bool>,
+        accept_invalid_certificates: bool,
     ) -> Self {
         Self::new(api_base_url, None, api_key, accept_invalid_certificates)
     }
@@ -57,7 +60,7 @@ impl ScamplersClient {
         api_base_url: String,
         frontend_token: Option<String>,
         api_key: Option<String>,
-        #[allow(unused_variables)] accept_invalid_certificates: Option<bool>,
+        accept_invalid_certificates: bool,
     ) -> Self {
         use reqwest::{
             ClientBuilder,
@@ -76,9 +79,7 @@ impl ScamplersClient {
 
         #[cfg(not(target_arch = "wasm32"))]
         {
-            if let Some(accept_invalid_certs) = accept_invalid_certificates {
-                client = client.danger_accept_invalid_certs(accept_invalid_certs);
-            }
+            client = client.danger_accept_invalid_certs(accept_invalid_certificates);
         }
 
         let client = client.build().unwrap();
@@ -102,7 +103,7 @@ impl ScamplersClient {
 
 impl ScamplersClient {
     #[allow(dead_code)]
-    async fn send_request<Req, Resp>(&self, data: Req) -> Result<Resp, ScamplersErrorResponse>
+    pub async fn send_request<Req, Resp>(&self, data: Req) -> Result<Resp, ScamplersErrorResponse>
     where
         Api: Endpoint<Req, Resp>,
         Resp: DeserializeOwned,
@@ -196,6 +197,7 @@ macro_rules! python_client_methods {
     {$($method_name:ident($request_type:path) -> $response_type:path;)*} => {
         $(
             #[cfg(feature = "python")]
+            #[pyo3_stub_gen::derive::gen_stub_pymethods]
             #[pyo3::pymethods]
             impl ScamplersClient {
                 async fn $method_name(
@@ -215,11 +217,12 @@ wasm_client_methods! {
     list_institutions(InstitutionQuery) -> Vec<Institution>;
     fetch_person(PersonId) -> Person;
     list_people(PersonQuery) -> Vec<Person>;
-    update_person(PersonUpdate) -> Person;
     create_lab(NewLab) -> Lab;
     fetch_lab(LabId) -> Lab;
     list_labs(LabQuery) -> Vec<Lab>;
     update_lab(LabUpdate) -> Lab;
+    fetch_specimen(SpecimenId) -> Specimen;
+    list_specimens(SpecimenQuery) -> Vec<Specimen>;
 }
 
 python_client_methods! {
@@ -234,6 +237,9 @@ python_client_methods! {
     fetch_lab(LabId) -> Lab;
     list_labs(LabQuery) -> Vec<Lab>;
     update_lab(LabUpdate) -> Lab;
+    create_specimen(NewSpecimen) -> Specimen;
+    fetch_specimen(SpecimenId) -> Specimen;
+    list_specimens(SpecimenQuery) -> Vec<Specimen>;
 }
 
 // #[cfg(feature = "python")]

@@ -5,10 +5,12 @@ use uuid::Uuid;
 use valid_string::ValidString;
 #[cfg(target_arch = "wasm32")]
 use wasm_bindgen::prelude::*;
+#[cfg(target_arch = "wasm32")]
+use wasm_bindgen::prelude::*;
 
 use crate::{
     db::models::{Links, Pagination, person::PersonSummary},
-    define_ordering_enum, impl_order_by, impl_python_order_by, impl_wasm_order_by, uuid_newtype,
+    define_ordering_enum, impl_order_by, impl_wasm_order_by, uuid_newtype,
 };
 
 #[cfg(feature = "app")]
@@ -56,6 +58,7 @@ impl NewLab {
 #[cfg_attr(feature = "app", diesel(table_name = scamplers_schema::lab))]
 pub struct LabSummary {
     pub id: Uuid,
+    #[cfg_attr(target_arch = "wasm32", wasm_bindgen(readonly))]
     pub links: Links,
     pub name: String,
     pub delivery_dir: String,
@@ -63,10 +66,10 @@ pub struct LabSummary {
 
 #[db_selection]
 #[cfg_attr(feature = "app", diesel(table_name = scamplers_schema::lab))]
-pub struct LabCore {
+pub struct LabSummaryWithRelations {
     // We include the ID even though it's already in `LabSummary` so that we can have `diesel::Identifiable` on this struct. Consequently, we skip serializing it since it's already in `LabSummary`
-    #[serde(skip)]
-    pub id: Uuid,
+    #[cfg_attr(feature = "app", diesel(column_name = id))]
+    pub id_: Uuid,
     #[serde(flatten)]
     #[cfg_attr(feature = "app", diesel(embed))]
     pub summary: LabSummary,
@@ -79,17 +82,18 @@ pub struct LabCore {
     wasm_bindgen::prelude::wasm_bindgen(getter_with_clone)
 )]
 #[cfg_attr(feature = "python", pyo3_stub_gen::derive::gen_stub_pyclass)]
-#[cfg_attr(feature = "python", pyclass(get_all))]
+#[cfg_attr(feature = "python", pyclass(get_all, module = "scamplepy.responses"))]
 #[base_model]
 pub struct Lab {
     #[serde(flatten)]
-    pub core: LabCore,
+    pub info: LabSummaryWithRelations,
     pub members: Vec<PersonSummary>,
 }
 
 #[db_update]
+#[cfg_attr(target_arch = "wasm32", wasm_bindgen(getter_with_clone))]
 #[cfg_attr(feature = "app", diesel(table_name = scamplers_schema::lab))]
-pub struct LabUpdateCore {
+pub struct LabUpdateFields {
     pub id: Uuid,
     #[garde(dive)]
     pub name: Option<ValidString>,
@@ -98,18 +102,23 @@ pub struct LabUpdateCore {
     pub delivery_dir: Option<ValidString>,
 }
 
-#[cfg_attr(feature = "python", pyclass(get_all, set_all))]
+#[cfg_attr(target_arch = "wasm32", wasm_bindgen(getter_with_clone))]
+#[cfg_attr(feature = "python", pyo3_stub_gen::derive::gen_stub_pyclass)]
+#[cfg_attr(
+    feature = "python",
+    pyclass(get_all, set_all, module = "scamplepy.update")
+)]
 #[base_model]
 #[derive(Default)]
 pub struct LabUpdate {
     #[serde(flatten)]
     #[garde(dive)]
-    pub core: LabUpdateCore,
+    pub fields: LabUpdateFields,
     pub add_members: Vec<Uuid>,
     pub remove_members: Vec<Uuid>,
 }
 
-define_ordering_enum! {LabOrderBy { Name }, default = Name}
+define_ordering_enum! { LabOrderBy { Name } }
 
 #[db_query]
 pub struct LabQuery {
@@ -125,6 +134,5 @@ pub struct LabQuery {
 
 impl_order_by!(LabQuery);
 impl_wasm_order_by!(LabQuery);
-impl_python_order_by!(LabQuery);
 
 uuid_newtype!(LabId);

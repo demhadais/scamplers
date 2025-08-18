@@ -161,7 +161,7 @@ wheels = [
 ]
 
 [[package]]
-name = "test-scamplers-core"
+name = "test-scamplepy"
 version = "0.1.0"
 source = { editable = "." }
 dependencies = [

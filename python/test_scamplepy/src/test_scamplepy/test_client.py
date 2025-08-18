@@ -3,7 +3,7 @@ import maturin_import_hook
 
 maturin_import_hook.install()
 
-from scamplers_core import ScamplersClient
+from scamplepy import ScamplersClient
 from .test_requests import (
     new_cellranger_count_dataset_fixture,
     new_cellranger_multi_dataset_fixture,

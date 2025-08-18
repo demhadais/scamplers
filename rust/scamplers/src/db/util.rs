@@ -1,5 +1,7 @@
 use std::fmt::Display;
 
+use uuid::Uuid;
+
 pub trait AsIlike: Display {
     fn as_ilike(&self) -> String {
         format!("%{self}%")
@@ -72,25 +74,16 @@ macro_rules! apply_ilike_filters {
 
 #[macro_export]
 macro_rules! define_ordering_enum {
-    {$name:ident {$($variant:ident),*}, default = $default_variant:ident$(, attributes = [$($enum_attribute:meta),*])?} => {
+    {$name:ident { $($variant:ident),* }} => {
         #[derive(Clone, Debug, PartialEq, ::serde::Serialize, ::serde::Deserialize, ::strum::EnumString, ::strum::Display, ::valuable::Valuable)]
         #[serde(tag = "field", rename_all = "snake_case")]
         #[strum(serialize_all = "snake_case")]
-        $(#[$enum_attribute])*
         pub enum $name {
             $(
                 $variant {
                     descending: bool
                 },
             )*
-        }
-
-        impl Default for $name {
-            fn default() -> Self {
-                Self::$default_variant {
-                    descending: false
-                }
-            }
         }
 
         #[allow(dead_code)]
@@ -114,6 +107,35 @@ macro_rules! define_ordering_enum {
                 match self {
                     $( Self::$variant{ descending, ..} )|* => *descending
                 }
+            }
+        }
+
+
+        #[cfg(feature = "python")]
+        impl pyo3::FromPyObject<'_> for $name {
+            fn extract_bound(ob: &Bound<'_, PyAny>) -> PyResult<Self> {
+                Ok(crate::db::models::WasmPythonOrderBy::extract_bound(ob)?.into())
+            }
+        }
+
+        #[cfg(feature = "python")]
+        impl<'py> pyo3::IntoPyObject<'py> for $name {
+            type Error = <crate::db::models::WasmPythonOrderBy as pyo3::IntoPyObject<'py>>::Error;
+            type Output = <crate::db::models::WasmPythonOrderBy as pyo3::IntoPyObject<'py>>::Output;
+            type Target = <crate::db::models::WasmPythonOrderBy as pyo3::IntoPyObject<'py>>::Target;
+
+            fn into_pyobject(self, py: Python<'py>) -> Result<Self::Output, Self::Error> {
+                let as_generic: crate::db::models::WasmPythonOrderBy = self.into();
+
+                as_generic.into_pyobject(py)
+            }
+        }
+
+
+        #[cfg(feature = "python")]
+        impl pyo3_stub_gen::PyStubType for $name {
+            fn type_output() -> pyo3_stub_gen::TypeInfo {
+                crate::db::models::WasmPythonOrderBy::type_output()
             }
         }
 
@@ -182,26 +204,6 @@ macro_rules! impl_wasm_order_by {
 }
 
 #[macro_export]
-macro_rules! impl_python_order_by {
-    ($query_struct:ident) => {
-        #[cfg(feature = "python")]
-        #[::pyo3_stub_gen::derive::gen_stub_pymethods]
-        #[::pyo3::pymethods]
-        impl $query_struct {
-            #[getter]
-            pub fn order_by(&self) -> Vec<crate::db::models::WasmPythonOrderBy> {
-                self.order_by_inner()
-            }
-
-            #[setter]
-            pub fn set_order_by(&mut self, orderings: Vec<crate::db::models::WasmPythonOrderBy>) {
-                self.set_order_by_inner(orderings)
-            }
-        }
-    };
-}
-
-#[macro_export]
 macro_rules! uuid_newtype {
     ($name:ident) => {
         #[cfg_attr(feature = "python", pyo3::pyclass)]
@@ -233,6 +235,13 @@ macro_rules! uuid_newtype {
                 self.0.fmt(f)
             }
         }
+
+        #[cfg(feature = "python")]
+        impl pyo3_stub_gen::PyStubType for $name {
+            fn type_output() -> pyo3_stub_gen::TypeInfo {
+                pyo3_stub_gen::TypeInfo::with_module("uuid.UUID", "uuid".into())
+            }
+        }
     };
 }
 
@@ -257,7 +266,7 @@ macro_rules! impl_id_db_operation {
 }
 
 #[macro_export]
-macro_rules! attach_children_to_parents {
+macro_rules! attach_children_to_parents_mtm {
     (parents = $parents:expr, children = $children:expr, transform_fn = $parent_with_children:expr) => {{
         let children = $children
             .grouped_by(&$parents)
@@ -270,4 +279,67 @@ macro_rules! attach_children_to_parents {
             .map(|(parent, children)| $parent_with_children((parent, children.collect())))
             .collect()
     }};
+}
+
+#[macro_export]
+macro_rules! attach_one_to_many_children_to_parents_otm {
+    (parents = $parents:expr, children = $children:expr, transform_fn = $parent_with_children:expr) => {{
+        let children = $children
+            .grouped_by(&$parents)
+            .into_iter()
+            .map(|children| children.into_iter());
+
+        $parents
+            .into_iter()
+            .zip(children)
+            .map(|(parent, children)| $parent_with_children((parent, children.collect())))
+            .collect()
+    }};
+}
+
+#[macro_export]
+macro_rules! impl_constrained_py_setter {
+    {$struct_name:ident::$setter_name:ident($field_type:ty) = $valid_value:expr} => {
+        #[cfg(feature = "python")]
+        #[pyo3_stub_gen::derive::gen_stub_pymethods]
+        #[pymethods]
+        impl $struct_name {
+            #[setter]
+            fn $setter_name(&mut self, value: $field_type) -> PyResult<()> {
+                use pyo3::exceptions::PyValueError;
+
+                if value != $valid_value {
+                    return Err(PyValueError::new_err(format!(
+                        "field can only be {}",
+                        $valid_value
+                    )));
+                }
+
+                Ok(())
+            }
+        }
+    };
+}
+
+pub trait SetParentId {
+    fn parent_id_mut(&mut self) -> &mut Uuid;
+
+    fn set_parent_id(&mut self, id: Uuid) {
+        let entity_id = self.parent_id_mut();
+        *entity_id = id;
+    }
+}
+
+pub trait ChildrenWithSelfId<Children: SetParentId> {
+    fn children(&mut self) -> &mut [Children];
+
+    fn children_with_self_id(&mut self, self_id: Uuid) -> &[Children] {
+        let measurements = self.children();
+
+        for m in &mut *measurements {
+            m.set_parent_id(self_id);
+        }
+
+        measurements
+    }
 }

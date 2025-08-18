@@ -4,10 +4,6 @@ maturin_import_hook.install()
 
 import asyncio
 import scamplepy
-# print(scamplepy.__all__)
-from scamplepy.requests.create import NewInstitution
-from scamplepy.requests.create import NewInstitution
-print(scamplepy.requests.create.NewInstitution)
 # from scamplers_core.requests import *  # noqa: F403
 # import fire
 

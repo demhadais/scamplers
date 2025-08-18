@@ -173,7 +173,7 @@ pub fn db_query(_attr: TokenStream, input: TokenStream) -> TokenStream {
     let output = quote! {
         #[::scamplers_macros::base_model]
         #[cfg_attr(target_arch = "wasm32", ::wasm_bindgen::prelude::wasm_bindgen(getter_with_clone))]
-        #[cfg_attr(feature = "python", ::pyo3_stub_gen::derive::gen_stub_pyclass)]
+        #[cfg_attr(feature = "python", ::pyo3_stub_gen::derive::gen_stub_pyclass(get_all, set_all))]
         #[cfg_attr(feature = "python", ::pyo3::pyclass(eq, module = "scamplepy.query"))]
         #[derive(Default, ::bon::Builder, ::scamplers_macros::Jsonify, ::scamplers_macros::WasmJsonify, ::scamplers_macros::PyJsonify)]
         #[serde(default)]

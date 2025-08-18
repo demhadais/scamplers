@@ -5,6 +5,7 @@ use valid_string::ValidString;
 use crate::db::models::units::{LengthUnit, VolumeUnit};
 
 #[db_simple_enum]
+#[cfg_attr(feature = "python", pyo3(module = "scamplepy.common"))]
 pub enum CellCountingMethod {
     BrightField,
     Aopi,
@@ -12,6 +13,7 @@ pub enum CellCountingMethod {
 }
 
 #[db_simple_enum]
+#[cfg_attr(feature = "python", pyo3(module = "scamplepy.common"))]
 pub enum BiologicalMaterial {
     Cells,
     Nuclei,

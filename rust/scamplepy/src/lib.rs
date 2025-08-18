@@ -3,7 +3,17 @@ use pyo3_stub_gen::define_stub_info_gatherer;
 use scamplers::{
     db::models::{
         institution::NewInstitution,
+        lab::NewLab,
         person::{NewPerson, UserRole},
+        specimen::{
+            self, Species,
+            block::{
+                BlockFixative, FixedBlockEmbeddingMatrix, FrozenBlockEmbeddingMatrix,
+                NewFixedBlock, NewFrozenBlock,
+            },
+            tissue::{NewCryopreservedTissue, NewFixedTissue, NewFrozenTissue, TissueFixative},
+            virtual_::{NewVirtualSpecimen, SuspensionFixative},
+        },
         units::{LengthUnit, MassUnit, VolumeUnit},
     },
     result::{
@@ -106,67 +116,67 @@ fn register_create_submodule<'a>(parent: &'a Bound<PyModule>) -> PyResult<Module
     create_submodule.add_class::<UserRole>()?;
     create_submodule.add_class::<NewPerson>()?;
 
-    // requests.add_class::<NewLab>()?;
+    create_submodule.add_class::<NewLab>()?;
 
-    // requests.add_class::<NewFixedBlock>()?;
-    // requests.add_class::<FixedBlockEmbeddingMatrix>()?;
-    // requests.add_class::<NewFrozenBlock>()?;
-    // requests.add_class::<BlockFixative>()?;
-    // requests.add_class::<FrozenBlockEmbeddingMatrix>()?;
-    // requests.add_class::<NewCryopreservedTissue>()?;
-    // requests.add_class::<NewFixedTissue>()?;
-    // requests.add_class::<NewFrozenTissue>()?;
-    // requests.add_class::<TissueFixative>()?;
-    // requests.add_class::<NewVirtualSpecimen>()?;
-    // requests.add_class::<SuspensionFixative>()?;
-    // requests.add_class::<Species>()?;
-    // requests.add_class::<specimen::common::MeasurementData>()?;
-    // requests.add_class::<NewSpecimenMeasurement>()?;
-    // requests.add_class::<NewCommitteeApproval>()?;
-    // requests.add_class::<ComplianceCommitteeType>()?;
+    create_submodule.add_class::<NewFixedBlock>()?;
+    create_submodule.add_class::<FixedBlockEmbeddingMatrix>()?;
+    create_submodule.add_class::<NewFrozenBlock>()?;
+    create_submodule.add_class::<BlockFixative>()?;
+    create_submodule.add_class::<FrozenBlockEmbeddingMatrix>()?;
+    create_submodule.add_class::<NewCryopreservedTissue>()?;
+    create_submodule.add_class::<NewFixedTissue>()?;
+    create_submodule.add_class::<NewFrozenTissue>()?;
+    create_submodule.add_class::<TissueFixative>()?;
+    create_submodule.add_class::<NewVirtualSpecimen>()?;
+    create_submodule.add_class::<SuspensionFixative>()?;
+    create_submodule.add_class::<Species>()?;
+    create_submodule.add_class::<specimen::common::MeasurementData>()?;
+    create_submodule.add_class::<NewSpecimenMeasurement>()?;
+    create_submodule.add_class::<NewCommitteeApproval>()?;
+    create_submodule.add_class::<ComplianceCommitteeType>()?;
 
-    // requests.add_class::<suspension::MeasurementDataCore>()?;
-    // requests.add_class::<BiologicalMaterial>()?;
-    // requests.add_class::<CellCountingMethod>()?;
-    // requests.add_class::<NewSuspension>()?;
-    // requests.add_class::<NewSuspensionMeasurement>()?;
-    // requests.add_class::<NewSuspensionPool>()?;
-    // requests.add_class::<NewSuspensionPoolMeasurement>()?;
+    // create_submodule.add_class::<suspension::MeasurementDataCore>()?;
+    // create_submodule.add_class::<BiologicalMaterial>()?;
+    // create_submodule.add_class::<CellCountingMethod>()?;
+    // create_submodule.add_class::<NewSuspension>()?;
+    // create_submodule.add_class::<NewSuspensionMeasurement>()?;
+    // create_submodule.add_class::<NewSuspensionPool>()?;
+    // create_submodule.add_class::<NewSuspensionPoolMeasurement>()?;
 
-    // requests.add_class::<NewSingleplexChromiumRun>()?;
-    // requests.add_class::<NewSingleplexGems>()?;
-    // requests.add_class::<NewSingleplexChipLoading>()?;
-    // requests.add_class::<SingleplexChromiumChip>()?;
-    // requests.add_class::<NewOcmChromiumRun>()?;
-    // requests.add_class::<NewOcmGems>()?;
-    // requests.add_class::<NewOcmChipLoading>()?;
-    // requests.add_class::<OcmChromiumChip>()?;
-    // requests.add_class::<NewPoolMultiplexChromiumRun>()?;
-    // requests.add_class::<NewPoolMultiplexGems>()?;
-    // requests.add_class::<NewPoolMultiplexChipLoading>()?;
-    // requests.add_class::<PoolMultiplexChromiumChip>()?;
+    // create_submodule.add_class::<NewSingleplexChromiumRun>()?;
+    // create_submodule.add_class::<NewSingleplexGems>()?;
+    // create_submodule.add_class::<NewSingleplexChipLoading>()?;
+    // create_submodule.add_class::<SingleplexChromiumChip>()?;
+    // create_submodule.add_class::<NewOcmChromiumRun>()?;
+    // create_submodule.add_class::<NewOcmGems>()?;
+    // create_submodule.add_class::<NewOcmChipLoading>()?;
+    // create_submodule.add_class::<OcmChromiumChip>()?;
+    // create_submodule.add_class::<NewPoolMultiplexChromiumRun>()?;
+    // create_submodule.add_class::<NewPoolMultiplexGems>()?;
+    // create_submodule.add_class::<NewPoolMultiplexChipLoading>()?;
+    // create_submodule.add_class::<PoolMultiplexChromiumChip>()?;
 
-    // requests.add_class::<LibraryType>()?;
-    // requests.add_class::<NewLibraryTypeSpecification>()?;
+    // create_submodule.add_class::<LibraryType>()?;
+    // create_submodule.add_class::<NewLibraryTypeSpecification>()?;
 
-    // requests.add_class::<nucleic_acid::common::ElectrophoreticMeasurementData>()?
-    // ; requests.add_class::<nucleic_acid::common::Concentration>()?;
-    // requests.add_class::<NewCdnaMeasurement>()?;
-    // requests.add_class::<NewCdna>()?;
-    // requests.add_class::<NewCdnaGroup>()?;
-    // requests.add_class::<nucleic_acid::library::MeasurementData>()?;
-    // requests.add_class::<NewLibraryMeasurement>()?;
-    // requests.add_class::<NewLibrary>()?;
+    // create_submodule.add_class::<nucleic_acid::common::ElectrophoreticMeasurementData>()?
+    // ; create_submodule.add_class::<nucleic_acid::common::Concentration>()?;
+    // create_submodule.add_class::<NewCdnaMeasurement>()?;
+    // create_submodule.add_class::<NewCdna>()?;
+    // create_submodule.add_class::<NewCdnaGroup>()?;
+    // create_submodule.add_class::<nucleic_acid::library::MeasurementData>()?;
+    // create_submodule.add_class::<NewLibraryMeasurement>()?;
+    // create_submodule.add_class::<NewLibrary>()?;
 
-    // requests.add_class::<SingleRowCsvMetricsFile>()?;
-    // requests.add_class::<MultiRowCsvMetricsFile>()?;
-    // requests.add_class::<JsonMetricsFile>()?;
+    // create_submodule.add_class::<SingleRowCsvMetricsFile>()?;
+    // create_submodule.add_class::<MultiRowCsvMetricsFile>()?;
+    // create_submodule.add_class::<JsonMetricsFile>()?;
 
-    // requests.add_class::<dataset::chromium::CellrangerarcCountDataset>()?;
-    // requests.add_class::<dataset::chromium::CellrangerCountDataset>()?;
-    // requests.add_class::<dataset::chromium::CellrangerMultiDataset>()?;
-    // requests.add_class::<dataset::chromium::CellrangerVdjDataset>()?;
-    // requests.add_class::<dataset::chromium::CellrangeratacCountDataset>()?;
+    // create_submodule.add_class::<dataset::chromium::CellrangerarcCountDataset>()?;
+    // create_submodule.add_class::<dataset::chromium::CellrangerCountDataset>()?;
+    // create_submodule.add_class::<dataset::chromium::CellrangerMultiDataset>()?;
+    // create_submodule.add_class::<dataset::chromium::CellrangerVdjDataset>()?;
+    // create_submodule.add_class::<dataset::chromium::CellrangeratacCountDataset>()?;
 
     parent.add_submodule(&create_submodule)?;
 

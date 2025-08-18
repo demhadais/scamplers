@@ -12,7 +12,7 @@ use wasm_bindgen::prelude::*;
 
 use crate::{
     db::models::{Links, Pagination, institution::Institution},
-    define_ordering_enum, impl_order_by, impl_python_order_by, impl_wasm_order_by, uuid_newtype,
+    define_ordering_enum, impl_order_by, impl_wasm_order_by, uuid_newtype,
 };
 
 #[cfg(feature = "app")]
@@ -98,9 +98,9 @@ pub struct PersonSummary {
 
 #[db_selection]
 #[cfg_attr(feature = "app", diesel(table_name = person))]
-pub struct PersonCore {
-    #[serde(skip)]
-    pub id: Uuid,
+pub struct PersonSummaryWithRelations {
+    #[cfg_attr(feature = "app", diesel(column_name = id))]
+    pub id_: Uuid,
     #[serde(flatten)]
     #[cfg_attr(feature = "app", diesel(embed))]
     pub summary: PersonSummary,
@@ -111,11 +111,12 @@ pub struct PersonCore {
 uuid_newtype!(PersonId);
 
 #[cfg_attr(target_arch = "wasm32", wasm_bindgen(getter_with_clone))]
-#[cfg_attr(feature = "python", pyclass(get_all))]
+#[cfg_attr(feature = "python", pyo3_stub_gen::derive::gen_stub_pyclass)]
+#[cfg_attr(feature = "python", pyclass(get_all, module = "scamplepy.responses"))]
 #[base_model]
 pub struct Person {
     #[serde(flatten)]
-    pub core: PersonCore,
+    pub info: PersonSummaryWithRelations,
     pub roles: Vec<UserRole>,
 }
 
@@ -129,7 +130,7 @@ pub struct CreatedUser {
 
 #[db_update]
 #[cfg_attr(feature = "app", diesel(table_name = person))]
-pub struct PersonUpdateCore {
+pub struct PersonUpdateFields {
     pub id: Uuid,
     #[garde(dive)]
     pub name: Option<ValidString>,
@@ -153,10 +154,10 @@ pub struct PersonUpdate {
     pub revoke_roles: Vec<UserRole>,
     #[serde(flatten)]
     #[garde(dive)]
-    pub core: PersonUpdateCore,
+    pub fields: PersonUpdateFields,
 }
 
-define_ordering_enum! {PersonOrderBy { Name, Email }, default = Name}
+define_ordering_enum! { PersonOrderBy { Name, Email } }
 
 #[db_query]
 pub struct PersonQuery {
@@ -175,4 +176,3 @@ pub struct PersonQuery {
 
 impl_order_by!(PersonQuery);
 impl_wasm_order_by!(PersonQuery);
-impl_python_order_by!(PersonQuery);

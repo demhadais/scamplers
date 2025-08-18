@@ -1,5 +1,5 @@
 [project]
-name = "test-scamplers-core"
+name = "test-scamplepy"
 version = "0.1.0"
 readme = "README.md"
 authors = [{ name = "Ahmed Said", email = "ahmed.said@jax.org" }]

@@ -1,7 +1,5 @@
 #[cfg(feature = "python")]
 use pyo3::prelude::*;
-#[cfg(feature = "python")]
-use scamplers_macros::db_selection;
 use scamplers_macros::{db_insertion, db_simple_enum};
 
 use crate::db::models::{Jsonify, chemistry::Chemistry};

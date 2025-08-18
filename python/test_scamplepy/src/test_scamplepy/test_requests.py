@@ -7,7 +7,7 @@ import json
 
 maturin_import_hook.install()
 
-from scamplers_core.requests import (
+from scamplepy.create import (
     CellCountingMethod,
     CellrangerMultiDataset,
     CellrangerVdjDataset,

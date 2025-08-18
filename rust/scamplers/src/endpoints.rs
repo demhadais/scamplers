@@ -9,6 +9,7 @@ use crate::{
         institution::{Institution, InstitutionId, InstitutionQuery, NewInstitution},
         lab::{Lab, LabId, LabQuery, LabUpdate, NewLab},
         person::{CreatedUser, NewPerson, Person, PersonId, PersonQuery, PersonUpdate},
+        specimen::{NewSpecimen, Specimen, SpecimenId, SpecimenQuery},
     },
     extract::{Base64JsonQuery, ValidJsonBody},
 };
@@ -136,6 +137,14 @@ impl_basic_endpoints!(
     query = LabQuery,
     update = LabUpdate,
     response = Lab
+);
+
+impl_basic_endpoints!(
+    path = "/specimens",
+    creation = NewSpecimen,
+    id = SpecimenId,
+    query = SpecimenQuery,
+    response = Specimen
 );
 
 impl Endpoint<NewPerson, CreatedUser> for Api {
