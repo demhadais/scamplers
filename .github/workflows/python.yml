@@ -1,4 +1,4 @@
-name: Check scamplers-core Python Library
+name: Check scamplepy
 on:
   push:
     paths:
