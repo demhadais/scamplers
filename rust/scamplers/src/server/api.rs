@@ -11,7 +11,10 @@ use crate::{
             multiplexing_tag::MultiplexingTag,
             person::{CreatedUser, NewPerson, Person, PersonId, PersonQuery, PersonUpdate},
             specimen::{NewSpecimen, Specimen, SpecimenId, SpecimenQuery},
-            suspension::suspension::{NewSuspension, Suspension, SuspensionId, SuspensionQuery},
+            suspension::{
+                pool::{NewSuspensionPool, SuspensionPool, SuspensionPoolId, SuspensionPoolQuery},
+                suspension::{NewSuspension, Suspension, SuspensionId, SuspensionQuery},
+            },
         },
     },
     endpoints::{Api, Endpoint},
@@ -120,6 +123,9 @@ pub fn router() -> Router<AppState> {
         create_suspension(NewSuspension) -> Suspension;
         fetch_suspension(SuspensionId) -> Suspension;
         list_suspensions(SuspensionQuery) -> Vec<Suspension>;
+        create_suspension_pool(NewSuspensionPool) -> SuspensionPool;
+        fetch_suspension_pool(SuspensionPoolId) -> SuspensionPool;
+        list_suspension_pools(SuspensionPoolQuery) -> Vec<SuspensionPool>;
     );
 
     router

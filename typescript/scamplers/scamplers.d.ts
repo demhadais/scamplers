@@ -437,11 +437,13 @@ export class ScamplersClient {
   update_lab(data: LabUpdate): Promise<Lab>;
   list_specimens(data: SpecimenQuery): Promise<Specimen[]>;
   list_suspensions(data: SuspensionQuery): Promise<Suspension[]>;
+  list_suspension_pools(data: SuspensionPoolQuery): Promise<SuspensionPool[]>;
   fetch_institution(data: string): Promise<Institution>;
   fetch_person(data: string): Promise<Person>;
   fetch_lab(data: string): Promise<Lab>;
   fetch_specimen(data: string): Promise<Specimen>;
   fetch_suspension(data: string): Promise<Suspension>;
+  fetch_suspension_pool(data: string): Promise<SuspensionPool>;
   list_person_specimens(id: string, query: SpecimenQuery): Promise<Specimen[]>;
 }
 export class ScamplersErrorResponse {
@@ -588,6 +590,57 @@ export class SuspensionMeasurement {
   measured_by: string;
   suspension_id: string;
 }
+export class SuspensionPool {
+  private constructor();
+  free(): void;
+  summary: SuspensionPoolSummary;
+  suspensions: SuspensionSummary[];
+  preparers: string[];
+  measurements: SuspensionPoolMeasurement[];
+}
+export class SuspensionPoolMeasurement {
+  private constructor();
+  free(): void;
+  to_json_bytes(): Uint8Array;
+  to_json_string(): string;
+  to_base64_json(): string;
+  static from_json_bytes(json_bytes: Uint8Array): SuspensionPoolMeasurement;
+  static from_json_string(json_str: string): SuspensionPoolMeasurement;
+  static from_base64_json(base64_json_bytes: string): SuspensionPoolMeasurement;
+  id: string;
+  pool_id: string;
+  measured_by: string;
+}
+export class SuspensionPoolQuery {
+  free(): void;
+  to_json_bytes(): Uint8Array;
+  to_json_string(): string;
+  to_base64_json(): string;
+  static from_json_bytes(json_bytes: Uint8Array): SuspensionPoolQuery;
+  static from_json_string(json_str: string): SuspensionPoolQuery;
+  static from_base64_json(base64_json_bytes: string): SuspensionPoolQuery;
+  constructor();
+  ids: string[];
+  order_by: OrderBy[];
+  pagination: Pagination;
+}
+export class SuspensionPoolSummary {
+  private constructor();
+  free(): void;
+  to_json_bytes(): Uint8Array;
+  to_json_string(): string;
+  to_base64_json(): string;
+  static from_json_bytes(json_bytes: Uint8Array): SuspensionPoolSummary;
+  static from_json_string(json_str: string): SuspensionPoolSummary;
+  static from_base64_json(base64_json_bytes: string): SuspensionPoolSummary;
+  id: string;
+  readonly links: Map<any, any>;
+  readable_id: string;
+  name: string;
+  pooled_at: Date;
+  get notes(): string;
+  set notes(value: string | null | undefined);
+}
 export class SuspensionQuery {
   free(): void;
   to_json_bytes(): Uint8Array;
@@ -611,6 +664,8 @@ export class SuspensionSummary {
   readonly links: Map<any, any>;
   readable_id: string;
   biological_material: string;
+  get pooled_into(): string;
+  set pooled_into(value: string | null | undefined);
   get created_at(): Date | undefined;
   set created_at(value: Date | null | undefined);
   get lysis_duration_minutes(): number | undefined;

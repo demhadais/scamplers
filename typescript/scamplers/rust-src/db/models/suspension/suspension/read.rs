@@ -1,6 +1,5 @@
 use diesel::prelude::*;
-use scamplers_schema::{multiplexing_tag, specimen, suspension, suspension_preparers};
-use uuid::Uuid;
+use scamplers_schema::{multiplexing_tag, specimen, suspension};
 
 use crate::{
     apply_eq_any_filters, attach_children_to_parents,
@@ -11,7 +10,7 @@ use crate::{
             SuspensionQuery, SuspensionSummaryWithParents,
         },
     },
-    group_mtm_children, group_otm_children, impl_id_db_operation, init_stmt,
+    group_otm_children, impl_id_db_operation, init_stmt,
 };
 
 impl DbOperation<Vec<Suspension>> for SuspensionQuery {
@@ -39,16 +38,14 @@ impl DbOperation<Vec<Suspension>> for SuspensionQuery {
         let grouped_measurements =
             group_otm_children!(parents = suspension_records, children = measurements);
 
-        let preparers: Vec<(SuspensionPreparer, Uuid)> =
+        let preparers: Vec<SuspensionPreparer> =
             SuspensionPreparer::belonging_to(&suspension_records)
-                .select((
-                    SuspensionPreparer::as_select(),
-                    suspension_preparers::prepared_by,
-                ))
+                .select(SuspensionPreparer::as_select())
                 .load(db_conn)?;
 
         let grouped_preparers =
-            group_mtm_children!(parents = suspension_records, children = preparers);
+            group_otm_children!(parents = suspension_records, children = preparers)
+                .map(|v| v.into_iter().map(|p| p.prepared_by).collect());
 
         let suspensions = attach_children_to_parents!(
             parents = suspension_records,

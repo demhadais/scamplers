@@ -2,6 +2,8 @@
 use diesel::{Associations, prelude::*};
 #[cfg(feature = "python")]
 use pyo3::prelude::*;
+#[cfg(feature = "python")]
+use pyo3_stub_gen::derive::gen_stub_pymethods;
 use scamplers_macros::{base_model, db_insertion, db_json, db_query, db_selection};
 #[cfg(feature = "app")]
 use scamplers_schema::suspension_preparers;
@@ -11,6 +13,8 @@ use valid_string::ValidString;
 #[cfg(target_arch = "wasm32")]
 use wasm_bindgen::prelude::*;
 
+#[cfg(feature = "app")]
+use crate::db::models::suspension::pool::SuspensionPoolSummary;
 use crate::{
     db::models::{
         DefaultVec, Links, Pagination,
@@ -87,7 +91,7 @@ pub struct NewSuspension {
     #[cfg_attr(feature = "app", diesel(skip_insertion))]
     pub measurements: Vec<NewSuspensionMeasurement>,
     pub created_at: Option<OffsetDateTime>,
-    pub pooled_into_id: Option<Uuid>,
+    pub pooled_into: Option<Uuid>,
     pub multiplexing_tag_id: Option<Uuid>,
     #[garde(range(min = 0.0))]
     pub lysis_duration_minutes: Option<f32>,
@@ -95,22 +99,11 @@ pub struct NewSuspension {
     pub notes: Option<ValidString>,
 }
 
-#[db_insertion]
-#[cfg_attr(
-    feature = "app",
-    derive(Identifiable, Associations, Selectable, Queryable)
-)]
-#[cfg_attr(feature = "app", diesel(primary_key(suspension_id, prepared_by), belongs_to(SuspensionSummaryWithParents, foreign_key = suspension_id)))]
-struct SuspensionPreparer {
-    suspension_id: Uuid,
-    prepared_by: Uuid,
-}
-
 #[cfg(feature = "python")]
 #[pymethods]
 impl NewSuspension {
     #[new]
-    #[pyo3(signature = (*, readable_id, parent_specimen_id, biological_material, target_cell_recovery, target_reads_per_cell, preparer_ids, measurements=Vec::new(), created_at=None, pooled_into_id=None, multiplexing_tag_id=None,lysis_duration_minutes=None,notes=None))]
+    #[pyo3(signature = (*, readable_id, parent_specimen_id, biological_material, target_cell_recovery, target_reads_per_cell, preparer_ids, measurements=Vec::new(), created_at=None, multiplexing_tag_id=None,lysis_duration_minutes=None,notes=None))]
     fn new(
         readable_id: ValidString,
         parent_specimen_id: Uuid,
@@ -120,7 +113,6 @@ impl NewSuspension {
         preparer_ids: Vec<Uuid>,
         measurements: Vec<NewSuspensionMeasurement>,
         created_at: Option<OffsetDateTime>,
-        pooled_into_id: Option<Uuid>,
         multiplexing_tag_id: Option<Uuid>,
         lysis_duration_minutes: Option<f32>,
         notes: Option<ValidString>,
@@ -134,7 +126,7 @@ impl NewSuspension {
             preparer_ids,
             measurements,
             created_at,
-            pooled_into_id,
+            pooled_into: None,
             multiplexing_tag_id,
             lysis_duration_minutes,
             notes,
@@ -143,13 +135,15 @@ impl NewSuspension {
 }
 
 #[db_selection]
-#[cfg_attr(feature = "app", diesel(table_name = scamplers_schema::suspension))]
+#[cfg_attr(feature = "app", derive(Associations))]
+#[cfg_attr(feature = "app", diesel(table_name = scamplers_schema::suspension, belongs_to(SuspensionPoolSummary, foreign_key = pooled_into)))]
 pub struct SuspensionSummary {
     pub id: Uuid,
     #[cfg_attr(target_arch = "wasm32", wasm_bindgen(readonly))]
     pub links: Links,
     pub readable_id: String,
     pub biological_material: String,
+    pub pooled_into: Option<Uuid>,
     pub created_at: Option<OffsetDateTime>,
     pub lysis_duration_minutes: Option<f32>,
     pub target_cell_recovery: f32,
@@ -169,6 +163,17 @@ pub struct SuspensionSummaryWithParents {
     pub parent_specimen: SpecimenSummary,
     #[cfg_attr(feature = "app", diesel(embed))]
     pub multiplexing_tag: Option<MultiplexingTag>,
+}
+
+#[db_insertion]
+#[cfg_attr(
+    feature = "app",
+    derive(Identifiable, Associations, Selectable, Queryable)
+)]
+#[cfg_attr(feature = "app", diesel(primary_key(suspension_id, prepared_by), belongs_to(SuspensionSummaryWithParents, foreign_key = suspension_id)))]
+struct SuspensionPreparer {
+    suspension_id: Uuid,
+    prepared_by: Uuid,
 }
 
 #[db_selection]
@@ -207,6 +212,25 @@ pub struct SuspensionQuery {
     order_by: DefaultVec<SuspensionOrderBy>,
     #[builder(default)]
     pagination: Pagination,
+}
+
+#[cfg(feature = "python")]
+#[gen_stub_pymethods]
+#[pymethods]
+impl SuspensionQuery {
+    #[new]
+    #[pyo3(signature = (*, ids = Vec::new(), order_by = DefaultVec::default(), pagination = Pagination::default()))]
+    fn new(
+        ids: Vec<Uuid>,
+        order_by: DefaultVec<SuspensionOrderBy>,
+        pagination: Pagination,
+    ) -> Self {
+        Self {
+            ids,
+            order_by,
+            pagination,
+        }
+    }
 }
 
 uuid_newtype!(SuspensionId);

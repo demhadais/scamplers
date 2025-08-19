@@ -17,7 +17,10 @@ use crate::db::models::{
     lab::{Lab, LabId, LabQuery, LabUpdate, NewLab},
     person::{CreatedUser, NewPerson, Person, PersonId, PersonQuery},
     specimen::{Specimen, SpecimenId, SpecimenQuery},
-    suspension::suspension::{Suspension, SuspensionId, SuspensionQuery},
+    suspension::{
+        pool::{SuspensionPool, SuspensionPoolId, SuspensionPoolQuery},
+        suspension::{Suspension, SuspensionId, SuspensionQuery},
+    },
 };
 #[cfg(feature = "python")]
 use crate::db::models::{
@@ -26,7 +29,10 @@ use crate::db::models::{
     multiplexing_tag::MultiplexingTag,
     person::{NewPerson, Person, PersonId, PersonQuery, PersonUpdate},
     specimen::{NewSpecimen, Specimen, SpecimenId, SpecimenQuery},
-    suspension::suspension::{NewSuspension, Suspension, SuspensionId, SuspensionQuery},
+    suspension::{
+        pool::{NewSuspensionPool, SuspensionPool, SuspensionPoolId, SuspensionPoolQuery},
+        suspension::{NewSuspension, Suspension, SuspensionId, SuspensionQuery},
+    },
 };
 use crate::{
     endpoints::{Api, Endpoint},
@@ -302,6 +308,7 @@ wasm_client_methods! {
     update_lab(LabUpdate) -> Lab;
     list_specimens(SpecimenQuery) -> Vec<Specimen>;
     list_suspensions(SuspensionQuery) -> Vec<Suspension>;
+    list_suspension_pools(SuspensionPoolQuery) -> Vec<SuspensionPool>;
 }
 
 #[cfg(target_arch = "wasm32")]
@@ -311,6 +318,7 @@ wasm_wrapped_data_methods! {
     fetch_lab(LabId(Uuid)) -> Lab;
     fetch_specimen(SpecimenId(Uuid)) -> Specimen;
     fetch_suspension(SuspensionId(Uuid)) -> Suspension;
+    fetch_suspension_pool(SuspensionPoolId(Uuid)) -> SuspensionPool;
 }
 
 #[cfg(target_arch = "wasm32")]
@@ -337,6 +345,9 @@ python_client_methods! {
     create_suspension(NewSuspension) -> Suspension;
     fetch_suspension(SuspensionId) -> Suspension;
     list_suspensions(SuspensionQuery) -> Vec<Suspension>;
+    create_suspension_pool(NewSuspensionPool) -> SuspensionPool;
+    fetch_suspension_pool(SuspensionPoolId) -> SuspensionPool;
+    list_suspension_pools(SuspensionPoolQuery) -> Vec<SuspensionPool>;
 }
 
 #[cfg(feature = "python")]

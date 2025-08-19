@@ -230,10 +230,7 @@ macro_rules! impl_id_db_operation {
 #[macro_export]
 macro_rules! group_otm_children {
     (parents = $parents:expr,children = $children:expr) => {
-        $children
-            .grouped_by(&$parents)
-            .into_iter()
-            .map(|children| children)
+        $children.grouped_by(&$parents).into_iter()
     };
 }
 
@@ -301,7 +298,7 @@ pub trait SetParentId {
 pub trait ChildrenWithSelfId<Child: SetParentId> {
     fn children(&mut self) -> &mut [Child];
 
-    fn children_with_self_id(&mut self, self_id: Uuid) -> &[Child] {
+    fn children_with_self_id(&mut self, self_id: Uuid) -> &mut [Child] {
         let children = self.children();
 
         for child in &mut *children {

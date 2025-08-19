@@ -1,4 +1,7 @@
 #![allow(dead_code)]
+#![allow(clippy::cast_possible_wrap)]
+#![allow(clippy::cast_possible_truncation)]
+#![allow(clippy::cast_precision_loss)]
 use std::{cmp::Ordering, collections::HashSet, fmt::Debug};
 
 use deadpool_diesel::postgres::Pool;
@@ -136,7 +139,7 @@ impl TestState {
         .unwrap()
     }
 
-    fn run_migrations(&self, db_conn: &mut PgConnection) {
+    fn run_migrations(db_conn: &mut PgConnection) {
         const MIGRATIONS: EmbeddedMigrations = embed_migrations!("../../db/migrations");
         db_conn.run_pending_migrations(MIGRATIONS).unwrap();
     }
@@ -437,7 +440,7 @@ impl TestState {
 
         db_conn
             .interact(|db_conn| {
-                self.run_migrations(db_conn);
+                Self::run_migrations(db_conn);
 
                 tokio::runtime::Handle::current().block_on(self.insert_seed_data(db_conn));
 

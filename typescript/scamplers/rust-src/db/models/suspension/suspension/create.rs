@@ -50,10 +50,12 @@ impl ManyToManyChildrenWithSelfId<SuspensionPreparer> for NewSuspension {
     }
 }
 
-impl DbOperation<Suspension> for NewSuspension {
-    fn execute(mut self, db_conn: &mut PgConnection) -> crate::result::ScamplersResult<Suspension> {
+// we implement this for a mutable reference so we can use it in
+// NewSuspensionPool::execute
+impl DbOperation<Suspension> for &mut NewSuspension {
+    fn execute(self, db_conn: &mut PgConnection) -> crate::result::ScamplersResult<Suspension> {
         let id = diesel::insert_into(suspension::table)
-            .values(&self)
+            .values(&*self)
             .returning(suspension::id)
             .get_result(db_conn)?;
 
@@ -66,5 +68,11 @@ impl DbOperation<Suspension> for NewSuspension {
             .execute(db_conn)?;
 
         SuspensionId(id).execute(db_conn)
+    }
+}
+
+impl DbOperation<Suspension> for NewSuspension {
+    fn execute(mut self, db_conn: &mut PgConnection) -> crate::result::ScamplersResult<Suspension> {
+        (&mut self).execute(db_conn)
     }
 }

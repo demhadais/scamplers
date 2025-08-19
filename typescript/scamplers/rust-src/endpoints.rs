@@ -11,7 +11,10 @@ use crate::{
         multiplexing_tag::{MultiplexingTag, MultiplexingTagId},
         person::{CreatedUser, NewPerson, Person, PersonId, PersonQuery, PersonUpdate},
         specimen::{NewSpecimen, Specimen, SpecimenId, SpecimenQuery},
-        suspension::suspension::{NewSuspension, Suspension, SuspensionId, SuspensionQuery},
+        suspension::{
+            pool::{NewSuspensionPool, SuspensionPool, SuspensionPoolId, SuspensionPoolQuery},
+            suspension::{NewSuspension, Suspension, SuspensionId, SuspensionQuery},
+        },
     },
     extract::{Base64JsonQuery, RelativesQuery, ValidJsonBody},
 };
@@ -183,6 +186,14 @@ impl_basic_endpoints! {
     id = SuspensionId,
     query = SuspensionQuery,
     response = Suspension
+}
+
+impl_basic_endpoints! {
+    path = "suspension-pools",
+    creation = NewSuspensionPool,
+    id = SuspensionPoolId,
+    query = SuspensionPoolQuery,
+    response = SuspensionPool
 }
 
 impl Endpoint<NewPerson, CreatedUser> for Api {

@@ -29,8 +29,8 @@ impl TestState {
                 None,
                 String::new(),
                 String::new(),
-                Default::default(),
-                Default::default(),
+                String::default(),
+                u16::default(),
             )
         } else {
             let container = DevContainer::new(&Uuid::now_v7().to_string(), !dev_api)

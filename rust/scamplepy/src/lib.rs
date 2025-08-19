@@ -16,6 +16,10 @@ use scamplers::{
             tissue::{NewCryopreservedTissue, NewFixedTissue, NewFrozenTissue, TissueFixative},
             virtual_::{NewVirtualSpecimen, SuspensionFixative},
         },
+        suspension::{
+            pool::{NewSuspensionPool, NewSuspensionPoolMeasurement, SuspensionPoolQuery},
+            suspension::{NewSuspension, NewSuspensionMeasurement, SuspensionQuery},
+        },
         units::{LengthUnit, MassUnit, VolumeUnit},
     },
     result::{
@@ -145,7 +149,11 @@ fn register_create_submodule<'a>(parent: &'a Bound<PyModule>) -> PyResult<Module
         specimen::common::MeasurementData,
         NewSpecimenMeasurement,
         NewCommitteeApproval,
-        ComplianceCommitteeType
+        ComplianceCommitteeType,
+        NewSuspension,
+        NewSuspensionMeasurement,
+        NewSuspensionPool,
+        NewSuspensionPoolMeasurement
     );
 
     // create_submodule.add_class::<suspension::MeasurementDataCore>()?;
@@ -209,7 +217,9 @@ fn register_query_submodule<'a>(parent: &'a Bound<PyModule>) -> PyResult<ModuleW
         PersonQuery,
         LabQuery,
         SpecimenType,
-        SpecimenQuery
+        SpecimenQuery,
+        SuspensionQuery,
+        SuspensionPoolQuery
     );
 
     parent.add_submodule(&query_submodule)?;

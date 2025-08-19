@@ -85,7 +85,7 @@ mod tests {
     use std::cmp::Ordering;
 
     use deadpool_diesel::postgres::Connection;
-    use diesel::{Connection as _, prelude::*};
+    use diesel::Connection as _;
     use pretty_assertions::assert_eq;
     use rstest::rstest;
     use uuid::Uuid;

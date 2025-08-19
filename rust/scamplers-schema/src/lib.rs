@@ -282,7 +282,7 @@ diesel::table! {
         parent_specimen_id -> Uuid,
         biological_material -> Text,
         created_at -> Nullable<Timestamptz>,
-        pooled_into_id -> Nullable<Uuid>,
+        pooled_into -> Nullable<Uuid>,
         multiplexing_tag_id -> Nullable<Uuid>,
         lysis_duration_minutes -> Nullable<Float4>,
         target_cell_recovery -> Float4,
@@ -304,8 +304,8 @@ diesel::table! {
     suspension_pool (id) {
         id -> Uuid,
         links -> Jsonb,
-        name -> Text,
         readable_id -> Text,
+        name -> Text,
         pooled_at -> Timestamptz,
         notes -> Nullable<Text>,
     }
@@ -371,7 +371,7 @@ diesel::joinable!(specimen_measurement -> person (measured_by));
 diesel::joinable!(specimen_measurement -> specimen (specimen_id));
 diesel::joinable!(suspension -> multiplexing_tag (multiplexing_tag_id));
 diesel::joinable!(suspension -> specimen (parent_specimen_id));
-diesel::joinable!(suspension -> suspension_pool (pooled_into_id));
+diesel::joinable!(suspension -> suspension_pool (pooled_into));
 diesel::joinable!(suspension_measurement -> person (measured_by));
 diesel::joinable!(suspension_measurement -> suspension (suspension_id));
 diesel::joinable!(suspension_pool_measurement -> person (measured_by));

@@ -12,7 +12,7 @@ create table suspension (
     parent_specimen_id uuid references specimen on delete restrict on update restrict not null,
     biological_material text not null,
     created_at timestamptz,
-    pooled_into_id uuid references suspension_pool on delete restrict on update restrict,
+    pooled_into uuid references suspension_pool on delete restrict on update restrict,
     multiplexing_tag_id uuid references multiplexing_tag on delete restrict on update restrict,
     lysis_duration_minutes real,
     target_cell_recovery real not null, -- validated on Rust side
@@ -20,9 +20,9 @@ create table suspension (
     notes text,
 
     -- two suspensions cannot be pooled together and tagged with the same tag
-    unique (pooled_into_id, multiplexing_tag_id),
+    unique (pooled_into, multiplexing_tag_id),
     -- either both are specified or neither is specified
-    constraint pooling_is_correctly_specified check ((pooled_into_id is null) = (multiplexing_tag_id is null))
+    constraint pooling_is_correctly_specified check ((pooled_into is null) = (multiplexing_tag_id is null))
 );
 
 create table suspension_measurement (
