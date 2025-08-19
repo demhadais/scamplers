@@ -1,11 +1,9 @@
-from datetime import UTC, datetime
-import uuid
 import maturin_import_hook
-import json
 
 maturin_import_hook.install()
-
-import asyncio
+from datetime import UTC, datetime
+import uuid
+from scamplepy.query import OrderBy, SpecimenQuery
 from scamplepy import ScamplersClient
 from scamplepy.create import *  # noqa: F403
 import fire
@@ -87,6 +85,12 @@ async def main(api_base_url: str | None = None, api_key: str | None = None):
     )
 
     specimen = await client.create_specimen(specimen)
+    specimen_query = SpecimenQuery(
+        name="f",
+        order_by=[OrderBy(field="received_at", descending=False)],
+        fixatives=[BlockFixative.FormaldehydeDerivative],
+    )
+    await client.list_specimens(specimen_query)
 
 
 if __name__ == "__main__":

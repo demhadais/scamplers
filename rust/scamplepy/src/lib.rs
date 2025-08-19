@@ -2,11 +2,12 @@ use pyo3::prelude::*;
 use pyo3_stub_gen::define_stub_info_gatherer;
 use scamplers::{
     db::models::{
-        institution::NewInstitution,
-        lab::NewLab,
-        person::{NewPerson, UserRole},
+        WasmPythonOrderBy,
+        institution::{InstitutionQuery, NewInstitution},
+        lab::{LabQuery, NewLab},
+        person::{NewPerson, PersonQuery, UserRole},
         specimen::{
-            self, Species,
+            self, Species, SpecimenQuery,
             block::{
                 BlockFixative, FixedBlockEmbeddingMatrix, FrozenBlockEmbeddingMatrix,
                 NewFixedBlock, NewFrozenBlock,
@@ -35,6 +36,7 @@ fn scamplepy(module: &Bound<'_, PyModule>) -> PyResult<()> {
         register_errors_submodule(module)?,
         register_units_submodule(module)?,
         register_create_submodule(module)?,
+        register_query_submodule(module)?,
     ];
 
     let python = module.py();
@@ -70,24 +72,36 @@ impl NewScamplepyModule for PyModule {
     }
 }
 
+macro_rules! add_classes {
+    ($module:expr, $($class:ty),*) => {{
+        $(
+            $module.add_class::<$class>()?;
+        )*
+    }};
+}
+
 fn register_errors_submodule<'a>(parent: &'a Bound<PyModule>) -> PyResult<ModuleWithName<'a>> {
     let errors_module =
         PyModule::new_scamplepy_module(parent.py(), scamplers::ERRORS_SUBMODULE_NAME)?;
 
-    errors_module.add_class::<ClientError>()?;
-    errors_module.add_class::<DuplicateResourceError>()?;
-    errors_module.add_class::<InvalidReferenceError>()?;
-    errors_module.add_class::<ResourceNotFoundError>()?;
-    errors_module.add_class::<InvalidDataError>()?;
-    errors_module.add_class::<MalformedRequestError>()?;
-    errors_module.add_class::<PermissionDeniedError>()?;
-    errors_module.add_class::<ServerError>()?;
-    errors_module.add_class::<CdnaGemsError>()?;
-    errors_module.add_class::<CdnaLibraryTypeError>()?;
-    errors_module.add_class::<DatasetCmdlineError>()?;
-    errors_module.add_class::<DatasetNMetricsFilesError>()?;
-    errors_module.add_class::<DatasetMetricsFileParseError>()?;
-    errors_module.add_class::<InvalidMeasurementError>()?;
+    add_classes!(
+        errors_module,
+        ClientError,
+        DuplicateResourceError,
+        InvalidReferenceError,
+        ResourceNotFoundError,
+        InvalidDataError,
+        MalformedRequestError,
+        PermissionDeniedError,
+        ServerError,
+        CdnaGemsError,
+        CdnaLibraryTypeError,
+        DatasetCmdlineError,
+        DatasetNMetricsFilesError,
+        DatasetMetricsFileParseError,
+        InvalidMeasurementError,
+        ScamplersErrorResponse
+    );
 
     errors_module.add_class::<ScamplersErrorResponse>()?;
 
@@ -100,9 +114,7 @@ fn register_units_submodule<'a>(parent: &'a Bound<PyModule>) -> PyResult<ModuleW
     let units_module =
         PyModule::new_scamplepy_module(parent.py(), scamplers::COMMON_SUBMODULE_NAME)?;
 
-    units_module.add_class::<MassUnit>()?;
-    units_module.add_class::<VolumeUnit>()?;
-    units_module.add_class::<LengthUnit>()?;
+    add_classes!(units_module, MassUnit, VolumeUnit, LengthUnit);
 
     parent.add_submodule(&units_module)?;
 
@@ -112,29 +124,29 @@ fn register_units_submodule<'a>(parent: &'a Bound<PyModule>) -> PyResult<ModuleW
 fn register_create_submodule<'a>(parent: &'a Bound<PyModule>) -> PyResult<ModuleWithName<'a>> {
     let create_submodule = PyModule::new(parent.py(), scamplers::CREATE_SUBMODULE_NAME)?;
 
-    create_submodule.add_class::<NewInstitution>()?;
-
-    create_submodule.add_class::<UserRole>()?;
-    create_submodule.add_class::<NewPerson>()?;
-
-    create_submodule.add_class::<NewLab>()?;
-
-    create_submodule.add_class::<NewFixedBlock>()?;
-    create_submodule.add_class::<FixedBlockEmbeddingMatrix>()?;
-    create_submodule.add_class::<NewFrozenBlock>()?;
-    create_submodule.add_class::<BlockFixative>()?;
-    create_submodule.add_class::<FrozenBlockEmbeddingMatrix>()?;
-    create_submodule.add_class::<NewCryopreservedTissue>()?;
-    create_submodule.add_class::<NewFixedTissue>()?;
-    create_submodule.add_class::<NewFrozenTissue>()?;
-    create_submodule.add_class::<TissueFixative>()?;
-    create_submodule.add_class::<NewVirtualSpecimen>()?;
-    create_submodule.add_class::<SuspensionFixative>()?;
-    create_submodule.add_class::<Species>()?;
-    create_submodule.add_class::<specimen::common::MeasurementData>()?;
-    create_submodule.add_class::<NewSpecimenMeasurement>()?;
-    create_submodule.add_class::<NewCommitteeApproval>()?;
-    create_submodule.add_class::<ComplianceCommitteeType>()?;
+    add_classes!(
+        create_submodule,
+        NewInstitution,
+        UserRole,
+        NewPerson,
+        NewLab,
+        NewFixedBlock,
+        FixedBlockEmbeddingMatrix,
+        NewFrozenBlock,
+        BlockFixative,
+        FrozenBlockEmbeddingMatrix,
+        NewCryopreservedTissue,
+        NewFixedTissue,
+        NewFrozenTissue,
+        TissueFixative,
+        NewVirtualSpecimen,
+        SuspensionFixative,
+        Species,
+        specimen::common::MeasurementData,
+        NewSpecimenMeasurement,
+        NewCommitteeApproval,
+        ComplianceCommitteeType
+    );
 
     // create_submodule.add_class::<suspension::MeasurementDataCore>()?;
     // create_submodule.add_class::<BiologicalMaterial>()?;
@@ -160,7 +172,8 @@ fn register_create_submodule<'a>(parent: &'a Bound<PyModule>) -> PyResult<Module
     // create_submodule.add_class::<LibraryType>()?;
     // create_submodule.add_class::<NewLibraryTypeSpecification>()?;
 
-    // create_submodule.add_class::<nucleic_acid::common::ElectrophoreticMeasurementData>()?
+    // create_submodule.
+    // add_class::<nucleic_acid::common::ElectrophoreticMeasurementData>()?
     // ; create_submodule.add_class::<nucleic_acid::common::Concentration>()?;
     // create_submodule.add_class::<NewCdnaMeasurement>()?;
     // create_submodule.add_class::<NewCdna>()?;
@@ -173,15 +186,34 @@ fn register_create_submodule<'a>(parent: &'a Bound<PyModule>) -> PyResult<Module
     // create_submodule.add_class::<MultiRowCsvMetricsFile>()?;
     // create_submodule.add_class::<JsonMetricsFile>()?;
 
-    // create_submodule.add_class::<dataset::chromium::CellrangerarcCountDataset>()?;
-    // create_submodule.add_class::<dataset::chromium::CellrangerCountDataset>()?;
+    // create_submodule.add_class::<dataset::chromium::CellrangerarcCountDataset>()?
+    // ; create_submodule.
+    // add_class::<dataset::chromium::CellrangerCountDataset>()?;
     // create_submodule.add_class::<dataset::chromium::CellrangerMultiDataset>()?;
     // create_submodule.add_class::<dataset::chromium::CellrangerVdjDataset>()?;
-    // create_submodule.add_class::<dataset::chromium::CellrangeratacCountDataset>()?;
+    // create_submodule.
+    // add_class::<dataset::chromium::CellrangeratacCountDataset>()?;
 
     parent.add_submodule(&create_submodule)?;
 
     Ok((scamplers::CREATE_SUBMODULE_NAME, create_submodule))
+}
+
+fn register_query_submodule<'a>(parent: &'a Bound<PyModule>) -> PyResult<ModuleWithName<'a>> {
+    let query_submodule = PyModule::new(parent.py(), scamplers::QUERY_SUBMODULE_NAME)?;
+
+    add_classes!(
+        query_submodule,
+        WasmPythonOrderBy,
+        InstitutionQuery,
+        PersonQuery,
+        LabQuery,
+        SpecimenQuery
+    );
+
+    parent.add_submodule(&query_submodule)?;
+
+    Ok((scamplers::QUERY_SUBMODULE_NAME, query_submodule))
 }
 
 define_stub_info_gatherer!(stub_info);

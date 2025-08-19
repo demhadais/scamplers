@@ -13,6 +13,22 @@ export enum LibraryType {
   VdjT = 9,
   VdjTGd = 10,
 }
+export enum Species {
+  AmbystomaMexicanum = 0,
+  CanisFamiliaris = 1,
+  CallithrixJacchus = 2,
+  DrosophilaMelanogaster = 3,
+  GasterosteusAculeatus = 4,
+  HomoSapiens = 5,
+  MusMusculus = 6,
+  RattusNorvegicus = 7,
+  SminthopsisCrassicaudata = 8,
+}
+export enum SpecimenType {
+  Block = 0,
+  Suspension = 1,
+  Tissue = 2,
+}
 export enum UserRole {
   AppAdmin = 0,
   BiologyStaff = 1,
@@ -38,10 +54,6 @@ export class CdnaLibraryTypeError {
   static from_json_bytes(json_bytes: Uint8Array): CdnaLibraryTypeError;
   static from_json_string(json_str: string): CdnaLibraryTypeError;
   static from_base64_json(base64_json_bytes: string): CdnaLibraryTypeError;
-  expected_library_types: any[];
-  found_library_types: any[];
-  expected_volumes: Float32Array;
-  found_volumes: Float32Array;
 }
 export class ClientError {
   private constructor();
@@ -53,6 +65,21 @@ export class ClientError {
   static from_json_string(json_str: string): ClientError;
   static from_base64_json(base64_json_bytes: string): ClientError;
   message: string;
+}
+export class CommitteeApproval {
+  private constructor();
+  free(): void;
+  to_json_bytes(): Uint8Array;
+  to_json_string(): string;
+  to_base64_json(): string;
+  static from_json_bytes(json_bytes: Uint8Array): CommitteeApproval;
+  static from_json_string(json_str: string): CommitteeApproval;
+  static from_base64_json(base64_json_bytes: string): CommitteeApproval;
+  institution_id: string;
+  specimen_id: string;
+  institution: Institution;
+  committee_type: string;
+  compliance_identifier: string;
 }
 export class CreatedUser {
   private constructor();
@@ -139,9 +166,8 @@ export class InstitutionQuery {
   ids: string[];
   get name(): string;
   set name(value: string | null | undefined);
+  order_by: OrderBy[];
   pagination: Pagination;
-  readonly get_order_by: OrderBy[];
-  set order_by(value: OrderBy[]);
 }
 export class InvalidDataError {
   private constructor();
@@ -179,6 +205,78 @@ export class InvalidReferenceError {
   get value(): string;
   set value(value: string | null | undefined);
 }
+export class Lab {
+  private constructor();
+  free(): void;
+  to_json_bytes(): Uint8Array;
+  to_json_string(): string;
+  to_base64_json(): string;
+  static from_json_bytes(json_bytes: Uint8Array): Lab;
+  static from_json_string(json_str: string): Lab;
+  static from_base64_json(base64_json_bytes: string): Lab;
+  info: LabSummaryWithRelations;
+  members: PersonSummary[];
+}
+export class LabQuery {
+  free(): void;
+  to_json_bytes(): Uint8Array;
+  to_json_string(): string;
+  to_base64_json(): string;
+  static from_json_bytes(json_bytes: Uint8Array): LabQuery;
+  static from_json_string(json_str: string): LabQuery;
+  static from_base64_json(base64_json_bytes: string): LabQuery;
+  constructor();
+  ids: string[];
+  get name(): string;
+  set name(value: string | null | undefined);
+  order_by: OrderBy[];
+  pagination: Pagination;
+}
+export class LabSummary {
+  private constructor();
+  free(): void;
+  to_json_bytes(): Uint8Array;
+  to_json_string(): string;
+  to_base64_json(): string;
+  static from_json_bytes(json_bytes: Uint8Array): LabSummary;
+  static from_json_string(json_str: string): LabSummary;
+  static from_base64_json(base64_json_bytes: string): LabSummary;
+  id: string;
+  readonly links: Map<any, any>;
+  name: string;
+  delivery_dir: string;
+}
+export class LabSummaryWithRelations {
+  private constructor();
+  free(): void;
+  to_json_bytes(): Uint8Array;
+  to_json_string(): string;
+  to_base64_json(): string;
+  static from_json_bytes(json_bytes: Uint8Array): LabSummaryWithRelations;
+  static from_json_string(json_str: string): LabSummaryWithRelations;
+  static from_base64_json(base64_json_bytes: string): LabSummaryWithRelations;
+  id_: string;
+  summary: LabSummary;
+  pi: PersonSummary;
+}
+export class LabUpdate {
+  private constructor();
+  free(): void;
+  fields: LabUpdateFields;
+  add_members: string[];
+  remove_members: string[];
+}
+export class LabUpdateFields {
+  private constructor();
+  free(): void;
+  id: string;
+  get name(): string;
+  set name(value: string | null | undefined);
+  get pi_id(): string;
+  set pi_id(value: string | null | undefined);
+  get delivery_dir(): string;
+  set delivery_dir(value: string | null | undefined);
+}
 export class LibraryIndexSetError {
   private constructor();
   free(): void;
@@ -214,6 +312,14 @@ export class MultiplexingTag {
   tag_id: string;
   type_: string;
 }
+export class NewLab {
+  private constructor();
+  free(): void;
+  name: string;
+  pi_id: string;
+  delivery_dir: string;
+  member_ids: string[];
+}
 export class NewPerson {
   free(): void;
   constructor(ms_user_id: string);
@@ -224,8 +330,8 @@ export class NewPerson {
   set ms_user_id(value: string | null | undefined);
 }
 export class OrderBy {
-  private constructor();
   free(): void;
+  constructor(field: string, descending: boolean);
   field: string;
   descending: boolean;
 }
@@ -249,20 +355,14 @@ export class PermissionDeniedError {
 export class Person {
   private constructor();
   free(): void;
-  core: PersonCore;
-  roles: any[];
-}
-export class PersonCore {
-  private constructor();
-  free(): void;
   to_json_bytes(): Uint8Array;
   to_json_string(): string;
   to_base64_json(): string;
-  static from_json_bytes(json_bytes: Uint8Array): PersonCore;
-  static from_json_string(json_str: string): PersonCore;
-  static from_base64_json(base64_json_bytes: string): PersonCore;
-  summary: PersonSummary;
-  institution: Institution;
+  static from_json_bytes(json_bytes: Uint8Array): Person;
+  static from_json_string(json_str: string): Person;
+  static from_base64_json(base64_json_bytes: string): Person;
+  info: PersonSummaryWithRelations;
+  roles: any[];
 }
 export class PersonQuery {
   free(): void;
@@ -282,9 +382,8 @@ export class PersonQuery {
   set orcid(value: string | null | undefined);
   get ms_user_id(): string;
   set ms_user_id(value: string | null | undefined);
+  order_by: OrderBy[];
   pagination: Pagination;
-  readonly get_order_by: OrderBy[];
-  set order_by(value: OrderBy[]);
 }
 export class PersonSummary {
   private constructor();
@@ -303,6 +402,19 @@ export class PersonSummary {
   get orcid(): string;
   set orcid(value: string | null | undefined);
 }
+export class PersonSummaryWithRelations {
+  private constructor();
+  free(): void;
+  to_json_bytes(): Uint8Array;
+  to_json_string(): string;
+  to_base64_json(): string;
+  static from_json_bytes(json_bytes: Uint8Array): PersonSummaryWithRelations;
+  static from_json_string(json_str: string): PersonSummaryWithRelations;
+  static from_base64_json(base64_json_bytes: string): PersonSummaryWithRelations;
+  id_: string;
+  summary: PersonSummary;
+  institution: Institution;
+}
 export class ResourceNotFoundError {
   private constructor();
   free(): void;
@@ -316,7 +428,18 @@ export class ResourceNotFoundError {
 }
 export class ScamplersClient {
   free(): void;
-  constructor(api_base_url: string, frontend_token?: string | null, api_key?: string | null, accept_invalid_certificates?: boolean | null);
+  constructor(api_base_url: string, frontend_token: string | null | undefined, api_key: string | null | undefined, accept_invalid_certificates: boolean);
+  list_institutions(data: InstitutionQuery): Promise<Institution[]>;
+  ms_login(data: NewPerson): Promise<CreatedUser>;
+  list_people(data: PersonQuery): Promise<Person[]>;
+  create_lab(data: NewLab): Promise<Lab>;
+  list_labs(data: LabQuery): Promise<Lab[]>;
+  update_lab(data: LabUpdate): Promise<Lab>;
+  list_specimens(data: SpecimenQuery): Promise<Specimen[]>;
+  fetch_institution(data: string): Promise<Institution>;
+  fetch_person(data: string): Promise<Person>;
+  fetch_lab(data: string): Promise<Lab>;
+  fetch_specimen(data: string): Promise<Specimen>;
 }
 export class ScamplersErrorResponse {
   private constructor();
@@ -343,6 +466,62 @@ export class ServerError {
   message: string;
   raw_response_body: string;
 }
+export class Specimen {
+  private constructor();
+  free(): void;
+  to_json_bytes(): Uint8Array;
+  to_json_string(): string;
+  to_base64_json(): string;
+  static from_json_bytes(json_bytes: Uint8Array): Specimen;
+  static from_json_string(json_str: string): Specimen;
+  static from_base64_json(base64_json_bytes: string): Specimen;
+  info: SpecimenSummaryWithRelations;
+  measurements: SpecimenMeasurement[];
+}
+export class SpecimenMeasurement {
+  private constructor();
+  free(): void;
+  to_json_bytes(): Uint8Array;
+  to_json_string(): string;
+  to_base64_json(): string;
+  static from_json_bytes(json_bytes: Uint8Array): SpecimenMeasurement;
+  static from_json_string(json_str: string): SpecimenMeasurement;
+  static from_base64_json(base64_json_bytes: string): SpecimenMeasurement;
+  id: string;
+  specimen_id: string;
+  measured_by: PersonSummary;
+}
+export class SpecimenQuery {
+  free(): void;
+  to_json_bytes(): Uint8Array;
+  to_json_string(): string;
+  to_base64_json(): string;
+  static from_json_bytes(json_bytes: Uint8Array): SpecimenQuery;
+  static from_json_string(json_str: string): SpecimenQuery;
+  static from_base64_json(base64_json_bytes: string): SpecimenQuery;
+  constructor();
+  ids: string[];
+  get name(): string;
+  set name(value: string | null | undefined);
+  submitters: string[];
+  labs: string[];
+  get received_before(): Date | undefined;
+  set received_before(value: Date | null | undefined);
+  get received_after(): Date | undefined;
+  set received_after(value: Date | null | undefined);
+  species: any[];
+  get notes(): string;
+  set notes(value: string | null | undefined);
+  type_: any[];
+  get storage_buffer(): string;
+  set storage_buffer(value: string | null | undefined);
+  get frozen(): boolean | undefined;
+  set frozen(value: boolean | null | undefined);
+  get cryopreserved(): boolean | undefined;
+  set cryopreserved(value: boolean | null | undefined);
+  order_by: OrderBy[];
+  pagination: Pagination;
+}
 export class SpecimenSummary {
   private constructor();
   free(): void;
@@ -361,7 +540,7 @@ export class SpecimenSummary {
   set notes(value: string | null | undefined);
   get returned_at(): Date | undefined;
   set returned_at(value: Date | null | undefined);
-  type_: string;
+  type_: SpecimenType;
   get embedded_in(): string;
   set embedded_in(value: string | null | undefined);
   get fixative(): string;
@@ -370,6 +549,21 @@ export class SpecimenSummary {
   cryopreserved: boolean;
   get storage_buffer(): string;
   set storage_buffer(value: string | null | undefined);
+  readonly species: string[];
+}
+export class SpecimenSummaryWithRelations {
+  private constructor();
+  free(): void;
+  to_json_bytes(): Uint8Array;
+  to_json_string(): string;
+  to_base64_json(): string;
+  static from_json_bytes(json_bytes: Uint8Array): SpecimenSummaryWithRelations;
+  static from_json_string(json_str: string): SpecimenSummaryWithRelations;
+  static from_base64_json(base64_json_bytes: string): SpecimenSummaryWithRelations;
+  id_: string;
+  summary: SpecimenSummary;
+  lab: LabSummary;
+  submitted_by: PersonSummary;
 }
 export class SuspensionCore {
   private constructor();
@@ -380,6 +574,7 @@ export class SuspensionCore {
   static from_json_bytes(json_bytes: Uint8Array): SuspensionCore;
   static from_json_string(json_str: string): SuspensionCore;
   static from_base64_json(base64_json_bytes: string): SuspensionCore;
+  id: string;
   summary: SuspensionSummary;
   parent_specimen: SpecimenSummary;
   multiplexing_tag: MultiplexingTag;
@@ -393,6 +588,7 @@ export class SuspensionMeasurement {
   static from_json_bytes(json_bytes: Uint8Array): SuspensionMeasurement;
   static from_json_string(json_str: string): SuspensionMeasurement;
   static from_base64_json(base64_json_bytes: string): SuspensionMeasurement;
+  id: string;
   measured_by: PersonSummary;
 }
 export class SuspensionSummary {

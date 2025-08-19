@@ -3,6 +3,7 @@
 use axum::http::StatusCode;
 use pretty_assertions::assert_eq;
 use rand::seq::IteratorRandom;
+use rstest::rstest;
 use scamplers::{
     client::ScamplersClient,
     config::Config,
@@ -23,7 +24,15 @@ struct TestState {
 
 impl TestState {
     async fn new(dev_api: bool) -> Self {
-        let (container, db_root_password, db_login_user_password, db_host, db_port) = if !dev_api {
+        let (container, db_root_password, db_login_user_password, db_host, db_port) = if dev_api {
+            (
+                None,
+                String::new(),
+                String::new(),
+                Default::default(),
+                Default::default(),
+            )
+        } else {
             let container = DevContainer::new(&Uuid::now_v7().to_string(), !dev_api)
                 .await
                 .unwrap();
@@ -38,14 +47,6 @@ impl TestState {
                 db_login_user_password,
                 db_host,
                 db_port,
-            )
-        } else {
-            (
-                Default::default(),
-                Default::default(),
-                Default::default(),
-                Default::default(),
-                Default::default(),
             )
         };
 
@@ -98,7 +99,9 @@ impl TestState {
     }
 }
 
+#[rstest]
 #[tokio::test]
+#[ignore = "integration test"]
 async fn prod_api_auth() {
     use scamplers::result::PermissionDeniedError;
     let test_state = TestState::new(false).await;
@@ -135,8 +138,9 @@ async fn prod_api_auth() {
     test_state.server_handle.abort();
 }
 
-#[cfg(feature = "app")]
+#[rstest]
 #[tokio::test]
+#[ignore = "integration test"]
 async fn client_deserialization() {
     let test_state = TestState::new(true).await;
 

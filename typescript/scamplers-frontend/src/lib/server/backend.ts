@@ -7,4 +7,4 @@ const BACKEND_PORT = env.SCAMPLERS_BACKEND_PORT ?? env.BACKEND_PORT;
 
 export const BACKEND_URL = `http://${BACKEND_HOST}:${BACKEND_PORT}`;
 
-export const scamplersClient = new ScamplersClient(BACKEND_URL, FRONTEND_TOKEN ?? '');
+export const scamplersClient = new ScamplersClient(BACKEND_URL, FRONTEND_TOKEN ?? '', null, false);
