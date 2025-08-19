@@ -17,13 +17,16 @@ use crate::db::models::{
     lab::{Lab, LabId, LabQuery, LabUpdate, NewLab},
     person::{CreatedUser, NewPerson, Person, PersonId, PersonQuery},
     specimen::{Specimen, SpecimenId, SpecimenQuery},
+    suspension::suspension::{Suspension, SuspensionId, SuspensionQuery},
 };
 #[cfg(feature = "python")]
 use crate::db::models::{
     institution::{Institution, InstitutionId, InstitutionQuery, NewInstitution},
     lab::{Lab, LabId, LabQuery, LabUpdate, NewLab},
+    multiplexing_tag::MultiplexingTag,
     person::{NewPerson, Person, PersonId, PersonQuery, PersonUpdate},
     specimen::{NewSpecimen, Specimen, SpecimenId, SpecimenQuery},
+    suspension::suspension::{NewSuspension, Suspension, SuspensionId, SuspensionQuery},
 };
 use crate::{
     endpoints::{Api, Endpoint},
@@ -298,6 +301,7 @@ wasm_client_methods! {
     list_labs(LabQuery) -> Vec<Lab>;
     update_lab(LabUpdate) -> Lab;
     list_specimens(SpecimenQuery) -> Vec<Specimen>;
+    list_suspensions(SuspensionQuery) -> Vec<Suspension>;
 }
 
 #[cfg(target_arch = "wasm32")]
@@ -306,6 +310,7 @@ wasm_wrapped_data_methods! {
     fetch_person(PersonId(Uuid)) -> Person;
     fetch_lab(LabId(Uuid)) -> Lab;
     fetch_specimen(SpecimenId(Uuid)) -> Specimen;
+    fetch_suspension(SuspensionId(Uuid)) -> Suspension;
 }
 
 #[cfg(target_arch = "wasm32")]
@@ -329,6 +334,19 @@ python_client_methods! {
     create_specimen(NewSpecimen) -> Specimen;
     fetch_specimen(SpecimenId) -> Specimen;
     list_specimens(SpecimenQuery) -> Vec<Specimen>;
+    create_suspension(NewSuspension) -> Suspension;
+    fetch_suspension(SuspensionId) -> Suspension;
+    list_suspensions(SuspensionQuery) -> Vec<Suspension>;
+}
+
+#[cfg(feature = "python")]
+#[pyo3_stub_gen::derive::gen_stub_pymethods]
+#[pyo3::pymethods]
+impl ScamplersClient {
+    async fn list_multiplexing_tags(&self) -> Result<Vec<MultiplexingTag>, ScamplersErrorResponse> {
+        let client = self.clone();
+        client.send_request_python(()).await
+    }
 }
 
 #[cfg(feature = "python")]

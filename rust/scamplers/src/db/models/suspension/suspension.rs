@@ -1,16 +1,24 @@
+#[cfg(feature = "app")]
+use diesel::{Associations, prelude::*};
 #[cfg(feature = "python")]
 use pyo3::prelude::*;
-use scamplers_macros::{base_model, db_insertion, db_json, db_selection};
+use scamplers_macros::{base_model, db_insertion, db_json, db_query, db_selection};
+#[cfg(feature = "app")]
+use scamplers_schema::suspension_preparers;
 use time::OffsetDateTime;
 use uuid::Uuid;
 use valid_string::ValidString;
+#[cfg(target_arch = "wasm32")]
+use wasm_bindgen::prelude::*;
 
-use crate::db::models::{
-    Links,
-    multiplexing_tag::MultiplexingTag,
-    person::PersonSummary,
-    specimen::SpecimenSummary,
-    suspension::common::{BiologicalMaterial, MeasurementDataCore},
+use crate::{
+    db::models::{
+        DefaultVec, Links, Pagination,
+        multiplexing_tag::MultiplexingTag,
+        specimen::SpecimenSummary,
+        suspension::common::{BiologicalMaterial, SuspensionMeasurementFields},
+    },
+    define_ordering_enum, uuid_newtype,
 };
 
 #[cfg(feature = "app")]
@@ -24,7 +32,7 @@ mod read;
 pub struct SuspensionMeasurementData {
     #[serde(flatten)]
     #[garde(dive)]
-    pub core: MeasurementDataCore,
+    pub fields: SuspensionMeasurementFields,
     pub is_post_hybridization: bool,
 }
 
@@ -47,7 +55,7 @@ impl NewSuspensionMeasurement {
     #[pyo3(signature = (*, measured_by, data, is_post_hybridization, suspension_id=Uuid::default()))]
     fn new(
         measured_by: Uuid,
-        data: MeasurementDataCore,
+        data: SuspensionMeasurementFields,
         is_post_hybridization: bool,
         suspension_id: Uuid,
     ) -> Self {
@@ -55,7 +63,7 @@ impl NewSuspensionMeasurement {
             suspension_id,
             measured_by,
             data: SuspensionMeasurementData {
-                core: data,
+                fields: data,
                 is_post_hybridization,
             },
         }
@@ -85,6 +93,17 @@ pub struct NewSuspension {
     pub lysis_duration_minutes: Option<f32>,
     #[garde(dive)]
     pub notes: Option<ValidString>,
+}
+
+#[db_insertion]
+#[cfg_attr(
+    feature = "app",
+    derive(Identifiable, Associations, Selectable, Queryable)
+)]
+#[cfg_attr(feature = "app", diesel(primary_key(suspension_id, prepared_by), belongs_to(SuspensionSummaryWithParents, foreign_key = suspension_id)))]
+struct SuspensionPreparer {
+    suspension_id: Uuid,
+    prepared_by: Uuid,
 }
 
 #[cfg(feature = "python")]
@@ -140,35 +159,54 @@ pub struct SuspensionSummary {
 
 #[db_selection]
 #[cfg_attr(feature = "app", diesel(table_name = scamplers_schema::suspension))]
-pub struct SuspensionCore {
-    #[serde(skip)]
-    pub id: Uuid,
+pub struct SuspensionSummaryWithParents {
+    #[cfg_attr(feature = "app", diesel(column_name = id))]
+    pub id_: Uuid,
     #[serde(flatten)]
     #[cfg_attr(feature = "app", diesel(embed))]
     pub summary: SuspensionSummary,
     #[cfg_attr(feature = "app", diesel(embed))]
     pub parent_specimen: SpecimenSummary,
     #[cfg_attr(feature = "app", diesel(embed))]
-    pub multiplexing_tag: MultiplexingTag,
+    pub multiplexing_tag: Option<MultiplexingTag>,
 }
 
 #[db_selection]
-#[cfg_attr(feature = "app", diesel(table_name = scamplers_schema::suspension_measurement))]
+#[cfg_attr(feature = "app", derive(Associations))]
+#[cfg_attr(feature = "app", diesel(table_name = scamplers_schema::suspension_measurement, belongs_to(SuspensionSummaryWithParents, foreign_key = suspension_id)))]
 pub struct SuspensionMeasurement {
-    #[serde(skip)]
     pub id: Uuid,
-    #[cfg_attr(feature = "app", diesel(embed))]
-    pub measured_by: PersonSummary,
+    pub measured_by: Uuid,
+    pub suspension_id: Uuid,
     #[serde(flatten)]
     #[cfg_attr(target_arch = "wasm32", wasm_bindgen(skip))]
     pub data: SuspensionMeasurementData,
 }
 
-#[cfg_attr(feature = "python", pyclass(get_all))]
+#[cfg_attr(target_arch = "wasm32", wasm_bindgen(getter_with_clone))]
+#[cfg_attr(feature = "python", pyo3_stub_gen::derive::gen_stub_pyclass)]
+#[cfg_attr(
+    feature = "python",
+    pyclass(eq, get_all, module = "scamplepy.responses")
+)]
 #[base_model]
 pub struct Suspension {
     #[serde(flatten)]
-    pub core: SuspensionCore,
-    pub preparers: Vec<PersonSummary>,
+    pub info: SuspensionSummaryWithParents,
+    pub preparers: Vec<Uuid>,
     pub measurements: Vec<SuspensionMeasurement>,
 }
+
+define_ordering_enum! {SuspensionOrderBy{ CreatedAt }, default = CreatedAt}
+
+#[db_query]
+pub struct SuspensionQuery {
+    #[builder(default)]
+    ids: Vec<Uuid>,
+    #[builder(default)]
+    order_by: DefaultVec<SuspensionOrderBy>,
+    #[builder(default)]
+    pagination: Pagination,
+}
+
+uuid_newtype!(SuspensionId);

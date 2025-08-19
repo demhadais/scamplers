@@ -57,7 +57,7 @@ impl NewCommitteeApproval {
 
 #[db_selection]
 #[cfg_attr(feature = "app", derive(Associations))]
-#[cfg_attr(feature = "app", diesel(table_name = scamplers_schema::committee_approval, primary_key(institution_id, committee_type, specimen_id), belongs_to(super::SpecimenSummaryWithRelations, foreign_key = specimen_id)))]
+#[cfg_attr(feature = "app", diesel(table_name = scamplers_schema::committee_approval, primary_key(institution_id, committee_type, specimen_id), belongs_to(super::SpecimenSummaryWithParents, foreign_key = specimen_id)))]
 pub struct CommitteeApproval {
     pub institution_id: Uuid,
     pub specimen_id: Uuid,

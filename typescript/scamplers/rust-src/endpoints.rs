@@ -8,8 +8,10 @@ use crate::{
     db::models::{
         institution::{Institution, InstitutionId, InstitutionQuery, NewInstitution},
         lab::{Lab, LabId, LabQuery, LabUpdate, NewLab},
+        multiplexing_tag::{MultiplexingTag, MultiplexingTagId},
         person::{CreatedUser, NewPerson, Person, PersonId, PersonQuery, PersonUpdate},
         specimen::{NewSpecimen, Specimen, SpecimenId, SpecimenQuery},
+        suspension::suspension::{NewSuspension, Suspension, SuspensionId, SuspensionQuery},
     },
     extract::{Base64JsonQuery, RelativesQuery, ValidJsonBody},
 };
@@ -30,14 +32,14 @@ pub trait Endpoint<Request, Response> {
 macro_rules! impl_basic_endpoints {
     (
         path = $path:expr,
-        creation = $creation:ident,
+        $(creation = $creation:ident,)?
         id = $id:ty,
         query = $query:ty,
         $(update = $update:ty,)?
         $(relative = {path = $relative_path:expr, query = $relative_query:ty, response = $relatives:ty},)*
         response = $response:ty
     ) => {
-        impl Endpoint<$creation, $response> for Api {
+        $(impl Endpoint<$creation, $response> for Api {
             type RequestExtractor = ValidJsonBody<$creation>;
             type ResponseWrapper = Json<$response>;
 
@@ -53,7 +55,7 @@ macro_rules! impl_basic_endpoints {
                 let path = <Self as Endpoint<$creation, $response>>::PATH;
                 client.post(format!("{base_url}{path}")).json(&data)
             }
-        }
+        })?
 
         impl Endpoint<$id, $response> for Api {
             type RequestExtractor = Path<$id>;
@@ -167,6 +169,21 @@ impl_basic_endpoints!(
     query = SpecimenQuery,
     response = Specimen
 );
+
+impl_basic_endpoints! {
+    path = "/multiplexing-tags",
+    id = MultiplexingTagId,
+    query = (),
+    response = MultiplexingTag
+}
+
+impl_basic_endpoints! {
+    path = "/suspensions",
+    creation = NewSuspension,
+    id = SuspensionId,
+    query = SuspensionQuery,
+    response = Suspension
+}
 
 impl Endpoint<NewPerson, CreatedUser> for Api {
     type RequestExtractor = ValidJsonBody<NewPerson>;

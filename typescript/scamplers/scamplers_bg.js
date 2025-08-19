@@ -259,11 +259,11 @@ function __wbg_adapter_36(arg0, arg1) {
 }
 
 function __wbg_adapter_39(arg0, arg1, arg2) {
-    wasm.closure297_externref_shim(arg0, arg1, arg2);
+    wasm.closure317_externref_shim(arg0, arg1, arg2);
 }
 
-function __wbg_adapter_650(arg0, arg1, arg2, arg3) {
-    wasm.closure332_externref_shim(arg0, arg1, arg2, arg3);
+function __wbg_adapter_673(arg0, arg1, arg2, arg3) {
+    wasm.closure352_externref_shim(arg0, arg1, arg2, arg3);
 }
 
 /**
@@ -1973,17 +1973,17 @@ export class Lab {
         wasm.__wbg_lab_free(ptr, 0);
     }
     /**
-     * @returns {LabSummaryWithRelations}
+     * @returns {LabSummaryWithParents}
      */
     get info() {
         const ret = wasm.__wbg_get_lab_info(this.__wbg_ptr);
-        return LabSummaryWithRelations.__wrap(ret);
+        return LabSummaryWithParents.__wrap(ret);
     }
     /**
-     * @param {LabSummaryWithRelations} arg0
+     * @param {LabSummaryWithParents} arg0
      */
     set info(arg0) {
-        _assertClass(arg0, LabSummaryWithRelations);
+        _assertClass(arg0, LabSummaryWithParents);
         var ptr0 = arg0.__destroy_into_raw();
         wasm.__wbg_set_lab_info(this.__wbg_ptr, ptr0);
     }
@@ -2361,36 +2361,36 @@ export class LabSummary {
     }
 }
 
-const LabSummaryWithRelationsFinalization = (typeof FinalizationRegistry === 'undefined')
+const LabSummaryWithParentsFinalization = (typeof FinalizationRegistry === 'undefined')
     ? { register: () => {}, unregister: () => {} }
-    : new FinalizationRegistry(ptr => wasm.__wbg_labsummarywithrelations_free(ptr >>> 0, 1));
+    : new FinalizationRegistry(ptr => wasm.__wbg_labsummarywithparents_free(ptr >>> 0, 1));
 
-export class LabSummaryWithRelations {
+export class LabSummaryWithParents {
 
     static __wrap(ptr) {
         ptr = ptr >>> 0;
-        const obj = Object.create(LabSummaryWithRelations.prototype);
+        const obj = Object.create(LabSummaryWithParents.prototype);
         obj.__wbg_ptr = ptr;
-        LabSummaryWithRelationsFinalization.register(obj, obj.__wbg_ptr, obj);
+        LabSummaryWithParentsFinalization.register(obj, obj.__wbg_ptr, obj);
         return obj;
     }
 
     __destroy_into_raw() {
         const ptr = this.__wbg_ptr;
         this.__wbg_ptr = 0;
-        LabSummaryWithRelationsFinalization.unregister(this);
+        LabSummaryWithParentsFinalization.unregister(this);
         return ptr;
     }
 
     free() {
         const ptr = this.__destroy_into_raw();
-        wasm.__wbg_labsummarywithrelations_free(ptr, 0);
+        wasm.__wbg_labsummarywithparents_free(ptr, 0);
     }
     /**
      * @returns {string}
      */
     get id_() {
-        const ret = wasm.__wbg_get_labsummarywithrelations_id_(this.__wbg_ptr);
+        const ret = wasm.__wbg_get_labsummarywithparents_id_(this.__wbg_ptr);
         var v1 = getCachedStringFromWasm0(ret[0], ret[1]);
         if (ret[0] !== 0) { wasm.__wbindgen_free(ret[0], ret[1], 1); }
         return v1;
@@ -2401,13 +2401,13 @@ export class LabSummaryWithRelations {
     set id_(arg0) {
         const ptr0 = passStringToWasm0(arg0, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
         const len0 = WASM_VECTOR_LEN;
-        wasm.__wbg_set_labsummarywithrelations_id_(this.__wbg_ptr, ptr0, len0);
+        wasm.__wbg_set_labsummarywithparents_id_(this.__wbg_ptr, ptr0, len0);
     }
     /**
      * @returns {LabSummary}
      */
     get summary() {
-        const ret = wasm.__wbg_get_labsummarywithrelations_summary(this.__wbg_ptr);
+        const ret = wasm.__wbg_get_labsummarywithparents_summary(this.__wbg_ptr);
         return LabSummary.__wrap(ret);
     }
     /**
@@ -2416,13 +2416,13 @@ export class LabSummaryWithRelations {
     set summary(arg0) {
         _assertClass(arg0, LabSummary);
         var ptr0 = arg0.__destroy_into_raw();
-        wasm.__wbg_set_labsummarywithrelations_summary(this.__wbg_ptr, ptr0);
+        wasm.__wbg_set_labsummarywithparents_summary(this.__wbg_ptr, ptr0);
     }
     /**
      * @returns {PersonSummary}
      */
     get pi() {
-        const ret = wasm.__wbg_get_labsummarywithrelations_pi(this.__wbg_ptr);
+        const ret = wasm.__wbg_get_labsummarywithparents_pi(this.__wbg_ptr);
         return PersonSummary.__wrap(ret);
     }
     /**
@@ -2431,13 +2431,13 @@ export class LabSummaryWithRelations {
     set pi(arg0) {
         _assertClass(arg0, PersonSummary);
         var ptr0 = arg0.__destroy_into_raw();
-        wasm.__wbg_set_labsummarywithrelations_pi(this.__wbg_ptr, ptr0);
+        wasm.__wbg_set_labsummarywithparents_pi(this.__wbg_ptr, ptr0);
     }
     /**
      * @returns {Uint8Array}
      */
     to_json_bytes() {
-        const ret = wasm.labsummarywithrelations_to_json_bytes(this.__wbg_ptr);
+        const ret = wasm.labsummarywithparents_to_json_bytes(this.__wbg_ptr);
         var v1 = getArrayU8FromWasm0(ret[0], ret[1]).slice();
         wasm.__wbindgen_free(ret[0], ret[1] * 1, 1);
         return v1;
@@ -2446,7 +2446,7 @@ export class LabSummaryWithRelations {
      * @returns {string}
      */
     to_json_string() {
-        const ret = wasm.labsummarywithrelations_to_json_string(this.__wbg_ptr);
+        const ret = wasm.labsummarywithparents_to_json_string(this.__wbg_ptr);
         var v1 = getCachedStringFromWasm0(ret[0], ret[1]);
         if (ret[0] !== 0) { wasm.__wbindgen_free(ret[0], ret[1], 1); }
         return v1;
@@ -2455,40 +2455,40 @@ export class LabSummaryWithRelations {
      * @returns {string}
      */
     to_base64_json() {
-        const ret = wasm.labsummarywithrelations_to_base64_json(this.__wbg_ptr);
+        const ret = wasm.labsummarywithparents_to_base64_json(this.__wbg_ptr);
         var v1 = getCachedStringFromWasm0(ret[0], ret[1]);
         if (ret[0] !== 0) { wasm.__wbindgen_free(ret[0], ret[1], 1); }
         return v1;
     }
     /**
      * @param {Uint8Array} json_bytes
-     * @returns {LabSummaryWithRelations}
+     * @returns {LabSummaryWithParents}
      */
     static from_json_bytes(json_bytes) {
         const ptr0 = passArray8ToWasm0(json_bytes, wasm.__wbindgen_malloc);
         const len0 = WASM_VECTOR_LEN;
-        const ret = wasm.labsummarywithrelations_from_json_bytes(ptr0, len0);
-        return LabSummaryWithRelations.__wrap(ret);
+        const ret = wasm.labsummarywithparents_from_json_bytes(ptr0, len0);
+        return LabSummaryWithParents.__wrap(ret);
     }
     /**
      * @param {string} json_str
-     * @returns {LabSummaryWithRelations}
+     * @returns {LabSummaryWithParents}
      */
     static from_json_string(json_str) {
         const ptr0 = passStringToWasm0(json_str, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
         const len0 = WASM_VECTOR_LEN;
-        const ret = wasm.labsummarywithrelations_from_json_string(ptr0, len0);
-        return LabSummaryWithRelations.__wrap(ret);
+        const ret = wasm.labsummarywithparents_from_json_string(ptr0, len0);
+        return LabSummaryWithParents.__wrap(ret);
     }
     /**
      * @param {string} base64_json_bytes
-     * @returns {LabSummaryWithRelations}
+     * @returns {LabSummaryWithParents}
      */
     static from_base64_json(base64_json_bytes) {
         const ptr0 = passStringToWasm0(base64_json_bytes, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
         const len0 = WASM_VECTOR_LEN;
-        const ret = wasm.labsummarywithrelations_from_base64_json(ptr0, len0);
-        return LabSummaryWithRelations.__wrap(ret);
+        const ret = wasm.labsummarywithparents_from_base64_json(ptr0, len0);
+        return LabSummaryWithParents.__wrap(ret);
     }
 }
 
@@ -3128,7 +3128,7 @@ export class NewPerson {
     set email(arg0) {
         const ptr0 = passStringToWasm0(arg0, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
         const len0 = WASM_VECTOR_LEN;
-        wasm.__wbg_set_newperson_email(this.__wbg_ptr, ptr0, len0);
+        wasm.__wbg_set_multiplexingtag_type_(this.__wbg_ptr, ptr0, len0);
     }
     /**
      * @returns {string}
@@ -3433,17 +3433,17 @@ export class Person {
         wasm.__wbg_person_free(ptr, 0);
     }
     /**
-     * @returns {PersonSummaryWithRelations}
+     * @returns {PersonSummaryWithParents}
      */
     get info() {
         const ret = wasm.__wbg_get_person_info(this.__wbg_ptr);
-        return PersonSummaryWithRelations.__wrap(ret);
+        return PersonSummaryWithParents.__wrap(ret);
     }
     /**
-     * @param {PersonSummaryWithRelations} arg0
+     * @param {PersonSummaryWithParents} arg0
      */
     set info(arg0) {
-        _assertClass(arg0, PersonSummaryWithRelations);
+        _assertClass(arg0, PersonSummaryWithParents);
         var ptr0 = arg0.__destroy_into_raw();
         wasm.__wbg_set_person_info(this.__wbg_ptr, ptr0);
     }
@@ -3896,36 +3896,36 @@ export class PersonSummary {
     }
 }
 
-const PersonSummaryWithRelationsFinalization = (typeof FinalizationRegistry === 'undefined')
+const PersonSummaryWithParentsFinalization = (typeof FinalizationRegistry === 'undefined')
     ? { register: () => {}, unregister: () => {} }
-    : new FinalizationRegistry(ptr => wasm.__wbg_personsummarywithrelations_free(ptr >>> 0, 1));
+    : new FinalizationRegistry(ptr => wasm.__wbg_personsummarywithparents_free(ptr >>> 0, 1));
 
-export class PersonSummaryWithRelations {
+export class PersonSummaryWithParents {
 
     static __wrap(ptr) {
         ptr = ptr >>> 0;
-        const obj = Object.create(PersonSummaryWithRelations.prototype);
+        const obj = Object.create(PersonSummaryWithParents.prototype);
         obj.__wbg_ptr = ptr;
-        PersonSummaryWithRelationsFinalization.register(obj, obj.__wbg_ptr, obj);
+        PersonSummaryWithParentsFinalization.register(obj, obj.__wbg_ptr, obj);
         return obj;
     }
 
     __destroy_into_raw() {
         const ptr = this.__wbg_ptr;
         this.__wbg_ptr = 0;
-        PersonSummaryWithRelationsFinalization.unregister(this);
+        PersonSummaryWithParentsFinalization.unregister(this);
         return ptr;
     }
 
     free() {
         const ptr = this.__destroy_into_raw();
-        wasm.__wbg_personsummarywithrelations_free(ptr, 0);
+        wasm.__wbg_personsummarywithparents_free(ptr, 0);
     }
     /**
      * @returns {string}
      */
     get id_() {
-        const ret = wasm.__wbg_get_personsummarywithrelations_id_(this.__wbg_ptr);
+        const ret = wasm.__wbg_get_personsummarywithparents_id_(this.__wbg_ptr);
         var v1 = getCachedStringFromWasm0(ret[0], ret[1]);
         if (ret[0] !== 0) { wasm.__wbindgen_free(ret[0], ret[1], 1); }
         return v1;
@@ -3936,13 +3936,13 @@ export class PersonSummaryWithRelations {
     set id_(arg0) {
         const ptr0 = passStringToWasm0(arg0, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
         const len0 = WASM_VECTOR_LEN;
-        wasm.__wbg_set_personsummarywithrelations_id_(this.__wbg_ptr, ptr0, len0);
+        wasm.__wbg_set_personsummarywithparents_id_(this.__wbg_ptr, ptr0, len0);
     }
     /**
      * @returns {PersonSummary}
      */
     get summary() {
-        const ret = wasm.__wbg_get_personsummarywithrelations_summary(this.__wbg_ptr);
+        const ret = wasm.__wbg_get_personsummarywithparents_summary(this.__wbg_ptr);
         return PersonSummary.__wrap(ret);
     }
     /**
@@ -3951,13 +3951,13 @@ export class PersonSummaryWithRelations {
     set summary(arg0) {
         _assertClass(arg0, PersonSummary);
         var ptr0 = arg0.__destroy_into_raw();
-        wasm.__wbg_set_personsummarywithrelations_summary(this.__wbg_ptr, ptr0);
+        wasm.__wbg_set_personsummarywithparents_summary(this.__wbg_ptr, ptr0);
     }
     /**
      * @returns {Institution}
      */
     get institution() {
-        const ret = wasm.__wbg_get_personsummarywithrelations_institution(this.__wbg_ptr);
+        const ret = wasm.__wbg_get_personsummarywithparents_institution(this.__wbg_ptr);
         return Institution.__wrap(ret);
     }
     /**
@@ -3966,13 +3966,13 @@ export class PersonSummaryWithRelations {
     set institution(arg0) {
         _assertClass(arg0, Institution);
         var ptr0 = arg0.__destroy_into_raw();
-        wasm.__wbg_set_personsummarywithrelations_institution(this.__wbg_ptr, ptr0);
+        wasm.__wbg_set_personsummarywithparents_institution(this.__wbg_ptr, ptr0);
     }
     /**
      * @returns {Uint8Array}
      */
     to_json_bytes() {
-        const ret = wasm.personsummarywithrelations_to_json_bytes(this.__wbg_ptr);
+        const ret = wasm.personsummarywithparents_to_json_bytes(this.__wbg_ptr);
         var v1 = getArrayU8FromWasm0(ret[0], ret[1]).slice();
         wasm.__wbindgen_free(ret[0], ret[1] * 1, 1);
         return v1;
@@ -3981,7 +3981,7 @@ export class PersonSummaryWithRelations {
      * @returns {string}
      */
     to_json_string() {
-        const ret = wasm.personsummarywithrelations_to_json_string(this.__wbg_ptr);
+        const ret = wasm.personsummarywithparents_to_json_string(this.__wbg_ptr);
         var v1 = getCachedStringFromWasm0(ret[0], ret[1]);
         if (ret[0] !== 0) { wasm.__wbindgen_free(ret[0], ret[1], 1); }
         return v1;
@@ -3990,40 +3990,40 @@ export class PersonSummaryWithRelations {
      * @returns {string}
      */
     to_base64_json() {
-        const ret = wasm.personsummarywithrelations_to_base64_json(this.__wbg_ptr);
+        const ret = wasm.personsummarywithparents_to_base64_json(this.__wbg_ptr);
         var v1 = getCachedStringFromWasm0(ret[0], ret[1]);
         if (ret[0] !== 0) { wasm.__wbindgen_free(ret[0], ret[1], 1); }
         return v1;
     }
     /**
      * @param {Uint8Array} json_bytes
-     * @returns {PersonSummaryWithRelations}
+     * @returns {PersonSummaryWithParents}
      */
     static from_json_bytes(json_bytes) {
         const ptr0 = passArray8ToWasm0(json_bytes, wasm.__wbindgen_malloc);
         const len0 = WASM_VECTOR_LEN;
-        const ret = wasm.personsummarywithrelations_from_json_bytes(ptr0, len0);
-        return PersonSummaryWithRelations.__wrap(ret);
+        const ret = wasm.personsummarywithparents_from_json_bytes(ptr0, len0);
+        return PersonSummaryWithParents.__wrap(ret);
     }
     /**
      * @param {string} json_str
-     * @returns {PersonSummaryWithRelations}
+     * @returns {PersonSummaryWithParents}
      */
     static from_json_string(json_str) {
         const ptr0 = passStringToWasm0(json_str, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
         const len0 = WASM_VECTOR_LEN;
-        const ret = wasm.personsummarywithrelations_from_json_string(ptr0, len0);
-        return PersonSummaryWithRelations.__wrap(ret);
+        const ret = wasm.personsummarywithparents_from_json_string(ptr0, len0);
+        return PersonSummaryWithParents.__wrap(ret);
     }
     /**
      * @param {string} base64_json_bytes
-     * @returns {PersonSummaryWithRelations}
+     * @returns {PersonSummaryWithParents}
      */
     static from_base64_json(base64_json_bytes) {
         const ptr0 = passStringToWasm0(base64_json_bytes, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
         const len0 = WASM_VECTOR_LEN;
-        const ret = wasm.personsummarywithrelations_from_base64_json(ptr0, len0);
-        return PersonSummaryWithRelations.__wrap(ret);
+        const ret = wasm.personsummarywithparents_from_base64_json(ptr0, len0);
+        return PersonSummaryWithParents.__wrap(ret);
     }
 }
 
@@ -4233,6 +4233,16 @@ export class ScamplersClient {
         return ret;
     }
     /**
+     * @param {SuspensionQuery} data
+     * @returns {Promise<Suspension[]>}
+     */
+    list_suspensions(data) {
+        _assertClass(data, SuspensionQuery);
+        var ptr0 = data.__destroy_into_raw();
+        const ret = wasm.scamplersclient_list_suspensions(this.__wbg_ptr, ptr0);
+        return ret;
+    }
+    /**
      * @param {string} data
      * @returns {Promise<Institution>}
      */
@@ -4270,6 +4280,16 @@ export class ScamplersClient {
         const ptr0 = passStringToWasm0(data, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
         const len0 = WASM_VECTOR_LEN;
         const ret = wasm.scamplersclient_fetch_specimen(this.__wbg_ptr, ptr0, len0);
+        return ret;
+    }
+    /**
+     * @param {string} data
+     * @returns {Promise<Suspension>}
+     */
+    fetch_suspension(data) {
+        const ptr0 = passStringToWasm0(data, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+        const len0 = WASM_VECTOR_LEN;
+        const ret = wasm.scamplersclient_fetch_suspension(this.__wbg_ptr, ptr0, len0);
         return ret;
     }
     /**
@@ -4535,17 +4555,17 @@ export class Specimen {
         wasm.__wbg_specimen_free(ptr, 0);
     }
     /**
-     * @returns {SpecimenSummaryWithRelations}
+     * @returns {SpecimenSummaryWithParents}
      */
     get info() {
         const ret = wasm.__wbg_get_specimen_info(this.__wbg_ptr);
-        return SpecimenSummaryWithRelations.__wrap(ret);
+        return SpecimenSummaryWithParents.__wrap(ret);
     }
     /**
-     * @param {SpecimenSummaryWithRelations} arg0
+     * @param {SpecimenSummaryWithParents} arg0
      */
     set info(arg0) {
-        _assertClass(arg0, SpecimenSummaryWithRelations);
+        _assertClass(arg0, SpecimenSummaryWithParents);
         var ptr0 = arg0.__destroy_into_raw();
         wasm.__wbg_set_specimen_info(this.__wbg_ptr, ptr0);
     }
@@ -4692,19 +4712,21 @@ export class SpecimenMeasurement {
         wasm.__wbg_set_specimenmeasurement_specimen_id(this.__wbg_ptr, ptr0, len0);
     }
     /**
-     * @returns {PersonSummary}
+     * @returns {string}
      */
     get measured_by() {
         const ret = wasm.__wbg_get_specimenmeasurement_measured_by(this.__wbg_ptr);
-        return PersonSummary.__wrap(ret);
+        var v1 = getCachedStringFromWasm0(ret[0], ret[1]);
+        if (ret[0] !== 0) { wasm.__wbindgen_free(ret[0], ret[1], 1); }
+        return v1;
     }
     /**
-     * @param {PersonSummary} arg0
+     * @param {string} arg0
      */
     set measured_by(arg0) {
-        _assertClass(arg0, PersonSummary);
-        var ptr0 = arg0.__destroy_into_raw();
-        wasm.__wbg_set_specimenmeasurement_measured_by(this.__wbg_ptr, ptr0);
+        const ptr0 = passStringToWasm0(arg0, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+        const len0 = WASM_VECTOR_LEN;
+        wasm.__wbg_set_specimenmeasurement_measured_by(this.__wbg_ptr, ptr0, len0);
     }
     /**
      * @returns {Uint8Array}
@@ -5359,36 +5381,36 @@ export class SpecimenSummary {
     }
 }
 
-const SpecimenSummaryWithRelationsFinalization = (typeof FinalizationRegistry === 'undefined')
+const SpecimenSummaryWithParentsFinalization = (typeof FinalizationRegistry === 'undefined')
     ? { register: () => {}, unregister: () => {} }
-    : new FinalizationRegistry(ptr => wasm.__wbg_specimensummarywithrelations_free(ptr >>> 0, 1));
+    : new FinalizationRegistry(ptr => wasm.__wbg_specimensummarywithparents_free(ptr >>> 0, 1));
 
-export class SpecimenSummaryWithRelations {
+export class SpecimenSummaryWithParents {
 
     static __wrap(ptr) {
         ptr = ptr >>> 0;
-        const obj = Object.create(SpecimenSummaryWithRelations.prototype);
+        const obj = Object.create(SpecimenSummaryWithParents.prototype);
         obj.__wbg_ptr = ptr;
-        SpecimenSummaryWithRelationsFinalization.register(obj, obj.__wbg_ptr, obj);
+        SpecimenSummaryWithParentsFinalization.register(obj, obj.__wbg_ptr, obj);
         return obj;
     }
 
     __destroy_into_raw() {
         const ptr = this.__wbg_ptr;
         this.__wbg_ptr = 0;
-        SpecimenSummaryWithRelationsFinalization.unregister(this);
+        SpecimenSummaryWithParentsFinalization.unregister(this);
         return ptr;
     }
 
     free() {
         const ptr = this.__destroy_into_raw();
-        wasm.__wbg_specimensummarywithrelations_free(ptr, 0);
+        wasm.__wbg_specimensummarywithparents_free(ptr, 0);
     }
     /**
      * @returns {string}
      */
     get id_() {
-        const ret = wasm.__wbg_get_specimensummarywithrelations_id_(this.__wbg_ptr);
+        const ret = wasm.__wbg_get_specimensummarywithparents_id_(this.__wbg_ptr);
         var v1 = getCachedStringFromWasm0(ret[0], ret[1]);
         if (ret[0] !== 0) { wasm.__wbindgen_free(ret[0], ret[1], 1); }
         return v1;
@@ -5399,13 +5421,13 @@ export class SpecimenSummaryWithRelations {
     set id_(arg0) {
         const ptr0 = passStringToWasm0(arg0, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
         const len0 = WASM_VECTOR_LEN;
-        wasm.__wbg_set_specimensummarywithrelations_id_(this.__wbg_ptr, ptr0, len0);
+        wasm.__wbg_set_specimensummarywithparents_id_(this.__wbg_ptr, ptr0, len0);
     }
     /**
      * @returns {SpecimenSummary}
      */
     get summary() {
-        const ret = wasm.__wbg_get_specimensummarywithrelations_summary(this.__wbg_ptr);
+        const ret = wasm.__wbg_get_specimensummarywithparents_summary(this.__wbg_ptr);
         return SpecimenSummary.__wrap(ret);
     }
     /**
@@ -5414,13 +5436,13 @@ export class SpecimenSummaryWithRelations {
     set summary(arg0) {
         _assertClass(arg0, SpecimenSummary);
         var ptr0 = arg0.__destroy_into_raw();
-        wasm.__wbg_set_specimensummarywithrelations_summary(this.__wbg_ptr, ptr0);
+        wasm.__wbg_set_specimensummarywithparents_summary(this.__wbg_ptr, ptr0);
     }
     /**
      * @returns {LabSummary}
      */
     get lab() {
-        const ret = wasm.__wbg_get_specimensummarywithrelations_lab(this.__wbg_ptr);
+        const ret = wasm.__wbg_get_specimensummarywithparents_lab(this.__wbg_ptr);
         return LabSummary.__wrap(ret);
     }
     /**
@@ -5429,13 +5451,13 @@ export class SpecimenSummaryWithRelations {
     set lab(arg0) {
         _assertClass(arg0, LabSummary);
         var ptr0 = arg0.__destroy_into_raw();
-        wasm.__wbg_set_specimensummarywithrelations_lab(this.__wbg_ptr, ptr0);
+        wasm.__wbg_set_specimensummarywithparents_lab(this.__wbg_ptr, ptr0);
     }
     /**
      * @returns {PersonSummary}
      */
     get submitted_by() {
-        const ret = wasm.__wbg_get_specimensummarywithrelations_submitted_by(this.__wbg_ptr);
+        const ret = wasm.__wbg_get_specimensummarywithparents_submitted_by(this.__wbg_ptr);
         return PersonSummary.__wrap(ret);
     }
     /**
@@ -5444,13 +5466,13 @@ export class SpecimenSummaryWithRelations {
     set submitted_by(arg0) {
         _assertClass(arg0, PersonSummary);
         var ptr0 = arg0.__destroy_into_raw();
-        wasm.__wbg_set_specimensummarywithrelations_submitted_by(this.__wbg_ptr, ptr0);
+        wasm.__wbg_set_specimensummarywithparents_submitted_by(this.__wbg_ptr, ptr0);
     }
     /**
      * @returns {Uint8Array}
      */
     to_json_bytes() {
-        const ret = wasm.specimensummarywithrelations_to_json_bytes(this.__wbg_ptr);
+        const ret = wasm.specimensummarywithparents_to_json_bytes(this.__wbg_ptr);
         var v1 = getArrayU8FromWasm0(ret[0], ret[1]).slice();
         wasm.__wbindgen_free(ret[0], ret[1] * 1, 1);
         return v1;
@@ -5459,7 +5481,7 @@ export class SpecimenSummaryWithRelations {
      * @returns {string}
      */
     to_json_string() {
-        const ret = wasm.specimensummarywithrelations_to_json_string(this.__wbg_ptr);
+        const ret = wasm.specimensummarywithparents_to_json_string(this.__wbg_ptr);
         var v1 = getCachedStringFromWasm0(ret[0], ret[1]);
         if (ret[0] !== 0) { wasm.__wbindgen_free(ret[0], ret[1], 1); }
         return v1;
@@ -5468,186 +5490,116 @@ export class SpecimenSummaryWithRelations {
      * @returns {string}
      */
     to_base64_json() {
-        const ret = wasm.specimensummarywithrelations_to_base64_json(this.__wbg_ptr);
+        const ret = wasm.specimensummarywithparents_to_base64_json(this.__wbg_ptr);
         var v1 = getCachedStringFromWasm0(ret[0], ret[1]);
         if (ret[0] !== 0) { wasm.__wbindgen_free(ret[0], ret[1], 1); }
         return v1;
     }
     /**
      * @param {Uint8Array} json_bytes
-     * @returns {SpecimenSummaryWithRelations}
+     * @returns {SpecimenSummaryWithParents}
      */
     static from_json_bytes(json_bytes) {
         const ptr0 = passArray8ToWasm0(json_bytes, wasm.__wbindgen_malloc);
         const len0 = WASM_VECTOR_LEN;
-        const ret = wasm.specimensummarywithrelations_from_json_bytes(ptr0, len0);
-        return SpecimenSummaryWithRelations.__wrap(ret);
+        const ret = wasm.specimensummarywithparents_from_json_bytes(ptr0, len0);
+        return SpecimenSummaryWithParents.__wrap(ret);
     }
     /**
      * @param {string} json_str
-     * @returns {SpecimenSummaryWithRelations}
+     * @returns {SpecimenSummaryWithParents}
      */
     static from_json_string(json_str) {
         const ptr0 = passStringToWasm0(json_str, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
         const len0 = WASM_VECTOR_LEN;
-        const ret = wasm.specimensummarywithrelations_from_json_string(ptr0, len0);
-        return SpecimenSummaryWithRelations.__wrap(ret);
+        const ret = wasm.specimensummarywithparents_from_json_string(ptr0, len0);
+        return SpecimenSummaryWithParents.__wrap(ret);
     }
     /**
      * @param {string} base64_json_bytes
-     * @returns {SpecimenSummaryWithRelations}
+     * @returns {SpecimenSummaryWithParents}
      */
     static from_base64_json(base64_json_bytes) {
         const ptr0 = passStringToWasm0(base64_json_bytes, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
         const len0 = WASM_VECTOR_LEN;
-        const ret = wasm.specimensummarywithrelations_from_base64_json(ptr0, len0);
-        return SpecimenSummaryWithRelations.__wrap(ret);
+        const ret = wasm.specimensummarywithparents_from_base64_json(ptr0, len0);
+        return SpecimenSummaryWithParents.__wrap(ret);
     }
 }
 
-const SuspensionCoreFinalization = (typeof FinalizationRegistry === 'undefined')
+const SuspensionFinalization = (typeof FinalizationRegistry === 'undefined')
     ? { register: () => {}, unregister: () => {} }
-    : new FinalizationRegistry(ptr => wasm.__wbg_suspensioncore_free(ptr >>> 0, 1));
+    : new FinalizationRegistry(ptr => wasm.__wbg_suspension_free(ptr >>> 0, 1));
 
-export class SuspensionCore {
+export class Suspension {
 
     static __wrap(ptr) {
         ptr = ptr >>> 0;
-        const obj = Object.create(SuspensionCore.prototype);
+        const obj = Object.create(Suspension.prototype);
         obj.__wbg_ptr = ptr;
-        SuspensionCoreFinalization.register(obj, obj.__wbg_ptr, obj);
+        SuspensionFinalization.register(obj, obj.__wbg_ptr, obj);
         return obj;
     }
 
     __destroy_into_raw() {
         const ptr = this.__wbg_ptr;
         this.__wbg_ptr = 0;
-        SuspensionCoreFinalization.unregister(this);
+        SuspensionFinalization.unregister(this);
         return ptr;
     }
 
     free() {
         const ptr = this.__destroy_into_raw();
-        wasm.__wbg_suspensioncore_free(ptr, 0);
+        wasm.__wbg_suspension_free(ptr, 0);
     }
     /**
-     * @returns {string}
+     * @returns {SuspensionSummaryWithParents}
      */
-    get id() {
-        const ret = wasm.__wbg_get_suspensioncore_id(this.__wbg_ptr);
-        var v1 = getCachedStringFromWasm0(ret[0], ret[1]);
-        if (ret[0] !== 0) { wasm.__wbindgen_free(ret[0], ret[1], 1); }
-        return v1;
+    get info() {
+        const ret = wasm.__wbg_get_suspension_info(this.__wbg_ptr);
+        return SuspensionSummaryWithParents.__wrap(ret);
     }
     /**
-     * @param {string} arg0
+     * @param {SuspensionSummaryWithParents} arg0
      */
-    set id(arg0) {
-        const ptr0 = passStringToWasm0(arg0, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
-        const len0 = WASM_VECTOR_LEN;
-        wasm.__wbg_set_suspensioncore_id(this.__wbg_ptr, ptr0, len0);
-    }
-    /**
-     * @returns {SuspensionSummary}
-     */
-    get summary() {
-        const ret = wasm.__wbg_get_suspensioncore_summary(this.__wbg_ptr);
-        return SuspensionSummary.__wrap(ret);
-    }
-    /**
-     * @param {SuspensionSummary} arg0
-     */
-    set summary(arg0) {
-        _assertClass(arg0, SuspensionSummary);
+    set info(arg0) {
+        _assertClass(arg0, SuspensionSummaryWithParents);
         var ptr0 = arg0.__destroy_into_raw();
-        wasm.__wbg_set_suspensioncore_summary(this.__wbg_ptr, ptr0);
+        wasm.__wbg_set_suspension_info(this.__wbg_ptr, ptr0);
     }
     /**
-     * @returns {SpecimenSummary}
+     * @returns {string[]}
      */
-    get parent_specimen() {
-        const ret = wasm.__wbg_get_suspensioncore_parent_specimen(this.__wbg_ptr);
-        return SpecimenSummary.__wrap(ret);
-    }
-    /**
-     * @param {SpecimenSummary} arg0
-     */
-    set parent_specimen(arg0) {
-        _assertClass(arg0, SpecimenSummary);
-        var ptr0 = arg0.__destroy_into_raw();
-        wasm.__wbg_set_suspensioncore_parent_specimen(this.__wbg_ptr, ptr0);
-    }
-    /**
-     * @returns {MultiplexingTag}
-     */
-    get multiplexing_tag() {
-        const ret = wasm.__wbg_get_suspensioncore_multiplexing_tag(this.__wbg_ptr);
-        return MultiplexingTag.__wrap(ret);
-    }
-    /**
-     * @param {MultiplexingTag} arg0
-     */
-    set multiplexing_tag(arg0) {
-        _assertClass(arg0, MultiplexingTag);
-        var ptr0 = arg0.__destroy_into_raw();
-        wasm.__wbg_set_suspensioncore_multiplexing_tag(this.__wbg_ptr, ptr0);
-    }
-    /**
-     * @returns {Uint8Array}
-     */
-    to_json_bytes() {
-        const ret = wasm.suspensioncore_to_json_bytes(this.__wbg_ptr);
-        var v1 = getArrayU8FromWasm0(ret[0], ret[1]).slice();
-        wasm.__wbindgen_free(ret[0], ret[1] * 1, 1);
+    get preparers() {
+        const ret = wasm.__wbg_get_suspension_preparers(this.__wbg_ptr);
+        var v1 = getArrayJsValueFromWasm0(ret[0], ret[1]).slice();
+        wasm.__wbindgen_free(ret[0], ret[1] * 4, 4);
         return v1;
     }
     /**
-     * @returns {string}
+     * @param {string[]} arg0
      */
-    to_json_string() {
-        const ret = wasm.suspensioncore_to_json_string(this.__wbg_ptr);
-        var v1 = getCachedStringFromWasm0(ret[0], ret[1]);
-        if (ret[0] !== 0) { wasm.__wbindgen_free(ret[0], ret[1], 1); }
+    set preparers(arg0) {
+        const ptr0 = passArrayJsValueToWasm0(arg0, wasm.__wbindgen_malloc);
+        const len0 = WASM_VECTOR_LEN;
+        wasm.__wbg_set_suspension_preparers(this.__wbg_ptr, ptr0, len0);
+    }
+    /**
+     * @returns {SuspensionMeasurement[]}
+     */
+    get measurements() {
+        const ret = wasm.__wbg_get_suspension_measurements(this.__wbg_ptr);
+        var v1 = getArrayJsValueFromWasm0(ret[0], ret[1]).slice();
+        wasm.__wbindgen_free(ret[0], ret[1] * 4, 4);
         return v1;
     }
     /**
-     * @returns {string}
+     * @param {SuspensionMeasurement[]} arg0
      */
-    to_base64_json() {
-        const ret = wasm.suspensioncore_to_base64_json(this.__wbg_ptr);
-        var v1 = getCachedStringFromWasm0(ret[0], ret[1]);
-        if (ret[0] !== 0) { wasm.__wbindgen_free(ret[0], ret[1], 1); }
-        return v1;
-    }
-    /**
-     * @param {Uint8Array} json_bytes
-     * @returns {SuspensionCore}
-     */
-    static from_json_bytes(json_bytes) {
-        const ptr0 = passArray8ToWasm0(json_bytes, wasm.__wbindgen_malloc);
+    set measurements(arg0) {
+        const ptr0 = passArrayJsValueToWasm0(arg0, wasm.__wbindgen_malloc);
         const len0 = WASM_VECTOR_LEN;
-        const ret = wasm.suspensioncore_from_json_bytes(ptr0, len0);
-        return SuspensionCore.__wrap(ret);
-    }
-    /**
-     * @param {string} json_str
-     * @returns {SuspensionCore}
-     */
-    static from_json_string(json_str) {
-        const ptr0 = passStringToWasm0(json_str, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
-        const len0 = WASM_VECTOR_LEN;
-        const ret = wasm.suspensioncore_from_json_string(ptr0, len0);
-        return SuspensionCore.__wrap(ret);
-    }
-    /**
-     * @param {string} base64_json_bytes
-     * @returns {SuspensionCore}
-     */
-    static from_base64_json(base64_json_bytes) {
-        const ptr0 = passStringToWasm0(base64_json_bytes, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
-        const len0 = WASM_VECTOR_LEN;
-        const ret = wasm.suspensioncore_from_base64_json(ptr0, len0);
-        return SuspensionCore.__wrap(ret);
+        wasm.__wbg_set_suspension_measurements(this.__wbg_ptr, ptr0, len0);
     }
 }
 
@@ -5663,6 +5615,13 @@ export class SuspensionMeasurement {
         obj.__wbg_ptr = ptr;
         SuspensionMeasurementFinalization.register(obj, obj.__wbg_ptr, obj);
         return obj;
+    }
+
+    static __unwrap(jsValue) {
+        if (!(jsValue instanceof SuspensionMeasurement)) {
+            return 0;
+        }
+        return jsValue.__destroy_into_raw();
     }
 
     __destroy_into_raw() {
@@ -5694,19 +5653,38 @@ export class SuspensionMeasurement {
         wasm.__wbg_set_suspensionmeasurement_id(this.__wbg_ptr, ptr0, len0);
     }
     /**
-     * @returns {PersonSummary}
+     * @returns {string}
      */
     get measured_by() {
         const ret = wasm.__wbg_get_suspensionmeasurement_measured_by(this.__wbg_ptr);
-        return PersonSummary.__wrap(ret);
+        var v1 = getCachedStringFromWasm0(ret[0], ret[1]);
+        if (ret[0] !== 0) { wasm.__wbindgen_free(ret[0], ret[1], 1); }
+        return v1;
     }
     /**
-     * @param {PersonSummary} arg0
+     * @param {string} arg0
      */
     set measured_by(arg0) {
-        _assertClass(arg0, PersonSummary);
-        var ptr0 = arg0.__destroy_into_raw();
-        wasm.__wbg_set_suspensionmeasurement_measured_by(this.__wbg_ptr, ptr0);
+        const ptr0 = passStringToWasm0(arg0, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+        const len0 = WASM_VECTOR_LEN;
+        wasm.__wbg_set_suspensionmeasurement_measured_by(this.__wbg_ptr, ptr0, len0);
+    }
+    /**
+     * @returns {string}
+     */
+    get suspension_id() {
+        const ret = wasm.__wbg_get_suspensionmeasurement_suspension_id(this.__wbg_ptr);
+        var v1 = getCachedStringFromWasm0(ret[0], ret[1]);
+        if (ret[0] !== 0) { wasm.__wbindgen_free(ret[0], ret[1], 1); }
+        return v1;
+    }
+    /**
+     * @param {string} arg0
+     */
+    set suspension_id(arg0) {
+        const ptr0 = passStringToWasm0(arg0, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+        const len0 = WASM_VECTOR_LEN;
+        wasm.__wbg_set_suspensionmeasurement_suspension_id(this.__wbg_ptr, ptr0, len0);
     }
     /**
      * @returns {Uint8Array}
@@ -5764,6 +5742,96 @@ export class SuspensionMeasurement {
         const len0 = WASM_VECTOR_LEN;
         const ret = wasm.suspensionmeasurement_from_base64_json(ptr0, len0);
         return SuspensionMeasurement.__wrap(ret);
+    }
+}
+
+const SuspensionQueryFinalization = (typeof FinalizationRegistry === 'undefined')
+    ? { register: () => {}, unregister: () => {} }
+    : new FinalizationRegistry(ptr => wasm.__wbg_suspensionquery_free(ptr >>> 0, 1));
+
+export class SuspensionQuery {
+
+    static __wrap(ptr) {
+        ptr = ptr >>> 0;
+        const obj = Object.create(SuspensionQuery.prototype);
+        obj.__wbg_ptr = ptr;
+        SuspensionQueryFinalization.register(obj, obj.__wbg_ptr, obj);
+        return obj;
+    }
+
+    __destroy_into_raw() {
+        const ptr = this.__wbg_ptr;
+        this.__wbg_ptr = 0;
+        SuspensionQueryFinalization.unregister(this);
+        return ptr;
+    }
+
+    free() {
+        const ptr = this.__destroy_into_raw();
+        wasm.__wbg_suspensionquery_free(ptr, 0);
+    }
+    /**
+     * @returns {Uint8Array}
+     */
+    to_json_bytes() {
+        const ret = wasm.suspensionquery_to_json_bytes(this.__wbg_ptr);
+        var v1 = getArrayU8FromWasm0(ret[0], ret[1]).slice();
+        wasm.__wbindgen_free(ret[0], ret[1] * 1, 1);
+        return v1;
+    }
+    /**
+     * @returns {string}
+     */
+    to_json_string() {
+        const ret = wasm.suspensionquery_to_json_string(this.__wbg_ptr);
+        var v1 = getCachedStringFromWasm0(ret[0], ret[1]);
+        if (ret[0] !== 0) { wasm.__wbindgen_free(ret[0], ret[1], 1); }
+        return v1;
+    }
+    /**
+     * @returns {string}
+     */
+    to_base64_json() {
+        const ret = wasm.suspensionquery_to_base64_json(this.__wbg_ptr);
+        var v1 = getCachedStringFromWasm0(ret[0], ret[1]);
+        if (ret[0] !== 0) { wasm.__wbindgen_free(ret[0], ret[1], 1); }
+        return v1;
+    }
+    /**
+     * @param {Uint8Array} json_bytes
+     * @returns {SuspensionQuery}
+     */
+    static from_json_bytes(json_bytes) {
+        const ptr0 = passArray8ToWasm0(json_bytes, wasm.__wbindgen_malloc);
+        const len0 = WASM_VECTOR_LEN;
+        const ret = wasm.suspensionquery_from_json_bytes(ptr0, len0);
+        return SuspensionQuery.__wrap(ret);
+    }
+    /**
+     * @param {string} json_str
+     * @returns {SuspensionQuery}
+     */
+    static from_json_string(json_str) {
+        const ptr0 = passStringToWasm0(json_str, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+        const len0 = WASM_VECTOR_LEN;
+        const ret = wasm.suspensionquery_from_json_string(ptr0, len0);
+        return SuspensionQuery.__wrap(ret);
+    }
+    /**
+     * @param {string} base64_json_bytes
+     * @returns {SuspensionQuery}
+     */
+    static from_base64_json(base64_json_bytes) {
+        const ptr0 = passStringToWasm0(base64_json_bytes, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+        const len0 = WASM_VECTOR_LEN;
+        const ret = wasm.suspensionquery_from_base64_json(ptr0, len0);
+        return SuspensionQuery.__wrap(ret);
+    }
+    constructor() {
+        const ret = wasm.suspensionquery_new();
+        this.__wbg_ptr = ret >>> 0;
+        SuspensionQueryFinalization.register(this, this.__wbg_ptr, this);
+        return this;
     }
 }
 
@@ -5978,6 +6046,155 @@ export class SuspensionSummary {
     }
 }
 
+const SuspensionSummaryWithParentsFinalization = (typeof FinalizationRegistry === 'undefined')
+    ? { register: () => {}, unregister: () => {} }
+    : new FinalizationRegistry(ptr => wasm.__wbg_suspensionsummarywithparents_free(ptr >>> 0, 1));
+
+export class SuspensionSummaryWithParents {
+
+    static __wrap(ptr) {
+        ptr = ptr >>> 0;
+        const obj = Object.create(SuspensionSummaryWithParents.prototype);
+        obj.__wbg_ptr = ptr;
+        SuspensionSummaryWithParentsFinalization.register(obj, obj.__wbg_ptr, obj);
+        return obj;
+    }
+
+    __destroy_into_raw() {
+        const ptr = this.__wbg_ptr;
+        this.__wbg_ptr = 0;
+        SuspensionSummaryWithParentsFinalization.unregister(this);
+        return ptr;
+    }
+
+    free() {
+        const ptr = this.__destroy_into_raw();
+        wasm.__wbg_suspensionsummarywithparents_free(ptr, 0);
+    }
+    /**
+     * @returns {string}
+     */
+    get id_() {
+        const ret = wasm.__wbg_get_suspensionsummarywithparents_id_(this.__wbg_ptr);
+        var v1 = getCachedStringFromWasm0(ret[0], ret[1]);
+        if (ret[0] !== 0) { wasm.__wbindgen_free(ret[0], ret[1], 1); }
+        return v1;
+    }
+    /**
+     * @param {string} arg0
+     */
+    set id_(arg0) {
+        const ptr0 = passStringToWasm0(arg0, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+        const len0 = WASM_VECTOR_LEN;
+        wasm.__wbg_set_suspensionsummarywithparents_id_(this.__wbg_ptr, ptr0, len0);
+    }
+    /**
+     * @returns {SuspensionSummary}
+     */
+    get summary() {
+        const ret = wasm.__wbg_get_suspensionsummarywithparents_summary(this.__wbg_ptr);
+        return SuspensionSummary.__wrap(ret);
+    }
+    /**
+     * @param {SuspensionSummary} arg0
+     */
+    set summary(arg0) {
+        _assertClass(arg0, SuspensionSummary);
+        var ptr0 = arg0.__destroy_into_raw();
+        wasm.__wbg_set_suspensionsummarywithparents_summary(this.__wbg_ptr, ptr0);
+    }
+    /**
+     * @returns {SpecimenSummary}
+     */
+    get parent_specimen() {
+        const ret = wasm.__wbg_get_suspensionsummarywithparents_parent_specimen(this.__wbg_ptr);
+        return SpecimenSummary.__wrap(ret);
+    }
+    /**
+     * @param {SpecimenSummary} arg0
+     */
+    set parent_specimen(arg0) {
+        _assertClass(arg0, SpecimenSummary);
+        var ptr0 = arg0.__destroy_into_raw();
+        wasm.__wbg_set_suspensionsummarywithparents_parent_specimen(this.__wbg_ptr, ptr0);
+    }
+    /**
+     * @returns {MultiplexingTag | undefined}
+     */
+    get multiplexing_tag() {
+        const ret = wasm.__wbg_get_suspensionsummarywithparents_multiplexing_tag(this.__wbg_ptr);
+        return ret === 0 ? undefined : MultiplexingTag.__wrap(ret);
+    }
+    /**
+     * @param {MultiplexingTag | null} [arg0]
+     */
+    set multiplexing_tag(arg0) {
+        let ptr0 = 0;
+        if (!isLikeNone(arg0)) {
+            _assertClass(arg0, MultiplexingTag);
+            ptr0 = arg0.__destroy_into_raw();
+        }
+        wasm.__wbg_set_suspensionsummarywithparents_multiplexing_tag(this.__wbg_ptr, ptr0);
+    }
+    /**
+     * @returns {Uint8Array}
+     */
+    to_json_bytes() {
+        const ret = wasm.suspensionsummarywithparents_to_json_bytes(this.__wbg_ptr);
+        var v1 = getArrayU8FromWasm0(ret[0], ret[1]).slice();
+        wasm.__wbindgen_free(ret[0], ret[1] * 1, 1);
+        return v1;
+    }
+    /**
+     * @returns {string}
+     */
+    to_json_string() {
+        const ret = wasm.suspensionsummarywithparents_to_json_string(this.__wbg_ptr);
+        var v1 = getCachedStringFromWasm0(ret[0], ret[1]);
+        if (ret[0] !== 0) { wasm.__wbindgen_free(ret[0], ret[1], 1); }
+        return v1;
+    }
+    /**
+     * @returns {string}
+     */
+    to_base64_json() {
+        const ret = wasm.suspensionsummarywithparents_to_base64_json(this.__wbg_ptr);
+        var v1 = getCachedStringFromWasm0(ret[0], ret[1]);
+        if (ret[0] !== 0) { wasm.__wbindgen_free(ret[0], ret[1], 1); }
+        return v1;
+    }
+    /**
+     * @param {Uint8Array} json_bytes
+     * @returns {SuspensionSummaryWithParents}
+     */
+    static from_json_bytes(json_bytes) {
+        const ptr0 = passArray8ToWasm0(json_bytes, wasm.__wbindgen_malloc);
+        const len0 = WASM_VECTOR_LEN;
+        const ret = wasm.suspensionsummarywithparents_from_json_bytes(ptr0, len0);
+        return SuspensionSummaryWithParents.__wrap(ret);
+    }
+    /**
+     * @param {string} json_str
+     * @returns {SuspensionSummaryWithParents}
+     */
+    static from_json_string(json_str) {
+        const ptr0 = passStringToWasm0(json_str, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+        const len0 = WASM_VECTOR_LEN;
+        const ret = wasm.suspensionsummarywithparents_from_json_string(ptr0, len0);
+        return SuspensionSummaryWithParents.__wrap(ret);
+    }
+    /**
+     * @param {string} base64_json_bytes
+     * @returns {SuspensionSummaryWithParents}
+     */
+    static from_base64_json(base64_json_bytes) {
+        const ptr0 = passStringToWasm0(base64_json_bytes, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+        const len0 = WASM_VECTOR_LEN;
+        const ret = wasm.suspensionsummarywithparents_from_base64_json(ptr0, len0);
+        return SuspensionSummaryWithParents.__wrap(ret);
+    }
+}
+
 export function __wbg_abort_410ec47a64ac6117(arg0, arg1) {
     arg0.abort(arg1);
 };
@@ -6100,7 +6317,7 @@ export function __wbg_new_23a2665fac83c611(arg0, arg1) {
             const a = state0.a;
             state0.a = 0;
             try {
-                return __wbg_adapter_650(a, state0.b, arg0, arg1);
+                return __wbg_adapter_673(a, state0.b, arg0, arg1);
             } finally {
                 state0.a = a;
             }
@@ -6297,6 +6514,21 @@ export function __wbg_stringify_f7ed6987935b4a24() { return handleError(function
     return ret;
 }, arguments) };
 
+export function __wbg_suspension_new(arg0) {
+    const ret = Suspension.__wrap(arg0);
+    return ret;
+};
+
+export function __wbg_suspensionmeasurement_new(arg0) {
+    const ret = SuspensionMeasurement.__wrap(arg0);
+    return ret;
+};
+
+export function __wbg_suspensionmeasurement_unwrap(arg0) {
+    const ret = SuspensionMeasurement.__unwrap(arg0);
+    return ret;
+};
+
 export function __wbg_then_44b73946d2fb3e7d(arg0, arg1) {
     const ret = arg0.then(arg1);
     return ret;
@@ -6339,13 +6571,13 @@ export function __wbindgen_cb_drop(arg0) {
     return ret;
 };
 
-export function __wbindgen_closure_wrapper2241(arg0, arg1, arg2) {
-    const ret = makeMutClosure(arg0, arg1, 280, __wbg_adapter_36);
+export function __wbindgen_closure_wrapper2365(arg0, arg1, arg2) {
+    const ret = makeMutClosure(arg0, arg1, 300, __wbg_adapter_36);
     return ret;
 };
 
-export function __wbindgen_closure_wrapper2271(arg0, arg1, arg2) {
-    const ret = makeMutClosure(arg0, arg1, 298, __wbg_adapter_39);
+export function __wbindgen_closure_wrapper2395(arg0, arg1, arg2) {
+    const ret = makeMutClosure(arg0, arg1, 318, __wbg_adapter_39);
     return ret;
 };
 

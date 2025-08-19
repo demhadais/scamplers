@@ -2,16 +2,15 @@ use diesel::prelude::*;
 use scamplers_schema::{lab, person, specimen};
 
 use crate::{
-    apply_eq_any_filters, apply_eq_filters, apply_ilike_filters,
-    attach_one_to_many_children_to_parents_otm,
+    apply_eq_any_filters, apply_eq_filters, apply_ilike_filters, attach_children_to_parents,
     db::{
         DbOperation,
         models::specimen::{
             Specimen, SpecimenId, SpecimenMeasurement, SpecimenOrderBy, SpecimenQuery,
-            SpecimenSummaryWithRelations,
+            SpecimenSummaryWithParents,
         },
     },
-    impl_id_db_operation, init_stmt,
+    group_otm_children, impl_id_db_operation, init_stmt,
 };
 
 impl DbOperation<Vec<Specimen>> for SpecimenQuery {
@@ -22,7 +21,7 @@ impl DbOperation<Vec<Specimen>> for SpecimenQuery {
             .inner_join(lab::table)
             .inner_join(person::table.on(submitter_join_condition));
 
-        let mut stmt = init_stmt!(stmt = base_stmt, query = &self, output_type = SpecimenSummaryWithRelations, orderby_spec = {SpecimenOrderBy::Name => specimen::name, SpecimenOrderBy::ReceivedAt => specimen::received_at});
+        let mut stmt = init_stmt!(stmt = base_stmt, query = &self, output_type = SpecimenSummaryWithParents, orderby_spec = {SpecimenOrderBy::Name => specimen::name, SpecimenOrderBy::ReceivedAt => specimen::received_at});
 
         let Self {
             ids,
@@ -85,13 +84,15 @@ impl DbOperation<Vec<Specimen>> for SpecimenQuery {
         let specimen_records = stmt.load(db_conn)?;
 
         let measurements = SpecimenMeasurement::belonging_to(&specimen_records)
-            .inner_join(person::table)
             .select(SpecimenMeasurement::as_select())
             .load(db_conn)?;
 
-        let specimens = attach_one_to_many_children_to_parents_otm!(
+        let grouped_measurements =
+            group_otm_children!(parents = specimen_records, children = measurements);
+
+        let specimens = attach_children_to_parents!(
             parents = specimen_records,
-            children = measurements,
+            children = [grouped_measurements],
             transform_fn = |(info, measurements)| Specimen { info, measurements }
         );
 

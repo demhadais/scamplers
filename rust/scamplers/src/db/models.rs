@@ -328,6 +328,9 @@ pub trait Jsonify: DeserializeOwned + Serialize {
         Self::from_json_bytes(&decoded)
     }
 }
+
+impl Jsonify for () {}
+
 #[cfg(test)]
 mod tests {
     use pretty_assertions::assert_eq;

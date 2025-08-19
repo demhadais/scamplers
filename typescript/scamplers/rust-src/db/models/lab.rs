@@ -67,7 +67,7 @@ pub struct LabSummary {
 
 #[db_selection]
 #[cfg_attr(feature = "app", diesel(table_name = scamplers_schema::lab))]
-pub struct LabSummaryWithRelations {
+pub struct LabSummaryWithParents {
     // We include the ID even though it's already in `LabSummary` so that we can have
     // `diesel::Identifiable` on this struct. Consequently, we skip serializing it since it's
     // already in `LabSummary`
@@ -93,7 +93,7 @@ pub struct LabSummaryWithRelations {
 #[derive(Jsonify, WasmJsonify, PyJsonify)]
 pub struct Lab {
     #[serde(flatten)]
-    pub info: LabSummaryWithRelations,
+    pub info: LabSummaryWithParents,
     pub members: Vec<PersonSummary>,
 }
 

@@ -7,7 +7,7 @@ use scamplers::{
         lab::{LabQuery, NewLab},
         person::{NewPerson, PersonQuery, UserRole},
         specimen::{
-            self, Species, SpecimenQuery,
+            self, Species, SpecimenQuery, SpecimenType,
             block::{
                 BlockFixative, FixedBlockEmbeddingMatrix, FrozenBlockEmbeddingMatrix,
                 NewFixedBlock, NewFrozenBlock,
@@ -208,6 +208,7 @@ fn register_query_submodule<'a>(parent: &'a Bound<PyModule>) -> PyResult<ModuleW
         InstitutionQuery,
         PersonQuery,
         LabQuery,
+        SpecimenType,
         SpecimenQuery
     );
 

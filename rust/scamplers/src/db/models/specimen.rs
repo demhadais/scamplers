@@ -136,7 +136,7 @@ impl SpecimenSummary {
 
 #[db_selection]
 #[cfg_attr(feature = "app", diesel(table_name = scamplers_schema::specimen))]
-pub struct SpecimenSummaryWithRelations {
+pub struct SpecimenSummaryWithParents {
     #[cfg_attr(feature = "app", diesel(column_name = id))]
     pub id_: Uuid,
     #[serde(flatten)]
@@ -150,12 +150,11 @@ pub struct SpecimenSummaryWithRelations {
 
 #[db_selection]
 #[cfg_attr(feature = "app", derive(Associations))]
-#[cfg_attr(feature = "app", diesel(table_name = scamplers_schema::specimen_measurement, belongs_to(SpecimenSummaryWithRelations, foreign_key = specimen_id)))]
+#[cfg_attr(feature = "app", diesel(table_name = scamplers_schema::specimen_measurement, belongs_to(SpecimenSummaryWithParents, foreign_key = specimen_id)))]
 pub struct SpecimenMeasurement {
     pub id: Uuid,
     pub specimen_id: Uuid,
-    #[cfg_attr(feature = "app", diesel(embed))]
-    pub measured_by: PersonSummary,
+    pub measured_by: Uuid,
     #[serde(flatten)]
     #[cfg_attr(target_arch = "wasm32", wasm_bindgen(skip))]
     pub data: common::MeasurementData,
@@ -174,7 +173,7 @@ pub struct SpecimenMeasurement {
 #[derive(Jsonify, WasmJsonify, PyJsonify)]
 pub struct Specimen {
     #[serde(flatten)]
-    pub info: SpecimenSummaryWithRelations,
+    pub info: SpecimenSummaryWithParents,
     pub measurements: Vec<SpecimenMeasurement>,
 }
 

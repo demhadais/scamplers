@@ -311,7 +311,7 @@ impl TestState {
                     NewSuspensionMeasurement::builder()
                         .measured_by(self.random_person_id())
                         .data(SuspensionMeasurementData {
-                            core: suspension::common::MeasurementDataCore::Volume {
+                            fields: suspension::common::SuspensionMeasurementFields::Volume {
                                 measured_at: self.random_time(),
                                 value: 10.0 * i as f32,
                                 unit: VolumeUnit::Microliter,
@@ -345,8 +345,8 @@ impl TestState {
         new_suspensions
     }
 
-    fn suspension_volume(&mut self) -> suspension::common::MeasurementDataCore {
-        suspension::common::MeasurementDataCore::Volume {
+    fn suspension_volume(&mut self) -> suspension::common::SuspensionMeasurementFields {
+        suspension::common::SuspensionMeasurementFields::Volume {
             measured_at: self.random_time(),
             value: 10.0,
             unit: VolumeUnit::Microliter,

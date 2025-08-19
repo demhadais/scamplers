@@ -100,7 +100,7 @@ pub struct PersonSummary {
 
 #[db_selection]
 #[cfg_attr(feature = "app", diesel(table_name = person))]
-pub struct PersonSummaryWithRelations {
+pub struct PersonSummaryWithParents {
     #[cfg_attr(feature = "app", diesel(column_name = id))]
     pub id_: Uuid,
     #[serde(flatten)]
@@ -122,7 +122,7 @@ uuid_newtype!(PersonId);
 #[derive(Jsonify, WasmJsonify, PyJsonify)]
 pub struct Person {
     #[serde(flatten)]
-    pub info: PersonSummaryWithRelations,
+    pub info: PersonSummaryWithParents,
     pub roles: Vec<UserRole>,
 }
 

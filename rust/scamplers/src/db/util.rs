@@ -168,7 +168,7 @@ macro_rules! impl_wasm_order_by {
 macro_rules! uuid_newtype {
     ($name:ident) => {
         #[derive(Clone, Copy, serde::Deserialize, serde::Serialize, valuable::Valuable)]
-        #[cfg_attr(feature = "python", derive(IntoPyObject, FromPyObject))]
+        #[cfg_attr(feature = "python", derive(pyo3::IntoPyObject, pyo3::FromPyObject))]
         #[cfg_attr(feature = "python", pyo3(transparent))]
         #[serde(transparent)]
         #[valuable(transparent)]
@@ -228,38 +228,40 @@ macro_rules! impl_id_db_operation {
 }
 
 #[macro_export]
-macro_rules! attach_children_to_parents_mtm {
-    (
-        parents = $parents:expr,children = $children:expr,transform_fn = $parent_with_children:expr
-    ) => {{
-        let children = $children
+macro_rules! group_otm_children {
+    (parents = $parents:expr,children = $children:expr) => {
+        $children
             .grouped_by(&$parents)
             .into_iter()
-            .map(|map_children_tuples| map_children_tuples.into_iter().map(|(_, child)| child));
-
-        $parents
-            .into_iter()
-            .zip(children)
-            .map(|(parent, children)| $parent_with_children((parent, children.collect())))
-            .collect()
-    }};
+            .map(|children| children)
+    };
 }
 
 #[macro_export]
-macro_rules! attach_one_to_many_children_to_parents_otm {
-    (
-        parents = $parents:expr,children = $children:expr,transform_fn = $parent_with_children:expr
-    ) => {{
-        let children = $children
+macro_rules! group_mtm_children {
+    (parents = $parents:expr,children = $children:expr) => {
+        $children
             .grouped_by(&$parents)
             .into_iter()
-            .map(|children| children.into_iter());
+            .map(|map_children_tuples| {
+                map_children_tuples
+                    .into_iter()
+                    .map(|(_, child)| child)
+                    .collect()
+            })
+    };
+}
 
-        $parents
-            .into_iter()
-            .zip(children)
-            .map(|(parent, children)| $parent_with_children((parent, children.collect())))
-            .collect()
+#[macro_export]
+macro_rules! attach_children_to_parents {
+    (parents = $parents:expr, children = [$($children:expr),*], transform_fn = $transform_fn:expr) => {{
+        let parents = $parents.into_iter();
+
+        $(
+            let parents = parents.zip($children);
+        )*
+
+        parents.map($transform_fn).collect()
     }};
 }
 
@@ -307,5 +309,19 @@ pub trait ChildrenWithSelfId<Child: SetParentId> {
         }
 
         children
+    }
+}
+pub trait ManyToMany {
+    fn new(parent_id: Uuid, child_id: Uuid) -> Self;
+}
+
+pub trait ManyToManyChildrenWithSelfId<Mapping: ManyToMany> {
+    fn mtm_children(&self) -> &[Uuid];
+
+    fn mtm_children_with_self_id(&self, self_id: Uuid) -> Vec<Mapping> {
+        self.mtm_children()
+            .iter()
+            .map(|child_id| Mapping::new(self_id, *child_id))
+            .collect()
     }
 }

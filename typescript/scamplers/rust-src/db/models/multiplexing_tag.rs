@@ -4,6 +4,8 @@ use scamplers_schema::multiplexing_tag;
 use uuid::Uuid;
 use valid_string::ValidString;
 
+use crate::uuid_newtype;
+
 #[cfg(feature = "app")]
 mod create;
 #[cfg(feature = "app")]
@@ -52,3 +54,5 @@ pub struct MultiplexingTag {
     pub tag_id: String,
     pub type_: String,
 }
+
+uuid_newtype!(MultiplexingTagId);

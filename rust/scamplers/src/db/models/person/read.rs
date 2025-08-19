@@ -6,7 +6,7 @@ use crate::{
     db::{
         DbOperation,
         models::{
-            person::{Person, PersonId, PersonOrderBy, PersonQuery, PersonSummaryWithRelations},
+            person::{Person, PersonId, PersonOrderBy, PersonQuery, PersonSummaryWithParents},
             specimen::{Specimen, SpecimenQuery},
         },
     },
@@ -20,7 +20,7 @@ impl DbOperation<Vec<Person>> for PersonQuery {
         self,
         db_conn: &mut diesel::PgConnection,
     ) -> crate::result::ScamplersResult<Vec<Person>> {
-        let mut stmt = init_stmt!(stmt = person::table.inner_join(institution::table), query = &self, output_type = PersonSummaryWithRelations, orderby_spec = {PersonOrderBy::Name => person::name, PersonOrderBy::Email => person::email });
+        let mut stmt = init_stmt!(stmt = person::table.inner_join(institution::table), query = &self, output_type = PersonSummaryWithParents, orderby_spec = {PersonOrderBy::Name => person::name, PersonOrderBy::Email => person::email });
 
         let Self {
             ids,
@@ -52,7 +52,7 @@ impl DbOperation<Vec<Person>> for PersonQuery {
             }
         );
 
-        let person_cores: Vec<PersonSummaryWithRelations> = stmt.load(db_conn)?;
+        let person_cores: Vec<PersonSummaryWithParents> = stmt.load(db_conn)?;
 
         let mut people = Vec::with_capacity(person_cores.len());
         for info in person_cores {

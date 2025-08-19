@@ -214,7 +214,7 @@ export class Lab {
   static from_json_bytes(json_bytes: Uint8Array): Lab;
   static from_json_string(json_str: string): Lab;
   static from_base64_json(base64_json_bytes: string): Lab;
-  info: LabSummaryWithRelations;
+  info: LabSummaryWithParents;
   members: PersonSummary[];
 }
 export class LabQuery {
@@ -246,15 +246,15 @@ export class LabSummary {
   name: string;
   delivery_dir: string;
 }
-export class LabSummaryWithRelations {
+export class LabSummaryWithParents {
   private constructor();
   free(): void;
   to_json_bytes(): Uint8Array;
   to_json_string(): string;
   to_base64_json(): string;
-  static from_json_bytes(json_bytes: Uint8Array): LabSummaryWithRelations;
-  static from_json_string(json_str: string): LabSummaryWithRelations;
-  static from_base64_json(base64_json_bytes: string): LabSummaryWithRelations;
+  static from_json_bytes(json_bytes: Uint8Array): LabSummaryWithParents;
+  static from_json_string(json_str: string): LabSummaryWithParents;
+  static from_base64_json(base64_json_bytes: string): LabSummaryWithParents;
   id_: string;
   summary: LabSummary;
   pi: PersonSummary;
@@ -361,7 +361,7 @@ export class Person {
   static from_json_bytes(json_bytes: Uint8Array): Person;
   static from_json_string(json_str: string): Person;
   static from_base64_json(base64_json_bytes: string): Person;
-  info: PersonSummaryWithRelations;
+  info: PersonSummaryWithParents;
   roles: any[];
 }
 export class PersonQuery {
@@ -402,15 +402,15 @@ export class PersonSummary {
   get orcid(): string;
   set orcid(value: string | null | undefined);
 }
-export class PersonSummaryWithRelations {
+export class PersonSummaryWithParents {
   private constructor();
   free(): void;
   to_json_bytes(): Uint8Array;
   to_json_string(): string;
   to_base64_json(): string;
-  static from_json_bytes(json_bytes: Uint8Array): PersonSummaryWithRelations;
-  static from_json_string(json_str: string): PersonSummaryWithRelations;
-  static from_base64_json(base64_json_bytes: string): PersonSummaryWithRelations;
+  static from_json_bytes(json_bytes: Uint8Array): PersonSummaryWithParents;
+  static from_json_string(json_str: string): PersonSummaryWithParents;
+  static from_base64_json(base64_json_bytes: string): PersonSummaryWithParents;
   id_: string;
   summary: PersonSummary;
   institution: Institution;
@@ -436,10 +436,12 @@ export class ScamplersClient {
   list_labs(data: LabQuery): Promise<Lab[]>;
   update_lab(data: LabUpdate): Promise<Lab>;
   list_specimens(data: SpecimenQuery): Promise<Specimen[]>;
+  list_suspensions(data: SuspensionQuery): Promise<Suspension[]>;
   fetch_institution(data: string): Promise<Institution>;
   fetch_person(data: string): Promise<Person>;
   fetch_lab(data: string): Promise<Lab>;
   fetch_specimen(data: string): Promise<Specimen>;
+  fetch_suspension(data: string): Promise<Suspension>;
   list_person_specimens(id: string, query: SpecimenQuery): Promise<Specimen[]>;
 }
 export class ScamplersErrorResponse {
@@ -476,7 +478,7 @@ export class Specimen {
   static from_json_bytes(json_bytes: Uint8Array): Specimen;
   static from_json_string(json_str: string): Specimen;
   static from_base64_json(base64_json_bytes: string): Specimen;
-  info: SpecimenSummaryWithRelations;
+  info: SpecimenSummaryWithParents;
   measurements: SpecimenMeasurement[];
 }
 export class SpecimenMeasurement {
@@ -490,7 +492,7 @@ export class SpecimenMeasurement {
   static from_base64_json(base64_json_bytes: string): SpecimenMeasurement;
   id: string;
   specimen_id: string;
-  measured_by: PersonSummary;
+  measured_by: string;
 }
 export class SpecimenQuery {
   free(): void;
@@ -552,33 +554,26 @@ export class SpecimenSummary {
   set storage_buffer(value: string | null | undefined);
   readonly species: string[];
 }
-export class SpecimenSummaryWithRelations {
+export class SpecimenSummaryWithParents {
   private constructor();
   free(): void;
   to_json_bytes(): Uint8Array;
   to_json_string(): string;
   to_base64_json(): string;
-  static from_json_bytes(json_bytes: Uint8Array): SpecimenSummaryWithRelations;
-  static from_json_string(json_str: string): SpecimenSummaryWithRelations;
-  static from_base64_json(base64_json_bytes: string): SpecimenSummaryWithRelations;
+  static from_json_bytes(json_bytes: Uint8Array): SpecimenSummaryWithParents;
+  static from_json_string(json_str: string): SpecimenSummaryWithParents;
+  static from_base64_json(base64_json_bytes: string): SpecimenSummaryWithParents;
   id_: string;
   summary: SpecimenSummary;
   lab: LabSummary;
   submitted_by: PersonSummary;
 }
-export class SuspensionCore {
+export class Suspension {
   private constructor();
   free(): void;
-  to_json_bytes(): Uint8Array;
-  to_json_string(): string;
-  to_base64_json(): string;
-  static from_json_bytes(json_bytes: Uint8Array): SuspensionCore;
-  static from_json_string(json_str: string): SuspensionCore;
-  static from_base64_json(base64_json_bytes: string): SuspensionCore;
-  id: string;
-  summary: SuspensionSummary;
-  parent_specimen: SpecimenSummary;
-  multiplexing_tag: MultiplexingTag;
+  info: SuspensionSummaryWithParents;
+  preparers: string[];
+  measurements: SuspensionMeasurement[];
 }
 export class SuspensionMeasurement {
   private constructor();
@@ -590,7 +585,18 @@ export class SuspensionMeasurement {
   static from_json_string(json_str: string): SuspensionMeasurement;
   static from_base64_json(base64_json_bytes: string): SuspensionMeasurement;
   id: string;
-  measured_by: PersonSummary;
+  measured_by: string;
+  suspension_id: string;
+}
+export class SuspensionQuery {
+  free(): void;
+  to_json_bytes(): Uint8Array;
+  to_json_string(): string;
+  to_base64_json(): string;
+  static from_json_bytes(json_bytes: Uint8Array): SuspensionQuery;
+  static from_json_string(json_str: string): SuspensionQuery;
+  static from_base64_json(base64_json_bytes: string): SuspensionQuery;
+  constructor();
 }
 export class SuspensionSummary {
   private constructor();
@@ -613,4 +619,19 @@ export class SuspensionSummary {
   target_reads_per_cell: number;
   get notes(): string;
   set notes(value: string | null | undefined);
+}
+export class SuspensionSummaryWithParents {
+  private constructor();
+  free(): void;
+  to_json_bytes(): Uint8Array;
+  to_json_string(): string;
+  to_base64_json(): string;
+  static from_json_bytes(json_bytes: Uint8Array): SuspensionSummaryWithParents;
+  static from_json_string(json_str: string): SuspensionSummaryWithParents;
+  static from_base64_json(base64_json_bytes: string): SuspensionSummaryWithParents;
+  id_: string;
+  summary: SuspensionSummary;
+  parent_specimen: SpecimenSummary;
+  get multiplexing_tag(): MultiplexingTag | undefined;
+  set multiplexing_tag(value: MultiplexingTag | null | undefined);
 }

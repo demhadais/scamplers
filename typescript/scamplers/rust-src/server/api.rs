@@ -8,8 +8,10 @@ use crate::{
         models::{
             institution::{Institution, InstitutionId, InstitutionQuery, NewInstitution},
             lab::{Lab, LabId, LabQuery, LabUpdate, NewLab},
+            multiplexing_tag::MultiplexingTag,
             person::{CreatedUser, NewPerson, Person, PersonId, PersonQuery, PersonUpdate},
             specimen::{NewSpecimen, Specimen, SpecimenId, SpecimenQuery},
+            suspension::suspension::{NewSuspension, Suspension, SuspensionId, SuspensionQuery},
         },
     },
     endpoints::{Api, Endpoint},
@@ -114,6 +116,10 @@ pub fn router() -> Router<AppState> {
         fetch_specimen(SpecimenId) -> Specimen;
         list_specimens(SpecimenQuery) -> Vec<Specimen>;
         list_person_specimens((PersonId, SpecimenQuery)) -> Vec<Specimen>;
+        list_multiplexing_tags(()) -> Vec<MultiplexingTag>;
+        create_suspension(NewSuspension) -> Suspension;
+        fetch_suspension(SuspensionId) -> Suspension;
+        list_suspensions(SuspensionQuery) -> Vec<Suspension>;
     );
 
     router

@@ -1,10 +1,9 @@
-from fire.core import json
 import maturin_import_hook
 
 maturin_import_hook.install()
 from datetime import UTC, datetime
 import uuid
-from scamplepy.query import OrderBy, SpecimenQuery
+from scamplepy.query import OrderBy, SpecimenQuery, SpecimenType
 from scamplepy import ScamplersClient
 from scamplepy.create import *  # noqa: F403
 import fire
@@ -70,7 +69,7 @@ async def main(api_base_url: str | None = None, api_key: str | None = None):
     )
 
     specimen = NewFixedBlock(
-        readable_id="fixedblock",
+        readable_id="SP01",
         name="f",
         submitted_by=person.info.id_,
         lab_id=lab.info.id_,
@@ -91,13 +90,11 @@ async def main(api_base_url: str | None = None, api_key: str | None = None):
         SpecimenQuery(
             name="f",
             order_by=[OrderBy(field="received_at", descending=False)],
-            fixatives=[BlockFixative.FormaldehydeDerivative],
+            types=[SpecimenType.Block],
         ),
     )
 
-    as_str = json.dumps(json.loads(created_specimen.to_json_string()), indent=4)
-    print(as_str)
-
+    assert len(fetched_specimens) == 1
     assert created_specimen == fetched_specimens[0]
 
 
