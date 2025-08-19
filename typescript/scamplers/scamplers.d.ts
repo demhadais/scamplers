@@ -440,6 +440,7 @@ export class ScamplersClient {
   fetch_person(data: string): Promise<Person>;
   fetch_lab(data: string): Promise<Lab>;
   fetch_specimen(data: string): Promise<Specimen>;
+  list_person_specimens(id: string, query: SpecimenQuery): Promise<Specimen[]>;
 }
 export class ScamplersErrorResponse {
   private constructor();

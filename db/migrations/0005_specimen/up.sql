@@ -1,7 +1,7 @@
 create table specimen (
     id uuid primary key default uuidv7(),
     readable_id text unique not null,
-    links jsonb generated always as (construct_links('specimens', id)) stored not null,
+    links jsonb generated always as (construct_links('specimens', id, '{"datasets"}')) stored not null,
     name text not null,
     submitted_by uuid references person on delete restrict on update restrict not null,
     lab_id uuid references lab on delete restrict on update restrict not null,

@@ -167,8 +167,9 @@ macro_rules! impl_wasm_order_by {
 #[macro_export]
 macro_rules! uuid_newtype {
     ($name:ident) => {
-        #[cfg_attr(feature = "python", pyo3::pyclass)]
         #[derive(Clone, Copy, serde::Deserialize, serde::Serialize, valuable::Valuable)]
+        #[cfg_attr(feature = "python", derive(IntoPyObject, FromPyObject))]
+        #[cfg_attr(feature = "python", pyo3(transparent))]
         #[serde(transparent)]
         #[valuable(transparent)]
         pub struct $name(pub uuid::Uuid);

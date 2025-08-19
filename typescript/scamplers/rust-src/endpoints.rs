@@ -11,7 +11,7 @@ use crate::{
         person::{CreatedUser, NewPerson, Person, PersonId, PersonQuery, PersonUpdate},
         specimen::{NewSpecimen, Specimen, SpecimenId, SpecimenQuery},
     },
-    extract::{Base64JsonQuery, ValidJsonBody},
+    extract::{Base64JsonQuery, RelativesQuery, ValidJsonBody},
 };
 
 pub struct Api;
@@ -34,6 +34,7 @@ macro_rules! impl_basic_endpoints {
         id = $id:ty,
         query = $query:ty,
         $(update = $update:ty,)?
+        $(relative = {path = $relative_path:expr, query = $relative_query:ty, response = $relatives:ty},)*
         response = $response:ty
     ) => {
         impl Endpoint<$creation, $response> for Api {
@@ -109,6 +110,26 @@ macro_rules! impl_basic_endpoints {
                 client.patch(format!("{base_url}{path}")).json(&update)
             }
         })?
+
+        $(impl Endpoint<($id, $relative_query), $relatives> for Api {
+            type RequestExtractor = RelativesQuery<$id, $relative_query>;
+            type ResponseWrapper = Json<$relatives>;
+
+            const METHOD: Method = Method::GET;
+            const PATH: &str = concat!($path, "/", "{id}", $relative_path);
+            const SUCCESS_STATUS_CODE: StatusCode = StatusCode::OK;
+
+            fn request(
+                client: &reqwest::Client,
+                base_url: &str,
+                (id, relatives_query): ($id, $relative_query),
+            ) -> reqwest::RequestBuilder {
+                use crate::db::models::Jsonify;
+                let path = <Self as Endpoint<($id, $relative_query), $relatives>>::PATH;
+                let path = path.replace("{id}", &id.to_string());
+                client.get(format!("{base_url}{path}?{}", relatives_query.to_base64_json()))
+            }
+        })*
     };
 }
 
@@ -126,6 +147,7 @@ impl_basic_endpoints!(
     id = PersonId,
     query = PersonQuery,
     update = PersonUpdate,
+    relative = {path = "/specimens", query = SpecimenQuery, response = Vec<Specimen>},
     response = Person
 );
 

@@ -5,7 +5,7 @@ use uuid::Uuid;
 use valid_string::ValidString;
 
 use crate::{
-    db::models::{DefaultVec, Jsonify, Links, Pagination},
+    db::models::{DefaultVec, Links, Pagination},
     define_ordering_enum, uuid_newtype,
 };
 

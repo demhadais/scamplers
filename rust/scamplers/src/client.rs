@@ -230,6 +230,24 @@ macro_rules! wasm_wrapped_data_methods {
     };
 }
 
+#[cfg(target_arch = "wasm32")]
+macro_rules! wasm_list_relatives_methods {
+    {$($method_name:ident($wrapper:ident($id_type:path), $query_type:ty) -> $response_type:path;)*} => {
+        $(
+            #[wasm_bindgen::prelude::wasm_bindgen]
+            impl ScamplersClient {
+                pub async fn $method_name(
+                    &self,
+                    id: $id_type,
+                    query: $query_type,
+                ) -> Result<$response_type, ScamplersErrorResponse> {
+                    self.send_request_wasm(($wrapper(id), query)).await
+                }
+            }
+        )*
+    };
+}
+
 #[cfg(feature = "python")]
 macro_rules! python_client_methods {
     {$($method_name:ident($request_type:ty) -> $response_type:path;)*} => {
@@ -243,6 +261,27 @@ macro_rules! python_client_methods {
                 ) -> Result<$response_type, ScamplersErrorResponse> {
                     let client = self.clone();
                     client.send_request_python(data).await
+                }
+            }
+        )*
+    };
+}
+
+#[cfg(feature = "python")]
+macro_rules! python_client_list_relatives_methods {
+    {$($method_name:ident($id_type:ty, $query_type:ty) -> $response_type:path;)*} => {
+        $(
+            #[pyo3_stub_gen::derive::gen_stub_pymethods]
+            #[pyo3::pymethods]
+            impl ScamplersClient {
+                #[pyo3(signature = (id, query = $query_type::default()))]
+                async fn $method_name(
+                    &self,
+                    id: $id_type,
+                    query: $query_type,
+                ) -> Result<$response_type, ScamplersErrorResponse> {
+                    let client = self.clone();
+                    client.send_request_python((id, query)).await
                 }
             }
         )*
@@ -269,6 +308,11 @@ wasm_wrapped_data_methods! {
     fetch_specimen(SpecimenId(Uuid)) -> Specimen;
 }
 
+#[cfg(target_arch = "wasm32")]
+wasm_list_relatives_methods! {
+    list_person_specimens(PersonId(Uuid), SpecimenQuery) -> Vec<Specimen>;
+}
+
 #[cfg(feature = "python")]
 python_client_methods! {
     create_institution(NewInstitution) -> Institution;
@@ -285,6 +329,11 @@ python_client_methods! {
     create_specimen(NewSpecimen) -> Specimen;
     fetch_specimen(SpecimenId) -> Specimen;
     list_specimens(SpecimenQuery) -> Vec<Specimen>;
+}
+
+#[cfg(feature = "python")]
+python_client_list_relatives_methods! {
+    list_person_specimens(PersonId, SpecimenQuery) -> Vec<Specimen>;
 }
 
 // #[cfg(feature = "python")]

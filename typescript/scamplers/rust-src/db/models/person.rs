@@ -114,7 +114,10 @@ uuid_newtype!(PersonId);
 
 #[cfg_attr(target_arch = "wasm32", wasm_bindgen(getter_with_clone))]
 #[cfg_attr(feature = "python", pyo3_stub_gen::derive::gen_stub_pyclass)]
-#[cfg_attr(feature = "python", pyclass(get_all, module = "scamplepy.responses"))]
+#[cfg_attr(
+    feature = "python",
+    pyclass(eq, get_all, module = "scamplepy.responses")
+)]
 #[base_model]
 #[derive(Jsonify, WasmJsonify, PyJsonify)]
 pub struct Person {

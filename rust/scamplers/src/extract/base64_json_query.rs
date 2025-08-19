@@ -1,5 +1,4 @@
 use axum::{extract::FromRequestParts, http::StatusCode};
-use serde::de::DeserializeOwned;
 
 use crate::{
     db::models::Jsonify,
@@ -11,7 +10,7 @@ pub struct Base64JsonQuery<T: Jsonify>(pub T);
 
 impl<S, Q> FromRequestParts<S> for Base64JsonQuery<Q>
 where
-    Q: DeserializeOwned + Jsonify + Default,
+    Q: Jsonify + Default,
     S: Sync,
 {
     type Rejection = ScamplersErrorResponse;

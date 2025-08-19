@@ -1,4 +1,8 @@
-use axum::{extract::rejection::JsonRejection, http::StatusCode, response::IntoResponse};
+use axum::{
+    extract::rejection::{JsonRejection, PathRejection},
+    http::StatusCode,
+    response::IntoResponse,
+};
 #[cfg(feature = "python")]
 use pyo3::{exceptions::PyException, prelude::*};
 use scamplers_macros::scamplers_error;
@@ -8,7 +12,7 @@ use valuable::Valuable;
 #[cfg(target_arch = "wasm32")]
 use wasm_bindgen::prelude::*;
 
-use crate::db::models::{Jsonify, library_type_specification::LibraryTypeSpecification};
+use crate::db::models::library_type_specification::LibraryTypeSpecification;
 
 #[scamplers_error]
 #[error("{self:#?}")]
@@ -296,6 +300,19 @@ impl From<deadpool_diesel::InteractError> for ScamplersErrorResponse {
 
 impl From<JsonRejection> for ScamplersErrorResponse {
     fn from(err: JsonRejection) -> Self {
+        let error = MalformedRequestError::builder()
+            .message(err.body_text())
+            .build();
+
+        ScamplersErrorResponse::builder()
+            .status(err.status())
+            .error(error)
+            .build()
+    }
+}
+
+impl From<PathRejection> for ScamplersErrorResponse {
+    fn from(err: PathRejection) -> Self {
         let error = MalformedRequestError::builder()
             .message(err.body_text())
             .build();

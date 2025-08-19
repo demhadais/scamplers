@@ -10,4 +10,4 @@ requires = ["maturin>=1.9,<2.0"]
 build-backend = "maturin"
 
 [tool.ruff.lint]
-ignore = ["F403", "F405"]
+ignore = ["F403", "F405", "F811"]

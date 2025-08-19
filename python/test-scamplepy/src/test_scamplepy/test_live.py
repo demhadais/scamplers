@@ -1,3 +1,4 @@
+from fire.core import json
 import maturin_import_hook
 
 maturin_import_hook.install()
@@ -84,13 +85,20 @@ async def main(api_base_url: str | None = None, api_key: str | None = None):
         fixative=BlockFixative.FormaldehydeDerivative,
     )
 
-    specimen = await client.create_specimen(specimen)
-    specimen_query = SpecimenQuery(
-        name="f",
-        order_by=[OrderBy(field="received_at", descending=False)],
-        fixatives=[BlockFixative.FormaldehydeDerivative],
+    created_specimen = await client.create_specimen(specimen)
+    fetched_specimens = await client.list_person_specimens(
+        person.info.id_,
+        SpecimenQuery(
+            name="f",
+            order_by=[OrderBy(field="received_at", descending=False)],
+            fixatives=[BlockFixative.FormaldehydeDerivative],
+        ),
     )
-    await client.list_specimens(specimen_query)
+
+    as_str = json.dumps(json.loads(created_specimen.to_json_string()), indent=4)
+    print(as_str)
+
+    assert created_specimen == fetched_specimens[0]
 
 
 if __name__ == "__main__":

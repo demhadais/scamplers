@@ -113,6 +113,7 @@ pub fn router() -> Router<AppState> {
         create_specimen(NewSpecimen) -> Specimen;
         fetch_specimen(SpecimenId) -> Specimen;
         list_specimens(SpecimenQuery) -> Vec<Specimen>;
+        list_person_specimens((PersonId, SpecimenQuery)) -> Vec<Specimen>;
     );
 
     router

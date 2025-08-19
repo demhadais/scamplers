@@ -47,6 +47,7 @@ pub struct WasmPythonOrderBy {
     pub descending: bool,
 }
 
+#[cfg(any(target_arch = "wasm32", feature = "python"))]
 impl WasmPythonOrderBy {
     fn new(field: String, descending: bool) -> Self {
         Self { field, descending }

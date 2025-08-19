@@ -5,8 +5,9 @@ use crate::{
     apply_eq_any_filters, apply_eq_filters, apply_ilike_filters,
     db::{
         DbOperation,
-        models::person::{
-            Person, PersonId, PersonOrderBy, PersonQuery, PersonSummaryWithRelations,
+        models::{
+            person::{Person, PersonId, PersonOrderBy, PersonQuery, PersonSummaryWithRelations},
+            specimen::{Specimen, SpecimenQuery},
         },
     },
     impl_id_db_operation, init_stmt,
@@ -68,6 +69,16 @@ impl_id_db_operation!(
     delegate_to = PersonQuery,
     returns = Person
 );
+
+impl DbOperation<Vec<Specimen>> for (PersonId, SpecimenQuery) {
+    fn execute(self, db_conn: &mut PgConnection) -> crate::result::ScamplersResult<Vec<Specimen>> {
+        let (PersonId(id), mut query) = self;
+
+        query.submitters.push(id);
+
+        query.execute(db_conn)
+    }
+}
 
 #[cfg(test)]
 mod tests {

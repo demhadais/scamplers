@@ -35,7 +35,7 @@ impl DbOperation<Vec<Specimen>> for SpecimenQuery {
             notes,
             types,
             embedded_in,
-            fixatives: fixative,
+            fixatives,
             storage_buffer,
             frozen,
             cryopreserved,
@@ -50,7 +50,7 @@ impl DbOperation<Vec<Specimen>> for SpecimenQuery {
                 specimen::submitted_by => submitters,
                 specimen::lab_id => labs,
                 specimen::embedded_in => embedded_in,
-                specimen::fixative => fixative
+                specimen::fixative => fixatives
             }
         );
 
