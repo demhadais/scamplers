@@ -252,7 +252,7 @@ pub struct SpecimenQuery {
     pub species: Vec<Species>,
     pub notes: Option<String>,
     #[builder(default)]
-    pub type_: Vec<SpecimenType>,
+    pub types: Vec<SpecimenType>,
     #[cfg_attr(target_arch = "wasm32", wasm_bindgen(skip))]
     #[builder(default)]
     pub embedded_in: Vec<BlockEmbeddingMatrix>,
@@ -273,7 +273,7 @@ pub struct SpecimenQuery {
 #[pymethods]
 impl SpecimenQuery {
     #[new]
-    #[pyo3(signature = (*,ids = Vec::new(), name = None, submitters = Vec::new(), labs = Vec::new(), received_before = None, received_after = None, species = Vec::new(), notes = None, type_ = Vec::new(), embedded_in = Vec::new(), fixatives = Vec::new(), storage_buffer = None, frozen = None, cryopreserved = None, order_by = DefaultVec::default(), pagination = Pagination::default()))]
+    #[pyo3(signature = (*,ids = Vec::new(), name = None, submitters = Vec::new(), labs = Vec::new(), received_before = None, received_after = None, species = Vec::new(), notes = None, types = Vec::new(), embedded_in = Vec::new(), fixatives = Vec::new(), storage_buffer = None, frozen = None, cryopreserved = None, order_by = DefaultVec::default(), pagination = Pagination::default()))]
     #[must_use]
     pub fn new(
         ids: Vec<Uuid>,
@@ -284,7 +284,7 @@ impl SpecimenQuery {
         received_after: Option<OffsetDateTime>,
         species: Vec<Species>,
         notes: Option<String>,
-        type_: Vec<SpecimenType>,
+        types: Vec<SpecimenType>,
         embedded_in: Vec<BlockEmbeddingMatrix>,
         fixatives: Vec<Fixative>,
         storage_buffer: Option<String>,
@@ -302,7 +302,7 @@ impl SpecimenQuery {
             received_after,
             species,
             notes,
-            type_,
+            types,
             embedded_in,
             fixatives,
             storage_buffer,

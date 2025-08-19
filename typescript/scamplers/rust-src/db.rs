@@ -16,8 +16,10 @@ pub mod util;
 
 #[cfg(feature = "app")]
 pub trait DbOperation<Output>: Sized {
+    /// # Errors
     fn execute(self, db_conn: &mut PgConnection) -> ScamplersResult<Output>;
 
+    /// # Errors
     fn execute_as_user<UserId>(
         self,
         user_id: UserId,

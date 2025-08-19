@@ -33,7 +33,7 @@ pub enum UserRole {
 }
 
 #[db_insertion]
-#[cfg_attr(target_arch = "wasm32", wasm_bindgen(getter_with_clone, setter))]
+#[cfg_attr(target_arch = "wasm32", wasm_bindgen(getter_with_clone))]
 #[cfg_attr(feature = "app", diesel(table_name = scamplers_schema::person))]
 pub struct NewPerson {
     #[garde(dive)]

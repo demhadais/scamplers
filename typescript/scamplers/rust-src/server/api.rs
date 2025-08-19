@@ -55,13 +55,14 @@ macro_rules! router {
         use axum::{http::Method, routing::*};
 
         $(
-            let path = <Api as Endpoint<$request_type, $response_type>>::PATH;
-            let method = <Api as Endpoint<$request_type, $response_type>>::METHOD;
-
+            #[allow(clippy::items_after_statements)]
             #[axum::debug_handler]
             async fn $handler_name(state: State<AppState>, user: User, request: <Api as Endpoint<$request_type, $response_type>>::RequestExtractor) -> ScamplersApiResponse<$request_type, $response_type> {
                 inner_handler::<$request_type, $response_type>(state, user, request.0).await
             }
+
+            let path = <Api as Endpoint<$request_type, $response_type>>::PATH;
+            let method = <Api as Endpoint<$request_type, $response_type>>::METHOD;
 
             $router = match method {
                 Method::GET => $router.route(path, get($handler_name)),
@@ -92,6 +93,9 @@ async fn new_ms_login(
 
 pub fn router() -> Router<AppState> {
     let mut router = Router::new();
+
+    let ms_login_path = <Api as Endpoint<NewPerson, CreatedUser>>::PATH;
+    router = router.route(ms_login_path, axum::routing::post(new_ms_login));
 
     router = router!(
         router = router,

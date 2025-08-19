@@ -20,7 +20,7 @@ where
         parts: &mut axum::http::request::Parts,
         _state: &S,
     ) -> Result<Self, Self::Rejection> {
-        fn err(e: anyhow::Error) -> ScamplersErrorResponse {
+        fn err(e: &anyhow::Error) -> ScamplersErrorResponse {
             ScamplersErrorResponse::builder()
                 .status(StatusCode::BAD_REQUEST)
                 .error(
@@ -35,7 +35,7 @@ where
             return Ok(Self::default());
         };
 
-        let extracted = Q::from_base64_json(raw).map_err(err)?;
+        let extracted = Q::from_base64_json(raw).map_err(|e| err(&e))?;
 
         Ok(Self(extracted))
     }

@@ -33,7 +33,7 @@ impl DbOperation<Vec<Specimen>> for SpecimenQuery {
             received_after,
             species,
             notes,
-            type_,
+            types,
             embedded_in,
             fixatives: fixative,
             storage_buffer,
@@ -46,6 +46,7 @@ impl DbOperation<Vec<Specimen>> for SpecimenQuery {
             stmt,
             filters = {
                 specimen::id => ids,
+                specimen::type_ => types,
                 specimen::submitted_by => submitters,
                 specimen::lab_id => labs,
                 specimen::embedded_in => embedded_in,

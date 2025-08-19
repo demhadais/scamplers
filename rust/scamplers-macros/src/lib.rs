@@ -301,10 +301,9 @@ pub fn db_simple_enum(_attr: TokenStream, input: TokenStream) -> TokenStream {
 pub fn db_json(_attr: TokenStream, input: TokenStream) -> TokenStream {
     let item = parse_macro_input!(input as Item);
 
-    let ident = match &item {
-        Item::Struct(ItemStruct { ident, .. }) => ident,
-        Item::Enum(ItemEnum { ident, .. }) => ident,
-        _ => panic!("this macro can only be used with structs and enums"),
+    let (Item::Struct(ItemStruct { ident, .. }) | Item::Enum(ItemEnum { ident, .. })) = &item
+    else {
+        panic!("this macro can only be used with structs and enums")
     };
 
     let output = quote! {

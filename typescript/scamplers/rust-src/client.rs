@@ -43,30 +43,13 @@ pub struct ScamplersClient {
     runtime: Arc<Runtime>,
 }
 
-#[cfg(feature = "python")]
-#[pyo3_stub_gen::derive::gen_stub_pymethods]
-#[pymethods]
 impl ScamplersClient {
-    #[new]
-    #[pyo3(signature = (*, api_base_url, api_key=None, accept_invalid_certificates=false))]
-    fn py_new(
-        api_base_url: String,
-        api_key: Option<String>,
-        accept_invalid_certificates: bool,
-    ) -> Self {
-        Self::new(api_base_url, None, api_key, accept_invalid_certificates)
-    }
-}
-
-#[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
-impl ScamplersClient {
-    #[cfg_attr(target_arch = "wasm32", wasm_bindgen(constructor))]
     #[must_use]
     pub fn new(
         api_base_url: String,
         frontend_token: Option<String>,
         api_key: Option<String>,
-        accept_invalid_certificates: bool,
+        #[allow(unused_variables)] accept_invalid_certificates: bool,
     ) -> Self {
         use reqwest::{
             ClientBuilder,
@@ -107,7 +90,37 @@ impl ScamplersClient {
     }
 }
 
+#[cfg(feature = "python")]
+#[pyo3_stub_gen::derive::gen_stub_pymethods]
+#[pymethods]
 impl ScamplersClient {
+    #[new]
+    #[pyo3(signature = (*, api_base_url, api_key=None, accept_invalid_certificates=false))]
+    fn py_new(
+        api_base_url: String,
+        api_key: Option<String>,
+        accept_invalid_certificates: bool,
+    ) -> Self {
+        Self::new(api_base_url, None, api_key, accept_invalid_certificates)
+    }
+}
+
+#[cfg(target_arch = "wasm32")]
+#[wasm_bindgen]
+impl ScamplersClient {
+    #[wasm_bindgen(constructor)]
+    #[must_use]
+    pub fn js_new(
+        api_base_url: String,
+        frontend_token: Option<String>,
+        api_key: Option<String>,
+    ) -> Self {
+        Self::new(api_base_url, frontend_token, api_key, false)
+    }
+}
+
+impl ScamplersClient {
+    /// # Errors
     #[allow(dead_code)]
     pub async fn send_request<Req, Resp>(&self, data: Req) -> Result<Resp, ScamplersErrorResponse>
     where
@@ -217,6 +230,7 @@ macro_rules! wasm_wrapped_data_methods {
     };
 }
 
+#[cfg(feature = "python")]
 macro_rules! python_client_methods {
     {$($method_name:ident($request_type:ty) -> $response_type:path;)*} => {
         $(
@@ -255,8 +269,6 @@ wasm_wrapped_data_methods! {
     fetch_specimen(SpecimenId(Uuid)) -> Specimen;
 }
 
-// We put the #[cfg(feature = "python")] here so that auto-imports are
-// automatically gated under that feature
 #[cfg(feature = "python")]
 python_client_methods! {
     create_institution(NewInstitution) -> Institution;

@@ -1,5 +1,8 @@
-use std::{fmt::Display, sync::LazyLock};
+#[cfg(feature = "app")]
+use std::fmt::Display;
+use std::sync::LazyLock;
 
+#[cfg(feature = "app")]
 use anyhow::anyhow;
 #[cfg(feature = "app")]
 use diesel::{PgConnection, prelude::*};
@@ -7,6 +10,7 @@ use regex::Regex;
 #[cfg(feature = "app")]
 use scamplers_schema::index_kit;
 
+#[cfg(feature = "app")]
 use crate::result::ServerError;
 
 pub(super) static INDEX_SET_NAME_REGEX: LazyLock<Regex> = LazyLock::new(|| {
@@ -15,8 +19,10 @@ pub(super) static INDEX_SET_NAME_REGEX: LazyLock<Regex> = LazyLock::new(|| {
 pub(super) static DNA_REGEX: LazyLock<Regex> =
     LazyLock::new(|| Regex::new(r"^[ACGT]{8}|[ACGT]{10}$").unwrap());
 
+#[cfg(feature = "app")]
 pub(super) const INDEX_SET_NAME_ERROR_MESSAGE: &str = "malformed index set name";
 
+#[cfg(feature = "app")]
 pub(super) trait IndexSetName: AsRef<str> {
     fn kit_name(&self) -> anyhow::Result<&str> {
         self.as_ref()
@@ -30,9 +36,10 @@ pub(super) trait IndexSetName: AsRef<str> {
             .ok_or(anyhow!(INDEX_SET_NAME_ERROR_MESSAGE,))
     }
 }
-
+#[cfg(feature = "app")]
 impl<T> IndexSetName for T where T: AsRef<str> {}
 
+#[cfg(feature = "app")]
 pub(super) fn map_err(e: impl Display) -> ServerError {
     ServerError {
         message: e.to_string(),

@@ -17,11 +17,12 @@ use crate::{
     result::ServerError,
 };
 
+#[allow(clippy::implicit_hasher)]
 impl DbOperation<()> for HashMap<String, NewDualIndexSet> {
     fn execute(self, db_conn: &mut diesel::PgConnection) -> crate::result::ScamplersResult<()> {
         #[derive(Insertable)]
         #[diesel(table_name = dual_index_set, check_for_backend(diesel::pg::Pg))]
-        struct NewDualIndexSetInner<'a> {
+        struct DualIndexSetInsertion<'a> {
             name: &'a str,
             kit: &'a str,
             well: &'a str,
@@ -56,7 +57,7 @@ impl DbOperation<()> for HashMap<String, NewDualIndexSet> {
         {
             let well_name = index_set_name.well_name().map_err(map_err)?;
 
-            insertables.push(NewDualIndexSetInner {
+            insertables.push(DualIndexSetInsertion {
                 name: index_set_name,
                 kit: kit_name,
                 well: well_name,

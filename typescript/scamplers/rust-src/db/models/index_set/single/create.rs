@@ -16,7 +16,7 @@ impl DbOperation<()> for Vec<NewSingleIndexSet> {
     fn execute(self, db_conn: &mut PgConnection) -> ScamplersResult<()> {
         #[derive(Insertable)]
         #[diesel(table_name = single_index_set, check_for_backend(diesel::pg::Pg))]
-        struct NewSingleIndexSetInner<'a> {
+        struct SingleIndexSetInsertion<'a> {
             name: &'a str,
             kit: &'a str,
             well: &'a str,
@@ -35,7 +35,7 @@ impl DbOperation<()> for Vec<NewSingleIndexSet> {
         for NewSingleIndexSet(index_set_name, sequences) in &self {
             let well_name = index_set_name.well_name().map_err(map_err)?;
 
-            insertables.push(NewSingleIndexSetInner {
+            insertables.push(SingleIndexSetInsertion {
                 name: index_set_name,
                 kit: kit_name,
                 well: well_name,

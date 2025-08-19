@@ -36,6 +36,7 @@ pub struct SeedData {
     library_type_specifications: Vec<LibraryTypeSpecification>,
 }
 
+/// # Errors
 pub async fn insert_seed_data(
     seed_data: SeedData,
     http_client: reqwest::Client,

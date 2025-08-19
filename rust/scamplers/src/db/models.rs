@@ -124,6 +124,7 @@ where
     }
 }
 
+#[allow(clippy::into_iter_without_iter)]
 impl<'a, O> IntoIterator for &'a DefaultVec<O>
 where
     O: Valuable,
@@ -246,6 +247,7 @@ where
 #[cfg_attr(feature = "python", pyo3(transparent))]
 pub struct Links(HashMap<String, String>);
 
+#[allow(clippy::into_iter_without_iter)]
 impl<'a> IntoIterator for &'a Links {
     type IntoIter = <&'a HashMap<String, String> as IntoIterator>::IntoIter;
     type Item = <&'a HashMap<String, String> as IntoIterator>::Item;
@@ -306,14 +308,17 @@ pub trait Jsonify: DeserializeOwned + Serialize {
         base64::engine::general_purpose::URL_SAFE.encode(self.to_json_bytes())
     }
 
+    /// # Errors
     fn from_json_bytes(json_bytes: &[u8]) -> anyhow::Result<Self> {
         Ok(serde_json::from_slice(json_bytes)?)
     }
 
+    /// # Errors
     fn from_json_string(json_str: &str) -> anyhow::Result<Self> {
         Ok(serde_json::from_str(json_str)?)
     }
 
+    /// # Errors
     fn from_base64_json(base64_json_bytes: &str) -> anyhow::Result<Self> {
         use base64::engine::Engine;
 

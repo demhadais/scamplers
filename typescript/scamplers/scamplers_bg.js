@@ -259,11 +259,11 @@ function __wbg_adapter_36(arg0, arg1) {
 }
 
 function __wbg_adapter_39(arg0, arg1, arg2) {
-    wasm.closure271_externref_shim(arg0, arg1, arg2);
+    wasm.closure293_externref_shim(arg0, arg1, arg2);
 }
 
 function __wbg_adapter_649(arg0, arg1, arg2, arg3) {
-    wasm.closure379_externref_shim(arg0, arg1, arg2, arg3);
+    wasm.closure328_externref_shim(arg0, arg1, arg2, arg3);
 }
 
 /**
@@ -4147,18 +4147,17 @@ export class ScamplersClient {
     }
     /**
      * @param {string} api_base_url
-     * @param {string | null | undefined} frontend_token
-     * @param {string | null | undefined} api_key
-     * @param {boolean} accept_invalid_certificates
+     * @param {string | null} [frontend_token]
+     * @param {string | null} [api_key]
      */
-    constructor(api_base_url, frontend_token, api_key, accept_invalid_certificates) {
+    constructor(api_base_url, frontend_token, api_key) {
         const ptr0 = passStringToWasm0(api_base_url, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
         const len0 = WASM_VECTOR_LEN;
         var ptr1 = isLikeNone(frontend_token) ? 0 : passStringToWasm0(frontend_token, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
         var len1 = WASM_VECTOR_LEN;
         var ptr2 = isLikeNone(api_key) ? 0 : passStringToWasm0(api_key, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
         var len2 = WASM_VECTOR_LEN;
-        const ret = wasm.scamplersclient_new(ptr0, len0, ptr1, len1, ptr2, len2, accept_invalid_certificates);
+        const ret = wasm.scamplersclient_js_new(ptr0, len0, ptr1, len1, ptr2, len2);
         this.__wbg_ptr = ret >>> 0;
         ScamplersClientFinalization.register(this, this.__wbg_ptr, this);
         return this;
@@ -4909,8 +4908,8 @@ export class SpecimenQuery {
     /**
      * @returns {any[]}
      */
-    get type_() {
-        const ret = wasm.__wbg_get_specimenquery_type_(this.__wbg_ptr);
+    get types() {
+        const ret = wasm.__wbg_get_specimenquery_types(this.__wbg_ptr);
         var v1 = getArrayJsValueFromWasm0(ret[0], ret[1]).slice();
         wasm.__wbindgen_free(ret[0], ret[1] * 4, 4);
         return v1;
@@ -4918,10 +4917,10 @@ export class SpecimenQuery {
     /**
      * @param {any[]} arg0
      */
-    set type_(arg0) {
+    set types(arg0) {
         const ptr0 = passArrayJsValueToWasm0(arg0, wasm.__wbindgen_malloc);
         const len0 = WASM_VECTOR_LEN;
-        wasm.__wbg_set_specimenquery_type_(this.__wbg_ptr, ptr0, len0);
+        wasm.__wbg_set_specimenquery_types(this.__wbg_ptr, ptr0, len0);
     }
     /**
      * @returns {string}
@@ -6327,13 +6326,13 @@ export function __wbindgen_cb_drop(arg0) {
     return ret;
 };
 
-export function __wbindgen_closure_wrapper2166(arg0, arg1, arg2) {
-    const ret = makeMutClosure(arg0, arg1, 255, __wbg_adapter_36);
+export function __wbindgen_closure_wrapper2235(arg0, arg1, arg2) {
+    const ret = makeMutClosure(arg0, arg1, 276, __wbg_adapter_36);
     return ret;
 };
 
-export function __wbindgen_closure_wrapper2190(arg0, arg1, arg2) {
-    const ret = makeMutClosure(arg0, arg1, 272, __wbg_adapter_39);
+export function __wbindgen_closure_wrapper2265(arg0, arg1, arg2) {
+    const ret = makeMutClosure(arg0, arg1, 294, __wbg_adapter_39);
     return ret;
 };
 

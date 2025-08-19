@@ -104,6 +104,7 @@ get_first = "allow"
 missing_panics_doc = "allow"
 unsafe_derive_deserialize = "allow"
 too_many_arguments = "allow"
+missing_errors_doc = "allow"
 
 [workspace.lints.rust]
 async_fn_in_trait = "allow"

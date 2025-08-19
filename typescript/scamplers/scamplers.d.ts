@@ -428,7 +428,7 @@ export class ResourceNotFoundError {
 }
 export class ScamplersClient {
   free(): void;
-  constructor(api_base_url: string, frontend_token: string | null | undefined, api_key: string | null | undefined, accept_invalid_certificates: boolean);
+  constructor(api_base_url: string, frontend_token?: string | null, api_key?: string | null);
   list_institutions(data: InstitutionQuery): Promise<Institution[]>;
   ms_login(data: NewPerson): Promise<CreatedUser>;
   list_people(data: PersonQuery): Promise<Person[]>;
@@ -512,7 +512,7 @@ export class SpecimenQuery {
   species: any[];
   get notes(): string;
   set notes(value: string | null | undefined);
-  type_: any[];
+  types: any[];
   get storage_buffer(): string;
   set storage_buffer(value: string | null | undefined);
   get frozen(): boolean | undefined;

@@ -34,10 +34,12 @@ async fn serve(mut config: Config) -> anyhow::Result<()> {
     Ok(())
 }
 
+/// # Errors
 pub async fn serve_integration_test(config: Config) -> anyhow::Result<()> {
     serve(config).await
 }
 
+/// # Errors
 pub async fn serve_app(config: Config, log_dir: Option<Utf8PathBuf>) -> anyhow::Result<()> {
     initialize_logging(log_dir);
     serve(config).await
