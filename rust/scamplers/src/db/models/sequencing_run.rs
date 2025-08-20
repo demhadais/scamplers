@@ -14,7 +14,7 @@ pub struct NewSequencingSubmission {
 }
 
 #[cfg(feature = "python")]
-#[pyo3_stub_gen::derive::gen_stub_pyclass]
+#[pyo3_stub_gen::derive::gen_stub_pymethods]
 #[pymethods]
 impl NewSequencingSubmission {
     #[new]
