@@ -6,6 +6,7 @@ use axum::{
 
 use crate::{
     db::models::{
+        chromium_run::{ChromiumRun, ChromiumRunId, ChromiumRunQuery, NewChromiumRun},
         institution::{Institution, InstitutionId, InstitutionQuery, NewInstitution},
         lab::{Lab, LabId, LabQuery, LabUpdate, NewLab},
         multiplexing_tag::{MultiplexingTag, MultiplexingTagId},
@@ -37,7 +38,7 @@ macro_rules! impl_basic_endpoints {
         path = $path:expr,
         $(creation = $creation:ident,)?
         id = $id:ty,
-        query = $query:ty,
+        $(query = $query:ty,)?
         $(update = $update:ty,)?
         $(relative = {path = $relative_path:expr, query = $relative_query:ty, response = $relatives:ty},)*
         response = $response:ty
@@ -79,7 +80,7 @@ macro_rules! impl_basic_endpoints {
             }
         }
 
-        impl Endpoint<$query, Vec<$response>> for Api {
+        $(impl Endpoint<$query, Vec<$response>> for Api {
             type RequestExtractor = Base64JsonQuery<$query>;
             type ResponseWrapper = Json<Vec<$response>>;
 
@@ -96,7 +97,7 @@ macro_rules! impl_basic_endpoints {
                 let path = <Self as Endpoint<$query, Vec<$response>>>::PATH;
                 client.get(format!("{base_url}{path}?{}", query.to_base64_json()))
             }
-        }
+        })?
 
         $(impl Endpoint<$update, $response> for Api {
             type RequestExtractor = ValidJsonBody<$update>;
@@ -194,6 +195,14 @@ impl_basic_endpoints! {
     id = SuspensionPoolId,
     query = SuspensionPoolQuery,
     response = SuspensionPool
+}
+
+impl_basic_endpoints! {
+    path = "chromium-runs",
+    creation = NewChromiumRun,
+    id = ChromiumRunId,
+    query = ChromiumRunQuery,
+    response = ChromiumRun
 }
 
 impl Endpoint<NewPerson, CreatedUser> for Api {

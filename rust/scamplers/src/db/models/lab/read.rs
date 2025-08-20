@@ -25,7 +25,7 @@ impl DbOperation<Vec<Lab>> for LabQuery {
 
         let mut stmt = init_stmt!(stmt = lab::table.inner_join(person::table), query = &self, output_type = LabSummaryWithParents, orderby_spec = { LabOrderBy::Name => lab::name });
 
-        let Self { ids, name, .. } = &self;
+        let Self { ids, names, .. } = &self;
 
         stmt = apply_eq_any_filters!(
             stmt,
@@ -34,7 +34,7 @@ impl DbOperation<Vec<Lab>> for LabQuery {
 
         stmt = apply_ilike_filters!(
             stmt,
-            filters = {lab::name => name}
+            filters = {lab::name => names}
         );
 
         let labs: Vec<LabSummaryWithParents> = stmt.load(db_conn)?;

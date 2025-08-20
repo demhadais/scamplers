@@ -255,15 +255,15 @@ function _assertClass(instance, klass) {
     }
 }
 function __wbg_adapter_36(arg0, arg1) {
-    wasm._dyn_core__ops__function__FnMut_____Output___R_as_wasm_bindgen__closure__WasmClosure___describe__invoke__hd9a7ba7f301b5b60(arg0, arg1);
+    wasm._dyn_core__ops__function__FnMut_____Output___R_as_wasm_bindgen__closure__WasmClosure___describe__invoke__hb908e8e255fc6532(arg0, arg1);
 }
 
 function __wbg_adapter_39(arg0, arg1, arg2) {
-    wasm.closure329_externref_shim(arg0, arg1, arg2);
+    wasm.closure341_externref_shim(arg0, arg1, arg2);
 }
 
-function __wbg_adapter_737(arg0, arg1, arg2, arg3) {
-    wasm.closure364_externref_shim(arg0, arg1, arg2, arg3);
+function __wbg_adapter_806(arg0, arg1, arg2, arg3) {
+    wasm.closure376_externref_shim(arg0, arg1, arg2, arg3);
 }
 
 /**
@@ -499,6 +499,472 @@ export class CdnaLibraryTypeError {
         const len0 = WASM_VECTOR_LEN;
         const ret = wasm.cdnalibrarytypeerror_from_base64_json(ptr0, len0);
         return CdnaLibraryTypeError.__wrap(ret);
+    }
+}
+
+const ChromiumRunFinalization = (typeof FinalizationRegistry === 'undefined')
+    ? { register: () => {}, unregister: () => {} }
+    : new FinalizationRegistry(ptr => wasm.__wbg_chromiumrun_free(ptr >>> 0, 1));
+
+export class ChromiumRun {
+
+    static __wrap(ptr) {
+        ptr = ptr >>> 0;
+        const obj = Object.create(ChromiumRun.prototype);
+        obj.__wbg_ptr = ptr;
+        ChromiumRunFinalization.register(obj, obj.__wbg_ptr, obj);
+        return obj;
+    }
+
+    __destroy_into_raw() {
+        const ptr = this.__wbg_ptr;
+        this.__wbg_ptr = 0;
+        ChromiumRunFinalization.unregister(this);
+        return ptr;
+    }
+
+    free() {
+        const ptr = this.__destroy_into_raw();
+        wasm.__wbg_chromiumrun_free(ptr, 0);
+    }
+    /**
+     * @returns {ChromiumRunSummary}
+     */
+    get summary() {
+        const ret = wasm.__wbg_get_chromiumrun_summary(this.__wbg_ptr);
+        return ChromiumRunSummary.__wrap(ret);
+    }
+    /**
+     * @param {ChromiumRunSummary} arg0
+     */
+    set summary(arg0) {
+        _assertClass(arg0, ChromiumRunSummary);
+        var ptr0 = arg0.__destroy_into_raw();
+        wasm.__wbg_set_chromiumrun_summary(this.__wbg_ptr, ptr0);
+    }
+    /**
+     * @returns {Gems[]}
+     */
+    get gems() {
+        const ret = wasm.__wbg_get_chromiumrun_gems(this.__wbg_ptr);
+        var v1 = getArrayJsValueFromWasm0(ret[0], ret[1]).slice();
+        wasm.__wbindgen_free(ret[0], ret[1] * 4, 4);
+        return v1;
+    }
+    /**
+     * @param {Gems[]} arg0
+     */
+    set gems(arg0) {
+        const ptr0 = passArrayJsValueToWasm0(arg0, wasm.__wbindgen_malloc);
+        const len0 = WASM_VECTOR_LEN;
+        wasm.__wbg_set_chromiumrun_gems(this.__wbg_ptr, ptr0, len0);
+    }
+}
+
+const ChromiumRunQueryFinalization = (typeof FinalizationRegistry === 'undefined')
+    ? { register: () => {}, unregister: () => {} }
+    : new FinalizationRegistry(ptr => wasm.__wbg_chromiumrunquery_free(ptr >>> 0, 1));
+
+export class ChromiumRunQuery {
+
+    static __wrap(ptr) {
+        ptr = ptr >>> 0;
+        const obj = Object.create(ChromiumRunQuery.prototype);
+        obj.__wbg_ptr = ptr;
+        ChromiumRunQueryFinalization.register(obj, obj.__wbg_ptr, obj);
+        return obj;
+    }
+
+    __destroy_into_raw() {
+        const ptr = this.__wbg_ptr;
+        this.__wbg_ptr = 0;
+        ChromiumRunQueryFinalization.unregister(this);
+        return ptr;
+    }
+
+    free() {
+        const ptr = this.__destroy_into_raw();
+        wasm.__wbg_chromiumrunquery_free(ptr, 0);
+    }
+    /**
+     * @returns {string[]}
+     */
+    get ids() {
+        const ret = wasm.__wbg_get_chromiumrunquery_ids(this.__wbg_ptr);
+        var v1 = getArrayJsValueFromWasm0(ret[0], ret[1]).slice();
+        wasm.__wbindgen_free(ret[0], ret[1] * 4, 4);
+        return v1;
+    }
+    /**
+     * @param {string[]} arg0
+     */
+    set ids(arg0) {
+        const ptr0 = passArrayJsValueToWasm0(arg0, wasm.__wbindgen_malloc);
+        const len0 = WASM_VECTOR_LEN;
+        wasm.__wbg_set_chromiumrunquery_ids(this.__wbg_ptr, ptr0, len0);
+    }
+    /**
+     * @returns {string[]}
+     */
+    get readable_ids() {
+        const ret = wasm.__wbg_get_chromiumrunquery_readable_ids(this.__wbg_ptr);
+        var v1 = getArrayJsValueFromWasm0(ret[0], ret[1]).slice();
+        wasm.__wbindgen_free(ret[0], ret[1] * 4, 4);
+        return v1;
+    }
+    /**
+     * @param {string[]} arg0
+     */
+    set readable_ids(arg0) {
+        const ptr0 = passArrayJsValueToWasm0(arg0, wasm.__wbindgen_malloc);
+        const len0 = WASM_VECTOR_LEN;
+        wasm.__wbg_set_chromiumrunquery_readable_ids(this.__wbg_ptr, ptr0, len0);
+    }
+    /**
+     * @returns {string[]}
+     */
+    get chips() {
+        const ret = wasm.__wbg_get_chromiumrunquery_chips(this.__wbg_ptr);
+        var v1 = getArrayJsValueFromWasm0(ret[0], ret[1]).slice();
+        wasm.__wbindgen_free(ret[0], ret[1] * 4, 4);
+        return v1;
+    }
+    /**
+     * @param {string[]} arg0
+     */
+    set chips(arg0) {
+        const ptr0 = passArrayJsValueToWasm0(arg0, wasm.__wbindgen_malloc);
+        const len0 = WASM_VECTOR_LEN;
+        wasm.__wbg_set_chromiumrunquery_chips(this.__wbg_ptr, ptr0, len0);
+    }
+    /**
+     * @returns {Date | undefined}
+     */
+    get run_before() {
+        const ret = wasm.__wbg_get_chromiumrunquery_run_before(this.__wbg_ptr);
+        return ret;
+    }
+    /**
+     * @param {Date | null} [arg0]
+     */
+    set run_before(arg0) {
+        wasm.__wbg_set_chromiumrunquery_run_before(this.__wbg_ptr, isLikeNone(arg0) ? 0 : addToExternrefTable0(arg0));
+    }
+    /**
+     * @returns {Date | undefined}
+     */
+    get run_after() {
+        const ret = wasm.__wbg_get_chromiumrunquery_run_after(this.__wbg_ptr);
+        return ret;
+    }
+    /**
+     * @param {Date | null} [arg0]
+     */
+    set run_after(arg0) {
+        wasm.__wbg_set_chromiumrunquery_run_after(this.__wbg_ptr, isLikeNone(arg0) ? 0 : addToExternrefTable0(arg0));
+    }
+    /**
+     * @returns {boolean | undefined}
+     */
+    get succeeded() {
+        const ret = wasm.__wbg_get_chromiumrunquery_succeeded(this.__wbg_ptr);
+        return ret === 0xFFFFFF ? undefined : ret !== 0;
+    }
+    /**
+     * @param {boolean | null} [arg0]
+     */
+    set succeeded(arg0) {
+        wasm.__wbg_set_chromiumrunquery_succeeded(this.__wbg_ptr, isLikeNone(arg0) ? 0xFFFFFF : arg0 ? 1 : 0);
+    }
+    /**
+     * @returns {string[]}
+     */
+    get notes() {
+        const ret = wasm.__wbg_get_chromiumrunquery_notes(this.__wbg_ptr);
+        var v1 = getArrayJsValueFromWasm0(ret[0], ret[1]).slice();
+        wasm.__wbindgen_free(ret[0], ret[1] * 4, 4);
+        return v1;
+    }
+    /**
+     * @param {string[]} arg0
+     */
+    set notes(arg0) {
+        const ptr0 = passArrayJsValueToWasm0(arg0, wasm.__wbindgen_malloc);
+        const len0 = WASM_VECTOR_LEN;
+        wasm.__wbg_set_chromiumrunquery_notes(this.__wbg_ptr, ptr0, len0);
+    }
+    /**
+     * @returns {OrderBy[]}
+     */
+    get order_by() {
+        const ret = wasm.__wbg_get_chromiumrunquery_order_by(this.__wbg_ptr);
+        var v1 = getArrayJsValueFromWasm0(ret[0], ret[1]).slice();
+        wasm.__wbindgen_free(ret[0], ret[1] * 4, 4);
+        return v1;
+    }
+    /**
+     * @param {OrderBy[]} arg0
+     */
+    set order_by(arg0) {
+        const ptr0 = passArrayJsValueToWasm0(arg0, wasm.__wbindgen_malloc);
+        const len0 = WASM_VECTOR_LEN;
+        wasm.__wbg_set_chromiumrunquery_order_by(this.__wbg_ptr, ptr0, len0);
+    }
+    /**
+     * @returns {Pagination}
+     */
+    get pagination() {
+        const ret = wasm.__wbg_get_chromiumrunquery_pagination(this.__wbg_ptr);
+        return Pagination.__wrap(ret);
+    }
+    /**
+     * @param {Pagination} arg0
+     */
+    set pagination(arg0) {
+        _assertClass(arg0, Pagination);
+        var ptr0 = arg0.__destroy_into_raw();
+        wasm.__wbg_set_chromiumrunquery_pagination(this.__wbg_ptr, ptr0);
+    }
+    /**
+     * @returns {Uint8Array}
+     */
+    to_json_bytes() {
+        const ret = wasm.chromiumrunquery_to_json_bytes(this.__wbg_ptr);
+        var v1 = getArrayU8FromWasm0(ret[0], ret[1]).slice();
+        wasm.__wbindgen_free(ret[0], ret[1] * 1, 1);
+        return v1;
+    }
+    /**
+     * @returns {string}
+     */
+    to_json_string() {
+        const ret = wasm.chromiumrunquery_to_json_string(this.__wbg_ptr);
+        var v1 = getCachedStringFromWasm0(ret[0], ret[1]);
+        if (ret[0] !== 0) { wasm.__wbindgen_free(ret[0], ret[1], 1); }
+        return v1;
+    }
+    /**
+     * @returns {string}
+     */
+    to_base64_json() {
+        const ret = wasm.chromiumrunquery_to_base64_json(this.__wbg_ptr);
+        var v1 = getCachedStringFromWasm0(ret[0], ret[1]);
+        if (ret[0] !== 0) { wasm.__wbindgen_free(ret[0], ret[1], 1); }
+        return v1;
+    }
+    /**
+     * @param {Uint8Array} json_bytes
+     * @returns {ChromiumRunQuery}
+     */
+    static from_json_bytes(json_bytes) {
+        const ptr0 = passArray8ToWasm0(json_bytes, wasm.__wbindgen_malloc);
+        const len0 = WASM_VECTOR_LEN;
+        const ret = wasm.chromiumrunquery_from_json_bytes(ptr0, len0);
+        return ChromiumRunQuery.__wrap(ret);
+    }
+    /**
+     * @param {string} json_str
+     * @returns {ChromiumRunQuery}
+     */
+    static from_json_string(json_str) {
+        const ptr0 = passStringToWasm0(json_str, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+        const len0 = WASM_VECTOR_LEN;
+        const ret = wasm.chromiumrunquery_from_json_string(ptr0, len0);
+        return ChromiumRunQuery.__wrap(ret);
+    }
+    /**
+     * @param {string} base64_json_bytes
+     * @returns {ChromiumRunQuery}
+     */
+    static from_base64_json(base64_json_bytes) {
+        const ptr0 = passStringToWasm0(base64_json_bytes, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+        const len0 = WASM_VECTOR_LEN;
+        const ret = wasm.chromiumrunquery_from_base64_json(ptr0, len0);
+        return ChromiumRunQuery.__wrap(ret);
+    }
+    constructor() {
+        const ret = wasm.chromiumrunquery_new();
+        this.__wbg_ptr = ret >>> 0;
+        ChromiumRunQueryFinalization.register(this, this.__wbg_ptr, this);
+        return this;
+    }
+}
+
+const ChromiumRunSummaryFinalization = (typeof FinalizationRegistry === 'undefined')
+    ? { register: () => {}, unregister: () => {} }
+    : new FinalizationRegistry(ptr => wasm.__wbg_chromiumrunsummary_free(ptr >>> 0, 1));
+
+export class ChromiumRunSummary {
+
+    static __wrap(ptr) {
+        ptr = ptr >>> 0;
+        const obj = Object.create(ChromiumRunSummary.prototype);
+        obj.__wbg_ptr = ptr;
+        ChromiumRunSummaryFinalization.register(obj, obj.__wbg_ptr, obj);
+        return obj;
+    }
+
+    __destroy_into_raw() {
+        const ptr = this.__wbg_ptr;
+        this.__wbg_ptr = 0;
+        ChromiumRunSummaryFinalization.unregister(this);
+        return ptr;
+    }
+
+    free() {
+        const ptr = this.__destroy_into_raw();
+        wasm.__wbg_chromiumrunsummary_free(ptr, 0);
+    }
+    /**
+     * @returns {string}
+     */
+    get id() {
+        const ret = wasm.__wbg_get_chromiumrunsummary_id(this.__wbg_ptr);
+        var v1 = getCachedStringFromWasm0(ret[0], ret[1]);
+        if (ret[0] !== 0) { wasm.__wbindgen_free(ret[0], ret[1], 1); }
+        return v1;
+    }
+    /**
+     * @param {string} arg0
+     */
+    set id(arg0) {
+        const ptr0 = passStringToWasm0(arg0, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+        const len0 = WASM_VECTOR_LEN;
+        wasm.__wbg_set_chromiumrunsummary_id(this.__wbg_ptr, ptr0, len0);
+    }
+    /**
+     * @returns {string}
+     */
+    get readable_id() {
+        const ret = wasm.__wbg_get_chromiumrunsummary_readable_id(this.__wbg_ptr);
+        var v1 = getCachedStringFromWasm0(ret[0], ret[1]);
+        if (ret[0] !== 0) { wasm.__wbindgen_free(ret[0], ret[1], 1); }
+        return v1;
+    }
+    /**
+     * @param {string} arg0
+     */
+    set readable_id(arg0) {
+        const ptr0 = passStringToWasm0(arg0, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+        const len0 = WASM_VECTOR_LEN;
+        wasm.__wbg_set_chromiumrunsummary_readable_id(this.__wbg_ptr, ptr0, len0);
+    }
+    /**
+     * @returns {string}
+     */
+    get chip() {
+        const ret = wasm.__wbg_get_chromiumrunsummary_chip(this.__wbg_ptr);
+        var v1 = getCachedStringFromWasm0(ret[0], ret[1]);
+        if (ret[0] !== 0) { wasm.__wbindgen_free(ret[0], ret[1], 1); }
+        return v1;
+    }
+    /**
+     * @param {string} arg0
+     */
+    set chip(arg0) {
+        const ptr0 = passStringToWasm0(arg0, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+        const len0 = WASM_VECTOR_LEN;
+        wasm.__wbg_set_chromiumrunsummary_chip(this.__wbg_ptr, ptr0, len0);
+    }
+    /**
+     * @returns {Date}
+     */
+    get run_at() {
+        const ret = wasm.__wbg_get_chromiumrunsummary_run_at(this.__wbg_ptr);
+        return ret;
+    }
+    /**
+     * @param {Date} arg0
+     */
+    set run_at(arg0) {
+        wasm.__wbg_set_chromiumrunsummary_run_at(this.__wbg_ptr, arg0);
+    }
+    /**
+     * @returns {boolean}
+     */
+    get succeeded() {
+        const ret = wasm.__wbg_get_chromiumrunsummary_succeeded(this.__wbg_ptr);
+        return ret !== 0;
+    }
+    /**
+     * @param {boolean} arg0
+     */
+    set succeeded(arg0) {
+        wasm.__wbg_set_chromiumrunsummary_succeeded(this.__wbg_ptr, arg0);
+    }
+    /**
+     * @returns {string}
+     */
+    get notes() {
+        const ret = wasm.__wbg_get_chromiumrunsummary_notes(this.__wbg_ptr);
+        var v1 = getCachedStringFromWasm0(ret[0], ret[1]);
+        if (ret[0] !== 0) { wasm.__wbindgen_free(ret[0], ret[1], 1); }
+        return v1;
+    }
+    /**
+     * @param {string | null} [arg0]
+     */
+    set notes(arg0) {
+        var ptr0 = isLikeNone(arg0) ? 0 : passStringToWasm0(arg0, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+        var len0 = WASM_VECTOR_LEN;
+        wasm.__wbg_set_chromiumrunsummary_notes(this.__wbg_ptr, ptr0, len0);
+    }
+    /**
+     * @returns {Uint8Array}
+     */
+    to_json_bytes() {
+        const ret = wasm.chromiumrunsummary_to_json_bytes(this.__wbg_ptr);
+        var v1 = getArrayU8FromWasm0(ret[0], ret[1]).slice();
+        wasm.__wbindgen_free(ret[0], ret[1] * 1, 1);
+        return v1;
+    }
+    /**
+     * @returns {string}
+     */
+    to_json_string() {
+        const ret = wasm.chromiumrunsummary_to_json_string(this.__wbg_ptr);
+        var v1 = getCachedStringFromWasm0(ret[0], ret[1]);
+        if (ret[0] !== 0) { wasm.__wbindgen_free(ret[0], ret[1], 1); }
+        return v1;
+    }
+    /**
+     * @returns {string}
+     */
+    to_base64_json() {
+        const ret = wasm.chromiumrunsummary_to_base64_json(this.__wbg_ptr);
+        var v1 = getCachedStringFromWasm0(ret[0], ret[1]);
+        if (ret[0] !== 0) { wasm.__wbindgen_free(ret[0], ret[1], 1); }
+        return v1;
+    }
+    /**
+     * @param {Uint8Array} json_bytes
+     * @returns {ChromiumRunSummary}
+     */
+    static from_json_bytes(json_bytes) {
+        const ptr0 = passArray8ToWasm0(json_bytes, wasm.__wbindgen_malloc);
+        const len0 = WASM_VECTOR_LEN;
+        const ret = wasm.chromiumrunsummary_from_json_bytes(ptr0, len0);
+        return ChromiumRunSummary.__wrap(ret);
+    }
+    /**
+     * @param {string} json_str
+     * @returns {ChromiumRunSummary}
+     */
+    static from_json_string(json_str) {
+        const ptr0 = passStringToWasm0(json_str, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+        const len0 = WASM_VECTOR_LEN;
+        const ret = wasm.chromiumrunsummary_from_json_string(ptr0, len0);
+        return ChromiumRunSummary.__wrap(ret);
+    }
+    /**
+     * @param {string} base64_json_bytes
+     * @returns {ChromiumRunSummary}
+     */
+    static from_base64_json(base64_json_bytes) {
+        const ptr0 = passStringToWasm0(base64_json_bytes, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+        const len0 = WASM_VECTOR_LEN;
+        const ret = wasm.chromiumrunsummary_from_base64_json(ptr0, len0);
+        return ChromiumRunSummary.__wrap(ret);
     }
 }
 
@@ -1329,6 +1795,165 @@ export class EmptyStringError {
     }
 }
 
+const GemsFinalization = (typeof FinalizationRegistry === 'undefined')
+    ? { register: () => {}, unregister: () => {} }
+    : new FinalizationRegistry(ptr => wasm.__wbg_gems_free(ptr >>> 0, 1));
+
+export class Gems {
+
+    static __wrap(ptr) {
+        ptr = ptr >>> 0;
+        const obj = Object.create(Gems.prototype);
+        obj.__wbg_ptr = ptr;
+        GemsFinalization.register(obj, obj.__wbg_ptr, obj);
+        return obj;
+    }
+
+    static __unwrap(jsValue) {
+        if (!(jsValue instanceof Gems)) {
+            return 0;
+        }
+        return jsValue.__destroy_into_raw();
+    }
+
+    __destroy_into_raw() {
+        const ptr = this.__wbg_ptr;
+        this.__wbg_ptr = 0;
+        GemsFinalization.unregister(this);
+        return ptr;
+    }
+
+    free() {
+        const ptr = this.__destroy_into_raw();
+        wasm.__wbg_gems_free(ptr, 0);
+    }
+    /**
+     * @returns {string}
+     */
+    get id() {
+        const ret = wasm.__wbg_get_gems_id(this.__wbg_ptr);
+        var v1 = getCachedStringFromWasm0(ret[0], ret[1]);
+        if (ret[0] !== 0) { wasm.__wbindgen_free(ret[0], ret[1], 1); }
+        return v1;
+    }
+    /**
+     * @param {string} arg0
+     */
+    set id(arg0) {
+        const ptr0 = passStringToWasm0(arg0, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+        const len0 = WASM_VECTOR_LEN;
+        wasm.__wbg_set_gems_id(this.__wbg_ptr, ptr0, len0);
+    }
+    /**
+     * @returns {string}
+     */
+    get readable_id() {
+        const ret = wasm.__wbg_get_gems_readable_id(this.__wbg_ptr);
+        var v1 = getCachedStringFromWasm0(ret[0], ret[1]);
+        if (ret[0] !== 0) { wasm.__wbindgen_free(ret[0], ret[1], 1); }
+        return v1;
+    }
+    /**
+     * @param {string} arg0
+     */
+    set readable_id(arg0) {
+        const ptr0 = passStringToWasm0(arg0, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+        const len0 = WASM_VECTOR_LEN;
+        wasm.__wbg_set_gems_readable_id(this.__wbg_ptr, ptr0, len0);
+    }
+    /**
+     * @returns {string}
+     */
+    get chemistry() {
+        const ret = wasm.__wbg_get_gems_chemistry(this.__wbg_ptr);
+        var v1 = getCachedStringFromWasm0(ret[0], ret[1]);
+        if (ret[0] !== 0) { wasm.__wbindgen_free(ret[0], ret[1], 1); }
+        return v1;
+    }
+    /**
+     * @param {string | null} [arg0]
+     */
+    set chemistry(arg0) {
+        var ptr0 = isLikeNone(arg0) ? 0 : passStringToWasm0(arg0, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+        var len0 = WASM_VECTOR_LEN;
+        wasm.__wbg_set_gems_chemistry(this.__wbg_ptr, ptr0, len0);
+    }
+    /**
+     * @returns {string}
+     */
+    get chromium_run_id() {
+        const ret = wasm.__wbg_get_gems_chromium_run_id(this.__wbg_ptr);
+        var v1 = getCachedStringFromWasm0(ret[0], ret[1]);
+        if (ret[0] !== 0) { wasm.__wbindgen_free(ret[0], ret[1], 1); }
+        return v1;
+    }
+    /**
+     * @param {string} arg0
+     */
+    set chromium_run_id(arg0) {
+        const ptr0 = passStringToWasm0(arg0, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+        const len0 = WASM_VECTOR_LEN;
+        wasm.__wbg_set_gems_chromium_run_id(this.__wbg_ptr, ptr0, len0);
+    }
+    /**
+     * @returns {Uint8Array}
+     */
+    to_json_bytes() {
+        const ret = wasm.gems_to_json_bytes(this.__wbg_ptr);
+        var v1 = getArrayU8FromWasm0(ret[0], ret[1]).slice();
+        wasm.__wbindgen_free(ret[0], ret[1] * 1, 1);
+        return v1;
+    }
+    /**
+     * @returns {string}
+     */
+    to_json_string() {
+        const ret = wasm.gems_to_json_string(this.__wbg_ptr);
+        var v1 = getCachedStringFromWasm0(ret[0], ret[1]);
+        if (ret[0] !== 0) { wasm.__wbindgen_free(ret[0], ret[1], 1); }
+        return v1;
+    }
+    /**
+     * @returns {string}
+     */
+    to_base64_json() {
+        const ret = wasm.gems_to_base64_json(this.__wbg_ptr);
+        var v1 = getCachedStringFromWasm0(ret[0], ret[1]);
+        if (ret[0] !== 0) { wasm.__wbindgen_free(ret[0], ret[1], 1); }
+        return v1;
+    }
+    /**
+     * @param {Uint8Array} json_bytes
+     * @returns {Gems}
+     */
+    static from_json_bytes(json_bytes) {
+        const ptr0 = passArray8ToWasm0(json_bytes, wasm.__wbindgen_malloc);
+        const len0 = WASM_VECTOR_LEN;
+        const ret = wasm.gems_from_json_bytes(ptr0, len0);
+        return Gems.__wrap(ret);
+    }
+    /**
+     * @param {string} json_str
+     * @returns {Gems}
+     */
+    static from_json_string(json_str) {
+        const ptr0 = passStringToWasm0(json_str, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+        const len0 = WASM_VECTOR_LEN;
+        const ret = wasm.gems_from_json_string(ptr0, len0);
+        return Gems.__wrap(ret);
+    }
+    /**
+     * @param {string} base64_json_bytes
+     * @returns {Gems}
+     */
+    static from_base64_json(base64_json_bytes) {
+        const ptr0 = passStringToWasm0(base64_json_bytes, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+        const len0 = WASM_VECTOR_LEN;
+        const ret = wasm.gems_from_base64_json(ptr0, len0);
+        return Gems.__wrap(ret);
+    }
+}
+
 const InstitutionFinalization = (typeof FinalizationRegistry === 'undefined')
     ? { register: () => {}, unregister: () => {} }
     : new FinalizationRegistry(ptr => wasm.__wbg_institution_free(ptr >>> 0, 1));
@@ -1497,21 +2122,21 @@ export class InstitutionQuery {
         wasm.__wbg_set_institutionquery_ids(this.__wbg_ptr, ptr0, len0);
     }
     /**
-     * @returns {string}
+     * @returns {string[]}
      */
-    get name() {
-        const ret = wasm.__wbg_get_institutionquery_name(this.__wbg_ptr);
-        var v1 = getCachedStringFromWasm0(ret[0], ret[1]);
-        if (ret[0] !== 0) { wasm.__wbindgen_free(ret[0], ret[1], 1); }
+    get names() {
+        const ret = wasm.__wbg_get_institutionquery_names(this.__wbg_ptr);
+        var v1 = getArrayJsValueFromWasm0(ret[0], ret[1]).slice();
+        wasm.__wbindgen_free(ret[0], ret[1] * 4, 4);
         return v1;
     }
     /**
-     * @param {string | null} [arg0]
+     * @param {string[]} arg0
      */
-    set name(arg0) {
-        var ptr0 = isLikeNone(arg0) ? 0 : passStringToWasm0(arg0, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
-        var len0 = WASM_VECTOR_LEN;
-        wasm.__wbg_set_institutionquery_name(this.__wbg_ptr, ptr0, len0);
+    set names(arg0) {
+        const ptr0 = passArrayJsValueToWasm0(arg0, wasm.__wbindgen_malloc);
+        const len0 = WASM_VECTOR_LEN;
+        wasm.__wbg_set_institutionquery_names(this.__wbg_ptr, ptr0, len0);
     }
     /**
      * @returns {OrderBy[]}
@@ -2106,21 +2731,21 @@ export class LabQuery {
         wasm.__wbg_set_labquery_ids(this.__wbg_ptr, ptr0, len0);
     }
     /**
-     * @returns {string}
+     * @returns {string[]}
      */
-    get name() {
-        const ret = wasm.__wbg_get_labquery_name(this.__wbg_ptr);
-        var v1 = getCachedStringFromWasm0(ret[0], ret[1]);
-        if (ret[0] !== 0) { wasm.__wbindgen_free(ret[0], ret[1], 1); }
+    get names() {
+        const ret = wasm.__wbg_get_labquery_names(this.__wbg_ptr);
+        var v1 = getArrayJsValueFromWasm0(ret[0], ret[1]).slice();
+        wasm.__wbindgen_free(ret[0], ret[1] * 4, 4);
         return v1;
     }
     /**
-     * @param {string | null} [arg0]
+     * @param {string[]} arg0
      */
-    set name(arg0) {
-        var ptr0 = isLikeNone(arg0) ? 0 : passStringToWasm0(arg0, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
-        var len0 = WASM_VECTOR_LEN;
-        wasm.__wbg_set_labquery_name(this.__wbg_ptr, ptr0, len0);
+    set names(arg0) {
+        const ptr0 = passArrayJsValueToWasm0(arg0, wasm.__wbindgen_malloc);
+        const len0 = WASM_VECTOR_LEN;
+        wasm.__wbg_set_labquery_names(this.__wbg_ptr, ptr0, len0);
     }
     /**
      * @returns {OrderBy[]}
@@ -3224,7 +3849,7 @@ export class OrderBy {
     set field(arg0) {
         const ptr0 = passStringToWasm0(arg0, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
         const len0 = WASM_VECTOR_LEN;
-        wasm.__wbg_set_multiplexingtag_tag_id(this.__wbg_ptr, ptr0, len0);
+        wasm.__wbg_set_orderby_field(this.__wbg_ptr, ptr0, len0);
     }
     /**
      * @returns {boolean}
@@ -3563,75 +4188,75 @@ export class PersonQuery {
     set ids(arg0) {
         const ptr0 = passArrayJsValueToWasm0(arg0, wasm.__wbindgen_malloc);
         const len0 = WASM_VECTOR_LEN;
-        wasm.__wbg_set_personquery_ids(this.__wbg_ptr, ptr0, len0);
+        wasm.__wbg_set_institutionquery_ids(this.__wbg_ptr, ptr0, len0);
     }
     /**
-     * @returns {string}
+     * @returns {string[]}
      */
-    get name() {
-        const ret = wasm.__wbg_get_personquery_name(this.__wbg_ptr);
-        var v1 = getCachedStringFromWasm0(ret[0], ret[1]);
-        if (ret[0] !== 0) { wasm.__wbindgen_free(ret[0], ret[1], 1); }
+    get names() {
+        const ret = wasm.__wbg_get_personquery_names(this.__wbg_ptr);
+        var v1 = getArrayJsValueFromWasm0(ret[0], ret[1]).slice();
+        wasm.__wbindgen_free(ret[0], ret[1] * 4, 4);
         return v1;
     }
     /**
-     * @param {string | null} [arg0]
+     * @param {string[]} arg0
      */
-    set name(arg0) {
-        var ptr0 = isLikeNone(arg0) ? 0 : passStringToWasm0(arg0, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
-        var len0 = WASM_VECTOR_LEN;
-        wasm.__wbg_set_personquery_name(this.__wbg_ptr, ptr0, len0);
+    set names(arg0) {
+        const ptr0 = passArrayJsValueToWasm0(arg0, wasm.__wbindgen_malloc);
+        const len0 = WASM_VECTOR_LEN;
+        wasm.__wbg_set_institutionquery_names(this.__wbg_ptr, ptr0, len0);
     }
     /**
-     * @returns {string}
+     * @returns {string[]}
      */
-    get email() {
-        const ret = wasm.__wbg_get_personquery_email(this.__wbg_ptr);
-        var v1 = getCachedStringFromWasm0(ret[0], ret[1]);
-        if (ret[0] !== 0) { wasm.__wbindgen_free(ret[0], ret[1], 1); }
+    get emails() {
+        const ret = wasm.__wbg_get_personquery_emails(this.__wbg_ptr);
+        var v1 = getArrayJsValueFromWasm0(ret[0], ret[1]).slice();
+        wasm.__wbindgen_free(ret[0], ret[1] * 4, 4);
         return v1;
     }
     /**
-     * @param {string | null} [arg0]
+     * @param {string[]} arg0
      */
-    set email(arg0) {
-        var ptr0 = isLikeNone(arg0) ? 0 : passStringToWasm0(arg0, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
-        var len0 = WASM_VECTOR_LEN;
-        wasm.__wbg_set_personquery_email(this.__wbg_ptr, ptr0, len0);
+    set emails(arg0) {
+        const ptr0 = passArrayJsValueToWasm0(arg0, wasm.__wbindgen_malloc);
+        const len0 = WASM_VECTOR_LEN;
+        wasm.__wbg_set_personquery_emails(this.__wbg_ptr, ptr0, len0);
     }
     /**
-     * @returns {string}
+     * @returns {string[]}
      */
-    get orcid() {
-        const ret = wasm.__wbg_get_personquery_orcid(this.__wbg_ptr);
-        var v1 = getCachedStringFromWasm0(ret[0], ret[1]);
-        if (ret[0] !== 0) { wasm.__wbindgen_free(ret[0], ret[1], 1); }
+    get orcids() {
+        const ret = wasm.__wbg_get_personquery_orcids(this.__wbg_ptr);
+        var v1 = getArrayJsValueFromWasm0(ret[0], ret[1]).slice();
+        wasm.__wbindgen_free(ret[0], ret[1] * 4, 4);
         return v1;
     }
     /**
-     * @param {string | null} [arg0]
+     * @param {string[]} arg0
      */
-    set orcid(arg0) {
-        var ptr0 = isLikeNone(arg0) ? 0 : passStringToWasm0(arg0, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
-        var len0 = WASM_VECTOR_LEN;
-        wasm.__wbg_set_personquery_orcid(this.__wbg_ptr, ptr0, len0);
+    set orcids(arg0) {
+        const ptr0 = passArrayJsValueToWasm0(arg0, wasm.__wbindgen_malloc);
+        const len0 = WASM_VECTOR_LEN;
+        wasm.__wbg_set_personquery_orcids(this.__wbg_ptr, ptr0, len0);
     }
     /**
-     * @returns {string}
+     * @returns {string[]}
      */
-    get ms_user_id() {
-        const ret = wasm.__wbg_get_personquery_ms_user_id(this.__wbg_ptr);
-        var v1 = getCachedStringFromWasm0(ret[0], ret[1]);
-        if (ret[0] !== 0) { wasm.__wbindgen_free(ret[0], ret[1], 1); }
+    get ms_user_ids() {
+        const ret = wasm.__wbg_get_personquery_ms_user_ids(this.__wbg_ptr);
+        var v1 = getArrayJsValueFromWasm0(ret[0], ret[1]).slice();
+        wasm.__wbindgen_free(ret[0], ret[1] * 4, 4);
         return v1;
     }
     /**
-     * @param {string | null} [arg0]
+     * @param {string[]} arg0
      */
-    set ms_user_id(arg0) {
-        var ptr0 = isLikeNone(arg0) ? 0 : passStringToWasm0(arg0, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
-        var len0 = WASM_VECTOR_LEN;
-        wasm.__wbg_set_personquery_ms_user_id(this.__wbg_ptr, ptr0, len0);
+    set ms_user_ids(arg0) {
+        const ptr0 = passArrayJsValueToWasm0(arg0, wasm.__wbindgen_malloc);
+        const len0 = WASM_VECTOR_LEN;
+        wasm.__wbg_set_personquery_ms_user_ids(this.__wbg_ptr, ptr0, len0);
     }
     /**
      * @returns {OrderBy[]}
@@ -4253,6 +4878,16 @@ export class ScamplersClient {
         return ret;
     }
     /**
+     * @param {ChromiumRunQuery} data
+     * @returns {Promise<ChromiumRun[]>}
+     */
+    list_chromium_runs(data) {
+        _assertClass(data, ChromiumRunQuery);
+        var ptr0 = data.__destroy_into_raw();
+        const ret = wasm.scamplersclient_list_chromium_runs(this.__wbg_ptr, ptr0);
+        return ret;
+    }
+    /**
      * @param {string} data
      * @returns {Promise<Institution>}
      */
@@ -4310,6 +4945,16 @@ export class ScamplersClient {
         const ptr0 = passStringToWasm0(data, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
         const len0 = WASM_VECTOR_LEN;
         const ret = wasm.scamplersclient_fetch_suspension_pool(this.__wbg_ptr, ptr0, len0);
+        return ret;
+    }
+    /**
+     * @param {string} data
+     * @returns {Promise<ChromiumRun>}
+     */
+    fetch_chromium_run(data) {
+        const ptr0 = passStringToWasm0(data, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+        const len0 = WASM_VECTOR_LEN;
+        const ret = wasm.scamplersclient_fetch_chromium_run(this.__wbg_ptr, ptr0, len0);
         return ret;
     }
     /**
@@ -4850,21 +5495,21 @@ export class SpecimenQuery {
         wasm.__wbg_set_specimenquery_ids(this.__wbg_ptr, ptr0, len0);
     }
     /**
-     * @returns {string}
+     * @returns {string[]}
      */
-    get name() {
-        const ret = wasm.__wbg_get_specimenquery_name(this.__wbg_ptr);
-        var v1 = getCachedStringFromWasm0(ret[0], ret[1]);
-        if (ret[0] !== 0) { wasm.__wbindgen_free(ret[0], ret[1], 1); }
+    get names() {
+        const ret = wasm.__wbg_get_specimenquery_names(this.__wbg_ptr);
+        var v1 = getArrayJsValueFromWasm0(ret[0], ret[1]).slice();
+        wasm.__wbindgen_free(ret[0], ret[1] * 4, 4);
         return v1;
     }
     /**
-     * @param {string | null} [arg0]
+     * @param {string[]} arg0
      */
-    set name(arg0) {
-        var ptr0 = isLikeNone(arg0) ? 0 : passStringToWasm0(arg0, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
-        var len0 = WASM_VECTOR_LEN;
-        wasm.__wbg_set_specimenquery_name(this.__wbg_ptr, ptr0, len0);
+    set names(arg0) {
+        const ptr0 = passArrayJsValueToWasm0(arg0, wasm.__wbindgen_malloc);
+        const len0 = WASM_VECTOR_LEN;
+        wasm.__wbg_set_specimenquery_names(this.__wbg_ptr, ptr0, len0);
     }
     /**
      * @returns {string[]}
@@ -4944,20 +5589,20 @@ export class SpecimenQuery {
         wasm.__wbg_set_specimenquery_species(this.__wbg_ptr, ptr0, len0);
     }
     /**
-     * @returns {string}
+     * @returns {string[]}
      */
     get notes() {
         const ret = wasm.__wbg_get_specimenquery_notes(this.__wbg_ptr);
-        var v1 = getCachedStringFromWasm0(ret[0], ret[1]);
-        if (ret[0] !== 0) { wasm.__wbindgen_free(ret[0], ret[1], 1); }
+        var v1 = getArrayJsValueFromWasm0(ret[0], ret[1]).slice();
+        wasm.__wbindgen_free(ret[0], ret[1] * 4, 4);
         return v1;
     }
     /**
-     * @param {string | null} [arg0]
+     * @param {string[]} arg0
      */
     set notes(arg0) {
-        var ptr0 = isLikeNone(arg0) ? 0 : passStringToWasm0(arg0, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
-        var len0 = WASM_VECTOR_LEN;
+        const ptr0 = passArrayJsValueToWasm0(arg0, wasm.__wbindgen_malloc);
+        const len0 = WASM_VECTOR_LEN;
         wasm.__wbg_set_specimenquery_notes(this.__wbg_ptr, ptr0, len0);
     }
     /**
@@ -4978,21 +5623,21 @@ export class SpecimenQuery {
         wasm.__wbg_set_specimenquery_types(this.__wbg_ptr, ptr0, len0);
     }
     /**
-     * @returns {string}
+     * @returns {string[]}
      */
-    get storage_buffer() {
-        const ret = wasm.__wbg_get_specimenquery_storage_buffer(this.__wbg_ptr);
-        var v1 = getCachedStringFromWasm0(ret[0], ret[1]);
-        if (ret[0] !== 0) { wasm.__wbindgen_free(ret[0], ret[1], 1); }
+    get storage_buffers() {
+        const ret = wasm.__wbg_get_specimenquery_storage_buffers(this.__wbg_ptr);
+        var v1 = getArrayJsValueFromWasm0(ret[0], ret[1]).slice();
+        wasm.__wbindgen_free(ret[0], ret[1] * 4, 4);
         return v1;
     }
     /**
-     * @param {string | null} [arg0]
+     * @param {string[]} arg0
      */
-    set storage_buffer(arg0) {
-        var ptr0 = isLikeNone(arg0) ? 0 : passStringToWasm0(arg0, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
-        var len0 = WASM_VECTOR_LEN;
-        wasm.__wbg_set_specimenquery_storage_buffer(this.__wbg_ptr, ptr0, len0);
+    set storage_buffers(arg0) {
+        const ptr0 = passArrayJsValueToWasm0(arg0, wasm.__wbindgen_malloc);
+        const len0 = WASM_VECTOR_LEN;
+        wasm.__wbg_set_specimenquery_storage_buffers(this.__wbg_ptr, ptr0, len0);
     }
     /**
      * @returns {boolean | undefined}
@@ -6040,7 +6685,7 @@ export class SuspensionPoolQuery {
     set ids(arg0) {
         const ptr0 = passArrayJsValueToWasm0(arg0, wasm.__wbindgen_malloc);
         const len0 = WASM_VECTOR_LEN;
-        wasm.__wbg_set_suspensionpoolquery_ids(this.__wbg_ptr, ptr0, len0);
+        wasm.__wbg_set_labquery_ids(this.__wbg_ptr, ptr0, len0);
     }
     /**
      * @returns {OrderBy[]}
@@ -6819,6 +7464,11 @@ export function __wbg_call_7cccdd69e0791ae2() { return handleError(function (arg
     return ret;
 }, arguments) };
 
+export function __wbg_chromiumrun_new(arg0) {
+    const ret = ChromiumRun.__wrap(arg0);
+    return ret;
+};
+
 export function __wbg_clearTimeout_b1115618e821c3b2(arg0) {
     const ret = clearTimeout(arg0);
     return ret;
@@ -6841,6 +7491,16 @@ export function __wbg_fetch_3afbdcc7ddbf16fe(arg0) {
 
 export function __wbg_fetch_509096533071c657(arg0, arg1) {
     const ret = arg0.fetch(arg1);
+    return ret;
+};
+
+export function __wbg_gems_new(arg0) {
+    const ret = Gems.__wrap(arg0);
+    return ret;
+};
+
+export function __wbg_gems_unwrap(arg0) {
+    const ret = Gems.__unwrap(arg0);
     return ret;
 };
 
@@ -6907,7 +7567,7 @@ export function __wbg_new_23a2665fac83c611(arg0, arg1) {
             const a = state0.a;
             state0.a = 0;
             try {
-                return __wbg_adapter_737(a, state0.b, arg0, arg1);
+                return __wbg_adapter_806(a, state0.b, arg0, arg1);
             } finally {
                 state0.a = a;
             }
@@ -7186,13 +7846,13 @@ export function __wbindgen_cb_drop(arg0) {
     return ret;
 };
 
-export function __wbindgen_closure_wrapper2559(arg0, arg1, arg2) {
-    const ret = makeMutClosure(arg0, arg1, 312, __wbg_adapter_36);
+export function __wbindgen_closure_wrapper2774(arg0, arg1, arg2) {
+    const ret = makeMutClosure(arg0, arg1, 324, __wbg_adapter_36);
     return ret;
 };
 
-export function __wbindgen_closure_wrapper2589(arg0, arg1, arg2) {
-    const ret = makeMutClosure(arg0, arg1, 330, __wbg_adapter_39);
+export function __wbindgen_closure_wrapper2804(arg0, arg1, arg2) {
+    const ret = makeMutClosure(arg0, arg1, 342, __wbg_adapter_39);
     return ret;
 };
 

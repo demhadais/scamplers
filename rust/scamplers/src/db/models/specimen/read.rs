@@ -2,7 +2,8 @@ use diesel::prelude::*;
 use scamplers_schema::{lab, person, specimen};
 
 use crate::{
-    apply_eq_any_filters, apply_eq_filters, apply_ilike_filters, attach_children_to_parents,
+    apply_eq_any_filters, apply_eq_filters, apply_ilike_filters, apply_time_filters,
+    attach_children_to_parents,
     db::{
         DbOperation,
         models::specimen::{
@@ -25,7 +26,7 @@ impl DbOperation<Vec<Specimen>> for SpecimenQuery {
 
         let Self {
             ids,
-            name,
+            names,
             submitters,
             labs,
             received_before,
@@ -35,7 +36,7 @@ impl DbOperation<Vec<Specimen>> for SpecimenQuery {
             types,
             embedded_in,
             fixatives,
-            storage_buffer,
+            storage_buffers,
             frozen,
             cryopreserved,
             ..
@@ -55,9 +56,9 @@ impl DbOperation<Vec<Specimen>> for SpecimenQuery {
 
         stmt = apply_ilike_filters!(stmt,
             filters = {
-                specimen::name => name,
+                specimen::name => names,
                 specimen::notes => notes,
-                specimen::storage_buffer => storage_buffer
+                specimen::storage_buffer => storage_buffers
             }
         );
 
@@ -69,13 +70,12 @@ impl DbOperation<Vec<Specimen>> for SpecimenQuery {
             }
         );
 
-        if let Some(received_before) = received_before {
-            stmt = stmt.filter(specimen::received_at.lt(received_before));
-        }
-
-        if let Some(received_after) = received_after {
-            stmt = stmt.filter(specimen::received_at.gt(received_after));
-        }
+        stmt = apply_time_filters!(
+            stmt,
+            filters = {
+                specimen::received_at => (received_before, received_after)
+            }
+        );
 
         if !species.is_empty() {
             stmt = stmt.filter(specimen::species.overlaps_with(species));
@@ -105,3 +105,95 @@ impl_id_db_operation!(
     delegate_to = SpecimenQuery,
     returns = Specimen
 );
+
+#[cfg(test)]
+mod tests {
+    #[allow(clippy::cast_possible_wrap)]
+    use rstest::rstest;
+
+    use crate::db::{
+        models::{
+            Pagination,
+            specimen::{
+                BlockEmbeddingMatrix, Specimen, SpecimenOrderBy, SpecimenQuery, SpecimenType,
+                block::FrozenBlockEmbeddingMatrix,
+            },
+        },
+        test_util::{N_SPECIMENS, db_conn, specimens, test_query},
+    };
+
+    #[rstest]
+    #[awt]
+    #[tokio::test]
+    async fn specimen_measurements(#[future] specimens: Vec<Specimen>) {
+        for s in specimens {
+            assert_eq!(s.measurements.len(), 1);
+        }
+    }
+
+    #[rstest]
+    #[awt]
+    #[tokio::test]
+    async fn default_specimen_query(
+        #[future] db_conn: deadpool_diesel::postgres::Connection,
+        #[future] specimens: Vec<Specimen>,
+    ) {
+        let query = SpecimenQuery::builder()
+            .pagination(Pagination {
+                limit: N_SPECIMENS as i64,
+                offset: 0,
+            })
+            .build();
+
+        test_query()
+            .all_data(specimens)
+            .sort_by(|s1, s2| {
+                s1.info
+                    .summary
+                    .received_at
+                    .cmp(&s2.info.summary.received_at)
+            })
+            .db_query(query)
+            .run(db_conn)
+            .await;
+    }
+
+    #[rstest]
+    #[awt]
+    #[tokio::test]
+    async fn specific_specimen_query(
+        #[future] db_conn: deadpool_diesel::postgres::Connection,
+        #[future] specimens: Vec<Specimen>,
+    ) {
+        fn filter(s: &Specimen) -> bool {
+            s.info.summary.frozen
+                && s.info.summary.type_ == SpecimenType::Block
+                && s.info
+                    .summary
+                    .embedded_in
+                    .as_ref()
+                    .is_some_and(|e| e == "carboxymethyl_cellulose")
+        }
+
+        let query = SpecimenQuery::builder()
+            .frozen(true)
+            .types([SpecimenType::Block])
+            .embedded_in([BlockEmbeddingMatrix::Frozen(
+                FrozenBlockEmbeddingMatrix::CarboxymethylCellulose,
+            )])
+            .order_by(SpecimenOrderBy::Name { descending: true })
+            .pagination(Pagination {
+                limit: N_SPECIMENS as i64,
+                offset: 0,
+            })
+            .build();
+
+        test_query()
+            .all_data(specimens)
+            .filter(filter)
+            .sort_by(|s1, s2| s1.info.summary.name.cmp(&s2.info.summary.name).reverse())
+            .db_query(query)
+            .run(db_conn)
+            .await;
+    }
+}

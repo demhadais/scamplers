@@ -241,9 +241,11 @@ define_ordering_enum! { SpecimenOrderBy { Name, ReceivedAt }, default = Received
 
 #[db_query]
 pub struct SpecimenQuery {
+    #[serde(alias = "id")]
     #[builder(default)]
     pub ids: Vec<Uuid>,
-    pub name: Option<String>,
+    #[builder(default)]
+    pub names: Vec<String>,
     #[builder(default)]
     pub submitters: Vec<Uuid>,
     #[builder(default)]
@@ -252,7 +254,8 @@ pub struct SpecimenQuery {
     pub received_after: Option<OffsetDateTime>,
     #[builder(default)]
     pub species: Vec<Species>,
-    pub notes: Option<String>,
+    #[builder(default)]
+    pub notes: Vec<String>,
     #[builder(default)]
     pub types: Vec<SpecimenType>,
     #[cfg_attr(target_arch = "wasm32", wasm_bindgen(skip))]
@@ -261,7 +264,8 @@ pub struct SpecimenQuery {
     #[cfg_attr(target_arch = "wasm32", wasm_bindgen(skip))]
     #[builder(default)]
     pub fixatives: Vec<Fixative>,
-    pub storage_buffer: Option<String>,
+    #[builder(default)]
+    pub storage_buffers: Vec<String>,
     pub frozen: Option<bool>,
     pub cryopreserved: Option<bool>,
     #[builder(default)]
@@ -275,21 +279,21 @@ pub struct SpecimenQuery {
 #[pymethods]
 impl SpecimenQuery {
     #[new]
-    #[pyo3(signature = (*,ids = Vec::new(), name = None, submitters = Vec::new(), labs = Vec::new(), received_before = None, received_after = None, species = Vec::new(), notes = None, types = Vec::new(), embedded_in = Vec::new(), fixatives = Vec::new(), storage_buffer = None, frozen = None, cryopreserved = None, order_by = DefaultVec::default(), pagination = Pagination::default()))]
+    #[pyo3(signature = (*,ids = Vec::new(), names = Vec::new(), submitters = Vec::new(), labs = Vec::new(), received_before = None, received_after = None, species = Vec::new(), notes = Vec::new(), types = Vec::new(), embedded_in = Vec::new(), fixatives = Vec::new(), storage_buffers = Vec::new(), frozen = None, cryopreserved = None, order_by = DefaultVec::default(), pagination = Pagination::default()))]
     #[must_use]
     pub fn new(
         ids: Vec<Uuid>,
-        name: Option<String>,
+        names: Vec<String>,
         submitters: Vec<Uuid>,
         labs: Vec<Uuid>,
         received_before: Option<OffsetDateTime>,
         received_after: Option<OffsetDateTime>,
         species: Vec<Species>,
-        notes: Option<String>,
+        notes: Vec<String>,
         types: Vec<SpecimenType>,
         embedded_in: Vec<BlockEmbeddingMatrix>,
         fixatives: Vec<Fixative>,
-        storage_buffer: Option<String>,
+        storage_buffers: Vec<String>,
         frozen: Option<bool>,
         cryopreserved: Option<bool>,
         order_by: DefaultVec<SpecimenOrderBy>,
@@ -297,7 +301,7 @@ impl SpecimenQuery {
     ) -> Self {
         Self {
             ids,
-            name,
+            names,
             submitters,
             labs,
             received_before,
@@ -307,7 +311,7 @@ impl SpecimenQuery {
             types,
             embedded_in,
             fixatives,
-            storage_buffer,
+            storage_buffers,
             frozen,
             cryopreserved,
             order_by,

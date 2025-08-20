@@ -13,6 +13,7 @@ use wasm_bindgen::prelude::*;
 
 #[cfg(target_arch = "wasm32")]
 use crate::db::models::{
+    chromium_run::{ChromiumRun, ChromiumRunId, ChromiumRunQuery},
     institution::{Institution, InstitutionId, InstitutionQuery},
     lab::{Lab, LabId, LabQuery, LabUpdate, NewLab},
     person::{CreatedUser, NewPerson, Person, PersonId, PersonQuery},
@@ -24,6 +25,7 @@ use crate::db::models::{
 };
 #[cfg(feature = "python")]
 use crate::db::models::{
+    chromium_run::{ChromiumRun, ChromiumRunId, ChromiumRunQuery, NewChromiumRun},
     institution::{Institution, InstitutionId, InstitutionQuery, NewInstitution},
     lab::{Lab, LabId, LabQuery, LabUpdate, NewLab},
     multiplexing_tag::MultiplexingTag,
@@ -204,7 +206,7 @@ impl ScamplersClient {
 
 #[cfg(target_arch = "wasm32")]
 macro_rules! wasm_client_methods {
-    {$($method_name:ident($request_type:path) -> $response_type:path;)*} => {
+    {$($method_name:ident($request_type:path) -> $response_type:path);*} => {
         $(
             #[cfg(target_arch = "wasm32")]
             #[wasm_bindgen::prelude::wasm_bindgen]
@@ -222,7 +224,7 @@ macro_rules! wasm_client_methods {
 
 #[cfg(target_arch = "wasm32")]
 macro_rules! wasm_wrapped_data_methods {
-    {$($method_name:ident($wrapper:ident($request_type:path)) -> $response_type:path;)*} => {
+    {$($method_name:ident($wrapper:ident($request_type:path)) -> $response_type:path);*} => {
         $(
             #[wasm_bindgen::prelude::wasm_bindgen]
             impl ScamplersClient {
@@ -239,7 +241,7 @@ macro_rules! wasm_wrapped_data_methods {
 
 #[cfg(target_arch = "wasm32")]
 macro_rules! wasm_list_relatives_methods {
-    {$($method_name:ident($wrapper:ident($id_type:path), $query_type:ty) -> $response_type:path;)*} => {
+    {$($method_name:ident($wrapper:ident($id_type:path), $query_type:ty) -> $response_type:path);*} => {
         $(
             #[wasm_bindgen::prelude::wasm_bindgen]
             impl ScamplersClient {
@@ -257,7 +259,7 @@ macro_rules! wasm_list_relatives_methods {
 
 #[cfg(feature = "python")]
 macro_rules! python_client_methods {
-    {$($method_name:ident($request_type:ty) -> $response_type:path;)*} => {
+    {$($method_name:ident($request_type:ty) -> $response_type:path);*} => {
         $(
             #[pyo3_stub_gen::derive::gen_stub_pymethods]
             #[pyo3::pymethods]
@@ -307,6 +309,7 @@ wasm_client_methods! {
     list_specimens(SpecimenQuery) -> Vec<Specimen>;
     list_suspensions(SuspensionQuery) -> Vec<Suspension>;
     list_suspension_pools(SuspensionPoolQuery) -> Vec<SuspensionPool>;
+    list_chromium_runs(ChromiumRunQuery) -> Vec<ChromiumRun>
 }
 
 #[cfg(target_arch = "wasm32")]
@@ -317,11 +320,12 @@ wasm_wrapped_data_methods! {
     fetch_specimen(SpecimenId(Uuid)) -> Specimen;
     fetch_suspension(SuspensionId(Uuid)) -> Suspension;
     fetch_suspension_pool(SuspensionPoolId(Uuid)) -> SuspensionPool;
+    fetch_chromium_run(ChromiumRunId(Uuid)) -> ChromiumRun
 }
 
 #[cfg(target_arch = "wasm32")]
 wasm_list_relatives_methods! {
-    list_person_specimens(PersonId(Uuid), SpecimenQuery) -> Vec<Specimen>;
+    list_person_specimens(PersonId(Uuid), SpecimenQuery) -> Vec<Specimen>
 }
 
 #[cfg(feature = "python")]
@@ -346,6 +350,9 @@ python_client_methods! {
     create_suspension_pool(NewSuspensionPool) -> SuspensionPool;
     fetch_suspension_pool(SuspensionPoolId) -> SuspensionPool;
     list_suspension_pools(SuspensionPoolQuery) -> Vec<SuspensionPool>;
+    create_chromium_run(NewChromiumRun) -> ChromiumRun;
+    fetch_chromium_run(ChromiumRunId) -> ChromiumRun;
+    list_chromium_runs(ChromiumRunQuery) -> Vec<ChromiumRun>
 }
 
 #[cfg(feature = "python")]

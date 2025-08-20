@@ -19,17 +19,15 @@ use time::OffsetDateTime;
 use tokio::sync::OnceCell;
 use uuid::Uuid;
 
-use crate::{db::seed_data::SeedData, result::ScamplersError};
 use crate::{
     db::{
         DbOperation,
         models::{
-            // chromium_run::{
-            //     ChromiumRun, NewChipLoadingCommon, NewChromiumRun, NewChromiumRunCommon,
-            // NewGemsCommon,     NewPoolMultiplexChipLoading,
-            // NewPoolMultiplexChromiumRun, NewPoolMultiplexGems,
-            //     PoolMultiplexChromiumChip,
-            // },
+            chromium_run::{
+                ChromiumRun, NewChipLoadingCommon, NewChromiumRun, NewChromiumRunCommon,
+                NewGemsCommon, NewPoolMultiplexChipLoading, NewPoolMultiplexChromiumRun,
+                NewPoolMultiplexGems, PoolMultiplexChromiumChip,
+            },
             // dataset::DatasetSummary,
             institution::{Institution, InstitutionId, NewInstitution},
             lab::{Lab, NewLab},
@@ -47,6 +45,7 @@ use crate::{
             suspension::{
                 self,
                 common::BiologicalMaterial,
+                pool::{NewSuspensionPool, NewSuspensionPoolMeasurement, SuspensionPool},
                 suspension::{NewSuspension, NewSuspensionMeasurement, SuspensionMeasurementData},
             },
             units::VolumeUnit,
@@ -55,6 +54,10 @@ use crate::{
     },
     dev_container::DevContainer,
     state::create_db_pool,
+};
+use crate::{
+    db::{models::suspension::pool::SuspensionPoolMeasurementData, seed_data::SeedData},
+    result::ScamplersError,
 };
 
 trait ChooseUnwrap<T> {
@@ -84,11 +87,11 @@ pub const N_SPECIMENS: usize = 1000;
 const N_MULTIPLEXING_TAGS: usize = 1600;
 
 // 25% of the specimens will be pooled
-const N_SUSPENSION_POOLS: usize = N_SPECIMENS / 4;
-const N_SUSPENSIONS_PER_POOL: usize = 2;
+pub const N_SUSPENSION_POOLS: usize = N_SPECIMENS / 4;
+pub const N_SUSPENSIONS_PER_POOL: usize = 2;
 
 // The remaining specimens will become singular suspensions
-const N_SUSPENSIONS: usize = N_SPECIMENS - N_SUSPENSIONS_PER_POOL;
+pub const N_SUSPENSIONS: usize = N_SPECIMENS - N_SUSPENSIONS_PER_POOL;
 
 const N_GEMS_PER_NONOCM_CHROMIUM_RUN: usize = 8;
 const N_GEMS_PER_OCM_CHROMIUM_RUN: usize = 2;
@@ -100,7 +103,8 @@ const N_OCM_CHROMIUM_RUNS: usize =
     N_SUSPENSIONS / (N_GEMS_PER_OCM_CHROMIUM_RUN * N_SUSPENSIONS_PER_OCM_GEMS);
 
 // Every suspension pool can be used for a pool multiplex chromium run
-const N_POOL_MULTIPLEX_CHROMIUM_RUNS: usize = N_SUSPENSION_POOLS / N_GEMS_PER_NONOCM_CHROMIUM_RUN;
+pub const N_POOL_MULTIPLEX_CHROMIUM_RUNS: usize =
+    N_SUSPENSION_POOLS / N_GEMS_PER_NONOCM_CHROMIUM_RUN;
 
 const N_CDNA: usize = (N_SINGLEPLEX_CHROMIUM_RUNS * N_GEMS_PER_NONOCM_CHROMIUM_RUN)
     + (N_OCM_CHROMIUM_RUNS * N_GEMS_PER_OCM_CHROMIUM_RUN)
@@ -123,8 +127,8 @@ pub struct TestState {
     labs: Vec<Lab>,
     specimens: Vec<Specimen>,
     multiplexing_tags: Vec<MultiplexingTag>,
-    // suspension_pools: Vec<SuspensionPoolHandle>,
-    // chromium_runs: Vec<ChromiumRun>,
+    suspension_pools: Vec<SuspensionPool>,
+    chromium_runs: Vec<ChromiumRun>,
     // cdna: Vec<CdnaHandle>,
     // libraries: Vec<LibraryHandle>,
     // sequencing_runs: Vec<SequencingRunSummary>,
@@ -151,6 +155,8 @@ impl TestState {
         insert_seed_data(seed_data, reqwest::Client::new(), db_conn)
             .await
             .unwrap();
+
+        self.multiplexing_tags = ().execute(db_conn).unwrap();
     }
 
     fn insert_institutions(&mut self, db_conn: &mut PgConnection) {
@@ -186,7 +192,7 @@ impl TestState {
             self.people.push(new_person);
         }
         // We know that seed_data contains "ahmed said" so make sure we add that too
-        let query = PersonQuery::builder().name("ahmed").build();
+        let query = PersonQuery::builder().names(["ahmed".to_string()]).build();
         let me = query.execute(db_conn).unwrap().remove(0);
         self.people.push(me);
     }
@@ -356,84 +362,86 @@ impl TestState {
         }
     }
 
-    // fn insert_suspension_pools(&mut self, db_conn: &mut PgConnection) {
-    //     for i in 0..N_SUSPENSION_POOLS {
-    //         let new_suspension_pool_measurement =
-    // NewSuspensionPoolMeasurement::builder()
-    // .measured_by(self.random_person_id())
-    // .data(SuspensionPoolMeasurementData {                 data:
-    // self.suspension_volume(),                 is_post_storage: false,
-    //             })
-    //             .build();
+    fn insert_suspension_pools(&mut self, db_conn: &mut PgConnection) {
+        for i in 0..N_SUSPENSION_POOLS {
+            let new_suspension_pool_measurement = NewSuspensionPoolMeasurement::builder()
+                .measured_by(self.random_person_id())
+                .data(SuspensionPoolMeasurementData {
+                    fields: self.suspension_volume(),
+                    is_post_storage: false,
+                })
+                .build();
 
-    //         let new_suspension_pool = NewSuspensionPool::builder()
-    //             .readable_id(Uuid::now_v7().to_string())
-    //             .name(format!("pool{i}"))
-    //             .pooled_at(self.random_time())
-    //             .preparer_ids(self.random_people_ids(2))
-    //             .suspensions(self.new_suspensions(N_SUSPENSIONS_PER_POOL, true))
-    //             .measurements([new_suspension_pool_measurement])
-    //             .build();
+            let new_suspension_pool = NewSuspensionPool::builder()
+                .readable_id(Uuid::now_v7().to_string())
+                .name(format!("pool{i}"))
+                .pooled_at(self.random_time())
+                .preparer_ids(self.random_people_ids(2))
+                .suspensions(self.new_suspensions(N_SUSPENSIONS_PER_POOL, true))
+                .measurements([new_suspension_pool_measurement])
+                .build();
 
-    //         self.suspension_pools
-    //             .push(new_suspension_pool.write_to_db(db_conn).await.unwrap());
-    //     }
-    // }
+            self.suspension_pools
+                .push(new_suspension_pool.execute(db_conn).unwrap());
+        }
+    }
 
-    // fn random_suspension_pool_id(&mut self) -> Uuid {
-    //     self.suspension_pools.choose_unwrap(&mut self.rng).id
-    // }
+    fn random_suspension_pool_id(&mut self) -> Uuid {
+        self.suspension_pools
+            .choose_unwrap(&mut self.rng)
+            .summary
+            .id
+    }
 
-    // fn insert_pool_multiplexed_chromium_runs(&mut self, db_conn: &mut
-    // PgConnection) {     for i in 0..N_POOL_MULTIPLEX_CHROMIUM_RUNS {
-    //         let chromium_run_common = NewChromiumRunCommon::builder()
-    //             .readable_id(format!("PMCR{i}"))
-    //             .run_at(self.random_time())
-    //             .run_by(self.random_person_id())
-    //             .succeeded(true)
-    //             .build();
+    fn insert_pool_multiplexed_chromium_runs(&mut self, db_conn: &mut PgConnection) {
+        for i in 0..N_POOL_MULTIPLEX_CHROMIUM_RUNS {
+            let chromium_run_common = NewChromiumRunCommon::builder()
+                .readable_id(format!("PMCR{i}"))
+                .run_at(self.random_time())
+                .run_by(self.random_person_id())
+                .succeeded(true)
+                .build();
 
-    //         let chip_loading_common = NewChipLoadingCommon::builder()
-    //             .suspension_volume_loaded(self.suspension_volume())
-    //             .buffer_volume_loaded(self.suspension_volume())
-    //             .build();
+            let chip_loading_common = NewChipLoadingCommon::builder()
+                .suspension_volume_loaded(self.suspension_volume())
+                .buffer_volume_loaded(self.suspension_volume())
+                .build();
 
-    //         let gems: Vec<_> = (0..N_GEMS_PER_NONOCM_CHROMIUM_RUN)
-    //             .map(|_| {
-    //                 let chip_loading = NewPoolMultiplexChipLoading::builder()
-    //                     .inner(chip_loading_common.clone())
-    //                     .suspension_pool_id(self.random_suspension_pool_id())
-    //                     .build();
+            let gems: Vec<_> = (0..N_GEMS_PER_NONOCM_CHROMIUM_RUN)
+                .map(|_| {
+                    let chip_loading = NewPoolMultiplexChipLoading::builder()
+                        .inner(chip_loading_common.clone())
+                        .suspension_pool_id(self.random_suspension_pool_id())
+                        .build();
 
-    //                 NewPoolMultiplexGems::builder()
-    //                     .loading(chip_loading)
-    //                     .inner(
-    //                         NewGemsCommon::builder()
-    //                             .chemistry(CHEMISTRY)
-    //                             .readable_id(format!(
-    //                                 "G{}",
-    //                                 (0..1_000_000).choose_unwrap_owned(&mut
-    // self.rng)                             ))
-    //                             .build(),
-    //                     )
-    //                     .build()
-    //             })
-    //             .collect();
+                    NewPoolMultiplexGems::builder()
+                        .loading([chip_loading])
+                        .chemistry(CHEMISTRY)
+                        .inner(
+                            NewGemsCommon::builder()
+                                .readable_id(format!(
+                                    "G{}",
+                                    (0..1_000_000).choose_unwrap_owned(&mut self.rng)
+                                ))
+                                .build(),
+                        )
+                        .build()
+                })
+                .collect();
 
-    //         let chromium_run = NewPoolMultiplexChromiumRun::builder()
-    //             .inner(chromium_run_common)
-    //             .chip(PoolMultiplexChromiumChip::GemxFx)
-    //             .gems(gems)
-    //             .build();
+            let chromium_run = NewPoolMultiplexChromiumRun::builder()
+                .inner(chromium_run_common)
+                .chip(PoolMultiplexChromiumChip::GemxFx)
+                .gems(gems)
+                .build();
 
-    //         self.chromium_runs.push(
-    //             NewChromiumRun::PoolMultiplex(chromium_run)
-    //                 .write_to_db(db_conn)
-    //                 .await
-    //                 .unwrap(),
-    //         );
-    //     }
-    // }
+            self.chromium_runs.push(
+                NewChromiumRun::PoolMultiplex(chromium_run)
+                    .execute(db_conn)
+                    .unwrap(),
+            );
+        }
+    }
 
     async fn populate_db(mut self) -> Self {
         let db_conn = self.db_pool.get().await.unwrap();
@@ -448,8 +456,8 @@ impl TestState {
                 self.insert_people(db_conn);
                 self.insert_labs(db_conn);
                 self.insert_specimens(db_conn);
-                // self.insert_suspension_pools(db_conn);
-                // self.insert_pool_multiplexed_chromium_runs(db_conn);
+                self.insert_suspension_pools(db_conn);
+                self.insert_pool_multiplexed_chromium_runs(db_conn);
 
                 self
             })
@@ -471,11 +479,11 @@ impl TestState {
             people: Vec::with_capacity(N_PEOPLE + 1),
             labs: Vec::with_capacity(N_LABS),
             specimens: Vec::with_capacity(N_SPECIMENS),
-            // suspension_pools: Vec::with_capacity(N_SUSPENSION_POOLS),
+            suspension_pools: Vec::with_capacity(N_SUSPENSION_POOLS),
             multiplexing_tags: Vec::with_capacity(N_MULTIPLEXING_TAGS),
-            // chromium_runs: Vec::with_capacity(
-            //     N_SINGLEPLEX_CHROMIUM_RUNS + N_OCM_CHROMIUM_RUNS +
-            // N_POOL_MULTIPLEX_CHROMIUM_RUNS, ),
+            chromium_runs: Vec::with_capacity(
+                N_SINGLEPLEX_CHROMIUM_RUNS + N_OCM_CHROMIUM_RUNS + N_POOL_MULTIPLEX_CHROMIUM_RUNS,
+            ),
             // cdna: Vec::with_capacity(N_CDNA),
             // libraries: Vec::with_capacity(N_LIBRARIES),
             // sequencing_runs: Vec::with_capacity(N_SEQUENCING_RUNS),
@@ -514,7 +522,7 @@ macro_rules! data_fixtures {
     };
 }
 
-data_fixtures!((institutions, Institution); (people, Person); (labs, Lab); (specimens, Specimen));
+data_fixtures!((institutions, Institution); (people, Person); (labs, Lab); (specimens, Specimen); (suspension_pools, SuspensionPool));
 
 #[bon::builder]
 fn extract_filter_sort<Record>(

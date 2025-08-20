@@ -167,12 +167,17 @@ define_ordering_enum! { PersonOrderBy { Name, Email }, default = Name }
 
 #[db_query]
 pub struct PersonQuery {
+    #[serde(alias = "id")]
     #[builder(default)]
     pub ids: Vec<Uuid>,
-    pub name: Option<String>,
-    pub email: Option<String>,
-    pub orcid: Option<String>,
-    pub ms_user_id: Option<Uuid>,
+    #[builder(default)]
+    pub names: Vec<String>,
+    #[builder(default)]
+    pub emails: Vec<String>,
+    #[builder(default)]
+    pub orcids: Vec<String>,
+    #[builder(default)]
+    pub ms_user_ids: Vec<Uuid>,
     #[builder(default)]
     pub order_by: DefaultVec<PersonOrderBy>,
     #[builder(default)]

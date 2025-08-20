@@ -53,7 +53,8 @@ pub struct InstitutionQuery {
     #[serde(alias = "id")]
     #[builder(default)]
     pub ids: Vec<Uuid>,
-    pub name: Option<String>,
+    #[builder(default)]
+    pub names: Vec<String>,
     #[builder(default)]
     pub order_by: DefaultVec<InstitutionOrderBy>,
     #[builder(default)]

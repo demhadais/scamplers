@@ -13,10 +13,10 @@ impl DbOperation<Vec<Institution>> for InstitutionQuery {
     fn execute(self, db_conn: &mut diesel::PgConnection) -> ScamplersResult<Vec<Institution>> {
         let mut stmt = init_stmt!(stmt = institution::table, query = &self, output_type = Institution, orderby_spec = { InstitutionOrderBy::Name => institution::name });
 
-        let Self { ids, name, .. } = &self;
+        let Self { ids, names, .. } = &self;
 
         stmt = apply_eq_any_filters!(stmt, filters = { institution::id => ids });
-        stmt = apply_ilike_filters!(stmt, filters = { institution::name => name });
+        stmt = apply_ilike_filters!(stmt, filters = { institution::name => names });
 
         Ok(stmt.load(db_conn)?)
     }
@@ -66,7 +66,7 @@ mod tests {
         #[future] institutions: Vec<Institution>,
     ) {
         let query = InstitutionQuery::builder()
-            .name("institution1")
+            .names(["institution1".to_string()])
             .order_by(InstitutionOrderBy::Name { descending: true })
             .build();
 

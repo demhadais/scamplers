@@ -13,8 +13,6 @@ pub(super) const MAX_GEMS_IN_NON_OCM_RUN: usize = 8;
 pub struct NewGemsCommon {
     #[garde(dive)]
     pub readable_id: ValidString,
-    #[garde(dive)]
-    pub chemistry: ValidString,
     #[serde(skip)]
     #[builder(skip)]
     pub chromium_run_id: Uuid,

@@ -6,6 +6,7 @@ use crate::{
     db::{
         DbOperation,
         models::{
+            chromium_run::{ChromiumRun, ChromiumRunId, ChromiumRunQuery, NewChromiumRun},
             institution::{Institution, InstitutionId, InstitutionQuery, NewInstitution},
             lab::{Lab, LabId, LabQuery, LabUpdate, NewLab},
             multiplexing_tag::MultiplexingTag,
@@ -55,7 +56,7 @@ where
 }
 
 macro_rules! router {
-    (router = $router:expr, $($handler_name:ident($request_type:ty) -> $response_type:ty;)*) => {{
+    (router = $router:expr, $($handler_name:ident($request_type:ty) -> $response_type:ty);*) => {{
         use crate::endpoints::{Api, Endpoint};
         use axum::{http::Method, routing::*};
 
@@ -126,6 +127,9 @@ pub fn router() -> Router<AppState> {
         create_suspension_pool(NewSuspensionPool) -> SuspensionPool;
         fetch_suspension_pool(SuspensionPoolId) -> SuspensionPool;
         list_suspension_pools(SuspensionPoolQuery) -> Vec<SuspensionPool>;
+        create_chromium_run(NewChromiumRun) -> ChromiumRun;
+        fetch_chromium_run(ChromiumRunId) -> ChromiumRun;
+        list_chromium_runs(ChromiumRunQuery) -> Vec<ChromiumRun>
     );
 
     router

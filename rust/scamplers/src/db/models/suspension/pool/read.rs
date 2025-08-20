@@ -67,3 +67,48 @@ impl DbOperation<Vec<SuspensionPool>> for SuspensionPoolQuery {
 }
 
 impl_id_db_operation! {id_type = SuspensionPoolId, delegate_to = SuspensionPoolQuery, returns = SuspensionPool}
+
+#[cfg(test)]
+mod tests {
+    #[allow(clippy::cast_possible_wrap)]
+    use rstest::rstest;
+
+    use crate::db::{
+        models::{
+            Pagination,
+            suspension::pool::{SuspensionPool, SuspensionPoolQuery},
+        },
+        test_util::{N_SUSPENSION_POOLS, db_conn, suspension_pools, test_query},
+    };
+
+    #[rstest]
+    #[awt]
+    #[tokio::test]
+    async fn suspension_pool_measurements(#[future] suspension_pools: Vec<SuspensionPool>) {
+        for s in suspension_pools {
+            assert_eq!(s.measurements.len(), 1);
+        }
+    }
+
+    #[rstest]
+    #[awt]
+    #[tokio::test]
+    async fn default_suspension_pool_query(
+        #[future] db_conn: deadpool_diesel::postgres::Connection,
+        #[future] suspension_pools: Vec<SuspensionPool>,
+    ) {
+        let query = SuspensionPoolQuery::builder()
+            .pagination(Pagination {
+                limit: N_SUSPENSION_POOLS as i64,
+                offset: 0,
+            })
+            .build();
+
+        test_query()
+            .all_data(suspension_pools)
+            .sort_by(|s1, s2| s1.summary.pooled_at.cmp(&s2.summary.pooled_at))
+            .db_query(query)
+            .run(db_conn)
+            .await;
+    }
+}

@@ -2,7 +2,7 @@ use diesel::{prelude::*, sql_types::Text};
 use scamplers_schema::{institution, person};
 
 use crate::{
-    apply_eq_any_filters, apply_eq_filters, apply_ilike_filters,
+    apply_eq_any_filters, apply_ilike_filters,
     db::{
         DbOperation,
         models::{
@@ -24,31 +24,27 @@ impl DbOperation<Vec<Person>> for PersonQuery {
 
         let Self {
             ids,
-            name,
-            email,
-            orcid,
-            ms_user_id,
+            names,
+            emails,
+            orcids,
+            ms_user_ids,
             ..
         } = &self;
 
         stmt = apply_eq_any_filters!(
             stmt,
-            filters = {person::id => ids}
+            filters = {
+                person::id => ids,
+                person::orcid => orcids,
+                person::ms_user_id => ms_user_ids
+            }
         );
 
         stmt = apply_ilike_filters!(
             stmt,
             filters = {
-                person::name => name,
-                person::email => email
-            }
-        );
-
-        stmt = apply_eq_filters!(
-            stmt,
-            filters = {
-                person::orcid => orcid,
-                person::ms_user_id => ms_user_id
+                person::name => names,
+                person::email => emails
             }
         );
 
@@ -125,7 +121,7 @@ mod tests {
     #[tokio::test]
     async fn specific_person_query(#[future] db_conn: Connection, #[future] people: Vec<Person>) {
         let query = PersonQuery::builder()
-            .name("person1")
+            .names(["person1".to_string()])
             .order_by(PersonOrderBy::Name { descending: true })
             .build();
 

@@ -107,7 +107,6 @@ diesel::table! {
 diesel::table! {
     gems (id) {
         id -> Uuid,
-        links -> Jsonb,
         readable_id -> Text,
         chemistry -> Nullable<Text>,
         chromium_run_id -> Uuid,

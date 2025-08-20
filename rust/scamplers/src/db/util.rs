@@ -1,13 +1,32 @@
-use std::fmt::Display;
-
 use uuid::Uuid;
 
-pub trait AsIlike: Display {
+pub trait AsIlike {
+    fn as_ilike(&self) -> String;
+}
+
+impl AsIlike for str {
     fn as_ilike(&self) -> String {
         format!("%{self}%")
     }
 }
-impl<T> AsIlike for T where T: Display {}
+
+impl AsIlike for String {
+    fn as_ilike(&self) -> String {
+        self.as_str().as_ilike()
+    }
+}
+
+impl AsIlike for &[String] {
+    fn as_ilike(&self) -> String {
+        self.join("|").as_ilike()
+    }
+}
+
+impl AsIlike for &Vec<String> {
+    fn as_ilike(&self) -> String {
+        self.as_slice().as_ilike()
+    }
+}
 
 #[macro_export]
 macro_rules! init_stmt {
@@ -59,12 +78,30 @@ macro_rules! apply_eq_filters {
 }
 
 #[macro_export]
-macro_rules! apply_ilike_filters {
-    ($stmt:expr, filters = {$($col:expr => $string:expr),*}) => {{
-        use $crate::db::util::AsIlike;
+macro_rules! apply_time_filters {
+    ($stmt:expr, filters = {$($col:expr => ($before:expr, $after:expr)),*}) => {{
         $(
-            if let Some(string) = $string {
-                $stmt = $stmt.filter($col.ilike(string.as_ilike()));
+            if let Some(before) = $before {
+                $stmt = $stmt.filter($col.lt(before));
+            }
+
+            if let Some(after) = $after {
+                $stmt = $stmt.filter($col.gt(after));
+            }
+        )*
+
+        $stmt
+    }};
+}
+
+#[macro_export]
+macro_rules! apply_ilike_filters {
+    ($stmt:expr, filters = {$($col:expr => $strings:expr),*}) => {{
+        use $crate::db::util::AsIlike;
+
+        $(
+            if !$strings.is_empty() {
+                $stmt = $stmt.filter($col.ilike($strings.as_ilike()))
             }
         )*
 

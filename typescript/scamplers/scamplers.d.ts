@@ -55,6 +55,51 @@ export class CdnaLibraryTypeError {
   static from_json_string(json_str: string): CdnaLibraryTypeError;
   static from_base64_json(base64_json_bytes: string): CdnaLibraryTypeError;
 }
+export class ChromiumRun {
+  private constructor();
+  free(): void;
+  summary: ChromiumRunSummary;
+  gems: Gems[];
+}
+export class ChromiumRunQuery {
+  free(): void;
+  to_json_bytes(): Uint8Array;
+  to_json_string(): string;
+  to_base64_json(): string;
+  static from_json_bytes(json_bytes: Uint8Array): ChromiumRunQuery;
+  static from_json_string(json_str: string): ChromiumRunQuery;
+  static from_base64_json(base64_json_bytes: string): ChromiumRunQuery;
+  constructor();
+  ids: string[];
+  readable_ids: string[];
+  chips: string[];
+  get run_before(): Date | undefined;
+  set run_before(value: Date | null | undefined);
+  get run_after(): Date | undefined;
+  set run_after(value: Date | null | undefined);
+  get succeeded(): boolean | undefined;
+  set succeeded(value: boolean | null | undefined);
+  notes: string[];
+  order_by: OrderBy[];
+  pagination: Pagination;
+}
+export class ChromiumRunSummary {
+  private constructor();
+  free(): void;
+  to_json_bytes(): Uint8Array;
+  to_json_string(): string;
+  to_base64_json(): string;
+  static from_json_bytes(json_bytes: Uint8Array): ChromiumRunSummary;
+  static from_json_string(json_str: string): ChromiumRunSummary;
+  static from_base64_json(base64_json_bytes: string): ChromiumRunSummary;
+  id: string;
+  readable_id: string;
+  chip: string;
+  run_at: Date;
+  succeeded: boolean;
+  get notes(): string;
+  set notes(value: string | null | undefined);
+}
 export class ClientError {
   private constructor();
   free(): void;
@@ -141,6 +186,21 @@ export class EmptyStringError {
   private constructor();
   free(): void;
 }
+export class Gems {
+  private constructor();
+  free(): void;
+  to_json_bytes(): Uint8Array;
+  to_json_string(): string;
+  to_base64_json(): string;
+  static from_json_bytes(json_bytes: Uint8Array): Gems;
+  static from_json_string(json_str: string): Gems;
+  static from_base64_json(base64_json_bytes: string): Gems;
+  id: string;
+  readable_id: string;
+  get chemistry(): string;
+  set chemistry(value: string | null | undefined);
+  chromium_run_id: string;
+}
 export class Institution {
   private constructor();
   free(): void;
@@ -164,8 +224,7 @@ export class InstitutionQuery {
   static from_base64_json(base64_json_bytes: string): InstitutionQuery;
   constructor();
   ids: string[];
-  get name(): string;
-  set name(value: string | null | undefined);
+  names: string[];
   order_by: OrderBy[];
   pagination: Pagination;
 }
@@ -227,8 +286,7 @@ export class LabQuery {
   static from_base64_json(base64_json_bytes: string): LabQuery;
   constructor();
   ids: string[];
-  get name(): string;
-  set name(value: string | null | undefined);
+  names: string[];
   order_by: OrderBy[];
   pagination: Pagination;
 }
@@ -374,14 +432,10 @@ export class PersonQuery {
   static from_base64_json(base64_json_bytes: string): PersonQuery;
   constructor();
   ids: string[];
-  get name(): string;
-  set name(value: string | null | undefined);
-  get email(): string;
-  set email(value: string | null | undefined);
-  get orcid(): string;
-  set orcid(value: string | null | undefined);
-  get ms_user_id(): string;
-  set ms_user_id(value: string | null | undefined);
+  names: string[];
+  emails: string[];
+  orcids: string[];
+  ms_user_ids: string[];
   order_by: OrderBy[];
   pagination: Pagination;
 }
@@ -438,12 +492,14 @@ export class ScamplersClient {
   list_specimens(data: SpecimenQuery): Promise<Specimen[]>;
   list_suspensions(data: SuspensionQuery): Promise<Suspension[]>;
   list_suspension_pools(data: SuspensionPoolQuery): Promise<SuspensionPool[]>;
+  list_chromium_runs(data: ChromiumRunQuery): Promise<ChromiumRun[]>;
   fetch_institution(data: string): Promise<Institution>;
   fetch_person(data: string): Promise<Person>;
   fetch_lab(data: string): Promise<Lab>;
   fetch_specimen(data: string): Promise<Specimen>;
   fetch_suspension(data: string): Promise<Suspension>;
   fetch_suspension_pool(data: string): Promise<SuspensionPool>;
+  fetch_chromium_run(data: string): Promise<ChromiumRun>;
   list_person_specimens(id: string, query: SpecimenQuery): Promise<Specimen[]>;
 }
 export class ScamplersErrorResponse {
@@ -506,8 +562,7 @@ export class SpecimenQuery {
   static from_base64_json(base64_json_bytes: string): SpecimenQuery;
   constructor();
   ids: string[];
-  get name(): string;
-  set name(value: string | null | undefined);
+  names: string[];
   submitters: string[];
   labs: string[];
   get received_before(): Date | undefined;
@@ -515,11 +570,9 @@ export class SpecimenQuery {
   get received_after(): Date | undefined;
   set received_after(value: Date | null | undefined);
   species: any[];
-  get notes(): string;
-  set notes(value: string | null | undefined);
+  notes: string[];
   types: any[];
-  get storage_buffer(): string;
-  set storage_buffer(value: string | null | undefined);
+  storage_buffers: string[];
   get frozen(): boolean | undefined;
   set frozen(value: boolean | null | undefined);
   get cryopreserved(): boolean | undefined;

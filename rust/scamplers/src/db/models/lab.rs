@@ -129,9 +129,11 @@ define_ordering_enum! { LabOrderBy { Name }, default = Name }
 
 #[db_query]
 pub struct LabQuery {
+    #[serde(alias = "id")]
     #[builder(default)]
     pub ids: Vec<Uuid>,
-    pub name: Option<String>,
+    #[builder(default)]
+    pub names: Vec<String>,
     #[builder(default)]
     pub order_by: DefaultVec<LabOrderBy>,
     #[builder(default)]

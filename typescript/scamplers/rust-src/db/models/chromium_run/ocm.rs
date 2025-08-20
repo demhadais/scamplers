@@ -1,54 +1,19 @@
 #[cfg(feature = "python")]
 use pyo3::prelude::*;
-use scamplers_macros::{base_model, db_insertion, db_simple_enum};
+use scamplers_macros::{db_insertion, db_simple_enum};
 #[cfg(feature = "python")]
 use time::OffsetDateTime;
 #[cfg(feature = "python")]
 use uuid::Uuid;
-#[cfg(feature = "python")]
 use valid_string::ValidString;
 
 use crate::db::models::chromium_run::{
     common::{NewChromiumRunCommon, NewGemsCommon},
     singleplex::NewSingleplexChipLoading,
 };
-#[cfg(feature = "python")]
-use crate::db::models::suspension::common::SuspensionMeasurementFields;
 
 const MAX_SUSPENSIONS_IN_OCM_GEMS: usize = 4;
 const MAX_GEMS_IN_OCM_RUN: usize = 2;
-
-#[cfg_attr(feature = "python", pyo3_stub_gen::derive::gen_stub_pyclass)]
-#[cfg_attr(feature = "python", pyclass(eq, module = "scamplepy.create"))]
-#[base_model]
-pub struct NewOcmChipLoading(pub NewSingleplexChipLoading);
-
-#[cfg(feature = "python")]
-#[pyo3_stub_gen::derive::gen_stub_pymethods]
-#[pymethods]
-impl NewOcmChipLoading {
-    #[new]
-    #[pyo3(signature = (*, suspension_id, suspension_volume_loaded, buffer_volume_loaded, notes=None))]
-    fn new(
-        suspension_id: Uuid,
-        suspension_volume_loaded: SuspensionMeasurementFields,
-        buffer_volume_loaded: SuspensionMeasurementFields,
-        notes: Option<ValidString>,
-    ) -> Self {
-        use super::common::NewChipLoadingCommon;
-        use crate::db::models::chromium_run::singleplex::NewSingleplexChipLoading;
-
-        Self(NewSingleplexChipLoading {
-            suspension_id,
-            inner: NewChipLoadingCommon {
-                gems_id: Uuid::default(),
-                suspension_volume_loaded,
-                buffer_volume_loaded,
-                notes,
-            },
-        })
-    }
-}
 
 #[db_insertion]
 #[cfg_attr(feature = "app", diesel(table_name = scamplers_schema::gems))]
@@ -57,9 +22,11 @@ pub struct NewOcmGems {
     #[garde(dive)]
     #[cfg_attr(feature = "app", diesel(embed))]
     pub inner: NewGemsCommon,
+    #[garde(dive)]
+    pub chemistry: ValidString,
     #[cfg_attr(feature = "app", diesel(skip_insertion))]
-    #[garde(length(min = 1, max = MAX_SUSPENSIONS_IN_OCM_GEMS))]
-    pub loading: Vec<NewOcmChipLoading>,
+    #[garde(dive, length(min = 1, max = MAX_SUSPENSIONS_IN_OCM_GEMS))]
+    pub loading: Vec<NewSingleplexChipLoading>,
 }
 
 #[cfg(feature = "python")]
@@ -71,20 +38,21 @@ impl NewOcmGems {
     fn new(
         readable_id: ValidString,
         chemistry: ValidString,
-        loading: Vec<NewOcmChipLoading>,
+        loading: Vec<NewSingleplexChipLoading>,
     ) -> Self {
         Self {
             inner: NewGemsCommon {
                 readable_id,
-                chemistry,
                 chromium_run_id: Uuid::default(),
             },
+            chemistry,
             loading,
         }
     }
 }
 
 #[db_simple_enum]
+#[derive(strum::Display)]
 #[cfg_attr(feature = "python", pyo3(module = "scamplepy.create"))]
 pub enum OcmChromiumChip {
     #[serde(rename = "GEM-X OCM 3'")]
@@ -101,7 +69,7 @@ pub struct NewOcmChromiumRun {
     pub inner: NewChromiumRunCommon,
     pub chip: OcmChromiumChip,
     #[cfg_attr(feature = "app", diesel(skip_insertion))]
-    #[garde(length(min = 1, max = MAX_GEMS_IN_OCM_RUN))]
+    #[garde(dive, length(min = 1, max = MAX_GEMS_IN_OCM_RUN))]
     pub gems: Vec<NewOcmGems>,
 }
 

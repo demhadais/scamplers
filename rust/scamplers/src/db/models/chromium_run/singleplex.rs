@@ -4,7 +4,6 @@ use scamplers_macros::{db_insertion, db_simple_enum};
 #[cfg(feature = "python")]
 use time::OffsetDateTime;
 use uuid::Uuid;
-#[cfg(feature = "python")]
 use valid_string::ValidString;
 
 use crate::db::models::chromium_run::common::{
@@ -24,6 +23,30 @@ pub struct NewSingleplexChipLoading {
     pub inner: NewChipLoadingCommon,
 }
 
+#[cfg(feature = "python")]
+#[pyo3_stub_gen::derive::gen_stub_pymethods]
+#[pymethods]
+impl NewSingleplexChipLoading {
+    #[new]
+    #[pyo3(signature = (*, suspension_id, suspension_volume_loaded, buffer_volume_loaded, notes=None))]
+    fn new(
+        suspension_id: Uuid,
+        suspension_volume_loaded: SuspensionMeasurementFields,
+        buffer_volume_loaded: SuspensionMeasurementFields,
+        notes: Option<ValidString>,
+    ) -> Self {
+        Self {
+            suspension_id,
+            inner: NewChipLoadingCommon {
+                gems_id: Uuid::default(),
+                suspension_volume_loaded,
+                buffer_volume_loaded,
+                notes,
+            },
+        }
+    }
+}
+
 #[db_insertion]
 #[cfg_attr(feature = "app", diesel(table_name = scamplers_schema::gems))]
 pub struct NewSingleplexGems {
@@ -31,8 +54,11 @@ pub struct NewSingleplexGems {
     #[garde(dive)]
     #[cfg_attr(feature = "app", diesel(embed))]
     pub inner: NewGemsCommon,
+    #[garde(dive)]
+    pub chemistry: Option<ValidString>,
+    #[garde(dive, length(min = 1, max = 1))]
     #[cfg_attr(feature = "app", diesel(skip_insertion))]
-    pub loading: NewSingleplexChipLoading,
+    pub loading: Vec<NewSingleplexChipLoading>,
 }
 
 #[cfg(feature = "python")]
@@ -42,7 +68,7 @@ impl NewSingleplexGems {
     #[pyo3(signature = (*, readable_id, chemistry, suspension_id, suspension_volume_loaded, buffer_volume_loaded, notes=None))]
     fn new(
         readable_id: ValidString,
-        chemistry: ValidString,
+        chemistry: Option<ValidString>,
         suspension_id: Uuid,
         suspension_volume_loaded: SuspensionMeasurementFields,
         buffer_volume_loaded: SuspensionMeasurementFields,
@@ -51,10 +77,10 @@ impl NewSingleplexGems {
         Self {
             inner: NewGemsCommon {
                 readable_id,
-                chemistry,
                 chromium_run_id: Uuid::default(),
             },
-            loading: NewSingleplexChipLoading {
+            chemistry,
+            loading: vec![NewSingleplexChipLoading {
                 suspension_id,
                 inner: NewChipLoadingCommon {
                     gems_id: Uuid::default(),
@@ -62,12 +88,13 @@ impl NewSingleplexGems {
                     buffer_volume_loaded,
                     notes,
                 },
-            },
+            }],
         }
     }
 }
 
 #[db_simple_enum]
+#[derive(strum::Display)]
 #[cfg_attr(feature = "python", pyo3(module = "scamplepy.create"))]
 pub enum SingleplexChromiumChip {
     #[serde(rename = "J")]
