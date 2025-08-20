@@ -56,4 +56,4 @@ jobs:
         run: |
           mkdir committed-typestubs && cp -r scamplepy/* committed-typestubs
           cargo run
-          diff --recursvice committed-typestubs scamplepy
+          diff --recursive committed-typestubs scamplepy
