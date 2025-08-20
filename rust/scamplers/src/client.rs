@@ -129,8 +129,6 @@ impl ScamplersClient {
 }
 
 impl ScamplersClient {
-    /// # Errors
-    #[allow(dead_code)]
     pub async fn send_request<Req, Resp>(&self, data: Req) -> Result<Resp, ScamplersErrorResponse>
     where
         Api: Endpoint<Req, Resp>,

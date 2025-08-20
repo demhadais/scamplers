@@ -57,3 +57,15 @@ pub enum SuspensionMeasurementFields {
         unit: (BiologicalMaterial, LengthUnit),
     },
 }
+
+impl SuspensionMeasurementFields {
+    pub fn is_volume(&self, (): &()) -> garde::Result {
+        if !matches!(self, Self::Volume { .. }) {
+            return Err(garde::Error::new(format!(
+                "expected volume, found {self:?}"
+            )));
+        }
+
+        Ok(())
+    }
+}
