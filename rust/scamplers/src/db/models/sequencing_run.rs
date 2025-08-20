@@ -3,9 +3,9 @@ use pyo3::prelude::*;
 use scamplers_macros::db_insertion;
 use time::OffsetDateTime;
 use uuid::Uuid;
-use valid_string::ValidString;
 
 #[db_insertion]
+#[cfg_attr(feature = "app", diesel(table_name = scamplers_schema::sequencing_submission))]
 pub struct NewSequencingSubmission {
     #[serde(default)]
     pub sequencing_run_id: Uuid,
