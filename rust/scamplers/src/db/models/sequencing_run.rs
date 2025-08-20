@@ -5,7 +5,7 @@ use time::OffsetDateTime;
 use uuid::Uuid;
 
 #[db_insertion]
-#[cfg_attr(feature = "app", diesel(table_name = scamplers_schema::sequencing_submission))]
+#[cfg_attr(feature = "app", diesel(table_name = scamplers_schema::sequencing_submissions))]
 pub struct NewSequencingSubmission {
     #[serde(default)]
     pub sequencing_run_id: Uuid,
