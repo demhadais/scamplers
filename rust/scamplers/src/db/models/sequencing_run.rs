@@ -1,6 +1,6 @@
 #[cfg(feature = "python")]
 use pyo3::prelude::*;
-use scamplers_macros::{db_insertion};
+use scamplers_macros::db_insertion;
 use time::OffsetDateTime;
 use uuid::Uuid;
 use valid_string::ValidString;
@@ -19,11 +19,7 @@ pub struct NewSequencingSubmission {
 impl NewSequencingSubmission {
     #[new]
     #[pyo3(signature = (*, library_id, submitted_at, sequencing_run_id=Uuid::default()))]
-    fn new(
-        library_id: Uuid,
-        submitted_at: OffsetDateTime,
-        sequencing_run_id: Uuid,
-    ) -> Self {
+    fn new(library_id: Uuid, submitted_at: OffsetDateTime, sequencing_run_id: Uuid) -> Self {
         Self {
             sequencing_run_id,
             library_id,
