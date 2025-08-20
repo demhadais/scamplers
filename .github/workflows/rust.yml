@@ -16,6 +16,8 @@ jobs:
 
       - name: Cache cargo files
         uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: "rust -> target"
 
       - name: Install diesel
         run: cargo install diesel_cli --no-default-features --features postgres
