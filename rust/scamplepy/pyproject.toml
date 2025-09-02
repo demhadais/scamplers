@@ -10,5 +10,5 @@ requires = ["maturin>=1.9,<2.0"]
 build-backend = "maturin"
 
 [tool.ruff]
-exclude = ["scamplepy/**/__init__.py"]
+exclude = ["scamplepy/"]
 lint = { ignore = ["F403", "F405", "F811"] }
