@@ -228,12 +228,6 @@ function passArray8ToWasm0(arg, malloc) {
     return ptr;
 }
 
-function _assertClass(instance, klass) {
-    if (!(instance instanceof klass)) {
-        throw new Error(`expected instance of ${klass.name}`);
-    }
-}
-
 function getArrayJsValueFromWasm0(ptr, len) {
     ptr = ptr >>> 0;
     const mem = getDataViewMemory0();
@@ -254,16 +248,22 @@ function passArrayJsValueToWasm0(array, malloc) {
     WASM_VECTOR_LEN = array.length;
     return ptr;
 }
+
+function _assertClass(instance, klass) {
+    if (!(instance instanceof klass)) {
+        throw new Error(`expected instance of ${klass.name}`);
+    }
+}
 function __wbg_adapter_36(arg0, arg1) {
-    wasm._dyn_core__ops__function__FnMut_____Output___R_as_wasm_bindgen__closure__WasmClosure___describe__invoke__h74b17c7c80342ef0(arg0, arg1);
+    wasm._dyn_core__ops__function__FnMut_____Output___R_as_wasm_bindgen__closure__WasmClosure___describe__invoke__ha4f98ed69bbc3f73(arg0, arg1);
 }
 
 function __wbg_adapter_39(arg0, arg1, arg2) {
-    wasm.closure357_externref_shim(arg0, arg1, arg2);
+    wasm.closure356_externref_shim(arg0, arg1, arg2);
 }
 
 function __wbg_adapter_850(arg0, arg1, arg2, arg3) {
-    wasm.closure392_externref_shim(arg0, arg1, arg2, arg3);
+    wasm.closure391_externref_shim(arg0, arg1, arg2, arg3);
 }
 
 /**
@@ -8294,13 +8294,13 @@ export function __wbindgen_cb_drop(arg0) {
     return ret;
 };
 
-export function __wbindgen_closure_wrapper2917(arg0, arg1, arg2) {
-    const ret = makeMutClosure(arg0, arg1, 340, __wbg_adapter_36);
+export function __wbindgen_closure_wrapper2940(arg0, arg1, arg2) {
+    const ret = makeMutClosure(arg0, arg1, 338, __wbg_adapter_36);
     return ret;
 };
 
-export function __wbindgen_closure_wrapper2947(arg0, arg1, arg2) {
-    const ret = makeMutClosure(arg0, arg1, 358, __wbg_adapter_39);
+export function __wbindgen_closure_wrapper2972(arg0, arg1, arg2) {
+    const ret = makeMutClosure(arg0, arg1, 357, __wbg_adapter_39);
     return ret;
 };
 

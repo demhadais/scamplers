@@ -1,1 +1,1 @@
-from scamplepy.query import *  # noqa: F403
+from scamplepy.query import * # noqa: F403

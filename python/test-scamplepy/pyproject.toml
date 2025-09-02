@@ -5,7 +5,6 @@ readme = "README.md"
 authors = [{ name = "Ahmed Said", email = "ahmed.said@jax.org" }]
 requires-python = ">=3.13"
 dependencies = [
-    "fire>=0.7.0",
     "maturin>=1.9.2",
     "maturin-import-hook>=0.3.0",
     "pyright>=1.1.403",
