@@ -167,7 +167,7 @@ pub struct SuspensionPool {
     pub measurements: Vec<SuspensionPoolMeasurement>,
 }
 
-define_ordering_enum! {SuspensionPoolOrderBy{ Name, PooledAt }, default = PooledAt}
+define_ordering_enum! { SuspensionPoolOrderBy{ Name, PooledAt, ReadableId }, default = PooledAt }
 
 #[db_query]
 pub struct SuspensionPoolQuery {

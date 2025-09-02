@@ -265,14 +265,14 @@ macro_rules! impl_id_db_operation {
 }
 
 #[macro_export]
-macro_rules! group_otm_children {
+macro_rules! group_children {
     (parents = $parents:expr,children = $children:expr) => {
         $children.grouped_by(&$parents).into_iter()
     };
 }
 
 #[macro_export]
-macro_rules! group_mtm_children {
+macro_rules! extract_group_children_from_tuple {
     (parents = $parents:expr,children = $children:expr) => {
         $children
             .grouped_by(&$parents)

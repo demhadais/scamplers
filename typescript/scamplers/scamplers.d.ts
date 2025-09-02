@@ -490,6 +490,7 @@ export class ScamplersClient {
   list_labs(data: LabQuery): Promise<Lab[]>;
   update_lab(data: LabUpdate): Promise<Lab>;
   list_specimens(data: SpecimenQuery): Promise<Specimen[]>;
+  list_sequencing_runs(data: SequencingRunQuery): Promise<SequencingRun[]>;
   list_suspensions(data: SuspensionQuery): Promise<Suspension[]>;
   list_suspension_pools(data: SuspensionPoolQuery): Promise<SuspensionPool[]>;
   list_chromium_runs(data: ChromiumRunQuery): Promise<ChromiumRun[]>;
@@ -497,6 +498,7 @@ export class ScamplersClient {
   fetch_person(data: string): Promise<Person>;
   fetch_lab(data: string): Promise<Lab>;
   fetch_specimen(data: string): Promise<Specimen>;
+  fetch_sequencing_run(data: string): Promise<SequencingRun>;
   fetch_suspension(data: string): Promise<Suspension>;
   fetch_suspension_pool(data: string): Promise<SuspensionPool>;
   fetch_chromium_run(data: string): Promise<ChromiumRun>;
@@ -514,6 +516,49 @@ export class ScamplersErrorResponse {
   get status(): number | undefined;
   set status(value: number | null | undefined);
   readonly error: any;
+}
+export class SequencingRun {
+  private constructor();
+  free(): void;
+  to_json_bytes(): Uint8Array;
+  to_json_string(): string;
+  to_base64_json(): string;
+  static from_json_bytes(json_bytes: Uint8Array): SequencingRun;
+  static from_json_string(json_str: string): SequencingRun;
+  static from_base64_json(base64_json_bytes: string): SequencingRun;
+  summary: SequencingRunSummary;
+  libraries: string[];
+}
+export class SequencingRunQuery {
+  free(): void;
+  to_json_bytes(): Uint8Array;
+  to_json_string(): string;
+  to_base64_json(): string;
+  static from_json_bytes(json_bytes: Uint8Array): SequencingRunQuery;
+  static from_json_string(json_str: string): SequencingRunQuery;
+  static from_base64_json(base64_json_bytes: string): SequencingRunQuery;
+  constructor();
+  ids: string[];
+  order_by: OrderBy[];
+  pagination: Pagination;
+}
+export class SequencingRunSummary {
+  private constructor();
+  free(): void;
+  to_json_bytes(): Uint8Array;
+  to_json_string(): string;
+  to_base64_json(): string;
+  static from_json_bytes(json_bytes: Uint8Array): SequencingRunSummary;
+  static from_json_string(json_str: string): SequencingRunSummary;
+  static from_base64_json(base64_json_bytes: string): SequencingRunSummary;
+  id: string;
+  readonly links: Map<any, any>;
+  readable_id: string;
+  begun_at: Date;
+  get finished_at(): Date | undefined;
+  set finished_at(value: Date | null | undefined);
+  get notes(): string;
+  set notes(value: string | null | undefined);
 }
 export class ServerError {
   private constructor();

@@ -69,8 +69,7 @@ pub struct LabSummary {
 #[cfg_attr(feature = "app", diesel(table_name = scamplers_schema::lab))]
 pub struct LabSummaryWithParents {
     // We include the ID even though it's already in `LabSummary` so that we can have
-    // `diesel::Identifiable` on this struct. Consequently, we skip serializing it since it's
-    // already in `LabSummary`
+    // `diesel::Identifiable` on this struct
     #[cfg_attr(feature = "app", diesel(column_name = id))]
     pub id_: Uuid,
     #[serde(flatten)]
@@ -129,7 +128,6 @@ define_ordering_enum! { LabOrderBy { Name }, default = Name }
 
 #[db_query]
 pub struct LabQuery {
-    #[serde(alias = "id")]
     #[builder(default)]
     pub ids: Vec<Uuid>,
     #[builder(default)]

@@ -156,7 +156,7 @@ pub struct SpecimenMeasurement {
     pub specimen_id: Uuid,
     pub measured_by: Uuid,
     #[serde(flatten)]
-    #[cfg_attr(target_arch = "wasm32", wasm_bindgen(skip))]
+    #[cfg_attr(target_arch = "wasm32", wasm_bindgen(skip))] // TODO: custom-getter
     pub data: common::MeasurementData,
 }
 
@@ -237,11 +237,10 @@ impl diesel::serialize::ToSql<::diesel::sql_types::Text, diesel::pg::Pg> for Fix
 #[cfg(feature = "python")]
 impl_stub_type!(Fixative = BlockFixative | SuspensionFixative | TissueFixative);
 
-define_ordering_enum! { SpecimenOrderBy { Name, ReceivedAt }, default = ReceivedAt }
+define_ordering_enum! { SpecimenOrderBy { Name, ReadableId, ReceivedAt }, default = ReceivedAt }
 
 #[db_query]
 pub struct SpecimenQuery {
-    #[serde(alias = "id")]
     #[builder(default)]
     pub ids: Vec<Uuid>,
     #[builder(default)]

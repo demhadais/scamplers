@@ -11,6 +11,7 @@ use crate::{
         lab::{Lab, LabId, LabQuery, LabUpdate, NewLab},
         multiplexing_tag::{MultiplexingTag, MultiplexingTagId},
         person::{CreatedUser, NewPerson, Person, PersonId, PersonQuery, PersonUpdate},
+        sequencing_run::{NewSequencingRun, SequencingRun, SequencingRunId, SequencingRunQuery},
         specimen::{NewSpecimen, Specimen, SpecimenId, SpecimenQuery},
         suspension::{
             pool::{NewSuspensionPool, SuspensionPool, SuspensionPoolId, SuspensionPoolQuery},
@@ -172,6 +173,14 @@ impl_basic_endpoints!(
     id = SpecimenId,
     query = SpecimenQuery,
     response = Specimen
+);
+
+impl_basic_endpoints!(
+    path = "/sequencing-runs",
+    creation = NewSequencingRun,
+    id = SequencingRunId,
+    query = SequencingRunQuery,
+    response = SequencingRun
 );
 
 impl_basic_endpoints! {

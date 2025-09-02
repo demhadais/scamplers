@@ -11,6 +11,9 @@ use crate::{
             lab::{Lab, LabId, LabQuery, LabUpdate, NewLab},
             multiplexing_tag::MultiplexingTag,
             person::{CreatedUser, NewPerson, Person, PersonId, PersonQuery, PersonUpdate},
+            sequencing_run::{
+                NewSequencingRun, SequencingRun, SequencingRunId, SequencingRunQuery,
+            },
             specimen::{NewSpecimen, Specimen, SpecimenId, SpecimenQuery},
             suspension::{
                 pool::{NewSuspensionPool, SuspensionPool, SuspensionPoolId, SuspensionPoolQuery},
@@ -120,6 +123,9 @@ pub fn router() -> Router<AppState> {
         fetch_specimen(SpecimenId) -> Specimen;
         list_specimens(SpecimenQuery) -> Vec<Specimen>;
         list_person_specimens((PersonId, SpecimenQuery)) -> Vec<Specimen>;
+        create_sequencing_run(NewSequencingRun) -> SequencingRun;
+        list_sequencing_runs(SequencingRunQuery) -> Vec<SequencingRun>;
+        fetch_sequencing_run(SequencingRunId) -> SequencingRun;
         list_multiplexing_tags(()) -> Vec<MultiplexingTag>;
         create_suspension(NewSuspension) -> Suspension;
         fetch_suspension(SuspensionId) -> Suspension;

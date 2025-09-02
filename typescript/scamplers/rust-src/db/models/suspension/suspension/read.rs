@@ -10,7 +10,7 @@ use crate::{
             SuspensionQuery, SuspensionSummaryWithParents,
         },
     },
-    group_otm_children, impl_id_db_operation, init_stmt,
+    group_children, impl_id_db_operation, init_stmt,
 };
 
 impl DbOperation<Vec<Suspension>> for SuspensionQuery {
@@ -22,7 +22,7 @@ impl DbOperation<Vec<Suspension>> for SuspensionQuery {
             .inner_join(specimen::table)
             .left_join(multiplexing_tag::table);
 
-        let mut stmt = init_stmt!(stmt = base_stmt, query = &self, output_type = SuspensionSummaryWithParents, orderby_spec = {SuspensionOrderBy::CreatedAt => suspension::created_at});
+        let mut stmt = init_stmt!(stmt = base_stmt, query = &self, output_type = SuspensionSummaryWithParents, orderby_spec = { SuspensionOrderBy::CreatedAt => suspension::created_at, SuspensionOrderBy::ReadableId => suspension::readable_id });
 
         let Self { ids, .. } = &self;
 
@@ -36,16 +36,15 @@ impl DbOperation<Vec<Suspension>> for SuspensionQuery {
                 .load(db_conn)?;
 
         let grouped_measurements =
-            group_otm_children!(parents = suspension_records, children = measurements);
+            group_children!(parents = suspension_records, children = measurements);
 
         let preparers: Vec<SuspensionPreparer> =
             SuspensionPreparer::belonging_to(&suspension_records)
                 .select(SuspensionPreparer::as_select())
                 .load(db_conn)?;
 
-        let grouped_preparers =
-            group_otm_children!(parents = suspension_records, children = preparers)
-                .map(|v| v.into_iter().map(|p| p.prepared_by).collect());
+        let grouped_preparers = group_children!(parents = suspension_records, children = preparers)
+            .map(|v| v.into_iter().map(|p| p.prepared_by).collect());
 
         let suspensions = attach_children_to_parents!(
             parents = suspension_records,

@@ -202,7 +202,7 @@ pub struct Suspension {
     pub measurements: Vec<SuspensionMeasurement>,
 }
 
-define_ordering_enum! {SuspensionOrderBy{ CreatedAt }, default = CreatedAt}
+define_ordering_enum! { SuspensionOrderBy{ CreatedAt, ReadableId }, default = CreatedAt }
 
 #[db_query]
 pub struct SuspensionQuery {

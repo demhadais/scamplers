@@ -13,7 +13,7 @@ use crate::{
             suspension::SuspensionSummary,
         },
     },
-    group_otm_children, impl_id_db_operation, init_stmt,
+    group_children, impl_id_db_operation, init_stmt,
 };
 
 impl DbOperation<Vec<SuspensionPool>> for SuspensionPoolQuery {
@@ -23,7 +23,7 @@ impl DbOperation<Vec<SuspensionPool>> for SuspensionPoolQuery {
     ) -> crate::result::ScamplersResult<Vec<SuspensionPool>> {
         let base_stmt = suspension_pool::table;
 
-        let mut stmt = init_stmt!(stmt = base_stmt, query = &self, output_type = SuspensionPoolSummary, orderby_spec = {SuspensionPoolOrderBy::Name => suspension_pool::name, SuspensionPoolOrderBy::PooledAt => suspension_pool::pooled_at});
+        let mut stmt = init_stmt!(stmt = base_stmt, query = &self, output_type = SuspensionPoolSummary, orderby_spec = { SuspensionPoolOrderBy::Name => suspension_pool::name, SuspensionPoolOrderBy::PooledAt => suspension_pool::pooled_at, SuspensionPoolOrderBy::ReadableId => suspension_pool::readable_id });
 
         let Self { ids, .. } = &self;
 
@@ -34,14 +34,14 @@ impl DbOperation<Vec<SuspensionPool>> for SuspensionPoolQuery {
             SuspensionPoolMeasurement::belonging_to(&suspension_pool_summaries).load(db_conn)?;
 
         let grouped_measurements =
-            group_otm_children!(parents = suspension_pool_summaries, children = measurements);
+            group_children!(parents = suspension_pool_summaries, children = measurements);
 
         let preparers = SuspensionPoolPreparer::belonging_to(&suspension_pool_summaries)
             .select(SuspensionPoolPreparer::as_select())
             .load(db_conn)?;
 
         let grouped_preparers =
-            group_otm_children!(parents = suspension_pool_summaries, children = preparers)
+            group_children!(parents = suspension_pool_summaries, children = preparers)
                 .map(|v| v.into_iter().map(|p| p.prepared_by).collect());
 
         let suspensions = SuspensionSummary::belonging_to(&suspension_pool_summaries)
@@ -49,7 +49,7 @@ impl DbOperation<Vec<SuspensionPool>> for SuspensionPoolQuery {
             .load(db_conn)?;
 
         let grouped_suspensions =
-            group_otm_children!(parents = suspension_pool_summaries, children = suspensions);
+            group_children!(parents = suspension_pool_summaries, children = suspensions);
 
         let suspension_pools = attach_children_to_parents!(
             parents = suspension_pool_summaries,

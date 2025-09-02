@@ -11,7 +11,7 @@ use crate::{
             SpecimenSummaryWithParents,
         },
     },
-    group_otm_children, impl_id_db_operation, init_stmt,
+    group_children, impl_id_db_operation, init_stmt,
 };
 
 impl DbOperation<Vec<Specimen>> for SpecimenQuery {
@@ -22,7 +22,7 @@ impl DbOperation<Vec<Specimen>> for SpecimenQuery {
             .inner_join(lab::table)
             .inner_join(person::table.on(submitter_join_condition));
 
-        let mut stmt = init_stmt!(stmt = base_stmt, query = &self, output_type = SpecimenSummaryWithParents, orderby_spec = {SpecimenOrderBy::Name => specimen::name, SpecimenOrderBy::ReceivedAt => specimen::received_at});
+        let mut stmt = init_stmt!(stmt = base_stmt, query = &self, output_type = SpecimenSummaryWithParents, orderby_spec = { SpecimenOrderBy::Name => specimen::name, SpecimenOrderBy::ReadableId => specimen::readable_id, SpecimenOrderBy::ReceivedAt => specimen::received_at });
 
         let Self {
             ids,
@@ -88,7 +88,7 @@ impl DbOperation<Vec<Specimen>> for SpecimenQuery {
             .load(db_conn)?;
 
         let grouped_measurements =
-            group_otm_children!(parents = specimen_records, children = measurements);
+            group_children!(parents = specimen_records, children = measurements);
 
         let specimens = attach_children_to_parents!(
             parents = specimen_records,

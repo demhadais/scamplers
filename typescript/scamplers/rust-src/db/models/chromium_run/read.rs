@@ -11,7 +11,7 @@ use crate::{
             Gems,
         },
     },
-    group_otm_children, impl_id_db_operation, init_stmt,
+    group_children, impl_id_db_operation, init_stmt,
 };
 
 impl DbOperation<Vec<ChromiumRun>> for ChromiumRunQuery {
@@ -72,7 +72,7 @@ impl DbOperation<Vec<ChromiumRun>> for ChromiumRunQuery {
         let gems = Gems::belonging_to(&chromium_run_summaries)
             .select(Gems::as_select())
             .load(db_conn)?;
-        let gems = group_otm_children!(parents = chromium_run_summaries, children = gems);
+        let gems = group_children!(parents = chromium_run_summaries, children = gems);
 
         Ok(attach_children_to_parents!(
             parents = chromium_run_summaries,

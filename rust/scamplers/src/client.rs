@@ -17,6 +17,7 @@ use crate::db::models::{
     institution::{Institution, InstitutionId, InstitutionQuery},
     lab::{Lab, LabId, LabQuery, LabUpdate, NewLab},
     person::{CreatedUser, NewPerson, Person, PersonId, PersonQuery},
+    sequencing_run::{SequencingRun, SequencingRunId, SequencingRunQuery},
     specimen::{Specimen, SpecimenId, SpecimenQuery},
     suspension::{
         pool::{SuspensionPool, SuspensionPoolId, SuspensionPoolQuery},
@@ -30,6 +31,7 @@ use crate::db::models::{
     lab::{Lab, LabId, LabQuery, LabUpdate, NewLab},
     multiplexing_tag::MultiplexingTag,
     person::{NewPerson, Person, PersonId, PersonQuery, PersonUpdate},
+    sequencing_run::{NewSequencingRun, SequencingRun, SequencingRunId, SequencingRunQuery},
     specimen::{NewSpecimen, Specimen, SpecimenId, SpecimenQuery},
     suspension::{
         pool::{NewSuspensionPool, SuspensionPool, SuspensionPoolId, SuspensionPoolQuery},
@@ -307,6 +309,7 @@ wasm_client_methods! {
     list_labs(LabQuery) -> Vec<Lab>;
     update_lab(LabUpdate) -> Lab;
     list_specimens(SpecimenQuery) -> Vec<Specimen>;
+    list_sequencing_runs(SequencingRunQuery) -> Vec<SequencingRun>;
     list_suspensions(SuspensionQuery) -> Vec<Suspension>;
     list_suspension_pools(SuspensionPoolQuery) -> Vec<SuspensionPool>;
     list_chromium_runs(ChromiumRunQuery) -> Vec<ChromiumRun>
@@ -318,6 +321,7 @@ wasm_wrapped_data_methods! {
     fetch_person(PersonId(Uuid)) -> Person;
     fetch_lab(LabId(Uuid)) -> Lab;
     fetch_specimen(SpecimenId(Uuid)) -> Specimen;
+    fetch_sequencing_run(SequencingRunId(Uuid)) -> SequencingRun;
     fetch_suspension(SuspensionId(Uuid)) -> Suspension;
     fetch_suspension_pool(SuspensionPoolId(Uuid)) -> SuspensionPool;
     fetch_chromium_run(ChromiumRunId(Uuid)) -> ChromiumRun
@@ -344,6 +348,9 @@ python_client_methods! {
     create_specimen(NewSpecimen) -> Specimen;
     fetch_specimen(SpecimenId) -> Specimen;
     list_specimens(SpecimenQuery) -> Vec<Specimen>;
+    create_sequencing_run(NewSequencingRun) -> SequencingRun;
+    fetch_sequencing_run(SequencingRunId) -> SequencingRun;
+    list_sequencing_runs(SequencingRunQuery) -> Vec<SequencingRun>;
     create_suspension(NewSuspension) -> Suspension;
     fetch_suspension(SuspensionId) -> Suspension;
     list_suspensions(SuspensionQuery) -> Vec<Suspension>;

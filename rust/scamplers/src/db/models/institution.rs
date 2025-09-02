@@ -50,7 +50,6 @@ define_ordering_enum! { InstitutionOrderBy { Name }, default = Name }
 
 #[db_query]
 pub struct InstitutionQuery {
-    #[serde(alias = "id")]
     #[builder(default)]
     pub ids: Vec<Uuid>,
     #[builder(default)]

@@ -11,7 +11,7 @@ use crate::{
             person::PersonSummary,
         },
     },
-    group_mtm_children, impl_id_db_operation, init_stmt,
+    extract_group_children_from_tuple, impl_id_db_operation, init_stmt,
 };
 
 impl DbOperation<Vec<Lab>> for LabQuery {
@@ -43,7 +43,8 @@ impl DbOperation<Vec<Lab>> for LabQuery {
             .select((LabMembership::as_select(), PersonSummary::as_select()))
             .load(db_conn)?;
 
-        let grouped_members = group_mtm_children!(parents = labs, children = members);
+        let grouped_members =
+            extract_group_children_from_tuple!(parents = labs, children = members);
 
         Ok(attach_children_to_parents!(
             parents = labs,
