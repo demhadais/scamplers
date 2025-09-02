@@ -108,7 +108,7 @@ impl_id_db_operation!(
 
 #[cfg(test)]
 mod tests {
-    #[allow(clippy::cast_possible_wrap)]
+    #![allow(clippy::cast_possible_wrap)]
     use rstest::rstest;
 
     use crate::db::{

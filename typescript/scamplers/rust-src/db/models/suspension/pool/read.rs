@@ -70,7 +70,7 @@ impl_id_db_operation! {id_type = SuspensionPoolId, delegate_to = SuspensionPoolQ
 
 #[cfg(test)]
 mod tests {
-    #[allow(clippy::cast_possible_wrap)]
+    #![allow(clippy::cast_possible_wrap)]
     use rstest::rstest;
 
     use crate::db::{

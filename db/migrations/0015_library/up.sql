@@ -28,7 +28,6 @@ create table library_preparers (
 create table sequencing_submissions (
     library_id uuid references library on delete restrict on update restrict not null,
     sequencing_run_id uuid references sequencing_run on delete restrict on update restrict not null,
-    fastq_paths text [],
     submitted_at timestamptz not null,
     primary key (library_id, sequencing_run_id)
 );

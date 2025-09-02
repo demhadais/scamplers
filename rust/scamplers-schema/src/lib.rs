@@ -227,7 +227,6 @@ diesel::table! {
     sequencing_submissions (library_id, sequencing_run_id) {
         library_id -> Uuid,
         sequencing_run_id -> Uuid,
-        fastq_paths -> Nullable<Array<Nullable<Text>>>,
         submitted_at -> Timestamptz,
     }
 }
