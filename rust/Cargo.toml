@@ -38,7 +38,7 @@ regex = "1.11.1"
 axum-extra = { version = "0.10.1", features = ["typed-header", "query"] }
 camino = { version = "1.1.10", features = ["serde1"] }
 thiserror = "2.0.12"
-_uuid = { package = "uuid", version = "1.17.0", features = ["serde", "v7"] }
+_uuid = { package = "uuid", version = "1.18.1", features = ["serde", "v7"] }
 serde = { version = "1.0.219", features = ["derive"] }
 serde_json = { version = "1.0.140" }
 diesel = { version = "2.2.11", default-features = false, features = [
@@ -93,7 +93,7 @@ pyo3 = { version = "0.25.1", features = [
     "serde",
     "anyhow",
 ] }
-pyo3-stub-gen = { version = "0.12.2", default-features = false }
+pyo3-stub-gen = { version = "0.13.1", default-features = false }
 bon = { version = "3.6.4" }
 derive_more = { version = "2.0.1", features = ["try_into", "from"] }
 getrandom = { version = "0.3.3" }

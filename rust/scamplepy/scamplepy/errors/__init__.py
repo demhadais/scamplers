@@ -1,1 +1,1 @@
-from scamplepy.errors import * # noqa:403
+from scamplepy.errors import *  # noqa: F403

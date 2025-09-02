@@ -5,28 +5,28 @@ maturin_import_hook.install()
 
 from scamplepy import ScamplersClient
 from .test_requests import (
-    new_cellranger_count_dataset_fixture,
-    new_cellranger_multi_dataset_fixture,
-    new_cellrangeratac_count_dataset_fixture,
+    # new_cellranger_count_dataset_fixture,
+    # new_cellranger_multi_dataset_fixture,
+    # new_cellrangeratac_count_dataset_fixture,
     new_cryopreserved_tissue_fixture,
     new_fixed_block_fixture,
     new_fixed_tissue_fixture,
     new_frozen_block_fixture,
     new_frozen_tissue_fixture,
-    new_singleplex_chromium_run_fixture,
+    # new_singleplex_chromium_run_fixture,
 )
 
-
+# This is to prevent ruff from removing "unused imports"
 __all__ = [
-    "new_cellranger_count_dataset_fixture",
-    "new_cellranger_multi_dataset_fixture",
-    "new_cellrangeratac_count_dataset_fixture",
+    # "new_cellranger_count_dataset_fixture",
+    # "new_cellranger_multi_dataset_fixture",
+    # "new_cellrangeratac_count_dataset_fixture",
     "new_cryopreserved_tissue_fixture",
     "new_fixed_block_fixture",
     "new_fixed_tissue_fixture",
     "new_frozen_block_fixture",
     "new_frozen_tissue_fixture",
-    "new_singleplex_chromium_run_fixture",
+    # "new_singleplex_chromium_run_fixture",
 ]
 
 

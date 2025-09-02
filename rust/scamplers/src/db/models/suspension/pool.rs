@@ -50,6 +50,7 @@ pub struct NewSuspensionPoolMeasurement {
 }
 
 #[cfg(feature = "python")]
+#[pyo3_stub_gen::derive::gen_stub_pymethods]
 #[pymethods]
 impl NewSuspensionPoolMeasurement {
     #[new]
@@ -93,6 +94,7 @@ pub struct NewSuspensionPool {
 }
 
 #[cfg(feature = "python")]
+#[pyo3_stub_gen::derive::gen_stub_pymethods]
 #[pymethods]
 impl NewSuspensionPool {
     #[new]

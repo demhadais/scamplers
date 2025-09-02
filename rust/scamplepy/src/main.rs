@@ -31,7 +31,7 @@ fn add_wildcard_imports(path: &Utf8Path, imports: &[&str]) -> anyhow::Result<()>
     let original_contents = fs::read_to_string(path)?;
     let imports = imports
         .iter()
-        .map(|s| format!("from {s} import * # noqa:403"))
+        .map(|s| format!("from {s} import * # noqa: F403"))
         .reduce(|s1, s2| format!("{s1}\n{s2}"))
         .unwrap_or_default();
     let new_contents = format!("{imports}\n{original_contents}");
@@ -82,9 +82,15 @@ fn correct_submodule_typestubs(
         return Ok(());
     }
 
-    add_wildcard_imports(&new_typestub_filepath, &[submodule_name, "..common"]).context(
-        format!("failed to add wildcared imports to {new_typestub_filepath}"),
-    )?;
+    // Import everything from `uuid` because pyo3_stub_gen doesn't use `uuid.UUID`
+    // for default values :)
+    add_wildcard_imports(
+        &new_typestub_filepath,
+        &[submodule_name, "..common", "uuid"],
+    )
+    .context(format!(
+        "failed to add wildcared imports to {new_typestub_filepath}"
+    ))?;
 
     Ok(())
 }

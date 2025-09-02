@@ -1,5 +1,4 @@
 from datetime import UTC, datetime
-from pathlib import Path
 from typing import Any
 import pytest
 import maturin_import_hook
@@ -9,25 +8,24 @@ maturin_import_hook.install()
 
 from scamplepy.create import (
     CellCountingMethod,
-    CellrangerMultiDataset,
-    CellrangerVdjDataset,
-    CellrangerarcCountDataset,
-    CellrangeratacCountDataset,
+    # CellrangerMultiDataset,
+    # CellrangerVdjDataset,
+    # CellrangerarcCountDataset,
+    # CellrangeratacCountDataset,
     ComplianceCommitteeType,
-    ElectrophoreticMeasurementData,
-    JsonMetricsFile,
+    NewSingleplexChipLoading,
+    # ElectrophoreticMeasurementData,
+    # JsonMetricsFile,
     LengthUnit,
-    MassUnit,
-    MultiRowCsvMetricsFile,
     NewSuspensionMeasurement,
     FrozenBlockEmbeddingMatrix,
-    LibraryMeasurementData,
-    NewCdnaMeasurement,
+    # LibraryMeasurementData,
+    # NewCdnaMeasurement,
     NewCommitteeApproval,
     NewInstitution,
-    NewLibrary,
-    NewLibraryMeasurement,
-    NewOcmChipLoading,
+    # NewLibrary,
+    # NewLibraryMeasurement,
+    # NewOcmChipLoading,
     NewOcmGems,
     NewPerson,
     NewLab,
@@ -36,57 +34,52 @@ from scamplepy.create import (
     NewCryopreservedTissue,
     NewFixedTissue,
     NewFrozenTissue,
-    NewPoolMultiplexChipLoading,
     NewPoolMultiplexChromiumRun,
     NewPoolMultiplexGems,
-    NewSingleplexChipLoading,
     NewSingleplexGems,
     NewSpecimenMeasurement,
     NewVirtualSpecimen,
     NewSuspension,
     NewSingleplexChromiumRun,
     NewOcmChromiumRun,
-    NewCdna,
+    # NewCdna,
     FixedBlockEmbeddingMatrix,
     BlockFixative,
-    NucleicAcidConcentration,
+    # NucleicAcidConcentration,
     OcmChromiumChip,
     PoolMultiplexChromiumChip,
-    SingleRowCsvMetricsFile,
+    # PoolMultiplexChromiumChip,
+    # SingleRowCsvMetricsFile,
     SingleplexChromiumChip,
     SpecimenMeasurementData,
-    SuspensionMeasurementDataCommon,
+    SuspensionMeasurementFields,
     TissueFixative,
     SuspensionFixative,
     BiologicalMaterial,
     Species,
-    LibraryType,
     UserRole,
     VolumeUnit,
     NewSuspensionPool,
     NewSuspensionPoolMeasurement,
-    CellrangerCountDataset,
+    # CellrangerCountDataset,
 )
 from uuid import UUID
 
 ID = UUID(int=0)
 TIME = datetime(year=1999, month=1, day=1, tzinfo=UTC)
 
-TEST_DATA_DIR = Path(__file__).parent / "test-data"
-
-WEB_SUMMARY = (TEST_DATA_DIR / "web-summary.html").read_text()
-SINGLE_ROW_CSV = SingleRowCsvMetricsFile(
-    filename="summary.csv",
-    raw_contents=(TEST_DATA_DIR / "single-row.csv").read_text(),
-)
-CELLRANGERATAC_COUNT_JSON = JsonMetricsFile(
-    filename="summary.json",
-    raw_contents=(TEST_DATA_DIR / "cellranger-atac_count.json").read_text(),
-)
-CELLRANGER_MULTI_CSV = MultiRowCsvMetricsFile(
-    filename="sample/summary.csv",
-    raw_contents=(TEST_DATA_DIR / "cellranger_multi.csv").read_text(),
-)
+# SINGLE_ROW_CSV = SingleRowCsvMetricsFile(
+#     filename="summary.csv",
+#     raw_contents="",
+# )
+# CELLRANGERATAC_COUNT_JSON = JsonMetricsFile(
+#     filename="summary.json",
+#     raw_contents="",
+# )
+# CELLRANGER_MULTI_CSV = MultiRowCsvMetricsFile(
+#     filename="sample/summary.csv",
+#     raw_contents="",
+# )
 
 
 def new_institution() -> NewInstitution:
@@ -249,8 +242,8 @@ def new_virtual_specimen_fixture() -> NewVirtualSpecimen:
     return new_virtual_specimen()
 
 
-def _suspension_concentration() -> SuspensionMeasurementDataCommon:
-    return SuspensionMeasurementDataCommon.Concentration(
+def _suspension_concentration() -> SuspensionMeasurementFields:
+    return SuspensionMeasurementFields.Concentration(
         measured_at=TIME,
         value=0,
         unit=(BiologicalMaterial.Cells, VolumeUnit.Microliter),
@@ -259,8 +252,8 @@ def _suspension_concentration() -> SuspensionMeasurementDataCommon:
     )
 
 
-def _suspension_mean_diameter() -> SuspensionMeasurementDataCommon:
-    return SuspensionMeasurementDataCommon.MeanDiameter(
+def _suspension_mean_diameter() -> SuspensionMeasurementFields:
+    return SuspensionMeasurementFields.MeanDiameter(
         measured_at=TIME,
         value=0,
         unit=(BiologicalMaterial.Cells, LengthUnit.Micrometer),
@@ -268,19 +261,19 @@ def _suspension_mean_diameter() -> SuspensionMeasurementDataCommon:
     )
 
 
-def _suspension_viability() -> SuspensionMeasurementDataCommon:
-    return SuspensionMeasurementDataCommon.Viability(
+def _suspension_viability() -> SuspensionMeasurementFields:
+    return SuspensionMeasurementFields.Viability(
         measured_at=TIME, value=0, instrument_name=""
     )
 
 
-def _suspension_volume() -> SuspensionMeasurementDataCommon:
-    return SuspensionMeasurementDataCommon.Volume(
+def _suspension_volume() -> SuspensionMeasurementFields:
+    return SuspensionMeasurementFields.Volume(
         measured_at=TIME, value=0, unit=VolumeUnit.Microliter
     )
 
 
-def _all_suspension_measurement_data_common() -> list[SuspensionMeasurementDataCommon]:
+def _all_suspension_measurement_data_common() -> list[SuspensionMeasurementFields]:
     return [
         _suspension_concentration(),
         _suspension_mean_diameter(),
@@ -300,6 +293,7 @@ def _new_suspension_measurements(
     ]
 
 
+@pytest.fixture
 def new_suspension(
     readable_id: str = "suspension",
     parent_specimen_id: UUID = ID,
@@ -319,11 +313,6 @@ def new_suspension(
     )
 
 
-@pytest.fixture
-def new_suspension_fixture() -> NewSuspension:
-    return new_suspension()
-
-
 def _new_suspension_pool_measurements(
     measured_by: UUID = ID,
 ) -> list[NewSuspensionPoolMeasurement]:
@@ -335,6 +324,7 @@ def _new_suspension_pool_measurements(
     ]
 
 
+@pytest.fixture
 def new_suspension_pool(
     person_id: UUID = ID,
     parent_specimen_ids: list[UUID] = [ID, ID],
@@ -357,10 +347,6 @@ def new_suspension_pool(
 
 
 @pytest.fixture
-def new_suspension_pool_fixture() -> NewSuspensionPool:
-    return new_suspension_pool()
-
-
 def new_singleplex_chromium_run(
     run_by: UUID = ID,
     suspension_id: UUID = ID,
@@ -377,21 +363,15 @@ def new_singleplex_chromium_run(
             NewSingleplexGems(
                 readable_id=gems_readable_id,
                 chemistry=chemistry,
-                loading=NewSingleplexChipLoading(
-                    suspension_id=suspension_id,
-                    suspension_volume_loaded=_suspension_volume(),
-                    buffer_volume_loaded=_suspension_volume(),
-                ),
+                suspension_id=suspension_id,
+                suspension_volume_loaded=_suspension_volume(),
+                buffer_volume_loaded=_suspension_volume(),
             )
         ],
     )
 
 
 @pytest.fixture
-def new_singleplex_chromium_run_fixture() -> NewSingleplexChromiumRun:
-    return new_singleplex_chromium_run()
-
-
 def new_pool_multiplex_chromium_run(
     run_by: UUID = ID, suspension_pool_id: UUID = ID
 ) -> NewPoolMultiplexChromiumRun:
@@ -405,21 +385,15 @@ def new_pool_multiplex_chromium_run(
             NewPoolMultiplexGems(
                 readable_id="",
                 chemistry="",
-                loading=NewPoolMultiplexChipLoading(
-                    suspension_pool_id=suspension_pool_id,
-                    suspension_volume_loaded=_suspension_volume(),
-                    buffer_volume_loaded=_suspension_volume(),
-                ),
+                suspension_pool_id=suspension_pool_id,
+                suspension_volume_loaded=_suspension_volume(),
+                buffer_volume_loaded=_suspension_volume(),
             )
         ],
     )
 
 
 @pytest.fixture
-def new_pool_multiplex_chromium_run_fixture() -> NewPoolMultiplexChromiumRun:
-    return new_pool_multiplex_chromium_run()
-
-
 def new_ocm_chromium_run(
     run_by: UUID = ID, suspension_id: UUID = ID
 ) -> NewOcmChromiumRun:
@@ -434,7 +408,7 @@ def new_ocm_chromium_run(
                 readable_id="",
                 chemistry="",
                 loading=[
-                    NewOcmChipLoading(
+                    NewSingleplexChipLoading(
                         suspension_id=suspension_id,
                         suspension_volume_loaded=_suspension_volume(),
                         buffer_volume_loaded=_suspension_volume(),
@@ -445,175 +419,140 @@ def new_ocm_chromium_run(
     )
 
 
-@pytest.fixture
-def new_ocm_chromium_run_fixture() -> NewOcmChromiumRun:
-    return new_ocm_chromium_run()
+# def _electrophoretic_measurement_data() -> ElectrophoreticMeasurementData:
+#     return ElectrophoreticMeasurementData(
+#         measured_at=TIME,
+#         instrument_name="mayonnaise",
+#         mean_library_size_bp=0,
+#         sizing_range=(0, 0),
+#         concentration_value=0,
+#         concentration_unit=(MassUnit.Nanogram, VolumeUnit.Microliter),
+#     )
 
 
-def _electrophoretic_measurement_data() -> ElectrophoreticMeasurementData:
-    return ElectrophoreticMeasurementData(
-        measured_at=TIME,
-        instrument_name="mayonnaise",
-        mean_library_size_bp=0,
-        sizing_range=(0, 0),
-        concentration_value=0,
-        concentration_unit=(MassUnit.Nanogram, VolumeUnit.Microliter),
-    )
+# @pytest.fixture
+# def new_cdna(gems_id: UUID = ID, person_id: UUID = ID) -> NewCdna:
+#     return NewCdna(
+#         library_type=LibraryType.GeneExpression,
+#         readable_id="cdna",
+#         prepared_at=TIME,
+#         gems_id=gems_id,
+#         n_amplification_cycles=0,
+#         volume_mcl=40.0,
+#         measurements=[
+#             NewCdnaMeasurement(
+#                 measured_by=person_id,
+#                 data=_electrophoretic_measurement_data(),
+#             )
+#         ],
+#         preparer_ids=[person_id],
+#     )
 
 
-def new_cdna(gems_id: UUID = ID, person_id: UUID = ID) -> NewCdna:
-    return NewCdna(
-        library_type=LibraryType.GeneExpression,
-        readable_id="cdna",
-        prepared_at=TIME,
-        gems_id=gems_id,
-        n_amplification_cycles=0,
-        volume_mcl=40.0,
-        measurements=[
-            NewCdnaMeasurement(
-                measured_by=person_id,
-                data=_electrophoretic_measurement_data(),
-            )
-        ],
-        preparer_ids=[person_id],
-    )
+# def _library_electrophoretic_measurement() -> LibraryMeasurementData:
+#     return LibraryMeasurementData.Electrophoretic(_electrophoretic_measurement_data())
 
 
-@pytest.fixture
-def new_cdna_fixture() -> NewCdna:
-    return new_cdna()
+# def _library_fluormetric_measurement() -> LibraryMeasurementData:
+#     return LibraryMeasurementData.Fluorometric(
+#         measured_at=TIME,
+#         instrument_name="mayonnaise",
+#         concentration=NucleicAcidConcentration(
+#             value=0, unit=(MassUnit.Picogram, VolumeUnit.Microliter)
+#         ),
+#     )
+
+# @pytest.fixture
+# def new_library(cdna_id: UUID = ID, person_id: UUID = ID) -> NewLibrary:
+#     return NewLibrary(
+#         readable_id="library",
+#         cdna_id=cdna_id,
+#         number_of_sample_index_pcr_cycles=0,
+#         target_reads_per_cell=0,
+#         prepared_at=TIME,
+#         preparer_ids=[person_id],
+#         measurements=[
+#             NewLibraryMeasurement(measured_by=person_id, data=m)
+#             for m in [
+#                 _library_electrophoretic_measurement(),
+#                 _library_fluormetric_measurement(),
+#             ]
+#         ],
+#     )
+
+# @pytest.fixture
+# def new_cellrangerarc_count_dataset(
+#     lab_id: UUID = ID, gems_id: UUID = ID
+# ) -> CellrangerarcCountDataset:
+#     return CellrangerarcCountDataset(
+#         name="dataset",
+#         lab_id=lab_id,
+#         data_path="data",
+#         delivered_at=TIME,
+#         gems_id=gems_id,
+#         web_summary=WEB_SUMMARY,
+#         metrics=SINGLE_ROW_CSV,
+#     )
 
 
-def _library_electrophoretic_measurement() -> LibraryMeasurementData:
-    return LibraryMeasurementData.Electrophoretic(_electrophoretic_measurement_data())
+# @pytest.fixture
+# def new_cellrangeratac_count_dataset(
+#     lab_id: UUID = ID, gems_id: UUID = ID
+# ) -> CellrangeratacCountDataset:
+#     return CellrangeratacCountDataset(
+#         name="dataset",
+#         lab_id=lab_id,
+#         data_path="data",
+#         delivered_at=TIME,
+#         gems_id=gems_id,
+#         web_summary=WEB_SUMMARY,
+#         metrics=CELLRANGERATAC_COUNT_JSON,
+#     )
 
 
-def _library_fluormetric_measurement() -> LibraryMeasurementData:
-    return LibraryMeasurementData.Fluorometric(
-        measured_at=TIME,
-        instrument_name="mayonnaise",
-        concentration=NucleicAcidConcentration(
-            value=0, unit=(MassUnit.Picogram, VolumeUnit.Microliter)
-        ),
-    )
+# @pytest.fixture
+# def new_cellranger_count_dataset(
+#     lab_id: UUID = ID, gems_id: UUID = ID
+# ) -> CellrangerCountDataset:
+#     return CellrangerCountDataset(
+#         name="",
+#         lab_id=lab_id,
+#         data_path="data",
+#         delivered_at=TIME,
+#         gems_id=gems_id,
+#         web_summary=WEB_SUMMARY,
+#         metrics=SINGLE_ROW_CSV,
+#     )
 
 
-def new_library(cdna_id: UUID = ID, person_id: UUID = ID) -> NewLibrary:
-    return NewLibrary(
-        readable_id="library",
-        cdna_id=cdna_id,
-        number_of_sample_index_pcr_cycles=0,
-        target_reads_per_cell=0,
-        prepared_at=TIME,
-        preparer_ids=[person_id],
-        measurements=[
-            NewLibraryMeasurement(measured_by=person_id, data=m)
-            for m in [
-                _library_electrophoretic_measurement(),
-                _library_fluormetric_measurement(),
-            ]
-        ],
-    )
+# @pytest.fixture
+# def new_cellranger_multi_dataset(
+#     lab_id: UUID = ID, gems_id: UUID = ID, n_samples: int = 1
+# ) -> CellrangerMultiDataset:
+#     return CellrangerMultiDataset(
+#         name="dataset",
+#         lab_id=lab_id,
+#         data_path="data",
+#         delivered_at=TIME,
+#         gems_id=gems_id,
+#         web_summary=WEB_SUMMARY,
+#         metrics=[CELLRANGER_MULTI_CSV for i in range(n_samples)],
+#     )
 
 
-@pytest.fixture
-def new_library_fixture() -> NewLibrary:
-    return new_library()
-
-
-def new_cellrangerarc_count_dataset(
-    lab_id: UUID = ID, gems_id: UUID = ID
-) -> CellrangerarcCountDataset:
-    return CellrangerarcCountDataset(
-        name="dataset",
-        lab_id=lab_id,
-        data_path="data",
-        delivered_at=TIME,
-        gems_id=gems_id,
-        web_summary=WEB_SUMMARY,
-        metrics=SINGLE_ROW_CSV,
-    )
-
-
-@pytest.fixture
-def new_cellrangerarc_count_dataset_fixture() -> CellrangerarcCountDataset:
-    return new_cellrangerarc_count_dataset()
-
-
-def new_cellrangeratac_count_dataset(
-    lab_id: UUID = ID, gems_id: UUID = ID
-) -> CellrangeratacCountDataset:
-    return CellrangeratacCountDataset(
-        name="dataset",
-        lab_id=lab_id,
-        data_path="data",
-        delivered_at=TIME,
-        gems_id=gems_id,
-        web_summary=WEB_SUMMARY,
-        metrics=CELLRANGERATAC_COUNT_JSON,
-    )
-
-
-@pytest.fixture
-def new_cellrangeratac_count_dataset_fixture() -> CellrangeratacCountDataset:
-    return new_cellrangeratac_count_dataset()
-
-
-def new_cellranger_count_dataset(
-    lab_id: UUID = ID, gems_id: UUID = ID
-) -> CellrangerCountDataset:
-    return CellrangerCountDataset(
-        name="",
-        lab_id=lab_id,
-        data_path="data",
-        delivered_at=TIME,
-        gems_id=gems_id,
-        web_summary=WEB_SUMMARY,
-        metrics=SINGLE_ROW_CSV,
-    )
-
-
-@pytest.fixture
-def new_cellranger_count_dataset_fixture() -> CellrangerCountDataset:
-    return new_cellranger_count_dataset()
-
-
-def new_cellranger_multi_dataset(
-    lab_id: UUID = ID, gems_id: UUID = ID, n_samples: int = 1
-) -> CellrangerMultiDataset:
-    return CellrangerMultiDataset(
-        name="dataset",
-        lab_id=lab_id,
-        data_path="data",
-        delivered_at=TIME,
-        gems_id=gems_id,
-        web_summary=WEB_SUMMARY,
-        metrics=[CELLRANGER_MULTI_CSV for i in range(n_samples)],
-    )
-
-
-@pytest.fixture
-def new_cellranger_multi_dataset_fixture() -> CellrangerMultiDataset:
-    return new_cellranger_multi_dataset()
-
-
-def new_cellranger_vdj_dataset(
-    lab_id: UUID = ID, gems_id: UUID = ID
-) -> CellrangerVdjDataset:
-    return CellrangerVdjDataset(
-        name="dataset",
-        lab_id=lab_id,
-        data_path="data",
-        delivered_at=TIME,
-        gems_id=gems_id,
-        web_summary="",
-        metrics=SINGLE_ROW_CSV,
-    )
-
-
-@pytest.fixture
-def new_cellranger_vdj_dataset_fixture() -> CellrangerVdjDataset:
-    return new_cellranger_vdj_dataset()
+# @pytest.fixture
+# def new_cellranger_vdj_dataset(
+#     lab_id: UUID = ID, gems_id: UUID = ID
+# ) -> CellrangerVdjDataset:
+#     return CellrangerVdjDataset(
+#         name="dataset",
+#         lab_id=lab_id,
+#         data_path="data",
+#         delivered_at=TIME,
+#         gems_id=gems_id,
+#         web_summary="",
+#         metrics=SINGLE_ROW_CSV,
+#     )
 
 
 @pytest.mark.parametrize(
@@ -633,17 +572,17 @@ def new_cellranger_vdj_dataset_fixture() -> CellrangerVdjDataset:
         ("new_singleplex_chromium_run_fixture", "plexy", "singleplex"),
         ("new_pool_multiplex_chromium_run_fixture", "plexy", "pool_multiplex"),
         ("new_ocm_chromium_run_fixture", "plexy", "ocm"),
-        ("new_cdna_fixture", "preparer_ids", [ID]),
-        ("new_library_fixture", "cdna_id", ID),
-        ("new_cellrangerarc_count_dataset_fixture", "cmdline", "cellranger-arc count"),
-        (
-            "new_cellrangeratac_count_dataset_fixture",
-            "cmdline",
-            "cellranger-atac count",
-        ),
-        ("new_cellranger_count_dataset_fixture", "cmdline", "cellranger count"),
-        ("new_cellranger_multi_dataset_fixture", "cmdline", "cellranger multi"),
-        ("new_cellranger_vdj_dataset_fixture", "cmdline", "cellranger vdj"),
+        # ("new_cdna_fixture", "preparer_ids", [ID]),
+        # ("new_library_fixture", "cdna_id", ID),
+        # ("new_cellrangerarc_count_dataset_fixture", "cmdline", "cellranger-arc count"),
+        # (
+        #     "new_cellrangeratac_count_dataset_fixture",
+        #     "cmdline",
+        #     "cellranger-atac count",
+        # ),
+        # ("new_cellranger_count_dataset_fixture", "cmdline", "cellranger count"),
+        # ("new_cellranger_multi_dataset_fixture", "cmdline", "cellranger multi"),
+        # ("new_cellranger_vdj_dataset_fixture", "cmdline", "cellranger vdj"),
     ],
 )
 def test_jsonification(

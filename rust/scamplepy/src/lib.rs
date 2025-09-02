@@ -3,9 +3,15 @@ use pyo3_stub_gen::define_stub_info_gatherer;
 use scamplers::{
     db::models::{
         WasmPythonOrderBy,
+        chromium_run::{
+            ChromiumRunQuery, NewOcmChromiumRun, NewOcmGems, NewPoolMultiplexChromiumRun,
+            NewPoolMultiplexGems, NewSingleplexChromiumRun, NewSingleplexGems, OcmChromiumChip,
+            PoolMultiplexChromiumChip, SingleplexChromiumChip,
+        },
         institution::{InstitutionQuery, NewInstitution},
         lab::{LabQuery, NewLab},
         person::{NewPerson, PersonQuery, UserRole},
+        sequencing_run::{NewSequencingRun, SequencingRunQuery},
         specimen::{
             self, Species, SpecimenQuery, SpecimenType,
             block::{
@@ -147,13 +153,23 @@ fn register_create_submodule<'a>(parent: &'a Bound<PyModule>) -> PyResult<Module
         SuspensionFixative,
         Species,
         specimen::common::MeasurementData,
+        NewSequencingRun,
         NewSpecimenMeasurement,
         NewCommitteeApproval,
         ComplianceCommitteeType,
         NewSuspension,
         NewSuspensionMeasurement,
         NewSuspensionPool,
-        NewSuspensionPoolMeasurement
+        NewSuspensionPoolMeasurement,
+        NewSingleplexChromiumRun,
+        SingleplexChromiumChip,
+        NewSingleplexGems,
+        NewOcmChromiumRun,
+        OcmChromiumChip,
+        NewOcmGems,
+        NewPoolMultiplexChromiumRun,
+        PoolMultiplexChromiumChip,
+        NewPoolMultiplexGems
     );
 
     // create_submodule.add_class::<suspension::MeasurementDataCore>()?;
@@ -218,8 +234,10 @@ fn register_query_submodule<'a>(parent: &'a Bound<PyModule>) -> PyResult<ModuleW
         LabQuery,
         SpecimenType,
         SpecimenQuery,
+        SequencingRunQuery,
         SuspensionQuery,
-        SuspensionPoolQuery
+        SuspensionPoolQuery,
+        ChromiumRunQuery
     );
 
     parent.add_submodule(&query_submodule)?;

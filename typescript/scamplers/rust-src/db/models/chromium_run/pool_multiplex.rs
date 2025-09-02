@@ -23,6 +23,7 @@ pub struct NewPoolMultiplexChipLoading {
 }
 
 #[cfg(feature = "python")]
+#[pyo3_stub_gen::derive::gen_stub_pymethods]
 #[pymethods]
 impl NewPoolMultiplexChipLoading {
     #[new]
@@ -59,6 +60,7 @@ pub struct NewPoolMultiplexGems {
 }
 
 #[cfg(feature = "python")]
+#[pyo3_stub_gen::derive::gen_stub_pymethods]
 #[pymethods]
 impl NewPoolMultiplexGems {
     #[new]
@@ -92,6 +94,7 @@ impl NewPoolMultiplexGems {
 
 #[db_simple_enum]
 #[derive(strum::Display)]
+#[cfg_attr(feature = "python", pyo3(module = "scamplepy.create"))]
 pub enum PoolMultiplexChromiumChip {
     #[serde(rename = "Q")]
     #[strum(serialize = "Q")]
@@ -115,6 +118,7 @@ pub struct NewPoolMultiplexChromiumRun {
 }
 
 #[cfg(feature = "python")]
+#[pyo3_stub_gen::derive::gen_stub_pymethods]
 #[pymethods]
 impl NewPoolMultiplexChromiumRun {
     #[new]

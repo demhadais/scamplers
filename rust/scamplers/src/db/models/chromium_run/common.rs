@@ -35,7 +35,7 @@ pub struct NewChipLoadingCommon {
 
 #[db_insertion]
 #[cfg_attr(feature = "app", diesel(table_name = scamplers_schema::chromium_run))]
-#[cfg_attr(feature = "python", pyo3(name = "_NewChipLoadingCommon"))]
+#[cfg_attr(feature = "python", pyo3(name = "_NewChromiumRunCommon"))]
 pub struct NewChromiumRunCommon {
     #[garde(dive)]
     pub readable_id: ValidString,

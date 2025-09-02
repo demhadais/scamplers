@@ -53,6 +53,7 @@ pub struct NewSuspensionMeasurement {
 }
 
 #[cfg(feature = "python")]
+#[pyo3_stub_gen::derive::gen_stub_pymethods]
 #[pymethods]
 impl NewSuspensionMeasurement {
     #[new]
@@ -100,6 +101,7 @@ pub struct NewSuspension {
 }
 
 #[cfg(feature = "python")]
+#[pyo3_stub_gen::derive::gen_stub_pymethods]
 #[pymethods]
 impl NewSuspension {
     #[new]

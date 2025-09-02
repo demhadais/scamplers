@@ -1,1 +1,1 @@
-from .scamplepy import * # noqa:403
+from .scamplepy import *  # noqa: F403

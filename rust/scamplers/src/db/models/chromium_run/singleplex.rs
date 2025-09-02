@@ -14,7 +14,6 @@ use crate::db::models::suspension::common::SuspensionMeasurementFields;
 
 #[db_insertion]
 #[cfg_attr(feature = "app", diesel(table_name = scamplers_schema::chip_loading))]
-#[cfg_attr(feature = "python", pyo3(name = "_NewSingleplexChipLoading"))]
 pub struct NewSingleplexChipLoading {
     pub suspension_id: Uuid,
     #[serde(flatten)]
@@ -62,6 +61,7 @@ pub struct NewSingleplexGems {
 }
 
 #[cfg(feature = "python")]
+#[pyo3_stub_gen::derive::gen_stub_pymethods]
 #[pymethods]
 impl NewSingleplexGems {
     #[new]
@@ -128,6 +128,7 @@ pub struct NewSingleplexChromiumRun {
 }
 
 #[cfg(feature = "python")]
+#[pyo3_stub_gen::derive::gen_stub_pymethods]
 #[pymethods]
 impl NewSingleplexChromiumRun {
     #[new]
