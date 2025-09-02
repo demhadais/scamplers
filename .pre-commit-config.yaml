@@ -39,6 +39,3 @@ repos:
       - id: ruff-check
         args: [--fix]
       - id: ruff-format
-        exclude_types: [pyi]
-        # Ruff transforms `from foo import * # comment` to `from foo import *  # comment` for some reason (notice the extra space before the comment)
-        exclude: "rust/scamplepy/scamplepy(/.*)?/__init__\\.py"

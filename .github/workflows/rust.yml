@@ -55,5 +55,5 @@ jobs:
         working-directory: rust/scamplepy
         run: |
           mkdir committed-typestubs && cp -r scamplepy/* committed-typestubs
-          cd .. && cargo run --package scamplepy
+          cargo run && ruff format
           diff --recursive committed-typestubs scamplepy

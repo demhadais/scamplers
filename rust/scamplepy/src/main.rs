@@ -31,7 +31,7 @@ fn add_wildcard_imports(path: &Utf8Path, imports: &[&str]) -> anyhow::Result<()>
     let original_contents = fs::read_to_string(path)?;
     let imports = imports
         .iter()
-        .map(|s| format!("from {s} import * # noqa: F403"))
+        .map(|s| format!("from {s} import *"))
         .reduce(|s1, s2| format!("{s1}\n{s2}"))
         .unwrap_or_default();
     let new_contents = format!("{imports}\n{original_contents}");
