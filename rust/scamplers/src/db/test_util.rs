@@ -148,15 +148,21 @@ impl TestState {
         db_conn.run_pending_migrations(MIGRATIONS).unwrap();
     }
 
-    async fn insert_seed_data(&mut self, db_conn: &mut PgConnection) {
+    async fn insert_seed_data(&mut self) {
         let seed_data: SeedData =
             serde_json::from_str(include_str!("../../../../seed_data.sample.json")).unwrap();
 
-        insert_seed_data(seed_data, reqwest::Client::new(), db_conn)
+        insert_seed_data(seed_data, reqwest::Client::new(), self.db_pool.clone())
             .await
             .unwrap();
 
-        self.multiplexing_tags = ().execute(db_conn).unwrap();
+        let db_conn = self.db_pool.clone().get().await.unwrap();
+        // This looks weird, but you can list multiplexing tags without supplying any
+        // query params (hence the `().execute`)
+        self.multiplexing_tags = db_conn
+            .interact(|db_conn| ().execute(db_conn).unwrap())
+            .await
+            .unwrap();
     }
 
     fn insert_institutions(&mut self, db_conn: &mut PgConnection) {
@@ -446,12 +452,11 @@ impl TestState {
     async fn populate_db(mut self) -> Self {
         let db_conn = self.db_pool.get().await.unwrap();
 
+        db_conn.interact(Self::run_migrations).await.unwrap();
+        self.insert_seed_data().await;
+
         db_conn
             .interact(|db_conn| {
-                Self::run_migrations(db_conn);
-
-                tokio::runtime::Handle::current().block_on(self.insert_seed_data(db_conn));
-
                 self.insert_institutions(db_conn);
                 self.insert_people(db_conn);
                 self.insert_labs(db_conn);

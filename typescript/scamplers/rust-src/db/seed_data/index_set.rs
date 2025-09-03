@@ -1,5 +1,4 @@
 use anyhow::Context;
-use diesel::PgConnection;
 use garde::Validate;
 use url::Url;
 
@@ -32,7 +31,7 @@ async fn download_index_set(
 pub(super) async fn download_and_insert_index_sets(
     file_urls: &[Url],
     http_client: reqwest::Client,
-    db_conn: &mut PgConnection,
+    db_conn: deadpool_diesel::postgres::Connection,
 ) -> anyhow::Result<()> {
     let downloads = file_urls
         .iter()
@@ -48,8 +47,14 @@ pub(super) async fn download_and_insert_index_sets(
     for sets in index_sets {
         sets.validate()?;
         match sets {
-            NewIndexSets::Dual(s) => s.execute(db_conn)?,
-            NewIndexSets::Single(s) => s.execute(db_conn)?,
+            NewIndexSets::Dual(s) => db_conn
+                .interact(|db_conn| s.execute(db_conn))
+                .await
+                .unwrap()?,
+            NewIndexSets::Single(s) => db_conn
+                .interact(|db_conn| s.execute(db_conn))
+                .await
+                .unwrap()?,
         }
     }
 

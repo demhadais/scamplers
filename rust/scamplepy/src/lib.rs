@@ -5,8 +5,8 @@ use scamplers::{
         WasmPythonOrderBy,
         chromium_run::{
             ChromiumRunQuery, NewOcmChromiumRun, NewOcmGems, NewPoolMultiplexChromiumRun,
-            NewPoolMultiplexGems, NewSingleplexChromiumRun, NewSingleplexGems, OcmChromiumChip,
-            PoolMultiplexChromiumChip, SingleplexChromiumChip,
+            NewPoolMultiplexGems, NewSingleplexChipLoading, NewSingleplexChromiumRun,
+            NewSingleplexGems, OcmChromiumChip, PoolMultiplexChromiumChip, SingleplexChromiumChip,
         },
         institution::{InstitutionQuery, NewInstitution},
         lab::{LabQuery, NewLab},
@@ -23,6 +23,7 @@ use scamplers::{
             virtual_::{NewVirtualSpecimen, SuspensionFixative},
         },
         suspension::{
+            common::{BiologicalMaterial, CellCountingMethod, SuspensionMeasurementFields},
             pool::{NewSuspensionPool, NewSuspensionPoolMeasurement, SuspensionPoolQuery},
             suspension::{NewSuspension, NewSuspensionMeasurement, SuspensionQuery},
         },
@@ -44,7 +45,7 @@ fn scamplepy(module: &Bound<'_, PyModule>) -> PyResult<()> {
 
     let submodules = [
         register_errors_submodule(module)?,
-        register_units_submodule(module)?,
+        register_common_submodule(module)?,
         register_create_submodule(module)?,
         register_query_submodule(module)?,
     ];
@@ -120,15 +121,23 @@ fn register_errors_submodule<'a>(parent: &'a Bound<PyModule>) -> PyResult<Module
     Ok((scamplers::ERRORS_SUBMODULE_NAME, errors_module))
 }
 
-fn register_units_submodule<'a>(parent: &'a Bound<PyModule>) -> PyResult<ModuleWithName<'a>> {
-    let units_module =
+fn register_common_submodule<'a>(parent: &'a Bound<PyModule>) -> PyResult<ModuleWithName<'a>> {
+    let common_submodule =
         PyModule::new_scamplepy_module(parent.py(), scamplers::COMMON_SUBMODULE_NAME)?;
 
-    add_classes!(units_module, MassUnit, VolumeUnit, LengthUnit);
+    add_classes!(
+        common_submodule,
+        MassUnit,
+        VolumeUnit,
+        LengthUnit,
+        CellCountingMethod,
+        SuspensionMeasurementFields,
+        BiologicalMaterial
+    );
 
-    parent.add_submodule(&units_module)?;
+    parent.add_submodule(&common_submodule)?;
 
-    Ok((scamplers::COMMON_SUBMODULE_NAME, units_module))
+    Ok((scamplers::COMMON_SUBMODULE_NAME, common_submodule))
 }
 
 fn register_create_submodule<'a>(parent: &'a Bound<PyModule>) -> PyResult<ModuleWithName<'a>> {
@@ -164,6 +173,7 @@ fn register_create_submodule<'a>(parent: &'a Bound<PyModule>) -> PyResult<Module
         NewSingleplexChromiumRun,
         SingleplexChromiumChip,
         NewSingleplexGems,
+        NewSingleplexChipLoading,
         NewOcmChromiumRun,
         OcmChromiumChip,
         NewOcmGems,

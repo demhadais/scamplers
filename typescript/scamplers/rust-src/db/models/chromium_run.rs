@@ -35,7 +35,7 @@ pub mod singleplex;
 
 #[base_model]
 #[serde(tag = "plexy")]
-#[cfg_attr(feature = "python", pyclass(eq, module = "scamplepy.create"))]
+#[cfg_attr(feature = "python", derive(FromPyObject))]
 pub enum NewChromiumRun {
     Singleplex(#[garde(dive)] NewSingleplexChromiumRun),
     Ocm(#[garde(dive)] NewOcmChromiumRun),

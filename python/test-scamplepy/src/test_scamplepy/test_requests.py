@@ -6,8 +6,14 @@ import json
 
 maturin_import_hook.install()
 
-from scamplepy.create import (
+from scamplepy.common import (
+    BiologicalMaterial,
     CellCountingMethod,
+    LengthUnit,
+    SuspensionMeasurementFields,
+    VolumeUnit,
+)
+from scamplepy.create import (
     # CellrangerMultiDataset,
     # CellrangerVdjDataset,
     # CellrangerarcCountDataset,
@@ -16,7 +22,6 @@ from scamplepy.create import (
     NewSingleplexChipLoading,
     # ElectrophoreticMeasurementData,
     # JsonMetricsFile,
-    LengthUnit,
     NewSuspensionMeasurement,
     FrozenBlockEmbeddingMatrix,
     # LibraryMeasurementData,
@@ -52,13 +57,10 @@ from scamplepy.create import (
     # SingleRowCsvMetricsFile,
     SingleplexChromiumChip,
     SpecimenMeasurementData,
-    SuspensionMeasurementFields,
     TissueFixative,
     SuspensionFixative,
-    BiologicalMaterial,
     Species,
     UserRole,
-    VolumeUnit,
     NewSuspensionPool,
     NewSuspensionPoolMeasurement,
     # CellrangerCountDataset,
@@ -82,15 +84,12 @@ TIME = datetime(year=1999, month=1, day=1, tzinfo=UTC)
 # )
 
 
+@pytest.fixture
 def new_institution() -> NewInstitution:
     return NewInstitution(id=ID, name="institution")
 
 
 @pytest.fixture
-def new_institution_fixture() -> NewInstitution:
-    return new_institution()
-
-
 def new_person(institution_id: UUID = ID) -> NewPerson:
     return NewPerson(
         name="ahmed",
@@ -101,17 +100,8 @@ def new_person(institution_id: UUID = ID) -> NewPerson:
 
 
 @pytest.fixture
-def new_person_fixture() -> NewPerson:
-    return new_person()
-
-
 def new_lab(pi_id: UUID = ID) -> NewLab:
     return NewLab(name="lab", pi_id=pi_id, delivery_dir="delivery")
-
-
-@pytest.fixture
-def new_lab_fixture() -> NewLab:
-    return new_lab()
 
 
 def _specimen_dv200() -> SpecimenMeasurementData:
@@ -134,6 +124,7 @@ def _new_committee_approval() -> NewCommitteeApproval:
     )
 
 
+@pytest.fixture
 def new_fixed_block(person_id: UUID = ID, lab_id: UUID = ID) -> NewFixedBlock:
     return NewFixedBlock(
         readable_id="fixedblock",
@@ -153,10 +144,6 @@ def new_fixed_block(person_id: UUID = ID, lab_id: UUID = ID) -> NewFixedBlock:
 
 
 @pytest.fixture
-def new_fixed_block_fixture() -> NewFixedBlock:
-    return new_fixed_block()
-
-
 def new_frozen_block(person_id: UUID = ID, lab_id: UUID = ID) -> NewFrozenBlock:
     return NewFrozenBlock(
         readable_id="frozenblock",
@@ -170,10 +157,6 @@ def new_frozen_block(person_id: UUID = ID, lab_id: UUID = ID) -> NewFrozenBlock:
 
 
 @pytest.fixture
-def new_frozen_block_fixture() -> NewFrozenBlock:
-    return new_frozen_block()
-
-
 def new_cryopreserved_tissue(
     person_id: UUID = ID, lab_id: UUID = ID
 ) -> NewCryopreservedTissue:
@@ -188,10 +171,6 @@ def new_cryopreserved_tissue(
 
 
 @pytest.fixture
-def new_cryopreserved_tissue_fixture() -> NewCryopreservedTissue:
-    return new_cryopreserved_tissue()
-
-
 def new_fixed_tissue(person_id: UUID = ID, lab_id: UUID = ID) -> NewFixedTissue:
     return NewFixedTissue(
         readable_id="fixedtissue",
@@ -205,10 +184,6 @@ def new_fixed_tissue(person_id: UUID = ID, lab_id: UUID = ID) -> NewFixedTissue:
 
 
 @pytest.fixture
-def new_fixed_tissue_fixture() -> NewFixedTissue:
-    return new_fixed_tissue()
-
-
 def new_frozen_tissue(person_id: UUID = ID, lab_id: UUID = ID) -> NewFrozenTissue:
     return NewFrozenTissue(
         readable_id="frozentissue",
@@ -221,10 +196,6 @@ def new_frozen_tissue(person_id: UUID = ID, lab_id: UUID = ID) -> NewFrozenTissu
 
 
 @pytest.fixture
-def new_frozen_tissue_fixture() -> NewFrozenTissue:
-    return new_frozen_tissue()
-
-
 def new_virtual_specimen(person_id: UUID = ID, lab_id: UUID = ID) -> NewVirtualSpecimen:
     return NewVirtualSpecimen(
         readable_id="virtualspecimen",
@@ -235,11 +206,6 @@ def new_virtual_specimen(person_id: UUID = ID, lab_id: UUID = ID) -> NewVirtualS
         species=[Species.DrosophilaMelanogaster],
         fixative=SuspensionFixative.FormaldehydeDerivative,
     )
-
-
-@pytest.fixture
-def new_virtual_specimen_fixture() -> NewVirtualSpecimen:
-    return new_virtual_specimen()
 
 
 def _suspension_concentration() -> SuspensionMeasurementFields:
@@ -293,7 +259,6 @@ def _new_suspension_measurements(
     ]
 
 
-@pytest.fixture
 def new_suspension(
     readable_id: str = "suspension",
     parent_specimen_id: UUID = ID,
@@ -313,6 +278,11 @@ def new_suspension(
     )
 
 
+@pytest.fixture
+def new_suspension_fixture():
+    return new_suspension()
+
+
 def _new_suspension_pool_measurements(
     measured_by: UUID = ID,
 ) -> list[NewSuspensionPoolMeasurement]:
@@ -326,6 +296,7 @@ def _new_suspension_pool_measurements(
 
 @pytest.fixture
 def new_suspension_pool(
+    request: pytest.FixtureRequest,
     person_id: UUID = ID,
     parent_specimen_ids: list[UUID] = [ID, ID],
 ) -> NewSuspensionPool:
@@ -558,38 +529,38 @@ def new_ocm_chromium_run(
 @pytest.mark.parametrize(
     "data, key, expected_value",
     [
-        ("new_institution_fixture", "name", "institution"),
-        ("new_person_fixture", "name", "ahmed"),
-        ("new_lab_fixture", "name", "lab"),
-        ("new_fixed_block_fixture", "type", "fixed_block"),
-        ("new_frozen_block_fixture", "type", "frozen_block"),
-        ("new_cryopreserved_tissue_fixture", "type", "cryopreserved_tissue"),
-        ("new_fixed_tissue_fixture", "type", "fixed_tissue"),
-        ("new_frozen_tissue_fixture", "type", "frozen_tissue"),
-        ("new_virtual_specimen_fixture", "type", "suspension"),
+        ("new_institution", "name", "institution"),
+        ("new_person", "name", "ahmed"),
+        ("new_lab", "name", "lab"),
+        ("new_fixed_block", "embedded_in", "paraffin"),
+        ("new_frozen_block", "embedded_in", "carboxymethyl_cellulose"),
+        ("new_cryopreserved_tissue", "name", "c"),
+        ("new_fixed_tissue", "name", "f"),
+        ("new_frozen_tissue", "name", "f"),
+        ("new_virtual_specimen", "name", "v"),
         ("new_suspension_fixture", "target_cell_recovery", 0),
-        ("new_suspension_pool_fixture", "preparer_ids", [ID]),
-        ("new_singleplex_chromium_run_fixture", "plexy", "singleplex"),
-        ("new_pool_multiplex_chromium_run_fixture", "plexy", "pool_multiplex"),
-        ("new_ocm_chromium_run_fixture", "plexy", "ocm"),
-        # ("new_cdna_fixture", "preparer_ids", [ID]),
-        # ("new_library_fixture", "cdna_id", ID),
-        # ("new_cellrangerarc_count_dataset_fixture", "cmdline", "cellranger-arc count"),
+        ("new_suspension_pool", "preparer_ids", [ID]),
+        ("new_singleplex_chromium_run", "chip", "GEM-X 3'"),
+        ("new_pool_multiplex_chromium_run", "chip", "GEM-X FX"),
+        ("new_ocm_chromium_run", "chip", "GEM-X OCM 3'"),
+        # ("new_cdna", "preparer_ids", [ID]),
+        # ("new_library", "cdna_id", ID),
+        # ("new_cellrangerarc_count_dataset", "cmdline", "cellranger-arc count"),
         # (
-        #     "new_cellrangeratac_count_dataset_fixture",
+        #     "new_cellrangeratac_count_dataset",
         #     "cmdline",
         #     "cellranger-atac count",
         # ),
-        # ("new_cellranger_count_dataset_fixture", "cmdline", "cellranger count"),
-        # ("new_cellranger_multi_dataset_fixture", "cmdline", "cellranger multi"),
-        # ("new_cellranger_vdj_dataset_fixture", "cmdline", "cellranger vdj"),
+        # ("new_cellranger_count_dataset", "cmdline", "cellranger count"),
+        # ("new_cellranger_multi_dataset", "cmdline", "cellranger multi"),
+        # ("new_cellranger_vdj_dataset", "cmdline", "cellranger vdj"),
     ],
 )
 def test_jsonification(
     data: Any, key: str | None, expected_value: Any, request: pytest.FixtureRequest
 ):
     data = request.getfixturevalue(data)
-    json_str = data.to_json()
+    json_str = data.to_json_bytes()
     pythonized = json.loads(json_str)
     found_value = pythonized[key]
 
@@ -603,4 +574,4 @@ def test_jsonification(
     assert found_value == expected_value
 
     dataclass = type(data)
-    assert dataclass.from_json(json_str) == data
+    assert dataclass.from_json_bytes(json_str) == data

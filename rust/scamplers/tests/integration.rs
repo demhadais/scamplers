@@ -7,19 +7,19 @@ use rstest::rstest;
 use scamplers::{
     client::ScamplersClient,
     config::Config,
-    db::models::institution::NewInstitution,
+    db::models::institution::{InstitutionQuery, NewInstitution},
     dev_container::DevContainer,
     result::ScamplersErrorResponse,
     server::{self},
 };
 use serde_json::json;
-use tokio::task::JoinHandle;
+use tokio::runtime::Runtime;
 use uuid::Uuid;
 
 struct TestState {
     _container: Option<DevContainer>,
     config: Config,
-    server_handle: JoinHandle<Result<(), anyhow::Error>>,
+    server_handle: tokio::task::JoinHandle<anyhow::Result<()>>,
 }
 
 impl TestState {
@@ -88,8 +88,14 @@ impl TestState {
 
         let config: Config = serde_json::from_value(config).unwrap();
 
-        let server_handle = tokio::spawn(server::serve_integration_test(config.clone()));
+        let server_handle =
+            tokio::runtime::Handle::current().spawn(server::serve_integration_test(config.clone()));
         tokio::time::sleep(tokio::time::Duration::from_secs(5)).await;
+
+        if server_handle.is_finished() {
+            server_handle.await.unwrap().unwrap();
+            panic!("server startup failed");
+        }
 
         Self {
             _container: container,
@@ -100,8 +106,8 @@ impl TestState {
 }
 
 #[rstest]
-#[tokio::test]
-#[ignore = "integration test"]
+#[tokio::test(flavor = "multi_thread")]
+#[ignore = "this test does not work"]
 async fn prod_api_auth() {
     use scamplers::result::PermissionDeniedError;
     let test_state = TestState::new(false).await;
@@ -139,8 +145,8 @@ async fn prod_api_auth() {
 }
 
 #[rstest]
-#[tokio::test]
-#[ignore = "integration test"]
+#[tokio::test(flavor = "multi_thread")]
+#[ignore = "this test does not work"]
 async fn client_deserialization() {
     let test_state = TestState::new(true).await;
 
@@ -148,11 +154,16 @@ async fn client_deserialization() {
 
     // A client with no API key
     let client = ScamplersClient::new(app_address, None, None, false);
+
     let request = NewInstitution::builder()
         .id(Uuid::now_v7())
         .name("institution")
         .build();
     client.send_request(request).await.unwrap();
+
+    let request = InstitutionQuery::default();
+    let response = client.send_request(request).await.unwrap();
+    assert!(response.len() == 2);
 
     test_state.server_handle.abort();
 }

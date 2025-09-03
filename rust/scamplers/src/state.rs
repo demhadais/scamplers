@@ -123,11 +123,15 @@ impl InitialAppState {
         }
     }
 
-    async fn db_root_conn(&self) -> ScamplersResult<deadpool_diesel::postgres::Connection> {
+    fn db_root_pool(&self) -> deadpool_diesel::postgres::Pool {
         match self {
-            Self::Dev(s) => s.db_conn().await,
-            Self::Prod(s) => Ok(s.db_root_pool.get().await?),
+            Self::Dev(s) => s.core.db_root_pool.clone(),
+            Self::Prod(s) => s.db_root_pool.clone(),
         }
+    }
+
+    async fn db_root_conn(&self) -> ScamplersResult<deadpool_diesel::postgres::Connection> {
+        Ok(self.db_root_pool().get().await?)
     }
 
     fn http_client(&self) -> reqwest::Client {
@@ -169,20 +173,9 @@ impl InitialAppState {
             Self::Prod(s) => s.core.config.seed_data()?,
         };
 
-        let db_conn = self.db_root_conn().await?;
         let http_client = self.http_client();
 
-        // Thanks AI! Just have to block on the async future
-        db_conn
-            .interact(|db_conn: &mut PgConnection| {
-                tokio::runtime::Handle::current().block_on(insert_seed_data(
-                    seed_data,
-                    http_client,
-                    db_conn,
-                ))
-            })
-            .await
-            .unwrap()?;
+        insert_seed_data(seed_data, http_client, self.db_root_pool()).await?;
 
         Ok(())
     }

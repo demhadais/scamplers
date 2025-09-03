@@ -40,7 +40,7 @@ pub struct SeedData {
 pub async fn insert_seed_data(
     seed_data: SeedData,
     http_client: reqwest::Client,
-    db_conn: &mut PgConnection,
+    db_pool: deadpool_diesel::postgres::Pool,
 ) -> anyhow::Result<()> {
     fn duplicate_resource_ok<T>(result: ScamplersResult<T>) -> ScamplersResult<()> {
         if matches!(result, Err(ScamplersError::DuplicateResource(_))) {
@@ -65,26 +65,36 @@ pub async fn insert_seed_data(
         library_type_specifications,
     } = seed_data;
 
-    duplicate_resource_ok(institution.execute(db_conn))?;
+    let simple_operations = |db_conn: &mut PgConnection| -> ScamplersResult<()> {
+        duplicate_resource_ok(institution.execute(db_conn))?;
 
-    if app_admin.ms_user_id.is_none() {
-        return Err(ServerError {
-            message: "app admin must have ms_user_id".to_string(),
-            ..Default::default()
-        })?;
-    }
+        if app_admin.ms_user_id.is_none() {
+            return Err(ServerError {
+                message: "app admin must have ms_user_id".to_string(),
+                ..Default::default()
+            })?;
+        }
 
-    app_admin.roles.push(UserRole::AppAdmin);
-    let result: ScamplersResult<Person> = app_admin.execute(db_conn);
-    duplicate_resource_ok(result)?;
+        app_admin.roles.push(UserRole::AppAdmin);
+        let result: ScamplersResult<Person> = app_admin.execute(db_conn);
+        duplicate_resource_ok(result)?;
 
+        chemistries.execute(db_conn)?;
+
+        multiplexing_tags.execute(db_conn)?;
+
+        library_type_specifications.execute(db_conn)?;
+
+        Ok(())
+    };
+
+    // Insert index sets first so we can insert library-type specifications as part
+    // of a larger set of operations in one shot
+    let db_conn = db_pool.get().await?;
     download_and_insert_index_sets(&index_set_urls, http_client, db_conn).await?;
 
-    chemistries.execute(db_conn)?;
-
-    multiplexing_tags.execute(db_conn)?;
-
-    library_type_specifications.execute(db_conn)?;
+    let db_conn = db_pool.get().await?;
+    db_conn.interact(simple_operations).await.unwrap()?;
 
     Ok(())
 }

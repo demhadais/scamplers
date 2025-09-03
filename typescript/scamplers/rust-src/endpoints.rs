@@ -199,7 +199,7 @@ impl_basic_endpoints! {
 }
 
 impl_basic_endpoints! {
-    path = "suspension-pools",
+    path = "/suspension-pools",
     creation = NewSuspensionPool,
     id = SuspensionPoolId,
     query = SuspensionPoolQuery,
@@ -207,7 +207,7 @@ impl_basic_endpoints! {
 }
 
 impl_basic_endpoints! {
-    path = "chromium-runs",
+    path = "/chromium-runs",
     creation = NewChromiumRun,
     id = ChromiumRunId,
     query = ChromiumRunQuery,

@@ -514,7 +514,7 @@ pub async fn db_conn() -> DbConnection {
     test_state.db_pool.get().await.unwrap()
 }
 
-macro_rules! data_fixtures {
+macro_rules! datas {
     ($(($field:ident, $ret_type:path));*) => {
         $(
             #[::rstest::fixture]
@@ -525,7 +525,7 @@ macro_rules! data_fixtures {
     };
 }
 
-data_fixtures!((institutions, Institution); (people, Person); (labs, Lab); (specimens, Specimen));
+datas!((institutions, Institution); (people, Person); (labs, Lab); (specimens, Specimen));
 
 #[bon::builder]
 fn extract_filter_sort<Record, Summary>(
