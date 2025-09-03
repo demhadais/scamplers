@@ -13,7 +13,6 @@ use scamplers::{
     server::{self},
 };
 use serde_json::json;
-use tokio::runtime::Runtime;
 use uuid::Uuid;
 
 struct TestState {

@@ -34,6 +34,18 @@ export enum UserRole {
   BiologyStaff = 1,
   ComputationalStaff = 2,
 }
+export class Cdna {
+  private constructor();
+  free(): void;
+  to_json_bytes(): Uint8Array;
+  to_json_string(): string;
+  to_base64_json(): string;
+  static from_json_bytes(json_bytes: Uint8Array): Cdna;
+  static from_json_string(json_str: string): Cdna;
+  static from_base64_json(base64_json_bytes: string): Cdna;
+  summary: CdnaSummary;
+  measurements: CdnaMeasurement[];
+}
 export class CdnaGemsError {
   private constructor();
   free(): void;
@@ -54,6 +66,53 @@ export class CdnaLibraryTypeError {
   static from_json_bytes(json_bytes: Uint8Array): CdnaLibraryTypeError;
   static from_json_string(json_str: string): CdnaLibraryTypeError;
   static from_base64_json(base64_json_bytes: string): CdnaLibraryTypeError;
+}
+export class CdnaMeasurement {
+  private constructor();
+  free(): void;
+  to_json_bytes(): Uint8Array;
+  to_json_string(): string;
+  to_base64_json(): string;
+  static from_json_bytes(json_bytes: Uint8Array): CdnaMeasurement;
+  static from_json_string(json_str: string): CdnaMeasurement;
+  static from_base64_json(base64_json_bytes: string): CdnaMeasurement;
+  id: string;
+  cdna_id: string;
+  measured_by: string;
+  data: ElectrophoreticMeasurementData;
+}
+export class CdnaQuery {
+  free(): void;
+  to_json_bytes(): Uint8Array;
+  to_json_string(): string;
+  to_base64_json(): string;
+  static from_json_bytes(json_bytes: Uint8Array): CdnaQuery;
+  static from_json_string(json_str: string): CdnaQuery;
+  static from_base64_json(base64_json_bytes: string): CdnaQuery;
+  constructor();
+  ids: string[];
+  order_by: OrderBy[];
+  pagination: Pagination;
+}
+export class CdnaSummary {
+  private constructor();
+  free(): void;
+  to_json_bytes(): Uint8Array;
+  to_json_string(): string;
+  to_base64_json(): string;
+  static from_json_bytes(json_bytes: Uint8Array): CdnaSummary;
+  static from_json_string(json_str: string): CdnaSummary;
+  static from_base64_json(base64_json_bytes: string): CdnaSummary;
+  id: string;
+  readonly links: Map<any, any>;
+  library_type: LibraryType;
+  readable_id: string;
+  prepared_at: Date;
+  n_amplification_cycles: number;
+  get storage_location(): string;
+  set storage_location(value: string | null | undefined);
+  get notes(): string;
+  set notes(value: string | null | undefined);
 }
 export class ChromiumRun {
   private constructor();
@@ -126,6 +185,12 @@ export class CommitteeApproval {
   committee_type: string;
   compliance_identifier: string;
 }
+export class Concentration {
+  private constructor();
+  free(): void;
+  value: number;
+  readonly unit: string;
+}
 export class CreatedUser {
   private constructor();
   free(): void;
@@ -181,6 +246,15 @@ export class DuplicateResourceError {
   entity: string;
   fields: string[];
   values: string[];
+}
+export class ElectrophoreticMeasurementData {
+  private constructor();
+  free(): void;
+  measured_at: Date;
+  instrument_name: string;
+  mean_library_size_bp: number;
+  concentration: Concentration;
+  readonly sizing_range: Uint16Array;
 }
 export class EmptyStringError {
   private constructor();
