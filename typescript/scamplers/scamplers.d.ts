@@ -409,6 +409,18 @@ export class LabUpdateFields {
   get delivery_dir(): string;
   set delivery_dir(value: string | null | undefined);
 }
+export class Library {
+  private constructor();
+  free(): void;
+  to_json_bytes(): Uint8Array;
+  to_json_string(): string;
+  to_base64_json(): string;
+  static from_json_bytes(json_bytes: Uint8Array): Library;
+  static from_json_string(json_str: string): Library;
+  static from_base64_json(base64_json_bytes: string): Library;
+  info: LibrarySummaryWithParents;
+  measurements: LibraryMeasurement[];
+}
 export class LibraryIndexSetError {
   private constructor();
   free(): void;
@@ -419,6 +431,54 @@ export class LibraryIndexSetError {
   static from_json_string(json_str: string): LibraryIndexSetError;
   static from_base64_json(base64_json_bytes: string): LibraryIndexSetError;
   message: string;
+}
+export class LibraryMeasurement {
+  private constructor();
+  free(): void;
+  to_json_bytes(): Uint8Array;
+  to_json_string(): string;
+  to_base64_json(): string;
+  static from_json_bytes(json_bytes: Uint8Array): LibraryMeasurement;
+  static from_json_string(json_str: string): LibraryMeasurement;
+  static from_base64_json(base64_json_bytes: string): LibraryMeasurement;
+  id: string;
+  library_id: string;
+  measured_by: string;
+}
+export class LibrarySummary {
+  private constructor();
+  free(): void;
+  to_json_bytes(): Uint8Array;
+  to_json_string(): string;
+  to_base64_json(): string;
+  static from_json_bytes(json_bytes: Uint8Array): LibrarySummary;
+  static from_json_string(json_str: string): LibrarySummary;
+  static from_base64_json(base64_json_bytes: string): LibrarySummary;
+  id: string;
+  readonly links: Map<any, any>;
+  readable_id: string;
+  get single_index_set_name(): string;
+  set single_index_set_name(value: string | null | undefined);
+  get dual_index_set_name(): string;
+  set dual_index_set_name(value: string | null | undefined);
+  number_of_sample_index_pcr_cycles: number;
+  target_reads_per_cell: number;
+  prepared_at: Date;
+  get notes(): string;
+  set notes(value: string | null | undefined);
+}
+export class LibrarySummaryWithParents {
+  private constructor();
+  free(): void;
+  to_json_bytes(): Uint8Array;
+  to_json_string(): string;
+  to_base64_json(): string;
+  static from_json_bytes(json_bytes: Uint8Array): LibrarySummaryWithParents;
+  static from_json_string(json_str: string): LibrarySummaryWithParents;
+  static from_base64_json(base64_json_bytes: string): LibrarySummaryWithParents;
+  id_: string;
+  summary: LibrarySummary;
+  cdna: CdnaSummary;
 }
 export class MalformedRequestError {
   private constructor();

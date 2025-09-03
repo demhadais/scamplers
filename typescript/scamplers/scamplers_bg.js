@@ -216,6 +216,24 @@ function debugString(val) {
     return className;
 }
 
+function getArrayU8FromWasm0(ptr, len) {
+    ptr = ptr >>> 0;
+    return getUint8ArrayMemory0().subarray(ptr / 1, ptr / 1 + len);
+}
+
+function passArray8ToWasm0(arg, malloc) {
+    const ptr = malloc(arg.length * 1, 1) >>> 0;
+    getUint8ArrayMemory0().set(arg, ptr / 1);
+    WASM_VECTOR_LEN = arg.length;
+    return ptr;
+}
+
+function _assertClass(instance, klass) {
+    if (!(instance instanceof klass)) {
+        throw new Error(`expected instance of ${klass.name}`);
+    }
+}
+
 function getArrayJsValueFromWasm0(ptr, len) {
     ptr = ptr >>> 0;
     const mem = getDataViewMemory0();
@@ -237,24 +255,6 @@ function passArrayJsValueToWasm0(array, malloc) {
     return ptr;
 }
 
-function getArrayU8FromWasm0(ptr, len) {
-    ptr = ptr >>> 0;
-    return getUint8ArrayMemory0().subarray(ptr / 1, ptr / 1 + len);
-}
-
-function passArray8ToWasm0(arg, malloc) {
-    const ptr = malloc(arg.length * 1, 1) >>> 0;
-    getUint8ArrayMemory0().set(arg, ptr / 1);
-    WASM_VECTOR_LEN = arg.length;
-    return ptr;
-}
-
-function _assertClass(instance, klass) {
-    if (!(instance instanceof klass)) {
-        throw new Error(`expected instance of ${klass.name}`);
-    }
-}
-
 let cachedUint16ArrayMemory0 = null;
 
 function getUint16ArrayMemory0() {
@@ -273,11 +273,11 @@ function __wbg_adapter_36(arg0, arg1) {
 }
 
 function __wbg_adapter_39(arg0, arg1, arg2) {
-    wasm.closure360_externref_shim(arg0, arg1, arg2);
+    wasm.closure364_externref_shim(arg0, arg1, arg2);
 }
 
-function __wbg_adapter_924(arg0, arg1, arg2, arg3) {
-    wasm.closure395_externref_shim(arg0, arg1, arg2, arg3);
+function __wbg_adapter_985(arg0, arg1, arg2, arg3) {
+    wasm.closure399_externref_shim(arg0, arg1, arg2, arg3);
 }
 
 /**
@@ -4047,6 +4047,122 @@ export class LabUpdateFields {
     }
 }
 
+const LibraryFinalization = (typeof FinalizationRegistry === 'undefined')
+    ? { register: () => {}, unregister: () => {} }
+    : new FinalizationRegistry(ptr => wasm.__wbg_library_free(ptr >>> 0, 1));
+
+export class Library {
+
+    static __wrap(ptr) {
+        ptr = ptr >>> 0;
+        const obj = Object.create(Library.prototype);
+        obj.__wbg_ptr = ptr;
+        LibraryFinalization.register(obj, obj.__wbg_ptr, obj);
+        return obj;
+    }
+
+    __destroy_into_raw() {
+        const ptr = this.__wbg_ptr;
+        this.__wbg_ptr = 0;
+        LibraryFinalization.unregister(this);
+        return ptr;
+    }
+
+    free() {
+        const ptr = this.__destroy_into_raw();
+        wasm.__wbg_library_free(ptr, 0);
+    }
+    /**
+     * @returns {LibrarySummaryWithParents}
+     */
+    get info() {
+        const ret = wasm.__wbg_get_library_info(this.__wbg_ptr);
+        return LibrarySummaryWithParents.__wrap(ret);
+    }
+    /**
+     * @param {LibrarySummaryWithParents} arg0
+     */
+    set info(arg0) {
+        _assertClass(arg0, LibrarySummaryWithParents);
+        var ptr0 = arg0.__destroy_into_raw();
+        wasm.__wbg_set_library_info(this.__wbg_ptr, ptr0);
+    }
+    /**
+     * @returns {LibraryMeasurement[]}
+     */
+    get measurements() {
+        const ret = wasm.__wbg_get_library_measurements(this.__wbg_ptr);
+        var v1 = getArrayJsValueFromWasm0(ret[0], ret[1]).slice();
+        wasm.__wbindgen_free(ret[0], ret[1] * 4, 4);
+        return v1;
+    }
+    /**
+     * @param {LibraryMeasurement[]} arg0
+     */
+    set measurements(arg0) {
+        const ptr0 = passArrayJsValueToWasm0(arg0, wasm.__wbindgen_malloc);
+        const len0 = WASM_VECTOR_LEN;
+        wasm.__wbg_set_library_measurements(this.__wbg_ptr, ptr0, len0);
+    }
+    /**
+     * @returns {Uint8Array}
+     */
+    to_json_bytes() {
+        const ret = wasm.library_to_json_bytes(this.__wbg_ptr);
+        var v1 = getArrayU8FromWasm0(ret[0], ret[1]).slice();
+        wasm.__wbindgen_free(ret[0], ret[1] * 1, 1);
+        return v1;
+    }
+    /**
+     * @returns {string}
+     */
+    to_json_string() {
+        const ret = wasm.library_to_json_string(this.__wbg_ptr);
+        var v1 = getCachedStringFromWasm0(ret[0], ret[1]);
+        if (ret[0] !== 0) { wasm.__wbindgen_free(ret[0], ret[1], 1); }
+        return v1;
+    }
+    /**
+     * @returns {string}
+     */
+    to_base64_json() {
+        const ret = wasm.library_to_base64_json(this.__wbg_ptr);
+        var v1 = getCachedStringFromWasm0(ret[0], ret[1]);
+        if (ret[0] !== 0) { wasm.__wbindgen_free(ret[0], ret[1], 1); }
+        return v1;
+    }
+    /**
+     * @param {Uint8Array} json_bytes
+     * @returns {Library}
+     */
+    static from_json_bytes(json_bytes) {
+        const ptr0 = passArray8ToWasm0(json_bytes, wasm.__wbindgen_malloc);
+        const len0 = WASM_VECTOR_LEN;
+        const ret = wasm.library_from_json_bytes(ptr0, len0);
+        return Library.__wrap(ret);
+    }
+    /**
+     * @param {string} json_str
+     * @returns {Library}
+     */
+    static from_json_string(json_str) {
+        const ptr0 = passStringToWasm0(json_str, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+        const len0 = WASM_VECTOR_LEN;
+        const ret = wasm.library_from_json_string(ptr0, len0);
+        return Library.__wrap(ret);
+    }
+    /**
+     * @param {string} base64_json_bytes
+     * @returns {Library}
+     */
+    static from_base64_json(base64_json_bytes) {
+        const ptr0 = passStringToWasm0(base64_json_bytes, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+        const len0 = WASM_VECTOR_LEN;
+        const ret = wasm.library_from_base64_json(ptr0, len0);
+        return Library.__wrap(ret);
+    }
+}
+
 const LibraryIndexSetErrorFinalization = (typeof FinalizationRegistry === 'undefined')
     ? { register: () => {}, unregister: () => {} }
     : new FinalizationRegistry(ptr => wasm.__wbg_libraryindexseterror_free(ptr >>> 0, 1));
@@ -4145,6 +4261,494 @@ export class LibraryIndexSetError {
         const len0 = WASM_VECTOR_LEN;
         const ret = wasm.libraryindexseterror_from_base64_json(ptr0, len0);
         return LibraryIndexSetError.__wrap(ret);
+    }
+}
+
+const LibraryMeasurementFinalization = (typeof FinalizationRegistry === 'undefined')
+    ? { register: () => {}, unregister: () => {} }
+    : new FinalizationRegistry(ptr => wasm.__wbg_librarymeasurement_free(ptr >>> 0, 1));
+
+export class LibraryMeasurement {
+
+    static __wrap(ptr) {
+        ptr = ptr >>> 0;
+        const obj = Object.create(LibraryMeasurement.prototype);
+        obj.__wbg_ptr = ptr;
+        LibraryMeasurementFinalization.register(obj, obj.__wbg_ptr, obj);
+        return obj;
+    }
+
+    static __unwrap(jsValue) {
+        if (!(jsValue instanceof LibraryMeasurement)) {
+            return 0;
+        }
+        return jsValue.__destroy_into_raw();
+    }
+
+    __destroy_into_raw() {
+        const ptr = this.__wbg_ptr;
+        this.__wbg_ptr = 0;
+        LibraryMeasurementFinalization.unregister(this);
+        return ptr;
+    }
+
+    free() {
+        const ptr = this.__destroy_into_raw();
+        wasm.__wbg_librarymeasurement_free(ptr, 0);
+    }
+    /**
+     * @returns {string}
+     */
+    get id() {
+        const ret = wasm.__wbg_get_librarymeasurement_id(this.__wbg_ptr);
+        var v1 = getCachedStringFromWasm0(ret[0], ret[1]);
+        if (ret[0] !== 0) { wasm.__wbindgen_free(ret[0], ret[1], 1); }
+        return v1;
+    }
+    /**
+     * @param {string} arg0
+     */
+    set id(arg0) {
+        const ptr0 = passStringToWasm0(arg0, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+        const len0 = WASM_VECTOR_LEN;
+        wasm.__wbg_set_librarymeasurement_id(this.__wbg_ptr, ptr0, len0);
+    }
+    /**
+     * @returns {string}
+     */
+    get library_id() {
+        const ret = wasm.__wbg_get_librarymeasurement_library_id(this.__wbg_ptr);
+        var v1 = getCachedStringFromWasm0(ret[0], ret[1]);
+        if (ret[0] !== 0) { wasm.__wbindgen_free(ret[0], ret[1], 1); }
+        return v1;
+    }
+    /**
+     * @param {string} arg0
+     */
+    set library_id(arg0) {
+        const ptr0 = passStringToWasm0(arg0, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+        const len0 = WASM_VECTOR_LEN;
+        wasm.__wbg_set_librarymeasurement_library_id(this.__wbg_ptr, ptr0, len0);
+    }
+    /**
+     * @returns {string}
+     */
+    get measured_by() {
+        const ret = wasm.__wbg_get_librarymeasurement_measured_by(this.__wbg_ptr);
+        var v1 = getCachedStringFromWasm0(ret[0], ret[1]);
+        if (ret[0] !== 0) { wasm.__wbindgen_free(ret[0], ret[1], 1); }
+        return v1;
+    }
+    /**
+     * @param {string} arg0
+     */
+    set measured_by(arg0) {
+        const ptr0 = passStringToWasm0(arg0, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+        const len0 = WASM_VECTOR_LEN;
+        wasm.__wbg_set_librarymeasurement_measured_by(this.__wbg_ptr, ptr0, len0);
+    }
+    /**
+     * @returns {Uint8Array}
+     */
+    to_json_bytes() {
+        const ret = wasm.librarymeasurement_to_json_bytes(this.__wbg_ptr);
+        var v1 = getArrayU8FromWasm0(ret[0], ret[1]).slice();
+        wasm.__wbindgen_free(ret[0], ret[1] * 1, 1);
+        return v1;
+    }
+    /**
+     * @returns {string}
+     */
+    to_json_string() {
+        const ret = wasm.librarymeasurement_to_json_string(this.__wbg_ptr);
+        var v1 = getCachedStringFromWasm0(ret[0], ret[1]);
+        if (ret[0] !== 0) { wasm.__wbindgen_free(ret[0], ret[1], 1); }
+        return v1;
+    }
+    /**
+     * @returns {string}
+     */
+    to_base64_json() {
+        const ret = wasm.librarymeasurement_to_base64_json(this.__wbg_ptr);
+        var v1 = getCachedStringFromWasm0(ret[0], ret[1]);
+        if (ret[0] !== 0) { wasm.__wbindgen_free(ret[0], ret[1], 1); }
+        return v1;
+    }
+    /**
+     * @param {Uint8Array} json_bytes
+     * @returns {LibraryMeasurement}
+     */
+    static from_json_bytes(json_bytes) {
+        const ptr0 = passArray8ToWasm0(json_bytes, wasm.__wbindgen_malloc);
+        const len0 = WASM_VECTOR_LEN;
+        const ret = wasm.librarymeasurement_from_json_bytes(ptr0, len0);
+        return LibraryMeasurement.__wrap(ret);
+    }
+    /**
+     * @param {string} json_str
+     * @returns {LibraryMeasurement}
+     */
+    static from_json_string(json_str) {
+        const ptr0 = passStringToWasm0(json_str, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+        const len0 = WASM_VECTOR_LEN;
+        const ret = wasm.librarymeasurement_from_json_string(ptr0, len0);
+        return LibraryMeasurement.__wrap(ret);
+    }
+    /**
+     * @param {string} base64_json_bytes
+     * @returns {LibraryMeasurement}
+     */
+    static from_base64_json(base64_json_bytes) {
+        const ptr0 = passStringToWasm0(base64_json_bytes, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+        const len0 = WASM_VECTOR_LEN;
+        const ret = wasm.librarymeasurement_from_base64_json(ptr0, len0);
+        return LibraryMeasurement.__wrap(ret);
+    }
+}
+
+const LibrarySummaryFinalization = (typeof FinalizationRegistry === 'undefined')
+    ? { register: () => {}, unregister: () => {} }
+    : new FinalizationRegistry(ptr => wasm.__wbg_librarysummary_free(ptr >>> 0, 1));
+
+export class LibrarySummary {
+
+    static __wrap(ptr) {
+        ptr = ptr >>> 0;
+        const obj = Object.create(LibrarySummary.prototype);
+        obj.__wbg_ptr = ptr;
+        LibrarySummaryFinalization.register(obj, obj.__wbg_ptr, obj);
+        return obj;
+    }
+
+    __destroy_into_raw() {
+        const ptr = this.__wbg_ptr;
+        this.__wbg_ptr = 0;
+        LibrarySummaryFinalization.unregister(this);
+        return ptr;
+    }
+
+    free() {
+        const ptr = this.__destroy_into_raw();
+        wasm.__wbg_librarysummary_free(ptr, 0);
+    }
+    /**
+     * @returns {string}
+     */
+    get id() {
+        const ret = wasm.__wbg_get_librarysummary_id(this.__wbg_ptr);
+        var v1 = getCachedStringFromWasm0(ret[0], ret[1]);
+        if (ret[0] !== 0) { wasm.__wbindgen_free(ret[0], ret[1], 1); }
+        return v1;
+    }
+    /**
+     * @param {string} arg0
+     */
+    set id(arg0) {
+        const ptr0 = passStringToWasm0(arg0, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+        const len0 = WASM_VECTOR_LEN;
+        wasm.__wbg_set_institution_id(this.__wbg_ptr, ptr0, len0);
+    }
+    /**
+     * @returns {Map<any, any>}
+     */
+    get links() {
+        const ret = wasm.__wbg_get_librarysummary_links(this.__wbg_ptr);
+        return ret;
+    }
+    /**
+     * @returns {string}
+     */
+    get readable_id() {
+        const ret = wasm.__wbg_get_librarysummary_readable_id(this.__wbg_ptr);
+        var v1 = getCachedStringFromWasm0(ret[0], ret[1]);
+        if (ret[0] !== 0) { wasm.__wbindgen_free(ret[0], ret[1], 1); }
+        return v1;
+    }
+    /**
+     * @param {string} arg0
+     */
+    set readable_id(arg0) {
+        const ptr0 = passStringToWasm0(arg0, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+        const len0 = WASM_VECTOR_LEN;
+        wasm.__wbg_set_librarysummary_readable_id(this.__wbg_ptr, ptr0, len0);
+    }
+    /**
+     * @returns {string}
+     */
+    get single_index_set_name() {
+        const ret = wasm.__wbg_get_librarysummary_single_index_set_name(this.__wbg_ptr);
+        var v1 = getCachedStringFromWasm0(ret[0], ret[1]);
+        if (ret[0] !== 0) { wasm.__wbindgen_free(ret[0], ret[1], 1); }
+        return v1;
+    }
+    /**
+     * @param {string | null} [arg0]
+     */
+    set single_index_set_name(arg0) {
+        var ptr0 = isLikeNone(arg0) ? 0 : passStringToWasm0(arg0, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+        var len0 = WASM_VECTOR_LEN;
+        wasm.__wbg_set_librarysummary_single_index_set_name(this.__wbg_ptr, ptr0, len0);
+    }
+    /**
+     * @returns {string}
+     */
+    get dual_index_set_name() {
+        const ret = wasm.__wbg_get_librarysummary_dual_index_set_name(this.__wbg_ptr);
+        var v1 = getCachedStringFromWasm0(ret[0], ret[1]);
+        if (ret[0] !== 0) { wasm.__wbindgen_free(ret[0], ret[1], 1); }
+        return v1;
+    }
+    /**
+     * @param {string | null} [arg0]
+     */
+    set dual_index_set_name(arg0) {
+        var ptr0 = isLikeNone(arg0) ? 0 : passStringToWasm0(arg0, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+        var len0 = WASM_VECTOR_LEN;
+        wasm.__wbg_set_librarysummary_dual_index_set_name(this.__wbg_ptr, ptr0, len0);
+    }
+    /**
+     * @returns {number}
+     */
+    get number_of_sample_index_pcr_cycles() {
+        const ret = wasm.__wbg_get_librarysummary_number_of_sample_index_pcr_cycles(this.__wbg_ptr);
+        return ret;
+    }
+    /**
+     * @param {number} arg0
+     */
+    set number_of_sample_index_pcr_cycles(arg0) {
+        wasm.__wbg_set_librarysummary_number_of_sample_index_pcr_cycles(this.__wbg_ptr, arg0);
+    }
+    /**
+     * @returns {number}
+     */
+    get target_reads_per_cell() {
+        const ret = wasm.__wbg_get_librarysummary_target_reads_per_cell(this.__wbg_ptr);
+        return ret;
+    }
+    /**
+     * @param {number} arg0
+     */
+    set target_reads_per_cell(arg0) {
+        wasm.__wbg_set_librarysummary_target_reads_per_cell(this.__wbg_ptr, arg0);
+    }
+    /**
+     * @returns {Date}
+     */
+    get prepared_at() {
+        const ret = wasm.__wbg_get_librarysummary_prepared_at(this.__wbg_ptr);
+        return ret;
+    }
+    /**
+     * @param {Date} arg0
+     */
+    set prepared_at(arg0) {
+        wasm.__wbg_set_librarysummary_prepared_at(this.__wbg_ptr, arg0);
+    }
+    /**
+     * @returns {string}
+     */
+    get notes() {
+        const ret = wasm.__wbg_get_librarysummary_notes(this.__wbg_ptr);
+        var v1 = getCachedStringFromWasm0(ret[0], ret[1]);
+        if (ret[0] !== 0) { wasm.__wbindgen_free(ret[0], ret[1], 1); }
+        return v1;
+    }
+    /**
+     * @param {string | null} [arg0]
+     */
+    set notes(arg0) {
+        var ptr0 = isLikeNone(arg0) ? 0 : passStringToWasm0(arg0, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+        var len0 = WASM_VECTOR_LEN;
+        wasm.__wbg_set_librarysummary_notes(this.__wbg_ptr, ptr0, len0);
+    }
+    /**
+     * @returns {Uint8Array}
+     */
+    to_json_bytes() {
+        const ret = wasm.librarysummary_to_json_bytes(this.__wbg_ptr);
+        var v1 = getArrayU8FromWasm0(ret[0], ret[1]).slice();
+        wasm.__wbindgen_free(ret[0], ret[1] * 1, 1);
+        return v1;
+    }
+    /**
+     * @returns {string}
+     */
+    to_json_string() {
+        const ret = wasm.librarysummary_to_json_string(this.__wbg_ptr);
+        var v1 = getCachedStringFromWasm0(ret[0], ret[1]);
+        if (ret[0] !== 0) { wasm.__wbindgen_free(ret[0], ret[1], 1); }
+        return v1;
+    }
+    /**
+     * @returns {string}
+     */
+    to_base64_json() {
+        const ret = wasm.librarysummary_to_base64_json(this.__wbg_ptr);
+        var v1 = getCachedStringFromWasm0(ret[0], ret[1]);
+        if (ret[0] !== 0) { wasm.__wbindgen_free(ret[0], ret[1], 1); }
+        return v1;
+    }
+    /**
+     * @param {Uint8Array} json_bytes
+     * @returns {LibrarySummary}
+     */
+    static from_json_bytes(json_bytes) {
+        const ptr0 = passArray8ToWasm0(json_bytes, wasm.__wbindgen_malloc);
+        const len0 = WASM_VECTOR_LEN;
+        const ret = wasm.librarysummary_from_json_bytes(ptr0, len0);
+        return LibrarySummary.__wrap(ret);
+    }
+    /**
+     * @param {string} json_str
+     * @returns {LibrarySummary}
+     */
+    static from_json_string(json_str) {
+        const ptr0 = passStringToWasm0(json_str, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+        const len0 = WASM_VECTOR_LEN;
+        const ret = wasm.librarysummary_from_json_string(ptr0, len0);
+        return LibrarySummary.__wrap(ret);
+    }
+    /**
+     * @param {string} base64_json_bytes
+     * @returns {LibrarySummary}
+     */
+    static from_base64_json(base64_json_bytes) {
+        const ptr0 = passStringToWasm0(base64_json_bytes, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+        const len0 = WASM_VECTOR_LEN;
+        const ret = wasm.librarysummary_from_base64_json(ptr0, len0);
+        return LibrarySummary.__wrap(ret);
+    }
+}
+
+const LibrarySummaryWithParentsFinalization = (typeof FinalizationRegistry === 'undefined')
+    ? { register: () => {}, unregister: () => {} }
+    : new FinalizationRegistry(ptr => wasm.__wbg_librarysummarywithparents_free(ptr >>> 0, 1));
+
+export class LibrarySummaryWithParents {
+
+    static __wrap(ptr) {
+        ptr = ptr >>> 0;
+        const obj = Object.create(LibrarySummaryWithParents.prototype);
+        obj.__wbg_ptr = ptr;
+        LibrarySummaryWithParentsFinalization.register(obj, obj.__wbg_ptr, obj);
+        return obj;
+    }
+
+    __destroy_into_raw() {
+        const ptr = this.__wbg_ptr;
+        this.__wbg_ptr = 0;
+        LibrarySummaryWithParentsFinalization.unregister(this);
+        return ptr;
+    }
+
+    free() {
+        const ptr = this.__destroy_into_raw();
+        wasm.__wbg_librarysummarywithparents_free(ptr, 0);
+    }
+    /**
+     * @returns {string}
+     */
+    get id_() {
+        const ret = wasm.__wbg_get_librarysummarywithparents_id_(this.__wbg_ptr);
+        var v1 = getCachedStringFromWasm0(ret[0], ret[1]);
+        if (ret[0] !== 0) { wasm.__wbindgen_free(ret[0], ret[1], 1); }
+        return v1;
+    }
+    /**
+     * @param {string} arg0
+     */
+    set id_(arg0) {
+        const ptr0 = passStringToWasm0(arg0, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+        const len0 = WASM_VECTOR_LEN;
+        wasm.__wbg_set_librarysummarywithparents_id_(this.__wbg_ptr, ptr0, len0);
+    }
+    /**
+     * @returns {LibrarySummary}
+     */
+    get summary() {
+        const ret = wasm.__wbg_get_librarysummarywithparents_summary(this.__wbg_ptr);
+        return LibrarySummary.__wrap(ret);
+    }
+    /**
+     * @param {LibrarySummary} arg0
+     */
+    set summary(arg0) {
+        _assertClass(arg0, LibrarySummary);
+        var ptr0 = arg0.__destroy_into_raw();
+        wasm.__wbg_set_librarysummarywithparents_summary(this.__wbg_ptr, ptr0);
+    }
+    /**
+     * @returns {CdnaSummary}
+     */
+    get cdna() {
+        const ret = wasm.__wbg_get_librarysummarywithparents_cdna(this.__wbg_ptr);
+        return CdnaSummary.__wrap(ret);
+    }
+    /**
+     * @param {CdnaSummary} arg0
+     */
+    set cdna(arg0) {
+        _assertClass(arg0, CdnaSummary);
+        var ptr0 = arg0.__destroy_into_raw();
+        wasm.__wbg_set_librarysummarywithparents_cdna(this.__wbg_ptr, ptr0);
+    }
+    /**
+     * @returns {Uint8Array}
+     */
+    to_json_bytes() {
+        const ret = wasm.librarysummarywithparents_to_json_bytes(this.__wbg_ptr);
+        var v1 = getArrayU8FromWasm0(ret[0], ret[1]).slice();
+        wasm.__wbindgen_free(ret[0], ret[1] * 1, 1);
+        return v1;
+    }
+    /**
+     * @returns {string}
+     */
+    to_json_string() {
+        const ret = wasm.librarysummarywithparents_to_json_string(this.__wbg_ptr);
+        var v1 = getCachedStringFromWasm0(ret[0], ret[1]);
+        if (ret[0] !== 0) { wasm.__wbindgen_free(ret[0], ret[1], 1); }
+        return v1;
+    }
+    /**
+     * @returns {string}
+     */
+    to_base64_json() {
+        const ret = wasm.librarysummarywithparents_to_base64_json(this.__wbg_ptr);
+        var v1 = getCachedStringFromWasm0(ret[0], ret[1]);
+        if (ret[0] !== 0) { wasm.__wbindgen_free(ret[0], ret[1], 1); }
+        return v1;
+    }
+    /**
+     * @param {Uint8Array} json_bytes
+     * @returns {LibrarySummaryWithParents}
+     */
+    static from_json_bytes(json_bytes) {
+        const ptr0 = passArray8ToWasm0(json_bytes, wasm.__wbindgen_malloc);
+        const len0 = WASM_VECTOR_LEN;
+        const ret = wasm.librarysummarywithparents_from_json_bytes(ptr0, len0);
+        return LibrarySummaryWithParents.__wrap(ret);
+    }
+    /**
+     * @param {string} json_str
+     * @returns {LibrarySummaryWithParents}
+     */
+    static from_json_string(json_str) {
+        const ptr0 = passStringToWasm0(json_str, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+        const len0 = WASM_VECTOR_LEN;
+        const ret = wasm.librarysummarywithparents_from_json_string(ptr0, len0);
+        return LibrarySummaryWithParents.__wrap(ret);
+    }
+    /**
+     * @param {string} base64_json_bytes
+     * @returns {LibrarySummaryWithParents}
+     */
+    static from_base64_json(base64_json_bytes) {
+        const ptr0 = passStringToWasm0(base64_json_bytes, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+        const len0 = WASM_VECTOR_LEN;
+        const ret = wasm.librarysummarywithparents_from_base64_json(ptr0, len0);
+        return LibrarySummaryWithParents.__wrap(ret);
     }
 }
 
@@ -8775,6 +9379,16 @@ export function __wbg_length_a446193dc22c12f8(arg0) {
     return ret;
 };
 
+export function __wbg_librarymeasurement_new(arg0) {
+    const ret = LibraryMeasurement.__wrap(arg0);
+    return ret;
+};
+
+export function __wbg_librarymeasurement_unwrap(arg0) {
+    const ret = LibraryMeasurement.__unwrap(arg0);
+    return ret;
+};
+
 export function __wbg_new_018dcc2d6c8c2f6a() { return handleError(function () {
     const ret = new Headers();
     return ret;
@@ -8787,7 +9401,7 @@ export function __wbg_new_23a2665fac83c611(arg0, arg1) {
             const a = state0.a;
             state0.a = 0;
             try {
-                return __wbg_adapter_924(a, state0.b, arg0, arg1);
+                return __wbg_adapter_985(a, state0.b, arg0, arg1);
             } finally {
                 state0.a = a;
             }
@@ -9071,13 +9685,13 @@ export function __wbindgen_cb_drop(arg0) {
     return ret;
 };
 
-export function __wbindgen_closure_wrapper3106(arg0, arg1, arg2) {
-    const ret = makeMutClosure(arg0, arg1, 342, __wbg_adapter_36);
+export function __wbindgen_closure_wrapper3266(arg0, arg1, arg2) {
+    const ret = makeMutClosure(arg0, arg1, 346, __wbg_adapter_36);
     return ret;
 };
 
-export function __wbindgen_closure_wrapper3138(arg0, arg1, arg2) {
-    const ret = makeMutClosure(arg0, arg1, 361, __wbg_adapter_39);
+export function __wbindgen_closure_wrapper3298(arg0, arg1, arg2) {
+    const ret = makeMutClosure(arg0, arg1, 365, __wbg_adapter_39);
     return ret;
 };
 
