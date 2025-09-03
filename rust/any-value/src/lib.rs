@@ -92,9 +92,9 @@ mod python {
     use super::AnyValue;
 
     impl<'py> IntoPyObject<'py> for AnyValue {
-        type Error = <PyObject as IntoPyObject<'py>>::Error;
-        type Output = <PyObject as IntoPyObject<'py>>::Output;
-        type Target = <PyObject as IntoPyObject<'py>>::Target;
+        type Error = <Py<PyAny> as IntoPyObject<'py>>::Error;
+        type Output = <Py<PyAny> as IntoPyObject<'py>>::Output;
+        type Target = <Py<PyAny> as IntoPyObject<'py>>::Target;
 
         fn into_pyobject(self, py: Python<'py>) -> Result<Self::Output, Self::Error> {
             let ret = match self.0 {

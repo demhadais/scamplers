@@ -10,6 +10,7 @@ use crate::{
             institution::{Institution, InstitutionId, InstitutionQuery, NewInstitution},
             lab::{Lab, LabId, LabQuery, LabUpdate, NewLab},
             multiplexing_tag::MultiplexingTag,
+            nucleic_acid::cdna::{Cdna, CdnaId, CdnaQuery, NewCdnaGroup},
             person::{CreatedUser, NewPerson, Person, PersonId, PersonQuery, PersonUpdate},
             sequencing_run::{
                 NewSequencingRun, SequencingRun, SequencingRunId, SequencingRunQuery,
@@ -135,7 +136,10 @@ pub fn router() -> Router<AppState> {
         list_suspension_pools(SuspensionPoolQuery) -> Vec<SuspensionPool>;
         create_chromium_run(NewChromiumRun) -> ChromiumRun;
         fetch_chromium_run(ChromiumRunId) -> ChromiumRun;
-        list_chromium_runs(ChromiumRunQuery) -> Vec<ChromiumRun>
+        list_chromium_runs(ChromiumRunQuery) -> Vec<ChromiumRun>;
+        create_cdna(NewCdnaGroup) -> Vec<Cdna>;
+        fetch_cdna(CdnaId) -> Cdna;
+        list_cdna(CdnaQuery) -> Vec<Cdna>
     );
 
     router

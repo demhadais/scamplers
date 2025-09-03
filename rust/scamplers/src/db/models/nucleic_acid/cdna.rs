@@ -3,7 +3,7 @@ use diesel::prelude::*;
 #[cfg(feature = "python")]
 use pyo3::prelude::*;
 #[cfg(feature = "python")]
-use pyo3_stub_gen::derive::gen_stub_pymethods;
+use pyo3_stub_gen::derive::{gen_stub_pyclass_complex_enum, gen_stub_pymethods};
 use scamplers_macros::{
     Jsonify, PyJsonify, WasmJsonify, base_model, db_insertion, db_query, db_selection,
 };
@@ -19,6 +19,11 @@ use crate::{
     define_ordering_enum, uuid_newtype,
 };
 
+#[cfg(feature = "app")]
+mod create;
+#[cfg(feature = "app")]
+mod read;
+
 #[db_insertion]
 #[cfg_attr(feature = "app", diesel(table_name = scamplers_schema::cdna_measurement))]
 pub struct NewCdnaMeasurement {
@@ -32,6 +37,7 @@ pub struct NewCdnaMeasurement {
 }
 
 #[cfg(feature = "python")]
+#[gen_stub_pymethods]
 #[pymethods]
 impl NewCdnaMeasurement {
     #[new]
@@ -103,11 +109,30 @@ impl NewCdna {
 
 #[base_model]
 #[serde(tag = "group_type")]
-#[cfg_attr(feature = "python", derive(FromPyObject))]
+#[cfg_attr(feature = "python", gen_stub_pyclass_complex_enum)]
+#[cfg_attr(
+    feature = "python",
+    pyclass(get_all, set_all, module = "scamplepy.create")
+)]
 pub enum NewCdnaGroup {
     Single(#[garde(dive)] NewCdna),
-    Multiple(#[garde(dive)] Vec<NewCdna>),
-    Ocm(#[garde(length(min = 1, max = 4))] Vec<NewCdna>),
+    Multiple(#[garde(dive, custom(validate_same_gems_ids))] Vec<NewCdna>),
+    Ocm(#[garde(length(max = 4), custom(validate_same_gems_ids))] Vec<NewCdna>),
+}
+
+#[allow(clippy::trivially_copy_pass_by_ref)]
+fn validate_same_gems_ids(cdna: &[NewCdna], _: &()) -> garde::Result {
+    let Some(first_cdna) = cdna.first() else {
+        return Ok(());
+    };
+
+    if cdna.iter().any(|c| c.gems_id != first_cdna.gems_id) {
+        return Err(garde::Error::new(
+            "all cDNA in a group must come from the same GEMs",
+        ));
+    }
+
+    Ok(())
 }
 
 #[db_selection]

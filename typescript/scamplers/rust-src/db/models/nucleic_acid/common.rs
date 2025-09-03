@@ -20,7 +20,7 @@ use crate::db::models::units::{MassUnit, VolumeUnit};
 pub struct Concentration {
     #[garde(range(min = 0.0))]
     pub value: f32,
-    #[cfg_attr(target_arch = "wasm32", wasm_bindgen(readonly, skip))]
+    #[cfg_attr(target_arch = "wasm32", wasm_bindgen(skip))]
     pub unit: (MassUnit, VolumeUnit),
 }
 
@@ -72,7 +72,7 @@ pub struct ElectrophoreticMeasurementData {
     #[garde(range(min = 0.0))]
     pub mean_library_size_bp: f32,
     #[garde(custom(electrophoretic_sizing_range))]
-    #[cfg_attr(target_arch = "wasm32", wasm_bindgen(readonly, skip))]
+    #[cfg_attr(target_arch = "wasm32", wasm_bindgen(skip))]
     pub sizing_range: (u16, u16),
     #[garde(dive)]
     pub concentration: Concentration,

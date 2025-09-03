@@ -10,6 +10,7 @@ use crate::{
         institution::{Institution, InstitutionId, InstitutionQuery, NewInstitution},
         lab::{Lab, LabId, LabQuery, LabUpdate, NewLab},
         multiplexing_tag::{MultiplexingTag, MultiplexingTagId},
+        nucleic_acid::cdna::{Cdna, CdnaId, CdnaQuery, NewCdnaGroup},
         person::{CreatedUser, NewPerson, Person, PersonId, PersonQuery, PersonUpdate},
         sequencing_run::{NewSequencingRun, SequencingRun, SequencingRunId, SequencingRunQuery},
         specimen::{NewSpecimen, Specimen, SpecimenId, SpecimenQuery},
@@ -212,6 +213,63 @@ impl_basic_endpoints! {
     id = ChromiumRunId,
     query = ChromiumRunQuery,
     response = ChromiumRun
+}
+
+// cDNA is a unique case, as it is created as a batch, so the creation returns
+// `Vec<Cdna>`. However, that means the macro will have an endpoint returning
+// `Vec<Vec<Cdna>>` for queries, so we implement `Endpoint` manually
+const CDNA_PATH: &str = "/cdna";
+
+impl Endpoint<NewCdnaGroup, Vec<Cdna>> for Api {
+    type RequestExtractor = ValidJsonBody<NewCdnaGroup>;
+    type ResponseWrapper = Json<Vec<Cdna>>;
+
+    const METHOD: Method = Method::POST;
+    const PATH: &str = CDNA_PATH;
+    const SUCCESS_STATUS_CODE: StatusCode = StatusCode::CREATED;
+
+    fn request(
+        client: &reqwest::Client,
+        base_url: &str,
+        data: NewCdnaGroup,
+    ) -> reqwest::RequestBuilder {
+        let path = <Self as Endpoint<NewCdnaGroup, Vec<Cdna>>>::PATH;
+        client.post(format!("{base_url}{path}")).json(&data)
+    }
+}
+
+impl Endpoint<CdnaQuery, Vec<Cdna>> for Api {
+    type RequestExtractor = Base64JsonQuery<CdnaQuery>;
+    type ResponseWrapper = Json<Vec<Cdna>>;
+
+    const METHOD: Method = Method::GET;
+    const PATH: &str = CDNA_PATH;
+    const SUCCESS_STATUS_CODE: StatusCode = StatusCode::OK;
+
+    fn request(
+        client: &reqwest::Client,
+        base_url: &str,
+        query: CdnaQuery,
+    ) -> reqwest::RequestBuilder {
+        use crate::db::models::Jsonify;
+        let path = <Self as Endpoint<CdnaQuery, Vec<Cdna>>>::PATH;
+        client.get(format!("{base_url}{path}?{}", query.to_base64_json()))
+    }
+}
+
+impl Endpoint<CdnaId, Cdna> for Api {
+    type RequestExtractor = Path<CdnaId>;
+    type ResponseWrapper = Json<Cdna>;
+
+    const METHOD: Method = Method::GET;
+    const PATH: &str = concat!("/cdna", "/", "{id}");
+    const SUCCESS_STATUS_CODE: StatusCode = StatusCode::OK;
+
+    fn request(client: &reqwest::Client, base_url: &str, id: CdnaId) -> reqwest::RequestBuilder {
+        let path = <Self as Endpoint<CdnaId, Cdna>>::PATH;
+        let path = path.replace("{id}", &id.to_string());
+        client.get(format!("{base_url}{path}"))
+    }
 }
 
 impl Endpoint<NewPerson, CreatedUser> for Api {
