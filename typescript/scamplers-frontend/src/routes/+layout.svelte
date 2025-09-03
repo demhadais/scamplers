@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { resolve } from '$app/paths';
 	import '../app.css';
 	import { signOut } from '@auth/sveltekit/client';
 
@@ -18,7 +19,7 @@
 	<nav>
 		<ul>
 			<li>
-				<a href="/profile">Profile</a>
+				<a href={resolve('/profile')}>Profile</a>
 			</li>
 		</ul>
 	</nav>

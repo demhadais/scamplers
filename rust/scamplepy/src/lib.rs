@@ -12,7 +12,7 @@ use scamplers::{
         lab::{LabQuery, NewLab},
         library_type_specification::LibraryType,
         nucleic_acid::{
-            cdna::{NewCdna, NewCdnaMeasurement},
+            cdna::{NewCdna, NewCdnaGroup, NewCdnaMeasurement},
             common::ElectrophoreticMeasurementData,
         },
         person::{NewPerson, PersonQuery, UserRole},
@@ -188,7 +188,8 @@ fn register_create_submodule<'a>(parent: &'a Bound<PyModule>) -> PyResult<Module
         PoolMultiplexChromiumChip,
         NewPoolMultiplexGems,
         NewCdnaMeasurement,
-        NewCdna
+        NewCdna,
+        NewCdnaGroup
     );
 
     // create_submodule.add_class::<suspension::MeasurementDataCore>()?;

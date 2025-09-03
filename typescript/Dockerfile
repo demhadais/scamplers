@@ -24,7 +24,7 @@ RUN --mount=type=bind,source=scamplers-frontend/package.json,target=scamplers-fr
     npm ci
 
 COPY scamplers-frontend scamplers-frontend
-COPY scamplers-core scamplers-core
+COPY scamplers scamplers
 
 RUN cd scamplers-frontend && npm run build
 

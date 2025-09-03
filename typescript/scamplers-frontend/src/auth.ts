@@ -1,5 +1,4 @@
 import { SvelteKitAuth, type DefaultSession } from '@auth/sveltekit';
-import Entra from '@auth/sveltekit/providers/microsoft-entra-id';
 import { Institution, NewPerson } from 'scamplers';
 import {
 	AUTH_SECRET,
@@ -9,6 +8,7 @@ import {
 } from '$lib/server/secrets';
 import { scamplersClient } from '$lib/server/backend';
 import { type JWT } from '@auth/core/jwt';
+import MicrosoftEntraID from '@auth/sveltekit/providers/microsoft-entra-id';
 
 declare module '@auth/sveltekit' {
 	interface Session {
@@ -29,7 +29,7 @@ declare module '@auth/core/jwt' {
 export const { handle, signIn, signOut } = SvelteKitAuth({
 	secret: AUTH_SECRET,
 	providers: [
-		Entra({
+		MicrosoftEntraID({
 			clientId: MICROSOFT_ENTRA_ID_ID,
 			clientSecret: MICROSOFT_ENTRA_ID_SECRET,
 			issuer: MICROSOFT_ENTRA_ID_ISSUER

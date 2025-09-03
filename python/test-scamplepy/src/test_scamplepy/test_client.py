@@ -8,6 +8,7 @@ from .test_requests import (
     # new_cellranger_count_dataset,
     # new_cellranger_multi_dataset,
     # new_cellrangeratac_count_dataset,
+    new_cdna_group,
     new_cryopreserved_tissue,
     new_fixed_block,
     new_fixed_tissue,
@@ -21,6 +22,7 @@ __all__ = [
     # "new_cellranger_count_dataset",
     # "new_cellranger_multi_dataset",
     # "new_cellrangeratac_count_dataset",
+    "new_cdna_group",
     "new_cryopreserved_tissue",
     "new_fixed_block",
     "new_fixed_tissue",
@@ -45,6 +47,7 @@ def scamplers_client() -> ScamplersClient:
         ("create_specimen", "new_frozen_tissue"),
         # ("create_cellranger_count_dataset", "new_cellranger_count_dataset"),
         ("create_chromium_run", "new_singleplex_chromium_run"),
+        ("create_cdna", "new_cdna_group"),
     ],
 )
 def test_client(

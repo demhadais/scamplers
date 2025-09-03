@@ -112,8 +112,9 @@ impl NewCdna {
 #[cfg_attr(feature = "python", gen_stub_pyclass_complex_enum)]
 #[cfg_attr(
     feature = "python",
-    pyclass(get_all, set_all, module = "scamplepy.create")
+    pyclass(eq, get_all, set_all, module = "scamplepy.create")
 )]
+#[derive(Jsonify, PyJsonify)]
 pub enum NewCdnaGroup {
     Single(#[garde(dive)] NewCdna),
     Multiple(#[garde(dive, custom(validate_same_gems_ids))] Vec<NewCdna>),

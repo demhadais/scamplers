@@ -22,6 +22,7 @@ from scamplepy.create import (
     # CellrangerarcCountDataset,
     # CellrangeratacCountDataset,
     ComplianceCommitteeType,
+    NewCdnaGroup,
     NewSingleplexChipLoading,
     # ElectrophoreticMeasurementData,
     # JsonMetricsFile,
@@ -405,8 +406,7 @@ def _electrophoretic_measurement_data() -> ElectrophoreticMeasurementData:
     )
 
 
-@pytest.fixture
-def new_cdna(gems_id: UUID = ID, person_id: UUID = ID) -> NewCdna:
+def _new_cdna(gems_id: UUID = ID, person_id: UUID = ID) -> NewCdna:
     return NewCdna(
         library_type=LibraryType.GeneExpression,
         readable_id="cdna",
@@ -422,6 +422,11 @@ def new_cdna(gems_id: UUID = ID, person_id: UUID = ID) -> NewCdna:
         ],
         preparer_ids=[person_id],
     )
+
+
+@pytest.fixture
+def new_cdna_group() -> NewCdnaGroup:
+    return NewCdnaGroup.Single(_new_cdna())
 
 
 # def _library_electrophoretic_measurement() -> LibraryMeasurementData:
@@ -547,7 +552,7 @@ def new_cdna(gems_id: UUID = ID, person_id: UUID = ID) -> NewCdna:
         ("new_singleplex_chromium_run", "chip", "GEM-X 3'"),
         ("new_pool_multiplex_chromium_run", "chip", "GEM-X FX"),
         ("new_ocm_chromium_run", "chip", "GEM-X OCM 3'"),
-        ("new_cdna", "preparer_ids", [ID]),
+        ("new_cdna_group", "preparer_ids", [ID]),
         # ("new_library", "cdna_id", ID),
         # ("new_cellrangerarc_count_dataset", "cmdline", "cellranger-arc count"),
         # (

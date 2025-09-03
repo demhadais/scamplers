@@ -1,5 +1,7 @@
 #[cfg(feature = "python")]
 use pyo3::prelude::*;
+#[cfg(feature = "python")]
+use pyo3_stub_gen::derive::gen_stub_pymethods;
 use scamplers_macros::{
     Jsonify, PyJsonify, WasmJsonify, base_model, db_insertion, db_query, db_selection,
     db_simple_enum, db_update,
@@ -181,4 +183,31 @@ pub struct PersonQuery {
     pub order_by: DefaultVec<PersonOrderBy>,
     #[builder(default)]
     pub pagination: Pagination,
+}
+
+#[cfg(feature = "python")]
+#[gen_stub_pymethods]
+#[pymethods]
+impl PersonQuery {
+    #[new]
+    #[pyo3(signature = (*, ids=Vec::new(), names=Vec::new(), emails=Vec::new(), orcids=Vec::new(), ms_user_ids=Vec::new(), order_by=DefaultVec::default(), pagination=Pagination::default()))]
+    fn new(
+        ids: Vec<Uuid>,
+        names: Vec<String>,
+        emails: Vec<String>,
+        orcids: Vec<String>,
+        ms_user_ids: Vec<Uuid>,
+        order_by: DefaultVec<PersonOrderBy>,
+        pagination: Pagination,
+    ) -> Self {
+        Self {
+            ids,
+            names,
+            emails,
+            orcids,
+            ms_user_ids,
+            order_by,
+            pagination,
+        }
+    }
 }
