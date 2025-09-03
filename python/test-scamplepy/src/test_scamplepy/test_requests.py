@@ -10,8 +10,11 @@ from scamplepy.common import (
     BiologicalMaterial,
     CellCountingMethod,
     LengthUnit,
+    LibraryType,
+    MassUnit,
     SuspensionMeasurementFields,
     VolumeUnit,
+    ElectrophoreticMeasurementData,
 )
 from scamplepy.create import (
     # CellrangerMultiDataset,
@@ -47,7 +50,8 @@ from scamplepy.create import (
     NewSuspension,
     NewSingleplexChromiumRun,
     NewOcmChromiumRun,
-    # NewCdna,
+    NewCdna,
+    NewCdnaMeasurement,
     FixedBlockEmbeddingMatrix,
     BlockFixative,
     # NucleicAcidConcentration,
@@ -390,34 +394,34 @@ def new_ocm_chromium_run(
     )
 
 
-# def _electrophoretic_measurement_data() -> ElectrophoreticMeasurementData:
-#     return ElectrophoreticMeasurementData(
-#         measured_at=TIME,
-#         instrument_name="mayonnaise",
-#         mean_library_size_bp=0,
-#         sizing_range=(0, 0),
-#         concentration_value=0,
-#         concentration_unit=(MassUnit.Nanogram, VolumeUnit.Microliter),
-#     )
+def _electrophoretic_measurement_data() -> ElectrophoreticMeasurementData:
+    return ElectrophoreticMeasurementData(
+        measured_at=TIME,
+        instrument_name="mayonnaise",
+        mean_library_size_bp=0,
+        sizing_range=(0, 0),
+        concentration_value=0,
+        concentration_unit=(MassUnit.Nanogram, VolumeUnit.Microliter),
+    )
 
 
-# @pytest.fixture
-# def new_cdna(gems_id: UUID = ID, person_id: UUID = ID) -> NewCdna:
-#     return NewCdna(
-#         library_type=LibraryType.GeneExpression,
-#         readable_id="cdna",
-#         prepared_at=TIME,
-#         gems_id=gems_id,
-#         n_amplification_cycles=0,
-#         volume_mcl=40.0,
-#         measurements=[
-#             NewCdnaMeasurement(
-#                 measured_by=person_id,
-#                 data=_electrophoretic_measurement_data(),
-#             )
-#         ],
-#         preparer_ids=[person_id],
-#     )
+@pytest.fixture
+def new_cdna(gems_id: UUID = ID, person_id: UUID = ID) -> NewCdna:
+    return NewCdna(
+        library_type=LibraryType.GeneExpression,
+        readable_id="cdna",
+        prepared_at=TIME,
+        gems_id=gems_id,
+        n_amplification_cycles=0,
+        volume_mcl=40.0,
+        measurements=[
+            NewCdnaMeasurement(
+                measured_by=person_id,
+                data=_electrophoretic_measurement_data(),
+            )
+        ],
+        preparer_ids=[person_id],
+    )
 
 
 # def _library_electrophoretic_measurement() -> LibraryMeasurementData:
@@ -543,7 +547,7 @@ def new_ocm_chromium_run(
         ("new_singleplex_chromium_run", "chip", "GEM-X 3'"),
         ("new_pool_multiplex_chromium_run", "chip", "GEM-X FX"),
         ("new_ocm_chromium_run", "chip", "GEM-X OCM 3'"),
-        # ("new_cdna", "preparer_ids", [ID]),
+        ("new_cdna", "preparer_ids", [ID]),
         # ("new_library", "cdna_id", ID),
         # ("new_cellrangerarc_count_dataset", "cmdline", "cellranger-arc count"),
         # (

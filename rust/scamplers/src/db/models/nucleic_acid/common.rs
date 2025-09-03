@@ -1,7 +1,7 @@
 #[cfg(feature = "python")]
 use pyo3::prelude::*;
 #[cfg(feature = "python")]
-use pyo3_stub_gen::derive::gen_stub_pyclass;
+use pyo3_stub_gen::derive::{gen_stub_pyclass, gen_stub_pymethods};
 use scamplers_macros::db_json;
 use time::OffsetDateTime;
 use valid_string::ValidString;
@@ -28,6 +28,7 @@ pub struct Concentration {
 #[wasm_bindgen]
 impl Concentration {
     #[wasm_bindgen(getter)]
+    #[must_use]
     pub fn unit(&self) -> String {
         let (num, denom) = self.unit;
 
@@ -63,6 +64,7 @@ fn electrophoretic_sizing_range((min, max): &(u16, u16), _: &()) -> garde::Resul
 #[cfg_attr(target_arch = "wasm32", wasm_bindgen(getter_with_clone))]
 #[cfg_attr(feature = "python", gen_stub_pyclass)]
 #[db_json]
+#[cfg_attr(feature = "python", pyo3(module = "scamplepy.common"))]
 pub struct ElectrophoreticMeasurementData {
     pub measured_at: OffsetDateTime,
     #[garde(dive)]
@@ -80,6 +82,7 @@ pub struct ElectrophoreticMeasurementData {
 #[wasm_bindgen]
 impl ElectrophoreticMeasurementData {
     #[wasm_bindgen(getter)]
+    #[must_use]
     pub fn sizing_range(&self) -> Vec<u16> {
         let (min, max) = self.sizing_range;
         [min, max].to_vec()
@@ -87,6 +90,7 @@ impl ElectrophoreticMeasurementData {
 }
 
 #[cfg(feature = "python")]
+#[gen_stub_pymethods]
 #[pymethods]
 impl ElectrophoreticMeasurementData {
     #[new]

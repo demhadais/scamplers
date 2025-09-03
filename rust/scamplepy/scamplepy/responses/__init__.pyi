@@ -9,7 +9,6 @@ import datetime
 import scamplepy.common
 import typing
 import uuid
-import scamplepy
 
 class Cdna:
     @property

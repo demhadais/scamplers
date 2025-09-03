@@ -10,6 +10,11 @@ use scamplers::{
         },
         institution::{InstitutionQuery, NewInstitution},
         lab::{LabQuery, NewLab},
+        library_type_specification::LibraryType,
+        nucleic_acid::{
+            cdna::{NewCdna, NewCdnaMeasurement},
+            common::ElectrophoreticMeasurementData,
+        },
         person::{NewPerson, PersonQuery, UserRole},
         sequencing_run::{NewSequencingRun, SequencingRunQuery},
         specimen::{
@@ -132,7 +137,9 @@ fn register_common_submodule<'a>(parent: &'a Bound<PyModule>) -> PyResult<Module
         LengthUnit,
         CellCountingMethod,
         SuspensionMeasurementFields,
-        BiologicalMaterial
+        BiologicalMaterial,
+        ElectrophoreticMeasurementData,
+        LibraryType
     );
 
     parent.add_submodule(&common_submodule)?;
@@ -179,7 +186,9 @@ fn register_create_submodule<'a>(parent: &'a Bound<PyModule>) -> PyResult<Module
         NewOcmGems,
         NewPoolMultiplexChromiumRun,
         PoolMultiplexChromiumChip,
-        NewPoolMultiplexGems
+        NewPoolMultiplexGems,
+        NewCdnaMeasurement,
+        NewCdna
     );
 
     // create_submodule.add_class::<suspension::MeasurementDataCore>()?;

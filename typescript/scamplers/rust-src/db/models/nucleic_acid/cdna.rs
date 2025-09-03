@@ -2,6 +2,8 @@
 use diesel::prelude::*;
 #[cfg(feature = "python")]
 use pyo3::prelude::*;
+#[cfg(feature = "python")]
+use pyo3_stub_gen::derive::gen_stub_pymethods;
 use scamplers_macros::{
     Jsonify, PyJsonify, WasmJsonify, base_model, db_insertion, db_query, db_selection,
 };
@@ -67,6 +69,7 @@ pub struct NewCdna {
 }
 
 #[cfg(feature = "python")]
+#[gen_stub_pymethods]
 #[pymethods]
 impl NewCdna {
     #[new]
