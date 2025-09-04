@@ -1,7 +1,7 @@
 {
   "index_set_urls": [
-    "https://cdn.10xgenomics.com/raw/upload/v1655155470/support/in-line%20documents/Chromium-i7-Multiplex-Kit-N-Set-A-sample-indexes-plate.json",
     "https://cdn.10xgenomics.com/raw/upload/v1655155349/support/in-line%20documents/Single_Index_Kit_N_Set_A.json",
+    "https://cdn.10xgenomics.com/raw/upload/v1655156427/support/in-line%20documents/Dual_Index_Kit_NN_Set_A.json",
     "https://cdn.10xgenomics.com/raw/upload/v1655156218/support/in-line%20documents/Dual_Index_Kit_TN_Set_A.json",
     "https://cdn.10xgenomics.com/raw/upload/v1655155616/support/in-line%20documents/Single_Index_Kit_T_Set_A.json",
     "https://cdn.10xgenomics.com/raw/upload/v1655155126/support/in-line%20documents/Dual_Index_Kit_TS_Set_A.json",
@@ -442,6 +442,39 @@
         }
       ],
       "cmdlines": ["cellranger multi"]
+    },
+    {
+      "barcode": [
+        {
+          "kind": "gel_bead",
+          "length": 16,
+          "offset": 0,
+          "read_type": "R1",
+          "whitelist": {
+            "name": "737K-fixed-rna-profiling"
+          }
+        }
+      ],
+      "description": "Flex Gene Expression",
+      "endedness": "three_prime",
+      "name": "SFRP",
+      "rna": {
+        "length": 50,
+        "offset": 0,
+        "read_type": "R2",
+        "min_length": 30
+      },
+      "rna2": null,
+      "strandedness": "-",
+      "umi": [
+        {
+          "length": 12,
+          "min_length": 10,
+          "offset": 16,
+          "read_type": "R1"
+        }
+      ],
+      "cmdlines": ["cellranger count"]
     },
     {
       "barcode": [
@@ -6712,11 +6745,81 @@
   ],
   "library_type_specifications": [
     {
+      "chemistry": "ARC-v1",
+      "library_type": "chromatin_accessibility",
+      "index_kit": "NA",
+      "cdna_volume_µl": 40,
+      "library_volume_µl": 20
+    },
+    {
+      "chemistry": "ARC-v1",
+      "library_type": "gene_expression",
+      "index_kit": "TT",
+      "cdna_volume_µl": 40,
+      "library_volume_µl": 35
+    },
+    {
+      "chemistry": "MFRP",
+      "library_type": "gene_expression",
+      "index_kit": "TS",
+      "cdna_volume_µl": 100,
+      "library_volume_µl": 40
+    },
+    {
       "chemistry": "MFRP-RNA",
       "library_type": "gene_expression",
       "index_kit": "TS",
+      "cdna_volume_µl": 100,
+      "library_volume_µl": 40
+    },
+    {
+      "chemistry": "MFRP-RNA-R1",
+      "library_type": "gene_expression",
+      "index_kit": "TS",
+      "cdna_volume_µl": 100,
+      "library_volume_µl": 40
+    },
+    {
+      "chemistry": "SC3Pv3",
+      "library_type": "gene_expression",
+      "index_kit": "TT",
       "cdna_volume_µl": 40,
-      "library_volume_µl": 100
+      "library_volume_µl": 35
+    },
+    {
+      "chemistry": "SC3Pv3-polyA",
+      "library_type": "gene_expression",
+      "index_kit": "TT",
+      "cdna_volume_µl": 40,
+      "library_volume_µl": 35
+    },
+    {
+      "chemistry": "SC3Pv4",
+      "library_type": "gene_expression",
+      "index_kit": "TT",
+      "cdna_volume_µl": 40,
+      "library_volume_µl": 35
+    },
+    {
+      "chemistry": "SC3Pv4-polyA",
+      "library_type": "gene_expression",
+      "index_kit": "TT",
+      "cdna_volume_µl": 40,
+      "library_volume_µl": 35
+    },
+    {
+      "chemistry": "SC3Pv4-polyA-OCM",
+      "library_type": "gene_expression",
+      "index_kit": "TT",
+      "cdna_volume_µl": 40,
+      "library_volume_µl": 35
+    },
+    {
+      "chemistry": "SFRP",
+      "library_type": "gene_expression",
+      "index_kit": "TS",
+      "cdna_volume_µl": 100,
+      "library_volume_µl": 40
     }
   ]
 }

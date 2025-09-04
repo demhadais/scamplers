@@ -51,15 +51,112 @@ impl ManyToManyChildrenWithSelfId<CdnaPreparer> for NewCdna {
 }
 
 impl NewCdnaGroup {
-    fn into_vec(self) -> Vec<NewCdna> {
+    fn library_types(&self) -> Vec<LibraryType> {
         match self {
-            Self::Single(c) => vec![c],
-            Self::Multiple(g) | Self::Ocm(g) => g,
+            Self::Single(c) => vec![c.library_type],
+            Self::Ocm(c) | Self::Multiple(c) => c.iter().map(|c| c.library_type).collect(),
         }
+    }
+
+    fn library_types_and_volumes(&self) -> Vec<(LibraryType, f32)> {
+        match self {
+            Self::Single(c) => vec![(c.library_type, c.volume_µl)],
+            Self::Ocm(c) | Self::Multiple(c) => {
+                c.iter().map(|c| (c.library_type, c.volume_µl)).collect()
+            }
+        }
+    }
+
+    fn is_atac(&self) -> bool {
+        matches!(
+            self,
+            Self::Single(NewCdna {
+                library_type: LibraryType::ChromatinAccessibility,
+                ..
+            })
+        )
+    }
+
+    fn validate_atac(&self) -> Result<(), CdnaLibraryTypeError> {
+        let expected_specification = chromatin_accessibility_library_specification();
+
+        let expected_library_types_and_volumes = [(
+            expected_specification.library_type,
+            expected_specification.cdna_volume_µl,
+        )];
+
+        if self.library_types_and_volumes() != expected_library_types_and_volumes {
+            return Err(CdnaLibraryTypeError {
+                expected_specifications: vec![expected_specification],
+            });
+        }
+
+        Ok(())
+    }
+
+    fn is_ocm(&self) -> bool {
+        matches!(self, Self::Ocm(_))
+    }
+
+    fn validate_ocm(&self) -> bool {
+        let library_types_and_volumes = self.library_types_and_volumes();
+
+        let all_groups_are
+        library_types_and_volumes
+            .iter()
+            .all(|lt_v| Some(lt_v) == library_types_and_volumes.first())
+    }
+
+    fn validate_library_types(&self, db_conn: &mut PgConnection) -> ScamplersResult<()> {
+        if self.is_atac() {
+            return Ok(self.validate_atac()?);
+        }
+
+        let mut found_library_types_and_volumes = self.library_types_and_volumes();
+
+        found_library_types_and_volumes.sort_by_key(|(lib_type, _)| *lib_type);
+
+        let mut expected_specifications: Vec<LibraryTypeSpecification> =
+            library_type_specification::table
+                .filter(library_type_specification::library_type.eq_any(self.library_types()))
+                .order_by((
+                    library_type_specification::chemistry,
+                    library_type_specification::library_type,
+                ))
+                .select(LibraryTypeSpecification::as_select())
+                .load(db_conn)?;
+
+        let expected_specifications_grouped_by_chemistry =
+            expected_specifications.chunk_by(|spec1, spec2| spec1.chemistry == spec2.chemistry);
+
+        // If the chemistry in the db only has one library type, then we know all the
+        // new cDNA must conform to this specification
+        if expected_specifications.len() == 1 {
+            // Fill in the rest of the `Vec`
+            for _ in 0..(self.len() - 1) {
+                expected_specifications.push(expected_specifications[0].clone());
+            }
+        }
+
+        let expected_library_types_and_volumes: Vec<_> = expected_specifications
+            .iter()
+            .map(|s| (s.library_type, s.cdna_volume_µl))
+            .collect();
+
+        if expected_library_types_and_volumes != found_library_types_and_volumes {
+            return Err(CdnaLibraryTypeError {
+                expected_specifications,
+            }
+            .into());
+        }
+
+        Ok(())
     }
 }
 
 trait VecExt {
+    fn library_types(&self) -> Vec<LibraryType>;
+    fn library_types_and_volumes(&self) -> Vec<(LibraryType, f32)>;
     fn validate_library_types(&self, db_conn: &mut PgConnection) -> ScamplersResult<()>;
 }
 
@@ -82,30 +179,52 @@ fn validate_chromatin_accessibility_cdna(
     Ok(())
 }
 
+trait IsAtac {
+    fn is_atac(&self) -> bool;
+}
+
+impl IsAtac for Vec<(LibraryType, f32)> {
+    fn is_atac(&self) -> bool {
+        if self.len() == 1 && self[0].0 == LibraryType::ChromatinAccessibility {
+            return true;
+        }
+
+        false
+    }
+}
+
 impl VecExt for Vec<NewCdna> {
+    fn library_types(&self) -> Vec<LibraryType> {
+        self.iter().map(|c| c.library_type).collect()
+    }
+
+    fn library_types_and_volumes(&self) -> Vec<(LibraryType, f32)> {
+        self.iter().map(|c| (c.library_type, c.volume_µl)).collect()
+    }
+
     fn validate_library_types(&self, db_conn: &mut PgConnection) -> ScamplersResult<()> {
-        let chemistry: Option<String> = gems::table
-            .inner_join(chemistry::table)
-            .filter(gems::id.eq(&self[0].gems_id))
-            .select(gems::chemistry)
-            .first(db_conn)?;
+        let mut found_library_types_and_volumes = self.library_types_and_volumes();
 
-        let mut found_library_types_and_volumes: Vec<_> =
-            self.iter().map(|c| (c.library_type, c.volume_µl)).collect();
-        found_library_types_and_volumes.sort_by_key(|(lib_type, _)| *lib_type);
-
-        let Some(chemistry) = chemistry else {
+        if found_library_types_and_volumes.is_atac() {
             return Ok(validate_chromatin_accessibility_cdna(
                 &found_library_types_and_volumes,
             )?);
-        };
+        }
+
+        found_library_types_and_volumes.sort_by_key(|(lib_type, _)| *lib_type);
 
         let mut expected_specifications: Vec<LibraryTypeSpecification> =
             library_type_specification::table
-                .filter(library_type_specification::chemistry.eq(chemistry))
-                .order_by(library_type_specification::library_type)
+                .filter(library_type_specification::library_type.eq_any(self.library_types()))
+                .order_by((
+                    library_type_specification::chemistry,
+                    library_type_specification::library_type,
+                ))
                 .select(LibraryTypeSpecification::as_select())
                 .load(db_conn)?;
+
+        let expected_specifications_grouped_by_chemistry =
+            expected_specifications.chunk_by(|spec1, spec2| spec1.chemistry == spec2.chemistry);
 
         // If the chemistry in the db only has one library type, then we know all the
         // new cDNA must conform to this specification

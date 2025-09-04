@@ -1,10 +1,9 @@
 pub use common::{NewChipLoadingCommon, NewChromiumRunCommon, NewGemsCommon};
 #[cfg(feature = "app")]
 use diesel::Associations;
-pub use ocm::{NewOcmChromiumRun, NewOcmGems, OcmChromiumChip};
+pub use ocm::{NewOcmChromiumRun, NewOcmGems};
 pub use pool_multiplex::{
     NewPoolMultiplexChipLoading, NewPoolMultiplexChromiumRun, NewPoolMultiplexGems,
-    PoolMultiplexChromiumChip,
 };
 #[cfg(feature = "python")]
 use pyo3::prelude::*;
@@ -20,7 +19,7 @@ use uuid::Uuid;
 use wasm_bindgen::prelude::*;
 
 use crate::{
-    db::models::{DefaultVec, Links, Pagination},
+    db::models::{DefaultVec, Links, Pagination, tenx_assay::TenxAssay},
     define_ordering_enum, uuid_newtype,
 };
 
@@ -54,7 +53,6 @@ pub struct ChromiumRunSummary {
     #[cfg_attr(target_arch = "wasm32", wasm_bindgen(skip))]
     pub links: Links,
     pub readable_id: String,
-    pub chip: String,
     pub run_at: OffsetDateTime,
     pub run_by: Uuid,
     pub succeeded: bool,
@@ -62,12 +60,23 @@ pub struct ChromiumRunSummary {
 }
 
 #[db_selection]
+#[cfg_attr(feature = "app", diesel(table_name = scamplers_schema::chromium_run))]
+pub struct ChromiumRunSummaryWithParents {
+    #[cfg_attr(feature = "app", diesel(column_name = "id"))]
+    pub id_: Uuid,
+    #[serde(flatten)]
+    #[cfg_attr(feature = "app", diesel(embed))]
+    pub summary: ChromiumRunSummary,
+    #[cfg_attr(feature = "app", diesel(embed))]
+    pub assay: TenxAssay,
+}
+
+#[db_selection]
 #[cfg_attr(feature = "app", derive(Associations))]
-#[cfg_attr(feature = "app", diesel(table_name = scamplers_schema::gems, belongs_to(ChromiumRunSummary, foreign_key = chromium_run_id)))]
+#[cfg_attr(feature = "app", diesel(table_name = scamplers_schema::gems, belongs_to(ChromiumRunSummaryWithParents, foreign_key = chromium_run_id)))]
 pub struct Gems {
     pub id: Uuid,
     pub readable_id: String,
-    pub chemistry: Option<String>,
     pub chromium_run_id: Uuid,
 }
 
@@ -77,7 +86,7 @@ pub struct Gems {
 #[cfg_attr(feature = "python", pyclass(eq, module = "scamplepy.responses"))]
 pub struct ChromiumRun {
     #[serde(flatten)]
-    pub summary: ChromiumRunSummary,
+    pub summary: ChromiumRunSummaryWithParents,
     pub gems: Vec<Gems>,
 }
 

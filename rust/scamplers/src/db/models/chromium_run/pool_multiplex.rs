@@ -92,18 +92,6 @@ impl NewPoolMultiplexGems {
     }
 }
 
-#[db_simple_enum]
-#[derive(strum::Display)]
-#[cfg_attr(feature = "python", pyo3(module = "scamplepy.create"))]
-pub enum PoolMultiplexChromiumChip {
-    #[serde(rename = "Q")]
-    #[strum(serialize = "Q")]
-    Q,
-    #[serde(rename = "GEM-X FX")]
-    #[strum(serialize = "GEM-X FX")]
-    GemxFx,
-}
-
 #[db_insertion]
 #[cfg_attr(feature = "app", diesel(table_name = scamplers_schema::chromium_run))]
 pub struct NewPoolMultiplexChromiumRun {

@@ -51,15 +51,6 @@ impl NewOcmGems {
     }
 }
 
-#[db_simple_enum]
-#[derive(strum::Display)]
-#[cfg_attr(feature = "python", pyo3(module = "scamplepy.create"))]
-pub enum OcmChromiumChip {
-    #[serde(rename = "GEM-X OCM 3'")]
-    #[strum(serialize = "GEM-X OCM 3'")]
-    GemxOcm3p,
-}
-
 #[db_insertion]
 #[cfg_attr(feature = "app", diesel(table_name = scamplers_schema::chromium_run))]
 pub struct NewOcmChromiumRun {

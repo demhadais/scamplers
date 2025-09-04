@@ -53,8 +53,6 @@ pub struct NewSingleplexGems {
     #[garde(dive)]
     #[cfg_attr(feature = "app", diesel(embed))]
     pub inner: NewGemsCommon,
-    #[garde(dive)]
-    pub chemistry: Option<ValidString>,
     #[garde(dive, length(min = 1, max = 1))]
     #[cfg_attr(feature = "app", diesel(skip_insertion))]
     pub loading: Vec<NewSingleplexChipLoading>,
