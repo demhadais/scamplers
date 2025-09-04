@@ -56,6 +56,7 @@ pub struct ChromiumRunSummary {
     pub readable_id: String,
     pub chip: String,
     pub run_at: OffsetDateTime,
+    pub run_by: Uuid,
     pub succeeded: bool,
     pub notes: Option<String>,
 }

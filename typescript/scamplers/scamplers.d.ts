@@ -44,6 +44,7 @@ export class Cdna {
   static from_json_string(json_str: string): Cdna;
   static from_base64_json(base64_json_bytes: string): Cdna;
   summary: CdnaSummary;
+  prepared_by: string[];
   measurements: CdnaMeasurement[];
 }
 export class CdnaGemsError {
@@ -155,6 +156,7 @@ export class ChromiumRunSummary {
   readable_id: string;
   chip: string;
   run_at: Date;
+  run_by: string;
   succeeded: boolean;
   get notes(): string;
   set notes(value: string | null | undefined);
@@ -419,6 +421,7 @@ export class Library {
   static from_json_string(json_str: string): Library;
   static from_base64_json(base64_json_bytes: string): Library;
   info: LibrarySummaryWithParents;
+  prepared_by: string[];
   measurements: LibraryMeasurement[];
 }
 export class LibraryIndexSetError {
@@ -444,6 +447,20 @@ export class LibraryMeasurement {
   id: string;
   library_id: string;
   measured_by: string;
+}
+export class LibraryQuery {
+  free(): void;
+  to_json_bytes(): Uint8Array;
+  to_json_string(): string;
+  to_base64_json(): string;
+  static from_json_bytes(json_bytes: Uint8Array): LibraryQuery;
+  static from_json_string(json_str: string): LibraryQuery;
+  static from_base64_json(base64_json_bytes: string): LibraryQuery;
+  constructor();
+  ids: string[];
+  library_types: any[];
+  pagination: Pagination;
+  order_by: OrderBy[];
 }
 export class LibrarySummary {
   private constructor();
@@ -806,7 +823,7 @@ export class Suspension {
   private constructor();
   free(): void;
   info: SuspensionSummaryWithParents;
-  preparers: string[];
+  prepared_by: string[];
   measurements: SuspensionMeasurement[];
 }
 export class SuspensionMeasurement {

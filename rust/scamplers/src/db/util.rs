@@ -272,6 +272,16 @@ macro_rules! group_children {
 }
 
 #[macro_export]
+macro_rules! group_preparers {
+    (parents = $parents:expr,children = $children:expr) => {
+        $children
+            .grouped_by(&$parents)
+            .into_iter()
+            .map(|preparer_vec| preparer_vec.into_iter().map(|p| p.prepared_by).collect())
+    };
+}
+
+#[macro_export]
 macro_rules! extract_group_children_from_tuple {
     (parents = $parents:expr,children = $children:expr) => {
         $children

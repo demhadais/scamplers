@@ -13,7 +13,7 @@ use crate::{
             suspension::SuspensionSummary,
         },
     },
-    group_children, impl_id_db_operation, init_stmt,
+    group_children, group_preparers, impl_id_db_operation, init_stmt,
 };
 
 impl DbOperation<Vec<SuspensionPool>> for SuspensionPoolQuery {
@@ -41,8 +41,7 @@ impl DbOperation<Vec<SuspensionPool>> for SuspensionPoolQuery {
             .load(db_conn)?;
 
         let grouped_preparers =
-            group_children!(parents = suspension_pool_summaries, children = preparers)
-                .map(|v| v.into_iter().map(|p| p.prepared_by).collect());
+            group_preparers!(parents = suspension_pool_summaries, children = preparers);
 
         let suspensions = SuspensionSummary::belonging_to(&suspension_pool_summaries)
             .select(SuspensionSummary::as_select())

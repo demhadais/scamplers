@@ -5,19 +5,30 @@ use pyo3::prelude::*;
 #[cfg(feature = "python")]
 use pyo3_stub_gen::derive::{gen_stub_pyclass_complex_enum, gen_stub_pymethods};
 use scamplers_macros::{
-    Jsonify, PyJsonify, WasmJsonify, base_model, db_insertion, db_json, db_selection,
+    Jsonify, PyJsonify, WasmJsonify, base_model, db_insertion, db_json, db_query, db_selection,
 };
+#[cfg(feature = "app")]
+use scamplers_schema::library_preparers;
 use time::OffsetDateTime;
 use uuid::Uuid;
 use valid_string::ValidString;
 
-use crate::db::models::{
-    Links,
-    nucleic_acid::{
-        cdna::CdnaSummary,
-        common::{Concentration, ElectrophoreticMeasurementData},
+use crate::{
+    db::models::{
+        DefaultVec, Links, Pagination,
+        library_type_specification::LibraryType,
+        nucleic_acid::{
+            cdna::CdnaSummary,
+            common::{Concentration, ElectrophoreticMeasurementData},
+        },
     },
+    define_ordering_enum, uuid_newtype,
 };
+
+#[cfg(feature = "app")]
+mod create;
+#[cfg(feature = "app")]
+mod read;
 
 #[cfg_attr(feature = "python", gen_stub_pyclass_complex_enum)]
 #[db_json]
@@ -75,6 +86,8 @@ pub struct NewLibrary {
     pub dual_index_set_name: Option<ValidString>,
     #[garde(range(min = 1))]
     pub number_of_sample_index_pcr_cycles: i32,
+    #[cfg_attr(feature = "app", diesel(skip_insertion))]
+    pub volume_µl: f32,
     #[garde(range(min = 1000))]
     pub target_reads_per_cell: i32,
     pub prepared_at: OffsetDateTime,
@@ -91,11 +104,12 @@ pub struct NewLibrary {
 #[pymethods]
 impl NewLibrary {
     #[new]
-    #[pyo3(signature = (*, readable_id, cdna_id, number_of_sample_index_pcr_cycles, target_reads_per_cell, prepared_at, preparer_ids, single_index_set_name=None, dual_index_set_name=None, measurements=Vec::new(), notes=None))]
+    #[pyo3(signature = (*, readable_id, cdna_id, number_of_sample_index_pcr_cycles, volume_µl, target_reads_per_cell, prepared_at, preparer_ids, single_index_set_name=None, dual_index_set_name=None, measurements=Vec::new(), notes=None))]
     fn new(
         readable_id: ValidString,
         cdna_id: Uuid,
         number_of_sample_index_pcr_cycles: i32,
+        volume_µl: f32,
         target_reads_per_cell: i32,
         prepared_at: OffsetDateTime,
         preparer_ids: Vec<Uuid>,
@@ -110,6 +124,7 @@ impl NewLibrary {
             single_index_set_name,
             dual_index_set_name,
             number_of_sample_index_pcr_cycles,
+            volume_µl,
             target_reads_per_cell,
             prepared_at,
             preparer_ids,
@@ -146,6 +161,14 @@ pub struct LibrarySummaryWithParents {
     pub cdna: CdnaSummary,
 }
 
+#[cfg(feature = "app")]
+#[derive(Insertable, Identifiable, Associations, Selectable, Queryable)]
+#[diesel(primary_key(library_id, prepared_by), belongs_to(LibrarySummaryWithParents, foreign_key = library_id))]
+struct LibraryPreparer {
+    library_id: Uuid,
+    prepared_by: Uuid,
+}
+
 #[db_selection]
 #[cfg_attr(feature = "app", derive(Associations))]
 #[cfg_attr(feature = "app", diesel(table_name = scamplers_schema::library_measurement, belongs_to(LibrarySummaryWithParents, foreign_key = library_id)))]
@@ -171,5 +194,22 @@ pub struct LibraryMeasurement {
 #[derive(Jsonify, WasmJsonify, PyJsonify)]
 pub struct Library {
     pub info: LibrarySummaryWithParents,
+    pub prepared_by: Vec<Uuid>,
     pub measurements: Vec<LibraryMeasurement>,
 }
+
+define_ordering_enum! { LibraryOrderBy{ PreparedAt, ReadableId }, default = PreparedAt }
+
+#[db_query]
+pub struct LibraryQuery {
+    #[builder(default)]
+    pub ids: Vec<Uuid>,
+    #[builder(default)]
+    pub library_types: Vec<LibraryType>,
+    #[builder(default)]
+    pub pagination: Pagination,
+    #[builder(default)]
+    pub order_by: DefaultVec<LibraryOrderBy>,
+}
+
+uuid_newtype!(LibraryId);

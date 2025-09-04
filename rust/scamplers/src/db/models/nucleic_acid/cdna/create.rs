@@ -14,7 +14,9 @@ use crate::{
                 LibraryType, LibraryTypeSpecification,
                 chromatin_accessibility_library_specification,
             },
-            nucleic_acid::cdna::{Cdna, CdnaQuery, NewCdna, NewCdnaGroup, NewCdnaMeasurement},
+            nucleic_acid::cdna::{
+                Cdna, CdnaPreparer, CdnaQuery, NewCdna, NewCdnaGroup, NewCdnaMeasurement,
+            },
         },
         util::{ChildrenWithSelfId, ManyToMany, ManyToManyChildrenWithSelfId, SetParentId},
     },
@@ -33,12 +35,6 @@ impl ChildrenWithSelfId<NewCdnaMeasurement> for NewCdna {
     }
 }
 
-#[derive(Insertable)]
-struct CdnaPreparer {
-    cdna_id: Uuid,
-    prepared_by: Uuid,
-}
-
 impl ManyToMany for CdnaPreparer {
     fn new(parent_id: Uuid, child_id: Uuid) -> Self {
         Self {
@@ -55,7 +51,7 @@ impl ManyToManyChildrenWithSelfId<CdnaPreparer> for NewCdna {
 }
 
 impl NewCdnaGroup {
-    fn to_vec(self) -> Vec<NewCdna> {
+    fn into_vec(self) -> Vec<NewCdna> {
         match self {
             Self::Single(c) => vec![c],
             Self::Multiple(g) | Self::Ocm(g) => g,
@@ -141,7 +137,7 @@ impl DbOperation<Vec<Cdna>> for NewCdnaGroup {
         self,
         db_conn: &mut diesel::PgConnection,
     ) -> crate::result::ScamplersResult<Vec<Cdna>> {
-        let mut cdnas = self.to_vec();
+        let mut cdnas = self.into_vec();
 
         cdnas.validate_library_types(db_conn)?;
 
@@ -153,8 +149,8 @@ impl DbOperation<Vec<Cdna>> for NewCdnaGroup {
         let mut measurements = Vec::with_capacity(cdnas.len());
         let mut preparers = Vec::with_capacity(cdnas.len());
 
-        // We have to do two iterations for borrow checker (one for measurements and one
-        // for preparers)
+        // We have to do two iterations for the borrow checker (one for measurements and
+        // one for preparers)
         for (cdna, id) in cdnas.iter_mut().zip(&ids) {
             measurements.extend(cdna.children_with_self_id(*id).iter_mut().map(|m| &*m));
         }

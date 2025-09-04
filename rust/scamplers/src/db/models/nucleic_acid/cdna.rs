@@ -7,6 +7,8 @@ use pyo3_stub_gen::derive::{gen_stub_pyclass_complex_enum, gen_stub_pymethods};
 use scamplers_macros::{
     Jsonify, PyJsonify, WasmJsonify, base_model, db_insertion, db_query, db_selection,
 };
+#[cfg(feature = "app")]
+use scamplers_schema::cdna_preparers;
 use time::OffsetDateTime;
 use uuid::Uuid;
 use valid_string::ValidString;
@@ -150,6 +152,14 @@ pub struct CdnaSummary {
     pub notes: Option<String>,
 }
 
+#[cfg(feature = "app")]
+#[derive(Insertable, Identifiable, Associations, Selectable, Queryable)]
+#[diesel(primary_key(cdna_id, prepared_by), belongs_to(CdnaSummary, foreign_key = cdna_id))]
+struct CdnaPreparer {
+    cdna_id: Uuid,
+    prepared_by: Uuid,
+}
+
 #[db_selection]
 #[cfg_attr(feature = "app", derive(Associations))]
 #[cfg_attr(feature = "app", diesel(table_name = scamplers_schema::cdna_measurement, belongs_to(CdnaSummary, foreign_key = cdna_id)))]
@@ -174,6 +184,7 @@ pub struct CdnaMeasurement {
 #[derive(Jsonify, WasmJsonify, PyJsonify)]
 pub struct Cdna {
     pub summary: CdnaSummary,
+    pub prepared_by: Vec<Uuid>,
     pub measurements: Vec<CdnaMeasurement>,
 }
 

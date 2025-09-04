@@ -10,7 +10,7 @@ use crate::{
             SuspensionQuery, SuspensionSummaryWithParents,
         },
     },
-    group_children, impl_id_db_operation, init_stmt,
+    group_children, group_preparers, impl_id_db_operation, init_stmt,
 };
 
 impl DbOperation<Vec<Suspension>> for SuspensionQuery {
@@ -43,15 +43,15 @@ impl DbOperation<Vec<Suspension>> for SuspensionQuery {
                 .select(SuspensionPreparer::as_select())
                 .load(db_conn)?;
 
-        let grouped_preparers = group_children!(parents = suspension_records, children = preparers)
-            .map(|v| v.into_iter().map(|p| p.prepared_by).collect());
+        let grouped_preparers =
+            group_preparers!(parents = suspension_records, children = preparers);
 
         let suspensions = attach_children_to_parents!(
             parents = suspension_records,
             children = [grouped_measurements, grouped_preparers],
-            transform_fn = |((info, measurements), preparers)| Suspension {
+            transform_fn = |((info, measurements), prepared_by)| Suspension {
                 info,
-                preparers,
+                prepared_by,
                 measurements
             }
         );

@@ -167,12 +167,9 @@ pub struct SuspensionSummaryWithParents {
     pub multiplexing_tag: Option<MultiplexingTag>,
 }
 
-#[db_insertion]
-#[cfg_attr(
-    feature = "app",
-    derive(Identifiable, Associations, Selectable, Queryable)
-)]
-#[cfg_attr(feature = "app", diesel(primary_key(suspension_id, prepared_by), belongs_to(SuspensionSummaryWithParents, foreign_key = suspension_id)))]
+#[cfg(feature = "app")]
+#[derive(Insertable, Identifiable, Associations, Selectable, Queryable)]
+#[diesel(primary_key(suspension_id, prepared_by), belongs_to(SuspensionSummaryWithParents, foreign_key = suspension_id))]
 struct SuspensionPreparer {
     suspension_id: Uuid,
     prepared_by: Uuid,
@@ -200,7 +197,7 @@ pub struct SuspensionMeasurement {
 pub struct Suspension {
     #[serde(flatten)]
     pub info: SuspensionSummaryWithParents,
-    pub preparers: Vec<Uuid>,
+    pub prepared_by: Vec<Uuid>,
     pub measurements: Vec<SuspensionMeasurement>,
 }
 

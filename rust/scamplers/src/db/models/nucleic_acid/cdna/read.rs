@@ -6,10 +6,10 @@ use crate::{
     db::{
         DbOperation,
         models::nucleic_acid::cdna::{
-            Cdna, CdnaId, CdnaMeasurement, CdnaOrderBy, CdnaQuery, CdnaSummary,
+            Cdna, CdnaId, CdnaMeasurement, CdnaOrderBy, CdnaPreparer, CdnaQuery, CdnaSummary,
         },
     },
-    group_children, impl_id_db_operation, init_stmt,
+    group_children, group_preparers, impl_id_db_operation, init_stmt,
 };
 
 impl DbOperation<Vec<Cdna>> for CdnaQuery {
@@ -34,15 +34,22 @@ impl DbOperation<Vec<Cdna>> for CdnaQuery {
 
         let summaries = stmt.load(db_conn)?;
 
-        let measurements = CdnaMeasurement::belonging_to(&summaries).load(db_conn)?;
+        let preparers = CdnaPreparer::belonging_to(&summaries)
+            .select(CdnaPreparer::as_select())
+            .load(db_conn)?;
+        let grouped_preparers = group_preparers!(parents = summaries, children = preparers);
 
+        let measurements = CdnaMeasurement::belonging_to(&summaries)
+            .select(CdnaMeasurement::as_select())
+            .load(db_conn)?;
         let grouped_measurements = group_children!(parents = summaries, children = measurements);
 
         let cdna = attach_children_to_parents!(
             parents = summaries,
-            children = [grouped_measurements],
-            transform_fn = |(summary, measurements)| Cdna {
+            children = [grouped_preparers, grouped_measurements],
+            transform_fn = |((summary, prepared_by), measurements)| Cdna {
                 summary,
+                prepared_by,
                 measurements
             }
         );

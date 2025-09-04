@@ -132,12 +132,9 @@ pub struct SuspensionPoolSummary {
     pub notes: Option<String>,
 }
 
-#[db_insertion]
-#[cfg_attr(
-    feature = "app",
-    derive(Identifiable, Associations, Selectable, Queryable)
-)]
-#[cfg_attr(feature = "app", diesel(primary_key(pool_id, prepared_by), belongs_to(SuspensionPoolSummary, foreign_key = pool_id)))]
+#[cfg(feature = "app")]
+#[derive(Insertable, Identifiable, Associations, Selectable, Queryable)]
+#[diesel(primary_key(pool_id, prepared_by), belongs_to(SuspensionPoolSummary, foreign_key = pool_id))]
 struct SuspensionPoolPreparer {
     pub pool_id: Uuid,
     pub prepared_by: Uuid,
