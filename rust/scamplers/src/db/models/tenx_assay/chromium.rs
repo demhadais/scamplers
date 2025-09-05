@@ -1,5 +1,5 @@
 use crate::db::models::tenx_assay::common::NewTenxAssayCommon;
-use scamplers_macros::db_simple_enum;
+use scamplers_macros::{db_insertion, db_simple_enum};
 use uuid::Uuid;
 use valid_string::ValidString;
 #[cfg(target_arch = "wasm32")]
@@ -32,14 +32,9 @@ pub enum SampleMultiplexing {
     Singleplex,
 }
 
-#[scamplers_macros::base_model]
-#[cfg_attr(
-    feature = "app",
-    derive(diesel::Insertable, diesel::Selectable, diesel::Queryable)
-)]
-#[derive(scamplers_macros::Jsonify, bon::Builder)]
-#[builder(on(_, into), derive(Clone, Debug, Into))]
-#[cfg_attr(feature = "app", diesel(check_for_backend(::diesel::pg::Pg), table_name = scamplers_schema::library_type_specification))]
+#[db_insertion]
+#[cfg_attr(feature = "app", derive(diesel::Selectable, diesel::Queryable))]
+#[cfg_attr(feature = "app", diesel(table_name = scamplers_schema::library_type_specification))]
 pub struct LibraryTypeSpecification {
     #[builder(default)]
     #[serde(default)]
@@ -54,14 +49,8 @@ pub struct LibraryTypeSpecification {
     pub library_volume_µl: f32,
 }
 
-#[scamplers_macros::base_model]
-#[cfg_attr(
-    feature = "app",
-    derive(diesel::Insertable),
-    diesel(check_for_backend(::diesel::pg::Pg), table_name = scamplers_schema::tenx_assay)
-)]
-#[derive(scamplers_macros::Jsonify, bon::Builder)]
-#[builder(on(_, into), derive(Clone, Debug, Into))]
+#[db_insertion]
+#[cfg_attr(feature = "app", diesel(table_name = scamplers_schema::tenx_assay))]
 pub struct NewChromiumAssay {
     #[cfg_attr(feature = "app", diesel(embed))]
     pub inner: NewTenxAssayCommon,

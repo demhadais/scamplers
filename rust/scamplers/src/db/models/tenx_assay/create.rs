@@ -3,7 +3,10 @@ use scamplers_schema::{library_type_specification, tenx_assay};
 
 use crate::db::{
     DbOperation,
-    models::tenx_assay::chromium::{LibraryTypeSpecification, NewChromiumAssay},
+    models::tenx_assay::{
+        NewTenxAssay,
+        chromium::{LibraryTypeSpecification, NewChromiumAssay},
+    },
     util::{ChildrenWithSelfId, SetParentId},
 };
 
@@ -19,16 +22,24 @@ impl ChildrenWithSelfId<LibraryTypeSpecification> for NewChromiumAssay {
     }
 }
 
-impl DbOperation<()> for Vec<NewChromiumAssay> {
-    fn execute(mut self, db_conn: &mut diesel::PgConnection) -> crate::result::ScamplersResult<()> {
+impl DbOperation<()> for Vec<NewTenxAssay> {
+    fn execute(self, db_conn: &mut diesel::PgConnection) -> crate::result::ScamplersResult<()> {
+        let mut chromium_assays = Vec::with_capacity(self.len());
+
+        for assay in self {
+            match assay {
+                NewTenxAssay::Chromium(a) => chromium_assays.push(a),
+            }
+        }
+
         let ids = diesel::insert_into(tenx_assay::table)
-            .values(&self)
+            .values(&chromium_assays)
             .on_conflict_do_nothing()
             .returning(tenx_assay::id)
             .get_results(db_conn)?;
 
-        let mut lib_type_specs = Vec::with_capacity(self.len());
-        for (assay, id) in self.iter_mut().zip(&ids) {
+        let mut lib_type_specs = Vec::with_capacity(chromium_assays.len());
+        for (assay, id) in chromium_assays.iter_mut().zip(&ids) {
             lib_type_specs.extend(&*assay.children_with_self_id(*id));
         }
 

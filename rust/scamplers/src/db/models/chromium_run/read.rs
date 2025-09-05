@@ -1,5 +1,5 @@
 use diesel::prelude::*;
-use scamplers_schema::chromium_run;
+use scamplers_schema::{chromium_run, tenx_assay};
 
 use crate::{
     apply_eq_any_filters, apply_eq_filters, apply_ilike_filters, apply_time_filters,
@@ -7,8 +7,8 @@ use crate::{
     db::{
         DbOperation,
         models::chromium_run::{
-            ChromiumRun, ChromiumRunId, ChromiumRunOrderBy, ChromiumRunQuery, ChromiumRunSummary,
-            Gems,
+            ChromiumRun, ChromiumRunId, ChromiumRunOrderBy, ChromiumRunQuery,
+            ChromiumRunSummaryWithParents, Gems,
         },
     },
     group_children, impl_id_db_operation, init_stmt,
@@ -20,16 +20,16 @@ impl DbOperation<Vec<ChromiumRun>> for ChromiumRunQuery {
         db_conn: &mut diesel::PgConnection,
     ) -> crate::result::ScamplersResult<Vec<ChromiumRun>> {
         let mut stmt = init_stmt!(
-            stmt = chromium_run::table,
+            stmt = chromium_run::table.inner_join(tenx_assay::table),
             query = &self,
-            output_type = ChromiumRunSummary,
+            output_type = ChromiumRunSummaryWithParents,
             orderby_spec = { ChromiumRunOrderBy::RunAt => chromium_run::run_at }
         );
 
         let Self {
             ids,
             readable_ids,
-            chips,
+            assay_names: chips,
             run_before,
             run_after,
             succeeded,
@@ -77,7 +77,7 @@ impl DbOperation<Vec<ChromiumRun>> for ChromiumRunQuery {
         Ok(attach_children_to_parents!(
             parents = chromium_run_summaries,
             children = [gems],
-            transform_fn = |(summary, gems)| ChromiumRun { summary, gems }
+            transform_fn = |(info, gems)| ChromiumRun { info, gems }
         ))
     }
 }

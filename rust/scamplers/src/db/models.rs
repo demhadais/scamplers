@@ -22,7 +22,6 @@ pub mod dataset;
 pub mod index_set;
 pub mod institution;
 pub mod lab;
-pub mod library_type_specification;
 pub mod multiplexing_tag;
 pub mod nucleic_acid;
 pub mod person;

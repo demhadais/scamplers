@@ -19,7 +19,10 @@ use uuid::Uuid;
 use wasm_bindgen::prelude::*;
 
 use crate::{
-    db::models::{DefaultVec, Links, Pagination, tenx_assay::TenxAssay},
+    db::models::{
+        DefaultVec, Links, Pagination,
+        tenx_assay::{TenxAssay, TenxAssayQuery},
+    },
     define_ordering_enum, uuid_newtype,
 };
 
@@ -48,7 +51,7 @@ impl_stub_type!(
 
 #[db_selection]
 #[cfg_attr(feature = "app", diesel(table_name = scamplers_schema::chromium_run))]
-pub struct ChromiumRunSummary {
+pub struct ChromiumRunSummaryWithParents {
     pub id: Uuid,
     #[cfg_attr(target_arch = "wasm32", wasm_bindgen(skip))]
     pub links: Links,
@@ -57,16 +60,6 @@ pub struct ChromiumRunSummary {
     pub run_by: Uuid,
     pub succeeded: bool,
     pub notes: Option<String>,
-}
-
-#[db_selection]
-#[cfg_attr(feature = "app", diesel(table_name = scamplers_schema::chromium_run))]
-pub struct ChromiumRunSummaryWithParents {
-    #[cfg_attr(feature = "app", diesel(column_name = "id"))]
-    pub id_: Uuid,
-    #[serde(flatten)]
-    #[cfg_attr(feature = "app", diesel(embed))]
-    pub summary: ChromiumRunSummary,
     #[cfg_attr(feature = "app", diesel(embed))]
     pub assay: TenxAssay,
 }
@@ -86,7 +79,7 @@ pub struct Gems {
 #[cfg_attr(feature = "python", pyclass(eq, module = "scamplepy.responses"))]
 pub struct ChromiumRun {
     #[serde(flatten)]
-    pub summary: ChromiumRunSummaryWithParents,
+    pub info: ChromiumRunSummaryWithParents,
     pub gems: Vec<Gems>,
 }
 
@@ -99,7 +92,7 @@ pub struct ChromiumRunQuery {
     #[builder(default)]
     pub readable_ids: Vec<String>,
     #[builder(default)]
-    pub chips: Vec<String>,
+    pub assay: TenxAssayQuery,
     pub run_before: Option<OffsetDateTime>,
     pub run_after: Option<OffsetDateTime>,
     pub succeeded: Option<bool>,

@@ -53,7 +53,6 @@ pub struct NewPoolMultiplexGems {
     #[garde(dive)]
     #[cfg_attr(feature = "app", diesel(embed))]
     pub inner: NewGemsCommon,
-    pub chemistry: ValidString,
     #[garde(dive, length(min = 1, max = 1))]
     #[cfg_attr(feature = "app", diesel(skip_insertion))]
     pub loading: Vec<NewPoolMultiplexChipLoading>,
@@ -64,10 +63,9 @@ pub struct NewPoolMultiplexGems {
 #[pymethods]
 impl NewPoolMultiplexGems {
     #[new]
-    #[pyo3(signature = (*, readable_id, chemistry, suspension_pool_id, suspension_volume_loaded, buffer_volume_loaded, notes=None))]
+    #[pyo3(signature = (*, readable_id, suspension_pool_id, suspension_volume_loaded, buffer_volume_loaded, notes=None))]
     fn new(
         readable_id: ValidString,
-        chemistry: ValidString,
         suspension_pool_id: Uuid,
         suspension_volume_loaded: SuspensionMeasurementFields,
         buffer_volume_loaded: SuspensionMeasurementFields,
@@ -78,7 +76,6 @@ impl NewPoolMultiplexGems {
                 readable_id,
                 chromium_run_id: Uuid::default(),
             },
-            chemistry,
             loading: vec![NewPoolMultiplexChipLoading {
                 suspension_pool_id,
                 inner: NewChipLoadingCommon {
@@ -99,7 +96,6 @@ pub struct NewPoolMultiplexChromiumRun {
     #[garde(dive)]
     #[cfg_attr(feature = "app", diesel(embed))]
     pub inner: NewChromiumRunCommon,
-    pub chip: PoolMultiplexChromiumChip,
     #[cfg_attr(feature = "app", diesel(skip_insertion))]
     #[garde(dive, length(min = 1, max = MAX_GEMS_IN_NON_OCM_RUN))]
     pub gems: Vec<NewPoolMultiplexGems>,
@@ -110,25 +106,25 @@ pub struct NewPoolMultiplexChromiumRun {
 #[pymethods]
 impl NewPoolMultiplexChromiumRun {
     #[new]
-    #[pyo3(signature = (*, readable_id, run_at, run_by, succeeded, chip, gems, notes=None))]
+    #[pyo3(signature = (*, readable_id, assay_id, run_at, run_by, succeeded, gems, notes=None))]
     fn new(
         readable_id: ValidString,
+        assay_id: Uuid,
         run_at: OffsetDateTime,
         run_by: Uuid,
         succeeded: bool,
-        chip: PoolMultiplexChromiumChip,
         gems: Vec<NewPoolMultiplexGems>,
         notes: Option<ValidString>,
     ) -> Self {
         Self {
             inner: NewChromiumRunCommon {
                 readable_id,
+                assay_id,
                 run_at,
                 run_by,
                 succeeded,
                 notes,
             },
-            chip,
             gems,
         }
     }

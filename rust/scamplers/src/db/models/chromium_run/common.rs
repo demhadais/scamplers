@@ -39,6 +39,7 @@ pub struct NewChipLoadingCommon {
 pub struct NewChromiumRunCommon {
     #[garde(dive)]
     pub readable_id: ValidString,
+    pub assay_id: Uuid,
     pub run_at: OffsetDateTime,
     pub run_by: Uuid,
     pub succeeded: bool,

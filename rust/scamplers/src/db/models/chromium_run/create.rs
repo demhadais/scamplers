@@ -11,16 +11,8 @@ use crate::db::{
     util::{ChildrenWithSelfId, SetParentId},
 };
 
-#[derive(Insertable)]
-#[diesel(table_name = chromium_run, check_for_backend(diesel::pg::Pg))]
-pub struct GenericNewChromiumRun {
-    #[diesel(embed)]
-    inner: NewChromiumRunCommon,
-    chip: String,
-}
-
-impl Insertable<chromium_run::table> for &NewChromiumRun {
-    type Values = <GenericNewChromiumRun as Insertable<chromium_run::table>>::Values;
+impl<'a> Insertable<chromium_run::table> for &'a NewChromiumRun {
+    type Values = <&'a NewChromiumRunCommon as Insertable<chromium_run::table>>::Values;
 
     fn values(self) -> Self::Values {
         use NewChromiumRun::{Ocm, PoolMultiplex, Singleplex};
@@ -29,16 +21,10 @@ impl Insertable<chromium_run::table> for &NewChromiumRun {
         let inner = match self {
             Singleplex(NewSingleplexChromiumRun { inner, .. })
             | Ocm(NewOcmChromiumRun { inner, .. })
-            | PoolMultiplex(NewPoolMultiplexChromiumRun { inner, .. }) => inner.clone(),
+            | PoolMultiplex(NewPoolMultiplexChromiumRun { inner, .. }) => inner,
         };
 
-        let chip = match self {
-            Singleplex(NewSingleplexChromiumRun { chip, .. }) => chip.to_string(),
-            Ocm(NewOcmChromiumRun { chip, .. }) => chip.to_string(),
-            PoolMultiplex(NewPoolMultiplexChromiumRun { chip, .. }) => chip.to_string(),
-        };
-
-        GenericNewChromiumRun { inner, chip }.values()
+        inner.values()
     }
 }
 

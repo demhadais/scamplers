@@ -325,6 +325,7 @@ diesel::table! {
 diesel::table! {
     tenx_assay (id) {
         id -> Uuid,
+        links -> Jsonb,
         name -> Text,
         library_types -> Nullable<Array<Nullable<Text>>>,
         sample_multiplexing -> Nullable<Text>,
