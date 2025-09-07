@@ -11,15 +11,13 @@ use crate::{
 };
 
 #[macro_export]
-macro_rules! tenx_assay_query {
-    ($query:expr) => {{
-        let mut stmt = init_stmt!(stmt = tenx_assay::table, query = &$query, output_type = TenxAssay, orderby_spec = {TenxAssayOrderBy::Name => tenx_assay::name});
-
+macro_rules! apply_tenx_assay_query {
+    ($stmt:expr, $query:expr) => {{
         for lib_type_group in &mut $query.library_types {
             lib_type_group.sort();
         }
 
-        let Self {
+        let crate::db::models::tenx_assay::TenxAssayQuery {
             ids,
             names,
             library_types,
@@ -29,8 +27,8 @@ macro_rules! tenx_assay_query {
             ..
         } = &$query;
 
-        stmt = apply_eq_any_filters!(
-            stmt,
+        $stmt = apply_eq_any_filters!(
+            $stmt,
             filters = {
                 tenx_assay::id => ids,
                 tenx_assay::library_types => library_types,
@@ -40,9 +38,9 @@ macro_rules! tenx_assay_query {
             }
         );
 
-        stmt = apply_ilike_filters!(stmt, filters = {tenx_assay::name => names});
+        $stmt = apply_ilike_filters!($stmt, filters = {tenx_assay::name => names});
 
-        stmt
+        $stmt
     }};
 }
 
@@ -51,7 +49,13 @@ impl DbOperation<Vec<TenxAssay>> for TenxAssayQuery {
         mut self,
         db_conn: &mut diesel::PgConnection,
     ) -> crate::result::ScamplersResult<Vec<TenxAssay>> {
-        let stmt = tenx_assay_query!(self);
+        let mut stmt = init_stmt!(
+            stmt = tenx_assay::table,
+            query = self, output_type = TenxAssay,
+            orderby_spec = { TenxAssayOrderBy::Name => tenx_assay::name }
+        );
+
+        stmt = apply_tenx_assay_query!(stmt, self);
 
         Ok(stmt.load(db_conn)?)
     }

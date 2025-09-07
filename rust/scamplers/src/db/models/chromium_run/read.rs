@@ -2,8 +2,8 @@ use diesel::prelude::*;
 use scamplers_schema::{chromium_run, tenx_assay};
 
 use crate::{
-    apply_eq_any_filters, apply_eq_filters, apply_ilike_filters, apply_time_filters,
-    attach_children_to_parents,
+    apply_eq_any_filters, apply_eq_filters, apply_ilike_filters, apply_tenx_assay_query,
+    apply_time_filters, attach_children_to_parents,
     db::{
         DbOperation,
         models::chromium_run::{
@@ -26,10 +26,13 @@ impl DbOperation<Vec<ChromiumRun>> for ChromiumRunQuery {
             orderby_spec = { ChromiumRunOrderBy::RunAt => chromium_run::run_at }
         );
 
+        if let Some(tenx_assay_query) = self.assay {
+            stmt = apply_tenx_assay_query!(stmt, tenx_assay_query);
+        }
+
         let Self {
             ids,
             readable_ids,
-            assay_names: chips,
             run_before,
             run_after,
             succeeded,
@@ -40,8 +43,7 @@ impl DbOperation<Vec<ChromiumRun>> for ChromiumRunQuery {
         stmt = apply_eq_any_filters!(
             stmt,
             filters = {
-                chromium_run::id => ids,
-                chromium_run::chip => chips
+                chromium_run::id => ids
             }
         );
 

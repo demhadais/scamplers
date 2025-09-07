@@ -10,9 +10,7 @@ use pyo3::prelude::*;
 #[cfg(feature = "python")]
 use pyo3_stub_gen::impl_stub_type;
 use scamplers_macros::{base_model, db_query, db_selection};
-pub use singleplex::{
-    NewSingleplexChipLoading, NewSingleplexChromiumRun, NewSingleplexGems, SingleplexChromiumChip,
-};
+pub use singleplex::{NewSingleplexChipLoading, NewSingleplexChromiumRun, NewSingleplexGems};
 use time::OffsetDateTime;
 use uuid::Uuid;
 #[cfg(target_arch = "wasm32")]
@@ -91,8 +89,7 @@ pub struct ChromiumRunQuery {
     pub ids: Vec<Uuid>,
     #[builder(default)]
     pub readable_ids: Vec<String>,
-    #[builder(default)]
-    pub assay: TenxAssayQuery,
+    pub assay: Option<TenxAssayQuery>,
     pub run_before: Option<OffsetDateTime>,
     pub run_after: Option<OffsetDateTime>,
     pub succeeded: Option<bool>,

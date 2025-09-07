@@ -15,8 +15,8 @@ use valid_string::ValidString;
 
 use crate::{
     db::models::{
-        DefaultVec, Links, Pagination, library_type_specification::LibraryType,
-        nucleic_acid::common::ElectrophoreticMeasurementData,
+        DefaultVec, Links, Pagination, nucleic_acid::common::ElectrophoreticMeasurementData,
+        tenx_assay::chromium::LibraryType,
     },
     define_ordering_enum, uuid_newtype,
 };
@@ -109,6 +109,12 @@ impl NewCdna {
     }
 }
 
+// We can get 16 libraries from one OCM GEMs by having 4 samples each with the following 4 library types:
+// - 5' Gene Expression
+// - Antibody Capture
+// - CRISPR
+// - V(D)J
+
 #[base_model]
 #[serde(tag = "group_type")]
 #[cfg_attr(feature = "python", gen_stub_pyclass_complex_enum)]
@@ -120,7 +126,7 @@ impl NewCdna {
 pub enum NewCdnaGroup {
     Single(#[garde(dive)] NewCdna),
     Multiple(#[garde(dive, custom(validate_same_gems_ids))] Vec<NewCdna>),
-    Ocm(#[garde(length(max = 4), custom(validate_same_gems_ids))] Vec<NewCdna>),
+    Ocm(#[garde(length(max = 16), custom(validate_same_gems_ids))] Vec<NewCdna>),
 }
 
 #[allow(clippy::trivially_copy_pass_by_ref)]

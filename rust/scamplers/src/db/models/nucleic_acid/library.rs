@@ -16,7 +16,6 @@ use valid_string::ValidString;
 use crate::{
     db::models::{
         DefaultVec, Links, Pagination,
-        library_type_specification::LibraryType,
         nucleic_acid::{
             cdna::CdnaSummary,
             common::{Concentration, ElectrophoreticMeasurementData},

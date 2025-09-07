@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 use diesel::prelude::*;
 use scamplers_schema::{
     cdna, cdna_measurement, cdna_preparers, chemistry,
@@ -10,13 +12,10 @@ use crate::{
     db::{
         DbOperation,
         models::{
-            library_type_specification::{
-                LibraryType, LibraryTypeSpecification,
-                chromatin_accessibility_library_specification,
-            },
             nucleic_acid::cdna::{
                 Cdna, CdnaPreparer, CdnaQuery, NewCdna, NewCdnaGroup, NewCdnaMeasurement,
             },
+            tenx_assay::chromium::LibraryType,
         },
         util::{ChildrenWithSelfId, ManyToMany, ManyToManyChildrenWithSelfId, SetParentId},
     },
@@ -67,64 +66,44 @@ impl NewCdnaGroup {
         }
     }
 
-    fn is_atac(&self) -> bool {
-        matches!(
-            self,
-            Self::Single(NewCdna {
-                library_type: LibraryType::ChromatinAccessibility,
-                ..
-            })
-        )
-    }
+    fn group_ocm(&self) -> Option<Vec<Vec<&NewCdna>>> {
+        let Self::Ocm(ocm_cdnas) = self else {
+            return None;
+        };
 
-    fn validate_atac(&self) -> Result<(), CdnaLibraryTypeError> {
-        let expected_specification = chromatin_accessibility_library_specification();
+        let mut grouped_cdnas = Vec::with_capacity(ocm_cdnas.len());
+        let mut seen_cdnas = Vec::with_capacity(ocm_cdnas.len());
 
-        let expected_library_types_and_volumes = [(
-            expected_specification.library_type,
-            expected_specification.cdna_volume_µl,
-        )];
+        for (i, c1) in ocm_cdnas.iter().enumerate() {
+            let mut group = Vec::with_capacity(ocm_cdnas.len());
+            group.push(c1);
 
-        if self.library_types_and_volumes() != expected_library_types_and_volumes {
-            return Err(CdnaLibraryTypeError {
-                expected_specifications: vec![expected_specification],
-            });
+            for c2 in &ocm_cdnas[i..ocm_cdnas.len()] {
+                if c1.library_type != c2.library_type && !seen_cdnas.contains(&c2) {
+                    group.push(c2);
+                    seen_cdnas.push(c2);
+                }
+            }
+
+            grouped_cdnas.push(group)
         }
 
-        Ok(())
-    }
-
-    fn is_ocm(&self) -> bool {
-        matches!(self, Self::Ocm(_))
-    }
-
-    fn validate_ocm(&self) -> bool {
-        let library_types_and_volumes = self.library_types_and_volumes();
-
-        let all_groups_are
-        library_types_and_volumes
-            .iter()
-            .all(|lt_v| Some(lt_v) == library_types_and_volumes.first())
+        Some(grouped_cdnas)
     }
 
     fn validate_library_types(&self, db_conn: &mut PgConnection) -> ScamplersResult<()> {
-        if self.is_atac() {
-            return Ok(self.validate_atac()?);
-        }
-
         let mut found_library_types_and_volumes = self.library_types_and_volumes();
 
         found_library_types_and_volumes.sort_by_key(|(lib_type, _)| *lib_type);
 
-        let mut expected_specifications: Vec<LibraryTypeSpecification> =
-            library_type_specification::table
-                .filter(library_type_specification::library_type.eq_any(self.library_types()))
-                .order_by((
-                    library_type_specification::chemistry,
-                    library_type_specification::library_type,
-                ))
-                .select(LibraryTypeSpecification::as_select())
-                .load(db_conn)?;
+        let mut expected_specifications: Vec<LibraryTypeSpe> = library_type_specification::table
+            .filter(library_type_specification::library_type.eq_any(self.library_types()))
+            .order_by((
+                library_type_specification::chemistry,
+                library_type_specification::library_type,
+            ))
+            .select(LibraryTypeSpecification::as_select())
+            .load(db_conn)?;
 
         let expected_specifications_grouped_by_chemistry =
             expected_specifications.chunk_by(|spec1, spec2| spec1.chemistry == spec2.chemistry);
