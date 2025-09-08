@@ -1,10 +1,11 @@
 #[cfg(feature = "python")]
 use pyo3::prelude::*;
-use scamplers_macros::{db_insertion, db_simple_enum};
+use scamplers_macros::db_insertion;
 #[cfg(feature = "python")]
 use time::OffsetDateTime;
 #[cfg(feature = "python")]
 use uuid::Uuid;
+#[cfg(feature = "python")]
 use valid_string::ValidString;
 
 use crate::db::models::chromium_run::{

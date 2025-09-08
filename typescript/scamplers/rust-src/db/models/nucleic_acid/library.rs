@@ -16,11 +16,11 @@ use valid_string::ValidString;
 use crate::{
     db::models::{
         DefaultVec, Links, Pagination,
-        library_type_specification::LibraryType,
         nucleic_acid::{
             cdna::CdnaSummary,
             common::{Concentration, ElectrophoreticMeasurementData},
         },
+        tenx_assay::chromium::LibraryType,
     },
     define_ordering_enum, uuid_newtype,
 };

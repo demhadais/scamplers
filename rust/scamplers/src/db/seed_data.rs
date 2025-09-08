@@ -10,7 +10,7 @@ use crate::{
             institution::NewInstitution,
             multiplexing_tag::NewMultiplexingTag,
             person::{NewPerson, Person, UserRole},
-            tenx_assay::chromium::NewChromiumAssay,
+            tenx_assay::NewTenxAssay,
         },
         seed_data::index_set::download_and_insert_index_sets,
         tenx_url_validator::is_10x_genomics_url,
@@ -29,7 +29,7 @@ pub struct SeedData {
     #[garde(inner(custom(is_10x_genomics_url)))]
     index_set_urls: Vec<Url>,
     #[garde(dive)]
-    chromium_assays: Vec<NewChromiumAssay>,
+    tenx_assays: Vec<NewTenxAssay>,
     #[garde(dive)]
     multiplexing_tags: Vec<NewMultiplexingTag>,
 }
@@ -58,7 +58,7 @@ pub async fn insert_seed_data(
         institution,
         mut app_admin,
         index_set_urls,
-        chromium_assays,
+        tenx_assays,
         multiplexing_tags,
     } = seed_data;
 
@@ -76,7 +76,7 @@ pub async fn insert_seed_data(
         let result: ScamplersResult<Person> = app_admin.execute(db_conn);
         duplicate_resource_ok(result)?;
 
-        chromium_assays.execute(db_conn)?;
+        tenx_assays.execute(db_conn)?;
 
         multiplexing_tags.execute(db_conn)?;
 

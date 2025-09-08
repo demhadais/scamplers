@@ -16,7 +16,7 @@ use crate::{
 
 impl DbOperation<Vec<ChromiumRun>> for ChromiumRunQuery {
     fn execute(
-        self,
+        mut self,
         db_conn: &mut diesel::PgConnection,
     ) -> crate::result::ScamplersResult<Vec<ChromiumRun>> {
         let mut stmt = init_stmt!(
@@ -26,7 +26,7 @@ impl DbOperation<Vec<ChromiumRun>> for ChromiumRunQuery {
             orderby_spec = { ChromiumRunOrderBy::RunAt => chromium_run::run_at }
         );
 
-        if let Some(tenx_assay_query) = self.assay {
+        if let Some(tenx_assay_query) = self.assay.take() {
             stmt = apply_tenx_assay_query!(stmt, tenx_assay_query);
         }
 

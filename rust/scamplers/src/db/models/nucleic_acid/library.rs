@@ -20,6 +20,7 @@ use crate::{
             cdna::CdnaSummary,
             common::{Concentration, ElectrophoreticMeasurementData},
         },
+        tenx_assay::chromium::LibraryType,
     },
     define_ordering_enum, uuid_newtype,
 };

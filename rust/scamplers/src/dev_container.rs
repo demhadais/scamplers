@@ -12,7 +12,7 @@ pub struct DevContainer {
 impl DevContainer {
     /// # Errors
     pub async fn new(container_name: &str, with_password: bool) -> anyhow::Result<Self> {
-        let postgres_version = "18beta3-alpine";
+        let postgres_version = "18rc1-alpine";
 
         let container = Postgres::default();
         let (container, db_root_password) = if with_password {

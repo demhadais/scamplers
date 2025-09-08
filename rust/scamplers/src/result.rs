@@ -12,7 +12,7 @@ use valuable::Valuable;
 #[cfg(target_arch = "wasm32")]
 use wasm_bindgen::prelude::*;
 
-use crate::db::models::library_type_specification::LibraryTypeSpecification;
+use crate::db::models::tenx_assay::chromium::LibraryTypeSpecification;
 
 #[scamplers_error]
 #[error("{self:#?}")]
@@ -92,7 +92,6 @@ pub struct DatasetMetricsFileParseError {
 #[scamplers_error]
 #[error("{self:#?}")]
 pub struct CdnaLibraryTypeError {
-    #[cfg_attr(target_arch = "wasm32", wasm_bindgen(skip))]
     pub expected_specifications: Vec<LibraryTypeSpecification>,
 }
 

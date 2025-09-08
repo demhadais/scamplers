@@ -7,13 +7,13 @@ use crate::{
     db::{
         DbOperation,
         models::{
-            chemistry::Chemistry,
             institution::NewInstitution,
-            library_type_specification::LibraryTypeSpecification,
             multiplexing_tag::NewMultiplexingTag,
             person::{NewPerson, Person, UserRole},
+            tenx_assay::NewTenxAssay,
         },
-        seed_data::index_set::{download_and_insert_index_sets, is_10x_genomics_url},
+        seed_data::index_set::download_and_insert_index_sets,
+        tenx_url_validator::is_10x_genomics_url,
     },
     result::{ScamplersError, ScamplersResult, ServerError},
 };
@@ -29,11 +29,9 @@ pub struct SeedData {
     #[garde(inner(custom(is_10x_genomics_url)))]
     index_set_urls: Vec<Url>,
     #[garde(dive)]
-    chemistries: Vec<Chemistry>,
+    tenx_assays: Vec<NewTenxAssay>,
     #[garde(dive)]
     multiplexing_tags: Vec<NewMultiplexingTag>,
-    #[garde(dive)]
-    library_type_specifications: Vec<LibraryTypeSpecification>,
 }
 
 /// # Errors
@@ -60,9 +58,8 @@ pub async fn insert_seed_data(
         institution,
         mut app_admin,
         index_set_urls,
-        chemistries,
+        tenx_assays,
         multiplexing_tags,
-        library_type_specifications,
     } = seed_data;
 
     let simple_operations = |db_conn: &mut PgConnection| -> ScamplersResult<()> {
@@ -79,11 +76,9 @@ pub async fn insert_seed_data(
         let result: ScamplersResult<Person> = app_admin.execute(db_conn);
         duplicate_resource_ok(result)?;
 
-        chemistries.execute(db_conn)?;
+        tenx_assays.execute(db_conn)?;
 
         multiplexing_tags.execute(db_conn)?;
-
-        library_type_specifications.execute(db_conn)?;
 
         Ok(())
     };

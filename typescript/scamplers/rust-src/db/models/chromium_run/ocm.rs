@@ -1,10 +1,11 @@
 #[cfg(feature = "python")]
 use pyo3::prelude::*;
-use scamplers_macros::{db_insertion, db_simple_enum};
+use scamplers_macros::db_insertion;
 #[cfg(feature = "python")]
 use time::OffsetDateTime;
 #[cfg(feature = "python")]
 use uuid::Uuid;
+#[cfg(feature = "python")]
 use valid_string::ValidString;
 
 use crate::db::models::chromium_run::{
@@ -22,8 +23,6 @@ pub struct NewOcmGems {
     #[garde(dive)]
     #[cfg_attr(feature = "app", diesel(embed))]
     pub inner: NewGemsCommon,
-    #[garde(dive)]
-    pub chemistry: ValidString,
     #[cfg_attr(feature = "app", diesel(skip_insertion))]
     #[garde(dive, length(min = 1, max = MAX_SUSPENSIONS_IN_OCM_GEMS))]
     pub loading: Vec<NewSingleplexChipLoading>,
@@ -34,30 +33,16 @@ pub struct NewOcmGems {
 #[pymethods]
 impl NewOcmGems {
     #[new]
-    #[pyo3(signature = (*, readable_id, chemistry, loading))]
-    fn new(
-        readable_id: ValidString,
-        chemistry: ValidString,
-        loading: Vec<NewSingleplexChipLoading>,
-    ) -> Self {
+    #[pyo3(signature = (*, readable_id, loading))]
+    fn new(readable_id: ValidString, loading: Vec<NewSingleplexChipLoading>) -> Self {
         Self {
             inner: NewGemsCommon {
                 readable_id,
                 chromium_run_id: Uuid::default(),
             },
-            chemistry,
             loading,
         }
     }
-}
-
-#[db_simple_enum]
-#[derive(strum::Display)]
-#[cfg_attr(feature = "python", pyo3(module = "scamplepy.create"))]
-pub enum OcmChromiumChip {
-    #[serde(rename = "GEM-X OCM 3'")]
-    #[strum(serialize = "GEM-X OCM 3'")]
-    GemxOcm3p,
 }
 
 #[db_insertion]
@@ -67,7 +52,6 @@ pub struct NewOcmChromiumRun {
     #[garde(dive)]
     #[cfg_attr(feature = "app", diesel(embed))]
     pub inner: NewChromiumRunCommon,
-    pub chip: OcmChromiumChip,
     #[cfg_attr(feature = "app", diesel(skip_insertion))]
     #[garde(dive, length(min = 1, max = MAX_GEMS_IN_OCM_RUN))]
     pub gems: Vec<NewOcmGems>,
@@ -78,25 +62,25 @@ pub struct NewOcmChromiumRun {
 #[pymethods]
 impl NewOcmChromiumRun {
     #[new]
-    #[pyo3(signature = (*, readable_id, run_at, succeeded, run_by, chip, gems, notes=None))]
+    #[pyo3(signature = (*, readable_id, assay_id, run_at, succeeded, run_by, gems, notes=None))]
     fn new(
         readable_id: ValidString,
+        assay_id: Uuid,
         run_at: OffsetDateTime,
         succeeded: bool,
         run_by: Uuid,
-        chip: OcmChromiumChip,
         gems: Vec<NewOcmGems>,
         notes: Option<ValidString>,
     ) -> Self {
         Self {
             inner: NewChromiumRunCommon {
                 readable_id,
+                assay_id,
                 run_at,
                 run_by,
                 succeeded,
                 notes,
             },
-            chip,
             gems,
         }
     }

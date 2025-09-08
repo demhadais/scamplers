@@ -17,19 +17,18 @@ use valuable::Valuable;
 #[cfg(target_arch = "wasm32")]
 use wasm_bindgen::prelude::*;
 
-pub mod chemistry;
 pub mod chromium_run;
 pub mod dataset;
 pub mod index_set;
 pub mod institution;
 pub mod lab;
-pub mod library_type_specification;
 pub mod multiplexing_tag;
 pub mod nucleic_acid;
 pub mod person;
 pub mod sequencing_run;
 pub mod specimen;
 pub mod suspension;
+pub mod tenx_assay;
 pub mod units;
 
 #[cfg_attr(

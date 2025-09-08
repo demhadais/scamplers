@@ -2,13 +2,13 @@ use diesel::prelude::*;
 use scamplers_schema::{chip_loading, chromium_run, gems};
 
 use crate::db::{
+    DbOperation,
     models::chromium_run::{
         ChromiumRun, ChromiumRunId, NewChromiumRun, NewChromiumRunCommon, NewOcmChromiumRun,
         NewOcmGems, NewPoolMultiplexChipLoading, NewPoolMultiplexChromiumRun, NewPoolMultiplexGems,
         NewSingleplexChipLoading, NewSingleplexChromiumRun, NewSingleplexGems,
     },
     util::{ChildrenWithSelfId, SetParentId},
-    DbOperation,
 };
 
 impl<'a> Insertable<chromium_run::table> for &'a NewChromiumRun {

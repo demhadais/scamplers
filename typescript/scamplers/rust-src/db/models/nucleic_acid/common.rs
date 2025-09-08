@@ -65,12 +65,14 @@ fn electrophoretic_sizing_range((min, max): &(u16, u16), _: &()) -> garde::Resul
 #[cfg_attr(feature = "python", gen_stub_pyclass)]
 #[db_json]
 #[cfg_attr(feature = "python", pyo3(module = "scamplepy.common"))]
+#[derive(bon::Builder)]
+#[builder(on(_, into))]
 pub struct ElectrophoreticMeasurementData {
     pub measured_at: OffsetDateTime,
     #[garde(dive)]
     pub instrument_name: ValidString,
     #[garde(range(min = 0.0))]
-    pub mean_library_size_bp: f32,
+    pub mean_size_bp: Option<f32>,
     #[garde(custom(electrophoretic_sizing_range))]
     #[cfg_attr(target_arch = "wasm32", wasm_bindgen(skip))]
     pub sizing_range: (u16, u16),
@@ -94,11 +96,11 @@ impl ElectrophoreticMeasurementData {
 #[pymethods]
 impl ElectrophoreticMeasurementData {
     #[new]
-    #[pyo3(signature = (*, measured_at, instrument_name, mean_library_size_bp, sizing_range, concentration_value, concentration_unit))]
+    #[pyo3(signature = (*, measured_at, instrument_name, mean_size_bp, sizing_range, concentration_value, concentration_unit))]
     fn new(
         measured_at: OffsetDateTime,
         instrument_name: ValidString,
-        mean_library_size_bp: f32,
+        mean_size_bp: Option<f32>,
         sizing_range: (u16, u16),
         concentration_value: f32,
         concentration_unit: (MassUnit, VolumeUnit),
@@ -106,7 +108,7 @@ impl ElectrophoreticMeasurementData {
         Self {
             measured_at,
             instrument_name,
-            mean_library_size_bp,
+            mean_size_bp,
             sizing_range,
             concentration: Concentration {
                 value: concentration_value,

@@ -4,21 +4,6 @@ use url::Url;
 
 use crate::db::{DbOperation, models::index_set::NewIndexSets};
 
-#[allow(clippy::trivially_copy_pass_by_ref)]
-pub(super) fn is_10x_genomics_url(url: &Url, _: &()) -> garde::Result {
-    let Some(domain) = url.domain() else {
-        return Err(garde::Error::new("malformed URL"));
-    };
-
-    if domain != "cdn.10xgenomics.com" {
-        return Err(garde::Error::new(format!(
-            "URL domain must be 'cdn.10xgenomics.com', found {domain}"
-        )));
-    }
-
-    Ok(())
-}
-
 async fn download_index_set(
     http_client: reqwest::Client,
     url: &str,

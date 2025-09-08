@@ -13,6 +13,13 @@ export enum LibraryType {
   VdjT = 9,
   VdjTGd = 10,
 }
+export enum SampleMultiplexing {
+  Cellplex = 0,
+  FlexBarcode = 1,
+  Hashtag = 2,
+  OnChipMultiplexing = 3,
+  Singleplex = 4,
+}
 export enum Species {
   AmbystomaMexicanum = 0,
   CanisFamiliaris = 1,
@@ -67,6 +74,7 @@ export class CdnaLibraryTypeError {
   static from_json_bytes(json_bytes: Uint8Array): CdnaLibraryTypeError;
   static from_json_string(json_str: string): CdnaLibraryTypeError;
   static from_base64_json(base64_json_bytes: string): CdnaLibraryTypeError;
+  expected_specifications: LibraryTypeSpecification[];
 }
 export class CdnaMeasurement {
   private constructor();
@@ -118,7 +126,7 @@ export class CdnaSummary {
 export class ChromiumRun {
   private constructor();
   free(): void;
-  summary: ChromiumRunSummary;
+  info: ChromiumRunSummaryWithParents;
   gems: Gems[];
 }
 export class ChromiumRunQuery {
@@ -132,7 +140,8 @@ export class ChromiumRunQuery {
   constructor();
   ids: string[];
   readable_ids: string[];
-  chips: string[];
+  get assay(): TenxAssayQuery | undefined;
+  set assay(value: TenxAssayQuery | null | undefined);
   get run_before(): Date | undefined;
   set run_before(value: Date | null | undefined);
   get run_after(): Date | undefined;
@@ -143,23 +152,23 @@ export class ChromiumRunQuery {
   order_by: OrderBy[];
   pagination: Pagination;
 }
-export class ChromiumRunSummary {
+export class ChromiumRunSummaryWithParents {
   private constructor();
   free(): void;
   to_json_bytes(): Uint8Array;
   to_json_string(): string;
   to_base64_json(): string;
-  static from_json_bytes(json_bytes: Uint8Array): ChromiumRunSummary;
-  static from_json_string(json_str: string): ChromiumRunSummary;
-  static from_base64_json(base64_json_bytes: string): ChromiumRunSummary;
+  static from_json_bytes(json_bytes: Uint8Array): ChromiumRunSummaryWithParents;
+  static from_json_string(json_str: string): ChromiumRunSummaryWithParents;
+  static from_base64_json(base64_json_bytes: string): ChromiumRunSummaryWithParents;
   id: string;
   readable_id: string;
-  chip: string;
   run_at: Date;
   run_by: string;
   succeeded: boolean;
   get notes(): string;
   set notes(value: string | null | undefined);
+  assay: TenxAssay;
 }
 export class ClientError {
   private constructor();
@@ -254,7 +263,8 @@ export class ElectrophoreticMeasurementData {
   free(): void;
   measured_at: Date;
   instrument_name: string;
-  mean_library_size_bp: number;
+  get mean_size_bp(): number | undefined;
+  set mean_size_bp(value: number | null | undefined);
   concentration: Concentration;
   readonly sizing_range: Uint16Array;
 }
@@ -273,8 +283,6 @@ export class Gems {
   static from_base64_json(base64_json_bytes: string): Gems;
   id: string;
   readable_id: string;
-  get chemistry(): string;
-  set chemistry(value: string | null | undefined);
   chromium_run_id: string;
 }
 export class Institution {
@@ -496,6 +504,13 @@ export class LibrarySummaryWithParents {
   id_: string;
   summary: LibrarySummary;
   cdna: CdnaSummary;
+}
+export class LibraryTypeSpecification {
+  private constructor();
+  free(): void;
+  assay_id: string;
+  library_type: LibraryType;
+  index_kit: string;
 }
 export class MalformedRequestError {
   private constructor();
@@ -938,4 +953,42 @@ export class SuspensionSummaryWithParents {
   parent_specimen: SpecimenSummary;
   get multiplexing_tag(): MultiplexingTag | undefined;
   set multiplexing_tag(value: MultiplexingTag | null | undefined);
+}
+export class TenxAssay {
+  private constructor();
+  free(): void;
+  to_json_bytes(): Uint8Array;
+  to_json_string(): string;
+  to_base64_json(): string;
+  static from_json_bytes(json_bytes: Uint8Array): TenxAssay;
+  static from_json_string(json_str: string): TenxAssay;
+  static from_base64_json(base64_json_bytes: string): TenxAssay;
+  id: string;
+  name: string;
+  get sample_multiplexing(): string;
+  set sample_multiplexing(value: string | null | undefined);
+  chemistry_version: string;
+  protocol_url: string;
+  get chromium_chip(): string;
+  set chromium_chip(value: string | null | undefined);
+  get cmdline(): string;
+  set cmdline(value: string | null | undefined);
+}
+export class TenxAssayQuery {
+  free(): void;
+  to_json_bytes(): Uint8Array;
+  to_json_string(): string;
+  to_base64_json(): string;
+  static from_json_bytes(json_bytes: Uint8Array): TenxAssayQuery;
+  static from_json_string(json_str: string): TenxAssayQuery;
+  static from_base64_json(base64_json_bytes: string): TenxAssayQuery;
+  constructor();
+  ids: string[];
+  names: string[];
+  sample_multiplexing: any[];
+  chemistry_versions: string[];
+  chromium_chips: string[];
+  cmdlines: string[];
+  order_by: OrderBy[];
+  pagination: Pagination;
 }

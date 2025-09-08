@@ -15,8 +15,8 @@ use valid_string::ValidString;
 
 use crate::{
     db::models::{
-        DefaultVec, Links, Pagination, library_type_specification::LibraryType,
-        nucleic_acid::common::ElectrophoreticMeasurementData,
+        DefaultVec, Links, Pagination, nucleic_acid::common::ElectrophoreticMeasurementData,
+        tenx_assay::chromium::LibraryType,
     },
     define_ordering_enum, uuid_newtype,
 };
@@ -30,11 +30,11 @@ mod read;
 #[cfg_attr(feature = "app", diesel(table_name = scamplers_schema::cdna_measurement))]
 pub struct NewCdnaMeasurement {
     #[serde(default)]
+    #[builder(default)]
     pub cdna_id: Uuid,
     pub measured_by: Uuid,
     #[serde(flatten)]
     #[garde(dive)]
-    #[cfg_attr(feature = "app", diesel(skip_insertion))]
     pub data: ElectrophoreticMeasurementData,
 }
 
@@ -109,6 +109,13 @@ impl NewCdna {
     }
 }
 
+// We can get 16 libraries from one OCM GEMs by having 4 samples each with the
+// following 4 library types:
+// - Gene Expression
+// - Antibody Capture
+// - CRISPR
+// - V(D)J
+
 #[base_model]
 #[serde(tag = "group_type")]
 #[cfg_attr(feature = "python", gen_stub_pyclass_complex_enum)]
@@ -119,8 +126,8 @@ impl NewCdna {
 #[derive(Jsonify, PyJsonify)]
 pub enum NewCdnaGroup {
     Single(#[garde(dive)] NewCdna),
-    Multiple(#[garde(dive, custom(validate_same_gems_ids))] Vec<NewCdna>),
-    Ocm(#[garde(length(max = 4), custom(validate_same_gems_ids))] Vec<NewCdna>),
+    Multiple(#[garde(custom(validate_same_gems_ids), dive, length(max = 4))] Vec<NewCdna>),
+    Ocm(#[garde(custom(validate_same_gems_ids), dive, length(max = 16))] Vec<NewCdna>),
 }
 
 #[allow(clippy::trivially_copy_pass_by_ref)]

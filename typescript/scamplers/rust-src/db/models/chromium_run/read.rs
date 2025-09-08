@@ -1,14 +1,14 @@
 use diesel::prelude::*;
-use scamplers_schema::chromium_run;
+use scamplers_schema::{chromium_run, tenx_assay};
 
 use crate::{
-    apply_eq_any_filters, apply_eq_filters, apply_ilike_filters, apply_time_filters,
-    attach_children_to_parents,
+    apply_eq_any_filters, apply_eq_filters, apply_ilike_filters, apply_tenx_assay_query,
+    apply_time_filters, attach_children_to_parents,
     db::{
         DbOperation,
         models::chromium_run::{
-            ChromiumRun, ChromiumRunId, ChromiumRunOrderBy, ChromiumRunQuery, ChromiumRunSummary,
-            Gems,
+            ChromiumRun, ChromiumRunId, ChromiumRunOrderBy, ChromiumRunQuery,
+            ChromiumRunSummaryWithParents, Gems,
         },
     },
     group_children, impl_id_db_operation, init_stmt,
@@ -16,20 +16,23 @@ use crate::{
 
 impl DbOperation<Vec<ChromiumRun>> for ChromiumRunQuery {
     fn execute(
-        self,
+        mut self,
         db_conn: &mut diesel::PgConnection,
     ) -> crate::result::ScamplersResult<Vec<ChromiumRun>> {
         let mut stmt = init_stmt!(
-            stmt = chromium_run::table,
+            stmt = chromium_run::table.inner_join(tenx_assay::table),
             query = &self,
-            output_type = ChromiumRunSummary,
+            output_type = ChromiumRunSummaryWithParents,
             orderby_spec = { ChromiumRunOrderBy::RunAt => chromium_run::run_at }
         );
+
+        if let Some(tenx_assay_query) = self.assay.take() {
+            stmt = apply_tenx_assay_query!(stmt, tenx_assay_query);
+        }
 
         let Self {
             ids,
             readable_ids,
-            chips,
             run_before,
             run_after,
             succeeded,
@@ -40,8 +43,7 @@ impl DbOperation<Vec<ChromiumRun>> for ChromiumRunQuery {
         stmt = apply_eq_any_filters!(
             stmt,
             filters = {
-                chromium_run::id => ids,
-                chromium_run::chip => chips
+                chromium_run::id => ids
             }
         );
 
@@ -77,7 +79,7 @@ impl DbOperation<Vec<ChromiumRun>> for ChromiumRunQuery {
         Ok(attach_children_to_parents!(
             parents = chromium_run_summaries,
             children = [gems],
-            transform_fn = |(summary, gems)| ChromiumRun { summary, gems }
+            transform_fn = |(info, gems)| ChromiumRun { info, gems }
         ))
     }
 }

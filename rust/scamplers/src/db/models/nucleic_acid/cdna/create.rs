@@ -1,10 +1,7 @@
-use std::collections::HashMap;
-
 use diesel::prelude::*;
 use scamplers_schema::{
-    cdna, cdna_measurement, cdna_preparers, chemistry,
-    gems::{self},
-    library_type_specification,
+    cdna, cdna_measurement, cdna_preparers, chromium_run, gems, library_type_specification,
+    tenx_assay,
 };
 use uuid::Uuid;
 
@@ -15,7 +12,7 @@ use crate::{
             nucleic_acid::cdna::{
                 Cdna, CdnaPreparer, CdnaQuery, NewCdna, NewCdnaGroup, NewCdnaMeasurement,
             },
-            tenx_assay::chromium::LibraryType,
+            tenx_assay::chromium::{LibraryType, LibraryTypeSpecification},
         },
         util::{ChildrenWithSelfId, ManyToMany, ManyToManyChildrenWithSelfId, SetParentId},
     },
@@ -49,184 +46,98 @@ impl ManyToManyChildrenWithSelfId<CdnaPreparer> for NewCdna {
     }
 }
 
-impl NewCdnaGroup {
-    fn library_types(&self) -> Vec<LibraryType> {
-        match self {
-            Self::Single(c) => vec![c.library_type],
-            Self::Ocm(c) | Self::Multiple(c) => c.iter().map(|c| c.library_type).collect(),
-        }
-    }
-
-    fn library_types_and_volumes(&self) -> Vec<(LibraryType, f32)> {
-        match self {
-            Self::Single(c) => vec![(c.library_type, c.volume_µl)],
-            Self::Ocm(c) | Self::Multiple(c) => {
-                c.iter().map(|c| (c.library_type, c.volume_µl)).collect()
-            }
-        }
-    }
-
-    fn group_ocm(&self) -> Option<Vec<Vec<&NewCdna>>> {
-        let Self::Ocm(ocm_cdnas) = self else {
-            return None;
-        };
-
-        let mut grouped_cdnas = Vec::with_capacity(ocm_cdnas.len());
-        let mut seen_cdnas = Vec::with_capacity(ocm_cdnas.len());
-
-        for (i, c1) in ocm_cdnas.iter().enumerate() {
-            let mut group = Vec::with_capacity(ocm_cdnas.len());
-            group.push(c1);
-
-            for c2 in &ocm_cdnas[i..ocm_cdnas.len()] {
-                if c1.library_type != c2.library_type && !seen_cdnas.contains(&c2) {
-                    group.push(c2);
-                    seen_cdnas.push(c2);
-                }
-            }
-
-            grouped_cdnas.push(group)
-        }
-
-        Some(grouped_cdnas)
-    }
-
-    fn validate_library_types(&self, db_conn: &mut PgConnection) -> ScamplersResult<()> {
-        let mut found_library_types_and_volumes = self.library_types_and_volumes();
-
-        found_library_types_and_volumes.sort_by_key(|(lib_type, _)| *lib_type);
-
-        let mut expected_specifications: Vec<LibraryTypeSpe> = library_type_specification::table
-            .filter(library_type_specification::library_type.eq_any(self.library_types()))
-            .order_by((
-                library_type_specification::chemistry,
-                library_type_specification::library_type,
-            ))
-            .select(LibraryTypeSpecification::as_select())
-            .load(db_conn)?;
-
-        let expected_specifications_grouped_by_chemistry =
-            expected_specifications.chunk_by(|spec1, spec2| spec1.chemistry == spec2.chemistry);
-
-        // If the chemistry in the db only has one library type, then we know all the
-        // new cDNA must conform to this specification
-        if expected_specifications.len() == 1 {
-            // Fill in the rest of the `Vec`
-            for _ in 0..(self.len() - 1) {
-                expected_specifications.push(expected_specifications[0].clone());
-            }
-        }
-
-        let expected_library_types_and_volumes: Vec<_> = expected_specifications
-            .iter()
-            .map(|s| (s.library_type, s.cdna_volume_µl))
-            .collect();
-
-        if expected_library_types_and_volumes != found_library_types_and_volumes {
-            return Err(CdnaLibraryTypeError {
-                expected_specifications,
-            }
-            .into());
-        }
-
-        Ok(())
-    }
-}
-
 trait VecExt {
-    fn library_types(&self) -> Vec<LibraryType>;
     fn library_types_and_volumes(&self) -> Vec<(LibraryType, f32)>;
-    fn validate_library_types(&self, db_conn: &mut PgConnection) -> ScamplersResult<()>;
 }
 
-fn validate_chromatin_accessibility_cdna(
-    library_types_and_volumes: &[(LibraryType, f32)],
-) -> Result<(), CdnaLibraryTypeError> {
-    let expected_specification = chromatin_accessibility_library_specification();
-
-    let expected_library_types_and_volumes = [(
-        expected_specification.library_type,
-        expected_specification.cdna_volume_µl,
-    )];
-
-    if library_types_and_volumes != expected_library_types_and_volumes {
-        return Err(CdnaLibraryTypeError {
-            expected_specifications: vec![expected_specification],
-        });
-    }
-
-    Ok(())
-}
-
-trait IsAtac {
-    fn is_atac(&self) -> bool;
-}
-
-impl IsAtac for Vec<(LibraryType, f32)> {
-    fn is_atac(&self) -> bool {
-        if self.len() == 1 && self[0].0 == LibraryType::ChromatinAccessibility {
-            return true;
-        }
-
-        false
-    }
-}
-
-impl VecExt for Vec<NewCdna> {
-    fn library_types(&self) -> Vec<LibraryType> {
-        self.iter().map(|c| c.library_type).collect()
-    }
-
+impl VecExt for Vec<&NewCdna> {
     fn library_types_and_volumes(&self) -> Vec<(LibraryType, f32)> {
         self.iter().map(|c| (c.library_type, c.volume_µl)).collect()
     }
+}
+
+impl NewCdnaGroup {
+    fn as_groups(&self) -> Vec<Vec<&NewCdna>> {
+        let cdnas = match self {
+            Self::Multiple(c) | Self::Ocm(c) => c.iter().collect(),
+            Self::Single(c) => vec![c],
+        };
+
+        let mut grouped_cdnas = Vec::with_capacity(cdnas.len());
+        let mut seen_cdnas = Vec::with_capacity(cdnas.len());
+
+        for (i, c1) in cdnas.iter().enumerate() {
+            let mut group = Vec::with_capacity(cdnas.len());
+            group.push(*c1);
+
+            for c2 in &cdnas[i..cdnas.len()] {
+                if c1.library_type != c2.library_type && !seen_cdnas.contains(c2) {
+                    group.push(*c2);
+                    seen_cdnas.push(*c2);
+                }
+            }
+
+            grouped_cdnas.push(group);
+        }
+
+        grouped_cdnas
+    }
+
+    fn assay_id(&self, db_conn: &mut PgConnection) -> ScamplersResult<Option<Uuid>> {
+        let cdna = match self {
+            Self::Single(cdna) => Some(cdna),
+            Self::Multiple(cdnas) | Self::Ocm(cdnas) => cdnas.first(),
+        };
+
+        let Some(gems_id) = cdna.map(|c| c.gems_id) else {
+            return Ok(None);
+        };
+
+        let assay_id = gems::table
+            .inner_join(chromium_run::table.inner_join(tenx_assay::table))
+            .filter(gems::id.eq(gems_id))
+            .select(tenx_assay::id)
+            .first(db_conn)?;
+
+        Ok(Some(assay_id))
+    }
 
     fn validate_library_types(&self, db_conn: &mut PgConnection) -> ScamplersResult<()> {
-        let mut found_library_types_and_volumes = self.library_types_and_volumes();
+        let assay_id = self.assay_id(db_conn)?;
 
-        if found_library_types_and_volumes.is_atac() {
-            return Ok(validate_chromatin_accessibility_cdna(
-                &found_library_types_and_volumes,
-            )?);
-        }
+        let Some(assay_id) = assay_id else {
+            return Ok(());
+        };
 
-        found_library_types_and_volumes.sort_by_key(|(lib_type, _)| *lib_type);
-
-        let mut expected_specifications: Vec<LibraryTypeSpecification> =
+        let expected_specifications: Vec<LibraryTypeSpecification> =
             library_type_specification::table
-                .filter(library_type_specification::library_type.eq_any(self.library_types()))
-                .order_by((
-                    library_type_specification::chemistry,
-                    library_type_specification::library_type,
-                ))
+                .filter(library_type_specification::assay_id.eq(assay_id))
+                .order_by(library_type_specification::library_type)
                 .select(LibraryTypeSpecification::as_select())
                 .load(db_conn)?;
-
-        let expected_specifications_grouped_by_chemistry =
-            expected_specifications.chunk_by(|spec1, spec2| spec1.chemistry == spec2.chemistry);
-
-        // If the chemistry in the db only has one library type, then we know all the
-        // new cDNA must conform to this specification
-        if expected_specifications.len() == 1 {
-            // Fill in the rest of the `Vec`
-            for _ in 0..(self.len() - 1) {
-                expected_specifications.push(expected_specifications[0].clone());
-            }
-        }
 
         let expected_library_types_and_volumes: Vec<_> = expected_specifications
             .iter()
             .map(|s| (s.library_type, s.cdna_volume_µl))
             .collect();
 
-        if expected_library_types_and_volumes != found_library_types_and_volumes {
-            return Err(CdnaLibraryTypeError {
-                expected_specifications,
+        for cdna_group in self.as_groups() {
+            if expected_library_types_and_volumes != cdna_group.library_types_and_volumes() {
+                return Err(CdnaLibraryTypeError {
+                    expected_specifications,
+                }
+                .into());
             }
-            .into());
         }
 
         Ok(())
+    }
+
+    fn into_vec(self) -> Vec<NewCdna> {
+        match self {
+            Self::Multiple(c) | Self::Ocm(c) => c,
+            Self::Single(c) => vec![c],
+        }
     }
 }
 
@@ -235,9 +146,9 @@ impl DbOperation<Vec<Cdna>> for NewCdnaGroup {
         self,
         db_conn: &mut diesel::PgConnection,
     ) -> crate::result::ScamplersResult<Vec<Cdna>> {
-        let mut cdnas = self.into_vec();
+        self.validate_library_types(db_conn)?;
 
-        cdnas.validate_library_types(db_conn)?;
+        let mut cdnas = self.into_vec();
 
         let ids = diesel::insert_into(cdna::table)
             .values(&cdnas)
