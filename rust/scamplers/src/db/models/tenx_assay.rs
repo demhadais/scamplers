@@ -33,7 +33,8 @@ pub struct TenxAssay {
     pub chemistry_version: String,
     pub protocol_url: String,
     pub chromium_chip: Option<String>,
-    pub cmdline: Option<String>,
+    #[cfg_attr(target_arch = "wasm32", wasm_bindgen(skip))]
+    pub cmdlines: Option<Vec<Option<String>>>,
 }
 
 define_ordering_enum! {TenxAssayOrderBy { Name }, default = Name}
@@ -53,8 +54,6 @@ pub struct TenxAssayQuery {
     pub chemistry_versions: Vec<String>,
     #[builder(default)]
     pub chromium_chips: Vec<String>,
-    #[builder(default)]
-    pub cmdlines: Vec<String>,
     #[builder(default)]
     pub order_by: DefaultVec<TenxAssayOrderBy>,
     #[builder(default)]

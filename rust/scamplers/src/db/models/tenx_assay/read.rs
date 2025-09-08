@@ -18,8 +18,7 @@ macro_rules! apply_tenx_assay_query {
             filters = {
                 tenx_assay::id => $query.ids,
                 tenx_assay::sample_multiplexing => $query.sample_multiplexing,
-                tenx_assay::chromium_chip => $query.chromium_chips,
-                tenx_assay::cmdline => $query.cmdlines
+                tenx_assay::chromium_chip => $query.chromium_chips
             }
         );
 

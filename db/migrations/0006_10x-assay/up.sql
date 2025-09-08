@@ -5,9 +5,9 @@ create table tenx_assay (
     library_types text [],
     sample_multiplexing text,
     chemistry_version text not null,
-    protocol_url text unique not null,
+    protocol_url text not null,
     chromium_chip text,
-    cmdline text,
+    cmdlines text [],
 
     unique (name, library_types, sample_multiplexing, chemistry_version)
 );

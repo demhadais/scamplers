@@ -285,11 +285,11 @@ function __wbg_adapter_36(arg0, arg1) {
 }
 
 function __wbg_adapter_39(arg0, arg1, arg2) {
-    wasm.closure381_externref_shim(arg0, arg1, arg2);
+    wasm.closure378_externref_shim(arg0, arg1, arg2);
 }
 
-function __wbg_adapter_1059(arg0, arg1, arg2, arg3) {
-    wasm.closure414_externref_shim(arg0, arg1, arg2, arg3);
+function __wbg_adapter_1055(arg0, arg1, arg2, arg3) {
+    wasm.closure411_externref_shim(arg0, arg1, arg2, arg3);
 }
 
 /**
@@ -9681,23 +9681,6 @@ export class TenxAssay {
         wasm.__wbg_set_tenxassay_chromium_chip(this.__wbg_ptr, ptr0, len0);
     }
     /**
-     * @returns {string}
-     */
-    get cmdline() {
-        const ret = wasm.__wbg_get_tenxassay_cmdline(this.__wbg_ptr);
-        var v1 = getCachedStringFromWasm0(ret[0], ret[1]);
-        if (ret[0] !== 0) { wasm.__wbindgen_free(ret[0], ret[1], 1); }
-        return v1;
-    }
-    /**
-     * @param {string | null} [arg0]
-     */
-    set cmdline(arg0) {
-        var ptr0 = isLikeNone(arg0) ? 0 : passStringToWasm0(arg0, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
-        var len0 = WASM_VECTOR_LEN;
-        wasm.__wbg_set_tenxassay_cmdline(this.__wbg_ptr, ptr0, len0);
-    }
-    /**
      * @returns {Uint8Array}
      */
     to_json_bytes() {
@@ -9865,23 +9848,6 @@ export class TenxAssayQuery {
         const ptr0 = passArrayJsValueToWasm0(arg0, wasm.__wbindgen_malloc);
         const len0 = WASM_VECTOR_LEN;
         wasm.__wbg_set_tenxassayquery_chromium_chips(this.__wbg_ptr, ptr0, len0);
-    }
-    /**
-     * @returns {string[]}
-     */
-    get cmdlines() {
-        const ret = wasm.__wbg_get_tenxassayquery_cmdlines(this.__wbg_ptr);
-        var v1 = getArrayJsValueFromWasm0(ret[0], ret[1]).slice();
-        wasm.__wbindgen_free(ret[0], ret[1] * 4, 4);
-        return v1;
-    }
-    /**
-     * @param {string[]} arg0
-     */
-    set cmdlines(arg0) {
-        const ptr0 = passArrayJsValueToWasm0(arg0, wasm.__wbindgen_malloc);
-        const len0 = WASM_VECTOR_LEN;
-        wasm.__wbg_set_tenxassayquery_cmdlines(this.__wbg_ptr, ptr0, len0);
     }
     /**
      * @returns {OrderBy[]}
@@ -10167,7 +10133,7 @@ export function __wbg_new_e30c39c06edaabf2(arg0, arg1) {
             const a = state0.a;
             state0.a = 0;
             try {
-                return __wbg_adapter_1059(a, state0.b, arg0, arg1);
+                return __wbg_adapter_1055(a, state0.b, arg0, arg1);
             } finally {
                 state0.a = a;
             }
@@ -10431,13 +10397,13 @@ export function __wbindgen_cb_drop(arg0) {
     return ret;
 };
 
-export function __wbindgen_closure_wrapper3575(arg0, arg1, arg2) {
-    const ret = makeMutClosure(arg0, arg1, 376, __wbg_adapter_36);
+export function __wbindgen_closure_wrapper3573(arg0, arg1, arg2) {
+    const ret = makeMutClosure(arg0, arg1, 373, __wbg_adapter_36);
     return ret;
 };
 
-export function __wbindgen_closure_wrapper3596(arg0, arg1, arg2) {
-    const ret = makeMutClosure(arg0, arg1, 380, __wbg_adapter_39);
+export function __wbindgen_closure_wrapper3594(arg0, arg1, arg2) {
+    const ret = makeMutClosure(arg0, arg1, 377, __wbg_adapter_39);
     return ret;
 };
 

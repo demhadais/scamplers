@@ -971,8 +971,6 @@ export class TenxAssay {
   protocol_url: string;
   get chromium_chip(): string;
   set chromium_chip(value: string | null | undefined);
-  get cmdline(): string;
-  set cmdline(value: string | null | undefined);
 }
 export class TenxAssayQuery {
   free(): void;
@@ -988,7 +986,6 @@ export class TenxAssayQuery {
   sample_multiplexing: any[];
   chemistry_versions: string[];
   chromium_chips: string[];
-  cmdlines: string[];
   order_by: OrderBy[];
   pagination: Pagination;
 }

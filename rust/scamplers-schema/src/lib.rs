@@ -332,7 +332,7 @@ diesel::table! {
         chemistry_version -> Text,
         protocol_url -> Text,
         chromium_chip -> Nullable<Text>,
-        cmdline -> Nullable<Text>,
+        cmdlines -> Nullable<Array<Nullable<Text>>>,
     }
 }
 

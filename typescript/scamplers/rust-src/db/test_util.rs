@@ -17,7 +17,6 @@ use rstest::fixture;
 use strum::VariantArray;
 use time::OffsetDateTime;
 use tokio::sync::OnceCell;
-use tracing_subscriber::fmt::format;
 use uuid::Uuid;
 
 use crate::{
@@ -35,7 +34,7 @@ use crate::{
             nucleic_acid::{
                 self,
                 cdna::{Cdna, NewCdna, NewCdnaGroup, NewCdnaMeasurement},
-                common::{Concentration, ElectrophoreticMeasurementData},
+                common::ElectrophoreticMeasurementData,
             },
             person::{NewPerson, Person, PersonQuery},
             specimen::{
@@ -416,23 +415,30 @@ impl TestState {
     }
 
     fn insert_pool_multiplexed_chromium_runs(&mut self, db_conn: &mut PgConnection) {
-        // Get the assay ID for the latest multiplexed Flex Gene Expression assay
-        let assay_id = TenxAssayQuery::builder()
-            .names(["Flex Gene Expression".to_string()])
-            .chemistry_versions(["v1 - GEM-X".to_string()])
-            .library_types([vec![LibraryType::GeneExpression]])
-            .sample_multiplexing([SampleMultiplexing::FlexBarcode])
-            .build()
-            .execute(db_conn)
-            .unwrap()
-            .last()
-            .unwrap()
-            .id;
+        // Ideally, we'd use TenxAssayQuery to get the Flex Gene Expression assay we're
+        // interested in, but it doesn't work for some reason, so we do it manually
+        let flex_assays: Vec<_> = self
+            .tenx_assays
+            .iter()
+            .map(|a| a.clone())
+            .filter(|a| {
+                a.name == "Flex Gene Expression"
+                    && a.chemistry_version == "v1 - GEM-X"
+                    && a.sample_multiplexing == Some("flex_barcode".to_string())
+            })
+            .collect();
+
+        if flex_assays.len() != 1 {
+            panic!(
+                "multiple Flex Gene Expression assays found: {:?}",
+                flex_assays
+            );
+        }
 
         for i in 0..N_POOL_MULTIPLEX_CHROMIUM_RUNS {
             let chromium_run_common = NewChromiumRunCommon::builder()
                 .readable_id(format!("PMCR{i}"))
-                .assay_id(assay_id)
+                .assay_id(flex_assays[0].id)
                 .run_at(self.random_time())
                 .run_by(self.random_person_id())
                 .succeeded(true)

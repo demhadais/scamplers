@@ -1,6 +1,7 @@
 {
   "index_set_urls": [
     "https://cdn.10xgenomics.com/raw/upload/v1655155349/support/in-line%20documents/Single_Index_Kit_N_Set_A.json",
+    "https://cdn.10xgenomics.com/raw/upload/v1655156423/support/in-line%20documents/Dual_Index_Kit_NT_Set_A.json",
     "https://cdn.10xgenomics.com/raw/upload/v1655156427/support/in-line%20documents/Dual_Index_Kit_NN_Set_A.json",
     "https://cdn.10xgenomics.com/raw/upload/v1655156218/support/in-line%20documents/Dual_Index_Kit_TN_Set_A.json",
     "https://cdn.10xgenomics.com/raw/upload/v1655155616/support/in-line%20documents/Single_Index_Kit_T_Set_A.json",
@@ -19,63 +20,53 @@
   },
   "tenx_assays": [
     {
-      "name": "3' Universal Gene Expression",
-      "chemistry_version": "v3.1 Dual Index",
-      "protocol_url": "https://www.10xgenomics.com/support/universal-three-prime-gene-expression/documentation/steps/library-prep/chromium-single-cell-3-reagent-kits-user-guide-v-3-1-chemistry-dual-index",
+      "name": "Epi ATAC",
+      "chemistry_version": "v2",
+      "protocol_url": "https://www.10xgenomics.com/support/epi-atac/documentation/steps/library-prep/chromium-single-cell-atac-reagent-kits-user-guide-v-2-chemistry",
       "sample_multiplexing": "singleplex",
-      "chromium_chip": "G",
-      "cmdline": "cellranger count",
+      "cmdlines": ["cellranger-atac count"],
+      "chromium_chip": "H",
+      "platform": "chromium",
       "library_type_specifications": [
         {
-          "library_type": "gene_expression",
-          "index_kit": "TT",
+          "library_type": "chromatin_accessibility",
+          "index_kit": "NA",
           "cdna_volume_µl": 40,
-          "library_volume_µl": 35
+          "library_volume_µl": 20
         }
-      ],
-      "platform": "chromium"
+      ]
     },
     {
-      "name": "3' Universal Gene Expression",
-      "chemistry_version": "v4 - GEM-X",
-      "protocol_url": "https://www.10xgenomics.com/support/universal-three-prime-gene-expression/documentation/steps/library-prep/chromium-gem-x-single-cell-3-v4-gene-expression-user-guide",
+      "name": "Epi Multiome ATAC + Gene Expression",
+      "chemistry_version": "v1",
+      "protocol_url": "https://www.10xgenomics.com/support/epi-multiome/documentation/steps/library-prep/chromium-next-gem-single-cell-multiome-atac-plus-gene-expression-reagent-kits-user-guide",
       "sample_multiplexing": "singleplex",
-      "chromium_chip": "GEM-X",
-      "cmdline": "cellranger count",
+      "cmdlines": ["cellranger-arc count"],
+      "chromium_chip": "J",
+      "platform": "chromium",
       "library_type_specifications": [
+        {
+          "library_type": "chromatin_accessibility",
+          "index_kit": "NA",
+          "cdna_volume_µl": 40,
+          "library_volume_µl": 20
+        },
         {
           "library_type": "gene_expression",
           "index_kit": "TT",
           "cdna_volume_µl": 40,
           "library_volume_µl": 35
         }
-      ],
-      "platform": "chromium"
-    },
-    {
-      "name": "3' Universal Gene Expression",
-      "chemistry_version": "v4 - GEM-X",
-      "protocol_url": "https://www.10xgenomics.com/support/universal-three-prime-gene-expression/documentation/steps/library-prep/gem-x-universal-3-prime-gene-expression-v-4-4-plex-reagent-kits",
-      "sample_multiplexing": "on_chip_multiplexing",
-      "chromium_chip": "GEM-X",
-      "cmdline": "cellranger multi",
-      "library_type_specifications": [
-        {
-          "library_type": "gene_expression",
-          "index_kit": "TT",
-          "cdna_volume_µl": 40,
-          "library_volume_µl": 35
-        }
-      ],
-      "platform": "chromium"
+      ]
     },
     {
       "name": "Flex Gene Expression",
       "chemistry_version": "v1 - GEM-X",
       "protocol_url": "https://www.10xgenomics.com/support/flex-gene-expression/documentation/steps/library-prep/gem-x-flex-gene-expression-reagent-kit-for-multiplex-samples",
       "sample_multiplexing": "flex_barcode",
-      "chromium_chip": "GEM-X",
-      "cmdline": "cellranger multi",
+      "cmdlines": ["cellranger multi"],
+      "chromium_chip": "GEM-X FX",
+      "platform": "chromium",
       "library_type_specifications": [
         {
           "library_type": "gene_expression",
@@ -83,8 +74,241 @@
           "cdna_volume_µl": 100,
           "library_volume_µl": 40
         }
-      ],
-      "platform": "chromium"
+      ]
+    },
+    {
+      "name": "Flex Gene Expression",
+      "chemistry_version": "v1 - GEM-X",
+      "protocol_url": "https://www.10xgenomics.com/support/flex-gene-expression/documentation/steps/library-prep/gem-x-flex-gene-expression-reagent-kit-for-singleplex-samples",
+      "sample_multiplexing": "singleplex",
+      "cmdlines": ["cellranger multi"],
+      "chromium_chip": "GEM-X FX",
+      "platform": "chromium",
+      "library_type_specifications": [
+        {
+          "library_type": "gene_expression",
+          "index_kit": "TS",
+          "cdna_volume_µl": 100,
+          "library_volume_µl": 40
+        }
+      ]
+    },
+    {
+      "name": "Flex Gene Expression",
+      "chemistry_version": "v1 - Next GEM",
+      "protocol_url": "https://www.10xgenomics.com/support/flex-gene-expression/documentation/steps/library-prep/chromium-single-cell-gene-expression-flex-reagent-kits-for-multiplexed-samples",
+      "sample_multiplexing": "flex_barcode",
+      "cmdlines": ["cellranger multi"],
+      "chromium_chip": "Q",
+      "platform": "chromium",
+      "library_type_specifications": [
+        {
+          "library_type": "gene_expression",
+          "index_kit": "TS",
+          "cdna_volume_µl": 100,
+          "library_volume_µl": 40
+        }
+      ]
+    },
+    {
+      "name": "Flex Gene Expression",
+      "chemistry_version": "v1 - Next GEM",
+      "protocol_url": "https://www.10xgenomics.com/support/flex-gene-expression/documentation/steps/library-prep/chromium-fixed-rna-profiling-reagent-kits-for-singleplexed-samples",
+      "sample_multiplexing": "singleplex",
+      "cmdlines": ["cellranger multi"],
+      "chromium_chip": "Q",
+      "platform": "chromium",
+      "library_type_specifications": [
+        {
+          "library_type": "gene_expression",
+          "index_kit": "TS",
+          "cdna_volume_µl": 100,
+          "library_volume_µl": 40
+        }
+      ]
+    },
+    {
+      "name": "Universal 3' Gene Expression",
+      "chemistry_version": "v4 - GEM-X",
+      "protocol_url": "https://www.10xgenomics.com/support/universal-three-prime-gene-expression/documentation/steps/library-prep/chromium-gem-x-single-cell-3-v4-gene-expression-with-feature-barcoding-technology-for-cell-surface-protein-user-guide",
+      "sample_multiplexing": "singleplex",
+      "cmdlines": ["cellranger count", "cellranger multi"],
+      "chromium_chip": "GEM-X 3'",
+      "platform": "chromium",
+      "library_type_specifications": [
+        {
+          "library_type": "antibody_capture",
+          "index_kit": "NT",
+          "cdna_volume_µl": 40,
+          "library_volume_µl": 35
+        },
+        {
+          "library_type": "gene_expression",
+          "index_kit": "TT",
+          "cdna_volume_µl": 40,
+          "library_volume_µl": 35
+        }
+      ]
+    },
+    {
+      "name": "Universal 3' Gene Expression",
+      "chemistry_version": "v4 - GEM-X",
+      "protocol_url": "https://www.10xgenomics.com/support/universal-three-prime-gene-expression/documentation/steps/library-prep/gem-x-universal-3-prime-gene-expression-v-4-4-plex-reagent-kits-with-feature-barcode-technology-for-cell-surface-protein",
+      "sample_multiplexing": "on_chip_multiplexing",
+      "cmdlines": ["cellranger multi"],
+      "chromium_chip": "GEM-X OCM 3'",
+      "platform": "chromium",
+      "library_type_specifications": [
+        {
+          "library_type": "antibody_capture",
+          "index_kit": "NT",
+          "cdna_volume_µl": 40,
+          "library_volume_µl": 35
+        },
+        {
+          "library_type": "gene_expression",
+          "index_kit": "TT",
+          "cdna_volume_µl": 40,
+          "library_volume_µl": 35
+        }
+      ]
+    },
+    {
+      "name": "Universal 3' Gene Expression",
+      "chemistry_version": "v4 - GEM-X",
+      "protocol_url": "https://www.10xgenomics.com/support/universal-three-prime-gene-expression/documentation/steps/library-prep/chromium-gem-x-single-cell-3-v4-gene-expression-user-guide",
+      "sample_multiplexing": "singleplex",
+      "cmdlines": ["cellranger count", "cellranger multi"],
+      "chromium_chip": "GEM-X 3'",
+      "platform": "chromium",
+      "library_type_specifications": [
+        {
+          "library_type": "gene_expression",
+          "index_kit": "TT",
+          "cdna_volume_µl": 40,
+          "library_volume_µl": 35
+        }
+      ]
+    },
+    {
+      "name": "Universal 3' Gene Expression",
+      "chemistry_version": "v4 - GEM-X",
+      "protocol_url": "https://www.10xgenomics.com/support/universal-three-prime-gene-expression/documentation/steps/library-prep/gem-x-universal-3-prime-gene-expression-v-4-4-plex-reagent-kits",
+      "sample_multiplexing": "on_chip_multiplexing",
+      "cmdlines": ["cellranger multi"],
+      "chromium_chip": "GEM-X OCM 3'",
+      "platform": "chromium",
+      "library_type_specifications": [
+        {
+          "library_type": "gene_expression",
+          "index_kit": "TT",
+          "cdna_volume_µl": 40,
+          "library_volume_µl": 35
+        }
+      ]
+    },
+    {
+      "name": "Universal 5' Gene Expression",
+      "chemistry_version": "v3 - GEM-X",
+      "protocol_url": "https://www.10xgenomics.com/support/universal-five-prime-gene-expression/documentation/steps/library-prep/chromium-gem-x-single-cell-5-v3-gene-expression-with-feature-barcoding-technology-for-crispr-screening",
+      "sample_multiplexing": "singleplex",
+      "cmdlines": ["cellranger count", "cellranger multi"],
+      "chromium_chip": "GEM-X 5'",
+      "platform": "chromium",
+      "library_type_specifications": [
+        {
+          "library_type": "crispr_guide_capture",
+          "index_kit": "TT",
+          "cdna_volume_µl": 50,
+          "library_volume_µl": 40
+        },
+        {
+          "library_type": "gene_expression",
+          "index_kit": "TT",
+          "cdna_volume_µl": 40,
+          "library_volume_µl": 35
+        }
+      ]
+    },
+    {
+      "name": "Universal 5' Gene Expression",
+      "chemistry_version": "v3 - GEM-X",
+      "protocol_url": "https://www.10xgenomics.com/support/universal-five-prime-gene-expression/documentation/steps/library-prep/gem-x-universal-5-prime-gene-expression-v-3-4-plex-reagent-kits",
+      "sample_multiplexing": "on_chip_multiplexing",
+      "cmdlines": ["cellranger multi"],
+      "chromium_chip": "GEM-X OCM 5'",
+      "platform": "chromium",
+      "library_type_specifications": [
+        {
+          "library_type": "gene_expression",
+          "index_kit": "TT",
+          "cdna_volume_µl": 40,
+          "library_volume_µl": 35
+        }
+      ]
+    },
+    {
+      "name": "Universal 5' Gene Expression",
+      "chemistry_version": "v3 - GEM-X",
+      "protocol_url": "https://www.10xgenomics.com/support/universal-five-prime-gene-expression/documentation/steps/library-prep/chromium-gem-x-single-cell-5-v3-gene-expression-user-guide",
+      "sample_multiplexing": "singleplex",
+      "cmdlines": ["cellranger count", "cellranger multi"],
+      "chromium_chip": "GEM-X 5'",
+      "platform": "chromium",
+      "library_type_specifications": [
+        {
+          "library_type": "gene_expression",
+          "index_kit": "TT",
+          "cdna_volume_µl": 40,
+          "library_volume_µl": 35
+        }
+      ]
+    },
+    {
+      "name": "Universal 5' Gene Expression",
+      "chemistry_version": "v3 - GEM-X",
+      "protocol_url": "https://www.10xgenomics.com/support/universal-five-prime-gene-expression/documentation/steps/library-prep/gem-x-universal-5-prime-gene-expression-v-3-4-plex-reagent-kits",
+      "sample_multiplexing": "on_chip_multiplexing",
+      "cmdlines": ["cellranger multi"],
+      "chromium_chip": "GEM-X OCM 5'",
+      "platform": "chromium",
+      "library_type_specifications": [
+        {
+          "library_type": "gene_expression",
+          "index_kit": "TT",
+          "cdna_volume_µl": 40,
+          "library_volume_µl": 35
+        },
+        {
+          "library_type": "vdj",
+          "index_kit": "TT",
+          "cdna_volume_µl": 40,
+          "library_volume_µl": 35
+        }
+      ]
+    },
+    {
+      "name": "Universal 5' Gene Expression",
+      "chemistry_version": "v3 - GEM-X",
+      "protocol_url": "https://www.10xgenomics.com/support/universal-five-prime-gene-expression/documentation/steps/library-prep/chromium-gem-x-single-cell-5-v3-gene-expression-user-guide",
+      "sample_multiplexing": "on_chip_multiplexing",
+      "cmdlines": ["cellranger multi"],
+      "chromium_chip": "GEM-X 5'",
+      "platform": "chromium",
+      "library_type_specifications": [
+        {
+          "library_type": "gene_expression",
+          "index_kit": "TT",
+          "cdna_volume_µl": 40,
+          "library_volume_µl": 35
+        },
+        {
+          "library_type": "vdj",
+          "index_kit": "TT",
+          "cdna_volume_µl": 40,
+          "library_volume_µl": 35
+        }
+      ]
     }
   ],
   "multiplexing_tags": [

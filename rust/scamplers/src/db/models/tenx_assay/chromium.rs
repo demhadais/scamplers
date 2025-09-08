@@ -70,7 +70,7 @@ pub struct NewChromiumAssay {
     #[garde(dive)]
     pub chromium_chip: ValidString,
     #[garde(dive)]
-    pub cmdline: ValidString,
+    pub cmdlines: Vec<ValidString>,
     #[cfg_attr(feature = "app", diesel(skip_insertion))]
     pub library_type_specifications: Vec<LibraryTypeSpecification>,
 }
