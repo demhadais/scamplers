@@ -1,8 +1,12 @@
+#[cfg(feature = "app")]
+use diesel::prelude::*;
 #[cfg(feature = "python")]
 use pyo3::prelude::*;
 #[cfg(feature = "python")]
 use pyo3_stub_gen::derive::{gen_stub_pyclass, gen_stub_pymethods};
 use scamplers_macros::db_json;
+#[cfg(feature = "app")]
+use scamplers_schema::{chromium_run, gems, tenx_assay};
 use time::OffsetDateTime;
 use valid_string::ValidString;
 #[cfg(target_arch = "wasm32")]
@@ -116,4 +120,10 @@ impl ElectrophoreticMeasurementData {
             },
         }
     }
+}
+
+#[cfg(feature = "app")]
+#[diesel::dsl::auto_type]
+pub(super) fn gems_to_assay_id() -> _ {
+    gems::table.inner_join(chromium_run::table.inner_join(tenx_assay::table))
 }

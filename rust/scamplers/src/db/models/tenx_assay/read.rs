@@ -1,11 +1,14 @@
 use diesel::prelude::*;
-use scamplers_schema::tenx_assay;
+use scamplers_schema::{library_type_specification, tenx_assay};
+use uuid::Uuid;
 
 use crate::{
     apply_eq_any_filters, apply_ilike_filters,
     db::{
         DbOperation,
-        models::tenx_assay::{TenxAssay, TenxAssayOrderBy, TenxAssayQuery},
+        models::tenx_assay::{
+            TenxAssay, TenxAssayOrderBy, TenxAssayQuery, chromium::LibraryTypeSpecification,
+        },
     },
     init_stmt,
 };
@@ -53,5 +56,20 @@ impl DbOperation<Vec<TenxAssay>> for TenxAssayQuery {
         stmt = apply_tenx_assay_query!(stmt, self);
 
         Ok(stmt.load(db_conn)?)
+    }
+}
+
+impl LibraryTypeSpecification {
+    // This is a temporary function which will eventually be moved into the
+    // `TenxAssayQuery`
+    pub fn list_by_assay_id(
+        assay_id: Uuid,
+        db_conn: &mut PgConnection,
+    ) -> crate::result::ScamplersResult<Vec<Self>> {
+        Ok(library_type_specification::table
+            .filter(library_type_specification::assay_id.eq(assay_id))
+            .order_by(library_type_specification::library_type)
+            .select(Self::as_select())
+            .load(db_conn)?)
     }
 }

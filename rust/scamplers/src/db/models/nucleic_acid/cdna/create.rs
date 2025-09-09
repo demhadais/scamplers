@@ -1,16 +1,14 @@
 use diesel::prelude::*;
-use scamplers_schema::{
-    cdna, cdna_measurement, cdna_preparers, chromium_run, gems, library_type_specification,
-    tenx_assay,
-};
+use scamplers_schema::{cdna, cdna_measurement, cdna_preparers, gems, tenx_assay};
 use uuid::Uuid;
 
 use crate::{
     db::{
         DbOperation,
         models::{
-            nucleic_acid::cdna::{
-                Cdna, CdnaPreparer, CdnaQuery, NewCdna, NewCdnaGroup, NewCdnaMeasurement,
+            nucleic_acid::{
+                cdna::{Cdna, CdnaPreparer, CdnaQuery, NewCdna, NewCdnaGroup, NewCdnaMeasurement},
+                common::gems_to_assay_id,
             },
             tenx_assay::chromium::{LibraryType, LibraryTypeSpecification},
         },
@@ -93,10 +91,9 @@ impl NewCdnaGroup {
             return Ok(None);
         };
 
-        let assay_id = gems::table
-            .inner_join(chromium_run::table.inner_join(tenx_assay::table))
-            .filter(gems::id.eq(gems_id))
+        let assay_id = gems_to_assay_id()
             .select(tenx_assay::id)
+            .filter(gems::id.eq(gems_id))
             .first(db_conn)?;
 
         Ok(Some(assay_id))
@@ -109,12 +106,8 @@ impl NewCdnaGroup {
             return Ok(());
         };
 
-        let expected_specifications: Vec<LibraryTypeSpecification> =
-            library_type_specification::table
-                .filter(library_type_specification::assay_id.eq(assay_id))
-                .order_by(library_type_specification::library_type)
-                .select(LibraryTypeSpecification::as_select())
-                .load(db_conn)?;
+        let expected_specifications =
+            LibraryTypeSpecification::list_by_assay_id(assay_id, db_conn)?;
 
         let expected_library_types_and_volumes: Vec<_> = expected_specifications
             .iter()

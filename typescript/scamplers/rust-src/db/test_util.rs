@@ -55,10 +55,7 @@ use crate::{
                 },
                 suspension::{NewSuspension, NewSuspensionMeasurement, SuspensionMeasurementData},
             },
-            tenx_assay::{
-                TenxAssay, TenxAssayQuery,
-                chromium::{LibraryType, SampleMultiplexing},
-            },
+            tenx_assay::{TenxAssay, TenxAssayQuery, chromium::LibraryType},
             units::{MassUnit, VolumeUnit},
         },
         seed_data::{SeedData, insert_seed_data},
