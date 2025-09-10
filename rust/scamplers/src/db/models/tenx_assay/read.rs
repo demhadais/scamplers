@@ -3,7 +3,6 @@ use scamplers_schema::{library_type_specification, tenx_assay};
 use uuid::Uuid;
 
 use crate::{
-    apply_eq_any_filters, apply_ilike_filters,
     db::{
         DbOperation,
         models::tenx_assay::{
@@ -16,26 +15,26 @@ use crate::{
 #[macro_export]
 macro_rules! apply_tenx_assay_query {
     ($stmt:expr, $query:expr) => {{
-        $stmt = apply_eq_any_filters!(
+        $stmt = $crate::apply_eq_any_filters!(
             $stmt,
             filters = {
-                tenx_assay::id => $query.ids,
-                tenx_assay::sample_multiplexing => $query.sample_multiplexing,
-                tenx_assay::chromium_chip => $query.chromium_chips
+                scamplers_schema::tenx_assay::id => $query.ids,
+                scamplers_schema::tenx_assay::sample_multiplexing => $query.sample_multiplexing,
+                scamplers_schema::tenx_assay::chromium_chip => $query.chromium_chips
             }
         );
 
-        $stmt = apply_ilike_filters!(
+        $stmt = $crate::apply_ilike_filters!(
             $stmt,
             filters = {
-                tenx_assay::name => &$query.names,
-                tenx_assay::chemistry_version => &$query.chemistry_versions
+                scamplers_schema::tenx_assay::name => &$query.names,
+                scamplers_schema::tenx_assay::chemistry_version => &$query.chemistry_versions
             }
         );
 
         for mut lib_type_group in $query.library_types {
             lib_type_group.sort();
-            $stmt = $stmt.or_filter(tenx_assay::library_types.eq(lib_type_group));
+            $stmt = $stmt.or_filter(scamplers_schema::tenx_assay::library_types.eq(lib_type_group));
         }
 
         $stmt

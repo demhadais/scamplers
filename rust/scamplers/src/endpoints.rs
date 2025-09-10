@@ -10,7 +10,10 @@ use crate::{
         institution::{Institution, InstitutionId, InstitutionQuery, NewInstitution},
         lab::{Lab, LabId, LabQuery, LabUpdate, NewLab},
         multiplexing_tag::{MultiplexingTag, MultiplexingTagId},
-        nucleic_acid::cdna::{Cdna, CdnaId, CdnaQuery, NewCdnaGroup},
+        nucleic_acid::{
+            cdna::{Cdna, CdnaId, CdnaQuery, NewCdnaGroup},
+            library::{Library, LibraryId, LibraryQuery, NewLibrary},
+        },
         person::{CreatedUser, NewPerson, Person, PersonId, PersonQuery, PersonUpdate},
         sequencing_run::{NewSequencingRun, SequencingRun, SequencingRunId, SequencingRunQuery},
         specimen::{NewSpecimen, Specimen, SpecimenId, SpecimenQuery},
@@ -271,6 +274,14 @@ impl Endpoint<CdnaId, Cdna> for Api {
         client.get(format!("{base_url}{path}"))
     }
 }
+
+impl_basic_endpoints!(
+    path = "/libraries",
+    creation = NewLibrary,
+    id = LibraryId,
+    query = LibraryQuery,
+    response = Library
+);
 
 impl Endpoint<NewPerson, CreatedUser> for Api {
     type RequestExtractor = ValidJsonBody<NewPerson>;

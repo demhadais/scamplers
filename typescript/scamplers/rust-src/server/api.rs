@@ -10,7 +10,10 @@ use crate::{
             institution::{Institution, InstitutionId, InstitutionQuery, NewInstitution},
             lab::{Lab, LabId, LabQuery, LabUpdate, NewLab},
             multiplexing_tag::MultiplexingTag,
-            nucleic_acid::cdna::{Cdna, CdnaId, CdnaQuery, NewCdnaGroup},
+            nucleic_acid::{
+                cdna::{Cdna, CdnaId, CdnaQuery, NewCdnaGroup},
+                library::{Library, LibraryId, LibraryQuery, NewLibrary},
+            },
             person::{CreatedUser, NewPerson, Person, PersonId, PersonQuery, PersonUpdate},
             sequencing_run::{
                 NewSequencingRun, SequencingRun, SequencingRunId, SequencingRunQuery,
@@ -139,7 +142,10 @@ pub fn router() -> Router<AppState> {
         list_chromium_runs(ChromiumRunQuery) -> Vec<ChromiumRun>;
         create_cdna(NewCdnaGroup) -> Vec<Cdna>;
         fetch_cdna(CdnaId) -> Cdna;
-        list_cdna(CdnaQuery) -> Vec<Cdna>
+        list_cdna(CdnaQuery) -> Vec<Cdna>;
+        create_library(NewLibrary) -> Library;
+        fetch_library(LibraryId) -> Library;
+        list_libraries(LibraryQuery) -> Vec<Library>
     );
 
     router

@@ -49,6 +49,20 @@ diesel::table! {
 }
 
 diesel::table! {
+    chromium_dataset (id) {
+        id -> Uuid,
+        links -> Jsonb,
+        name -> Text,
+        lab_id -> Uuid,
+        data_path -> Text,
+        delivered_at -> Timestamptz,
+        gems_id -> Uuid,
+        metrics -> Jsonb,
+        web_summary -> Text,
+    }
+}
+
+diesel::table! {
     chromium_run (id) {
         id -> Uuid,
         links -> Jsonb,
@@ -67,20 +81,6 @@ diesel::table! {
         specimen_id -> Uuid,
         committee_type -> Text,
         compliance_identifier -> Text,
-    }
-}
-
-diesel::table! {
-    dataset (id) {
-        id -> Uuid,
-        links -> Jsonb,
-        name -> Text,
-        lab_id -> Uuid,
-        data_path -> Text,
-        delivered_at -> Timestamptz,
-        gems_id -> Nullable<Uuid>,
-        metrics -> Nullable<Jsonb>,
-        web_summary -> Nullable<Text>,
     }
 }
 
@@ -344,12 +344,12 @@ diesel::joinable!(cdna_preparers -> person (prepared_by));
 diesel::joinable!(chip_loading -> gems (gems_id));
 diesel::joinable!(chip_loading -> suspension (suspension_id));
 diesel::joinable!(chip_loading -> suspension_pool (suspension_pool_id));
+diesel::joinable!(chromium_dataset -> gems (gems_id));
+diesel::joinable!(chromium_dataset -> lab (lab_id));
 diesel::joinable!(chromium_run -> person (run_by));
 diesel::joinable!(chromium_run -> tenx_assay (assay_id));
 diesel::joinable!(committee_approval -> institution (institution_id));
 diesel::joinable!(committee_approval -> specimen (specimen_id));
-diesel::joinable!(dataset -> gems (gems_id));
-diesel::joinable!(dataset -> lab (lab_id));
 diesel::joinable!(dual_index_set -> index_kit (kit));
 diesel::joinable!(gems -> chromium_run (chromium_run_id));
 diesel::joinable!(lab -> person (pi_id));
@@ -388,9 +388,9 @@ diesel::allow_tables_to_appear_in_same_query!(
     cdna_measurement,
     cdna_preparers,
     chip_loading,
+    chromium_dataset,
     chromium_run,
     committee_approval,
-    dataset,
     dual_index_set,
     gems,
     index_kit,

@@ -11,8 +11,9 @@ use scamplers::{
         institution::{InstitutionQuery, NewInstitution},
         lab::{LabQuery, NewLab},
         nucleic_acid::{
-            cdna::{NewCdna, NewCdnaGroup, NewCdnaMeasurement},
+            cdna::{CdnaQuery, NewCdna, NewCdnaGroup, NewCdnaMeasurement},
             common::ElectrophoreticMeasurementData,
+            library::{self, LibraryQuery, NewLibrary, NewLibraryMeasurement},
         },
         person::{NewPerson, PersonQuery, UserRole},
         sequencing_run::{NewSequencingRun, SequencingRunQuery},
@@ -139,7 +140,8 @@ fn register_common_submodule<'a>(parent: &'a Bound<PyModule>) -> PyResult<Module
         SuspensionMeasurementFields,
         BiologicalMaterial,
         ElectrophoreticMeasurementData,
-        LibraryType
+        LibraryType,
+        library::MeasurementData
     );
 
     parent.add_submodule(&common_submodule)?;
@@ -186,7 +188,9 @@ fn register_create_submodule<'a>(parent: &'a Bound<PyModule>) -> PyResult<Module
         NewPoolMultiplexGems,
         NewCdnaMeasurement,
         NewCdna,
-        NewCdnaGroup
+        NewCdnaGroup,
+        NewLibraryMeasurement,
+        NewLibrary
     );
 
     // create_submodule.add_class::<suspension::MeasurementDataCore>()?;
@@ -254,7 +258,9 @@ fn register_query_submodule<'a>(parent: &'a Bound<PyModule>) -> PyResult<ModuleW
         SequencingRunQuery,
         SuspensionQuery,
         SuspensionPoolQuery,
-        ChromiumRunQuery
+        ChromiumRunQuery,
+        CdnaQuery,
+        LibraryQuery
     );
 
     parent.add_submodule(&query_submodule)?;

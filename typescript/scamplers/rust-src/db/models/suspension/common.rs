@@ -24,7 +24,7 @@ pub enum BiologicalMaterial {
     pyo3_stub_gen::derive::gen_stub_pyclass_complex_enum
 )]
 #[db_json]
-#[cfg_attr(feature = "python", pyo3(module = "scamplepy.common"))]
+#[cfg_attr(feature = "python", pyo3(module = "scamplepy.common", set_all))]
 pub enum SuspensionMeasurementFields {
     Concentration {
         measured_at: OffsetDateTime,

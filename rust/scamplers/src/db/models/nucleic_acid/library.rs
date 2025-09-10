@@ -35,7 +35,7 @@ mod read;
 #[serde(tag = "type")]
 #[cfg_attr(
     feature = "python",
-    pyo3(name = "LibraryMeasurementData", module = "scamplepy.common")
+    pyo3(name = "LibraryMeasurementData", module = "scamplepy.common", set_all)
 )]
 pub enum MeasurementData {
     Electrophoretic(ElectrophoreticMeasurementData),
@@ -52,6 +52,7 @@ pub enum MeasurementData {
 #[cfg_attr(feature = "app", diesel(table_name = scamplers_schema::library_measurement))]
 pub struct NewLibraryMeasurement {
     #[serde(default)]
+    #[builder(default)]
     pub library_id: Uuid,
     pub measured_by: Uuid,
     #[serde(flatten)]
@@ -101,6 +102,7 @@ pub struct NewLibrary {
 }
 
 #[cfg(feature = "python")]
+#[gen_stub_pymethods]
 #[pymethods]
 impl NewLibrary {
     #[new]

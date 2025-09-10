@@ -308,7 +308,7 @@ pub fn db_json(_attr: TokenStream, input: TokenStream) -> TokenStream {
 
     let output = quote! {
         #[::scamplers_macros::base_model]
-        #[cfg_attr(feature = "python", ::pyo3::pyclass(get_all, set_all, eq))]
+        #[cfg_attr(feature = "python", ::pyo3::pyclass(get_all, eq))]
         #[derive(::scamplers_macros::Jsonify, ::scamplers_macros::PyJsonify)]
         #[cfg_attr(feature = "app", derive(::diesel::deserialize::FromSqlRow, ::diesel::expression::AsExpression))]
         #[cfg_attr(feature = "app", diesel(sql_type = ::diesel::sql_types::Jsonb))]

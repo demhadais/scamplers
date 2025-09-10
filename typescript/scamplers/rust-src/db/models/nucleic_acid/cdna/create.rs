@@ -8,7 +8,7 @@ use crate::{
         models::{
             nucleic_acid::{
                 cdna::{Cdna, CdnaPreparer, CdnaQuery, NewCdna, NewCdnaGroup, NewCdnaMeasurement},
-                common::gems_to_assay_id,
+                common::gems_to_assay,
             },
             tenx_assay::chromium::{LibraryType, LibraryTypeSpecification},
         },
@@ -91,7 +91,7 @@ impl NewCdnaGroup {
             return Ok(None);
         };
 
-        let assay_id = gems_to_assay_id()
+        let assay_id = gems_to_assay()
             .select(tenx_assay::id)
             .filter(gems::id.eq(gems_id))
             .first(db_conn)?;

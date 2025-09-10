@@ -19,7 +19,7 @@ use crate::{
     db::models::{
         DefaultVec, Links, Pagination,
         multiplexing_tag::MultiplexingTag,
-        specimen::SpecimenSummary,
+        specimen::{SpecimenQuery, SpecimenSummary},
         suspension::common::{BiologicalMaterial, SuspensionMeasurementFields},
     },
     define_ordering_enum, uuid_newtype,
@@ -32,7 +32,7 @@ mod read;
 
 #[cfg_attr(feature = "python", pyo3_stub_gen::derive::gen_stub_pyclass)]
 #[db_json]
-#[cfg_attr(feature = "python", pyo3(module = "scamplepy.common"))]
+#[cfg_attr(feature = "python", pyo3(module = "scamplepy.common", set_all))]
 pub struct SuspensionMeasurementData {
     #[serde(flatten)]
     #[garde(dive)]
@@ -203,14 +203,16 @@ pub struct Suspension {
 
 define_ordering_enum! { SuspensionOrderBy{ CreatedAt, ReadableId }, default = CreatedAt }
 
+// TODO: add more fields
 #[db_query]
 pub struct SuspensionQuery {
     #[builder(default)]
-    ids: Vec<Uuid>,
+    pub ids: Vec<Uuid>,
+    pub specimen: Option<SpecimenQuery>,
     #[builder(default)]
-    order_by: DefaultVec<SuspensionOrderBy>,
+    pub order_by: DefaultVec<SuspensionOrderBy>,
     #[builder(default)]
-    pagination: Pagination,
+    pub pagination: Pagination,
 }
 
 #[cfg(feature = "python")]
@@ -218,14 +220,16 @@ pub struct SuspensionQuery {
 #[pymethods]
 impl SuspensionQuery {
     #[new]
-    #[pyo3(signature = (*, ids = Vec::new(), order_by = DefaultVec::default(), pagination = Pagination::default()))]
+    #[pyo3(signature = (*, ids = Vec::new(), specimen = None, order_by = DefaultVec::default(), pagination = Pagination::default()))]
     fn new(
         ids: Vec<Uuid>,
+        specimen: Option<SpecimenQuery>,
         order_by: DefaultVec<SuspensionOrderBy>,
         pagination: Pagination,
     ) -> Self {
         Self {
             ids,
+            specimen,
             order_by,
             pagination,
         }

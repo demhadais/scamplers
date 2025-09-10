@@ -28,13 +28,18 @@ use crate::{
                 NewGemsCommon, NewPoolMultiplexChipLoading, NewPoolMultiplexChromiumRun,
                 NewPoolMultiplexGems,
             },
+            dataset::chromium::{
+                ChromiumDataset, MultiRowCsvMetricsFile, MultiRowCsvMetricsFileGroup,
+                NewCellrangerMultiDataset, NewChromiumDatasetCommon,
+            },
             institution::{Institution, InstitutionId, NewInstitution},
             lab::{Lab, NewLab},
             multiplexing_tag::MultiplexingTag,
             nucleic_acid::{
                 self,
                 cdna::{Cdna, NewCdna, NewCdnaGroup, NewCdnaMeasurement},
-                common::ElectrophoreticMeasurementData,
+                common::{Concentration, ElectrophoreticMeasurementData},
+                library::{self, Library, NewLibrary, NewLibraryMeasurement},
             },
             person::{NewPerson, Person, PersonQuery},
             specimen::{
@@ -96,7 +101,7 @@ pub const N_SUSPENSION_POOLS: usize = N_SPECIMENS / 4;
 pub const N_SUSPENSIONS_PER_POOL: usize = 2;
 
 // The remaining specimens will become singular suspensions
-pub const N_SUSPENSIONS: usize = N_SPECIMENS - N_SUSPENSIONS_PER_POOL;
+pub const N_SUSPENSIONS: usize = N_SPECIMENS - (N_SUSPENSION_POOLS * N_SUSPENSIONS_PER_POOL);
 
 const N_TENX_ASSAYS: usize = 20;
 
@@ -121,7 +126,7 @@ const N_LIBRARIES: usize = N_CDNA;
 
 const N_SEQUENCING_RUNS: usize = 1;
 
-const N_DATASETS: usize = N_LIBRARIES;
+const N_CHROMIUM_DATASETS: usize = N_LIBRARIES;
 
 pub struct TestState {
     _container: DevContainer,
@@ -136,9 +141,9 @@ pub struct TestState {
     tenx_assays: Vec<TenxAssay>,
     chromium_runs: Vec<ChromiumRun>,
     cdna: Vec<Cdna>,
-    // libraries: Vec<LibraryHandle>,
+    libraries: Vec<Library>,
     // sequencing_runs: Vec<SequencingRunSummary>,
-    // datasets: Vec<DatasetSummary>,
+    chromium_datasets: Vec<ChromiumDataset>,
 }
 impl TestState {
     fn random_time(&mut self) -> OffsetDateTime {
@@ -411,9 +416,7 @@ impl TestState {
             .id
     }
 
-    fn insert_pool_multiplexed_chromium_runs(&mut self, db_conn: &mut PgConnection) {
-        // Ideally, we'd use TenxAssayQuery to get the Flex Gene Expression assay we're
-        // interested in, but it doesn't work for some reason, so we do it manually
+    fn flex_assay_id(&self) -> Uuid {
         let flex_assays: Vec<_> = self
             .tenx_assays
             .iter()
@@ -432,10 +435,16 @@ impl TestState {
             );
         }
 
+        flex_assays[0].id
+    }
+
+    fn insert_pool_multiplexed_chromium_runs(&mut self, db_conn: &mut PgConnection) {
+        let assay_id = self.flex_assay_id();
+
         for i in 0..N_POOL_MULTIPLEX_CHROMIUM_RUNS {
             let chromium_run_common = NewChromiumRunCommon::builder()
                 .readable_id(format!("PMCR{i}"))
-                .assay_id(flex_assays[0].id)
+                .assay_id(assay_id)
                 .run_at(self.random_time())
                 .run_by(self.random_person_id())
                 .succeeded(true)
@@ -486,9 +495,11 @@ impl TestState {
     }
 
     fn insert_cdna(&mut self, db_conn: &mut PgConnection) {
-        // Just insert the cDNA resulting from pool-multiplexed Chromium runs
-        for i in 0..N_POOL_MULTIPLEX_CHROMIUM_RUNS {
-            for j in 0..N_GEMS_PER_NONOCM_CHROMIUM_RUN {
+        let flex_assay_id = self.flex_assay_id();
+
+        // Clone here so we can use `self.random_*`
+        for chromium_run in self.chromium_runs.clone() {
+            for gems in &chromium_run.gems {
                 let new_cdna_measurement = NewCdnaMeasurement::builder()
                     .data(
                         ElectrophoreticMeasurementData::builder()
@@ -498,29 +509,102 @@ impl TestState {
                                 unit: (MassUnit::Picogram, VolumeUnit::Microliter),
                             })
                             .instrument_name("trumpet")
-                            .sizing_range((150, 1000))
+                            .sizing_range((50, 1000))
                             .build(),
                     )
                     .measured_by(self.random_person_id())
                     .build();
 
-                let gems_id = self.random_gems_id();
-                let cdnas = NewCdnaGroup::Multiple(vec![
-                    NewCdna::builder()
-                        .library_type(LibraryType::GeneExpression)
-                        .gems_id(gems_id)
-                        .volume_µl(100.0)
-                        .readable_id(format!("C{i}-{j}"))
-                        .prepared_at(self.random_time())
-                        .n_amplification_cycles(7)
-                        .preparer_ids(self.random_people_ids(2))
-                        .measurements([new_cdna_measurement])
-                        .build(),
-                ])
-                .execute(db_conn)
-                .unwrap();
+                let gems_id = gems.id;
 
-                self.cdna.extend(cdnas);
+                if chromium_run.info.assay.id == flex_assay_id {
+                    let cdnas = NewCdnaGroup::Multiple(vec![
+                        NewCdna::builder()
+                            .library_type(LibraryType::GeneExpression)
+                            .gems_id(gems_id)
+                            .volume_µl(100.0)
+                            .readable_id(format!("C{gems_id}"))
+                            .prepared_at(self.random_time())
+                            .n_amplification_cycles(7)
+                            .preparer_ids(self.random_people_ids(2))
+                            .measurements([new_cdna_measurement])
+                            .build(),
+                    ])
+                    .execute(db_conn)
+                    .unwrap();
+
+                    self.cdna.extend(cdnas);
+                }
+            }
+        }
+    }
+
+    fn insert_libraries(&mut self, db_conn: &mut PgConnection) {
+        for cdna in self.cdna.clone() {
+            if cdna.summary.library_type == LibraryType::GeneExpression {
+                let new_library_measurement = NewLibraryMeasurement::builder()
+                    .measured_by(self.random_person_id())
+                    .data(library::MeasurementData::Fluorometric {
+                        measured_at: self.random_time(),
+                        instrument_name: "hubble".into(),
+                        concentration: Concentration {
+                            value: 30.0,
+                            unit: (MassUnit::Nanogram, VolumeUnit::Microliter),
+                        },
+                    })
+                    .build();
+
+                let cdna_id = cdna.summary.id;
+
+                let mut new_library = NewLibrary::builder()
+                    .readable_id(format!("L{cdna_id}"))
+                    .cdna_id(cdna_id)
+                    .dual_index_set_name("SI-TS-A1")
+                    .measurements([new_library_measurement])
+                    .prepared_at(self.random_time())
+                    .preparer_ids(self.random_people_ids(2))
+                    .number_of_sample_index_pcr_cycles(10)
+                    .target_reads_per_cell(50_000)
+                    .volume_µl(40.0)
+                    .build();
+
+                let result = new_library.clone().execute(db_conn);
+
+                if let Ok(library) = result {
+                    self.libraries.push(library);
+                } else if let Err(ScamplersError::CdnaLibraryType(_)) = result {
+                    new_library.volume_µl = 35.0;
+                    let library = new_library.execute(db_conn).unwrap();
+                    self.libraries.push(library);
+                } else {
+                    result.unwrap();
+                }
+            }
+        }
+    }
+
+    fn insert_chromium_datasets(&mut self, db_conn: &mut PgConnection) {
+        for chromium_run in self.chromium_runs.clone() {
+            for gems in chromium_run.gems {
+                let new_cellranger_multi_dataset = NewCellrangerMultiDataset {
+                    inner: NewChromiumDatasetCommon {
+                        name: "dataset".into(),
+                        lab_id: self.random_lab_id(),
+                        data_path: "path".into(),
+                        delivered_at: self.random_time(),
+                        gems_id: gems.id,
+                        web_summary: String::default(),
+                    },
+                    metrics: vec![MultiRowCsvMetricsFile {
+                        filename: "metrics".to_string(),
+                        raw_contents: include_str!(
+                            "models/dataset/chromium/test-data/cellranger_multi.csv"
+                        )
+                        .into(),
+                        contents: Vec::default(),
+                    }]
+                    .into(),
+                };
             }
         }
     }
@@ -540,6 +624,8 @@ impl TestState {
                 self.insert_suspension_pools(db_conn);
                 self.insert_pool_multiplexed_chromium_runs(db_conn);
                 self.insert_cdna(db_conn);
+                self.insert_libraries(db_conn);
+                self.insert_chromium_datasets(db_conn);
 
                 self
             })
@@ -568,9 +654,9 @@ impl TestState {
                 N_SINGLEPLEX_CHROMIUM_RUNS + N_OCM_CHROMIUM_RUNS + N_POOL_MULTIPLEX_CHROMIUM_RUNS,
             ),
             cdna: Vec::with_capacity(N_CDNA),
-            // libraries: Vec::with_capacity(N_LIBRARIES),
+            libraries: Vec::with_capacity(N_LIBRARIES),
             // sequencing_runs: Vec::with_capacity(N_SEQUENCING_RUNS),
-            // datasets: Vec::with_capacity(N_DATASETS),
+            chromium_datasets: Vec::with_capacity(N_CHROMIUM_DATASETS),
         };
 
         let mut test_state = test_state.populate_db().await;

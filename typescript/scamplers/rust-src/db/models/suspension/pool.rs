@@ -29,7 +29,7 @@ mod read;
 
 #[cfg_attr(feature = "python", pyo3_stub_gen::derive::gen_stub_pyclass)]
 #[db_json]
-#[cfg_attr(feature = "python", pyo3(module = "scamplepy.common"))]
+#[cfg_attr(feature = "python", pyo3(module = "scamplepy.common", set_all))]
 pub struct SuspensionPoolMeasurementData {
     #[serde(flatten)]
     #[garde(dive)]

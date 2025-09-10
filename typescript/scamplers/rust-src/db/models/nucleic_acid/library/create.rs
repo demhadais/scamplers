@@ -7,7 +7,7 @@ use crate::{
         DbOperation,
         models::{
             nucleic_acid::{
-                common::gems_to_assay_id,
+                common::gems_to_assay,
                 library::{Library, LibraryId, LibraryPreparer, NewLibrary, NewLibraryMeasurement},
             },
             tenx_assay::chromium::{LibraryType, LibraryTypeSpecification},
@@ -50,7 +50,7 @@ impl NewLibrary {
         db_conn: &mut PgConnection,
     ) -> ScamplersResult<(LibraryType, Uuid)> {
         let assay_id = cdna::table
-            .inner_join(gems_to_assay_id())
+            .inner_join(gems_to_assay())
             .filter(cdna::id.eq(self.cdna_id))
             .select((cdna::library_type, tenx_assay::id))
             .first(db_conn)?;

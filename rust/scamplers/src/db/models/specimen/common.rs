@@ -72,7 +72,7 @@ pub struct CommitteeApproval {
 #[serde(tag = "type")]
 #[cfg_attr(
     feature = "python",
-    pyo3(name = "SpecimenMeasurementData", module = "scamplepy.common")
+    pyo3(name = "SpecimenMeasurementData", module = "scamplepy.common", set_all)
 )]
 pub enum MeasurementData {
     #[serde(rename = "RIN")]

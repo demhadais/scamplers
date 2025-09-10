@@ -2,8 +2,7 @@ use diesel::prelude::*;
 use scamplers_schema::{lab, person, specimen};
 
 use crate::{
-    apply_eq_any_filters, apply_eq_filters, apply_ilike_filters, apply_time_filters,
-    attach_children_to_parents,
+    apply_eq_any_filters, attach_children_to_parents,
     db::{
         DbOperation,
         models::specimen::{
@@ -13,6 +12,55 @@ use crate::{
     },
     group_children, impl_id_db_operation, init_stmt,
 };
+
+#[macro_export]
+macro_rules! apply_specimen_query {
+    ($stmt:expr, $query:expr) => {{
+        use scamplers_schema::specimen;
+
+        $stmt = apply_eq_any_filters!(
+            $stmt,
+            filters = {
+                specimen::id => $query.ids,
+                specimen::type_ => $query.types,
+                specimen::submitted_by => $query.submitters,
+                specimen::lab_id => $query.labs,
+                specimen::embedded_in => $query.embedded_in,
+                specimen::fixative => $query.fixatives
+            }
+        );
+
+        $stmt = $crate::apply_ilike_filters!(
+            $stmt,
+            filters = {
+                specimen::name => &$query.names,
+                specimen::notes => &$query.notes,
+                specimen::storage_buffer => &$query.storage_buffers
+            }
+        );
+
+        $stmt = $crate::apply_eq_filters!(
+            $stmt,
+            filters = {
+                specimen::frozen => $query.frozen,
+                specimen::cryopreserved => $query.cryopreserved
+            }
+        );
+
+        $stmt = $crate::apply_time_filters!(
+            $stmt,
+            filters = {
+                specimen::received_at => ($query.received_before, $query.received_after)
+            }
+        );
+
+        if !$query.species.is_empty() {
+            $stmt = $stmt.filter(specimen::species.overlaps_with($query.species));
+        }
+
+        $stmt
+    }};
+}
 
 impl DbOperation<Vec<Specimen>> for SpecimenQuery {
     fn execute(self, db_conn: &mut PgConnection) -> crate::result::ScamplersResult<Vec<Specimen>> {
@@ -24,62 +72,7 @@ impl DbOperation<Vec<Specimen>> for SpecimenQuery {
 
         let mut stmt = init_stmt!(stmt = base_stmt, query = &self, output_type = SpecimenSummaryWithParents, orderby_spec = { SpecimenOrderBy::Name => specimen::name, SpecimenOrderBy::ReadableId => specimen::readable_id, SpecimenOrderBy::ReceivedAt => specimen::received_at });
 
-        let Self {
-            ids,
-            names,
-            submitters,
-            labs,
-            received_before,
-            received_after,
-            species,
-            notes,
-            types,
-            embedded_in,
-            fixatives,
-            storage_buffers,
-            frozen,
-            cryopreserved,
-            ..
-        } = &self;
-
-        stmt = apply_eq_any_filters!(
-            stmt,
-            filters = {
-                specimen::id => ids,
-                specimen::type_ => types,
-                specimen::submitted_by => submitters,
-                specimen::lab_id => labs,
-                specimen::embedded_in => embedded_in,
-                specimen::fixative => fixatives
-            }
-        );
-
-        stmt = apply_ilike_filters!(stmt,
-            filters = {
-                specimen::name => names,
-                specimen::notes => notes,
-                specimen::storage_buffer => storage_buffers
-            }
-        );
-
-        stmt = apply_eq_filters!(
-            stmt,
-            filters = {
-                specimen::frozen => frozen,
-                specimen::cryopreserved => cryopreserved
-            }
-        );
-
-        stmt = apply_time_filters!(
-            stmt,
-            filters = {
-                specimen::received_at => (received_before, received_after)
-            }
-        );
-
-        if !species.is_empty() {
-            stmt = stmt.filter(specimen::species.overlaps_with(species));
-        }
+        stmt = apply_specimen_query!(stmt, self);
 
         let specimen_records = stmt.load(db_conn)?;
 

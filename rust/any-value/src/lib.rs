@@ -54,7 +54,7 @@ impl valuable::Valuable for AnyValue {
 }
 
 #[cfg(feature = "app")]
-mod backend {
+mod app {
     use diesel::{
         backend::Backend,
         deserialize::FromSql,

@@ -123,6 +123,47 @@ export class CdnaSummary {
   get notes(): string;
   set notes(value: string | null | undefined);
 }
+export class ChromiumDataset {
+  private constructor();
+  free(): void;
+  to_json_bytes(): Uint8Array;
+  to_json_string(): string;
+  to_base64_json(): string;
+  static from_json_bytes(json_bytes: Uint8Array): ChromiumDataset;
+  static from_json_string(json_str: string): ChromiumDataset;
+  static from_base64_json(base64_json_bytes: string): ChromiumDataset;
+  id: string;
+  readonly links: Map<any, any>;
+  name: string;
+  lab: LabSummary;
+  data_path: string;
+  delivered_at: Date;
+  tenx_assay: TenxAssay;
+  web_summary: string;
+}
+export class ChromiumDatasetQuery {
+  free(): void;
+  to_json_bytes(): Uint8Array;
+  to_json_string(): string;
+  to_base64_json(): string;
+  static from_json_bytes(json_bytes: Uint8Array): ChromiumDatasetQuery;
+  static from_json_string(json_str: string): ChromiumDatasetQuery;
+  static from_base64_json(base64_json_bytes: string): ChromiumDatasetQuery;
+  constructor();
+  ids: string[];
+  names: string[];
+  lab_ids: string[];
+  get delivered_before(): Date | undefined;
+  set delivered_before(value: Date | null | undefined);
+  get delivered_after(): Date | undefined;
+  set delivered_after(value: Date | null | undefined);
+  get tenx_assay(): TenxAssayQuery | undefined;
+  set tenx_assay(value: TenxAssayQuery | null | undefined);
+  get specimen(): SpecimenQuery | undefined;
+  set specimen(value: SpecimenQuery | null | undefined);
+  order_by: OrderBy[];
+  pagination: Pagination;
+}
 export class ChromiumRun {
   private constructor();
   free(): void;
@@ -914,6 +955,11 @@ export class SuspensionQuery {
   static from_json_string(json_str: string): SuspensionQuery;
   static from_base64_json(base64_json_bytes: string): SuspensionQuery;
   constructor();
+  ids: string[];
+  get specimen(): SpecimenQuery | undefined;
+  set specimen(value: SpecimenQuery | null | undefined);
+  order_by: OrderBy[];
+  pagination: Pagination;
 }
 export class SuspensionSummary {
   private constructor();
