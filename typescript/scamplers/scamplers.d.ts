@@ -141,6 +141,17 @@ export class ChromiumDataset {
   tenx_assay: TenxAssay;
   web_summary: string;
 }
+export class ChromiumDatasetError {
+  private constructor();
+  free(): void;
+  to_json_bytes(): Uint8Array;
+  to_json_string(): string;
+  to_base64_json(): string;
+  static from_json_bytes(json_bytes: Uint8Array): ChromiumDatasetError;
+  static from_json_string(json_str: string): ChromiumDatasetError;
+  static from_base64_json(base64_json_bytes: string): ChromiumDatasetError;
+  message: string;
+}
 export class ChromiumDatasetQuery {
   free(): void;
   to_json_bytes(): Uint8Array;
@@ -248,20 +259,6 @@ export class CreatedUser {
   free(): void;
   person: Person;
   api_key: string;
-}
-export class DatasetCmdlineError {
-  private constructor();
-  free(): void;
-  to_json_bytes(): Uint8Array;
-  to_json_string(): string;
-  to_base64_json(): string;
-  static from_json_bytes(json_bytes: Uint8Array): DatasetCmdlineError;
-  static from_json_string(json_str: string): DatasetCmdlineError;
-  static from_base64_json(base64_json_bytes: string): DatasetCmdlineError;
-  get chemistry(): string;
-  set chemistry(value: string | null | undefined);
-  expected_cmdlines: string[];
-  found_cmdline: string;
 }
 export class DatasetMetricsFileParseError {
   private constructor();
@@ -701,6 +698,9 @@ export class ScamplersClient {
   list_suspensions(data: SuspensionQuery): Promise<Suspension[]>;
   list_suspension_pools(data: SuspensionPoolQuery): Promise<SuspensionPool[]>;
   list_chromium_runs(data: ChromiumRunQuery): Promise<ChromiumRun[]>;
+  list_cdna(data: CdnaQuery): Promise<Cdna[]>;
+  list_libraries(data: LibraryQuery): Promise<Library[]>;
+  list_chromium_datasets(data: ChromiumDatasetQuery): Promise<ChromiumDataset[]>;
   fetch_institution(data: string): Promise<Institution>;
   fetch_person(data: string): Promise<Person>;
   fetch_lab(data: string): Promise<Lab>;
@@ -709,6 +709,9 @@ export class ScamplersClient {
   fetch_suspension(data: string): Promise<Suspension>;
   fetch_suspension_pool(data: string): Promise<SuspensionPool>;
   fetch_chromium_run(data: string): Promise<ChromiumRun>;
+  fetch_cdna(data: string): Promise<Cdna>;
+  fetch_library(data: string): Promise<Library>;
+  fetch_chromium_dataset(data: string): Promise<ChromiumDataset>;
   list_person_specimens(id: string, query: SpecimenQuery): Promise<Specimen[]>;
 }
 export class ScamplersErrorResponse {

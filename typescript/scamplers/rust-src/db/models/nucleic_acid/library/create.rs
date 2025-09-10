@@ -59,13 +59,26 @@ impl NewLibrary {
     }
 
     fn validate_type_and_volume(&self, db_conn: &mut PgConnection) -> ScamplersResult<()> {
+        use crate::db::models::index_set::IndexSetName;
+
         let (library_type, assay_id) = self.library_type_and_assay_id(db_conn)?;
 
         let expected_specifications =
             LibraryTypeSpecification::list_by_assay_id(assay_id, db_conn)?;
 
+        let index_kit = self
+            .single_index_set_name
+            .clone()
+            .unwrap_or(self.dual_index_set_name.clone().unwrap_or_default());
+
+        // `unwrap_or_default` is fine because if it's not valid, the next check will
+        // catch it
+        let index_kit_name = index_kit.kit_name().unwrap_or_default();
+
         for spec in &expected_specifications {
-            if (library_type, self.volume_µl) == (spec.library_type, spec.library_volume_µl) {
+            if (library_type, index_kit_name, self.volume_µl)
+                == (spec.library_type, &spec.index_kit, spec.library_volume_µl)
+            {
                 return Ok(());
             }
         }

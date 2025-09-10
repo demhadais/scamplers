@@ -8,7 +8,7 @@ use heck::ToSnekCase;
 #[cfg(feature = "python")]
 use pyo3::prelude::*;
 #[cfg(feature = "python")]
-use pyo3_stub_gen::impl_stub_type;
+use pyo3_stub_gen::{derive::gen_stub_pyclass_complex_enum, impl_stub_type};
 #[cfg(not(target_arch = "wasm32"))]
 use regex::Regex;
 use scamplers_macros::{
@@ -27,7 +27,7 @@ use crate::{
         specimen::SpecimenQuery,
         tenx_assay::{TenxAssay, TenxAssayQuery},
     },
-    define_ordering_enum,
+    define_ordering_enum, uuid_newtype,
 };
 
 #[cfg(feature = "app")]
@@ -233,6 +233,7 @@ pub struct JsonMetricsFile {
     #[serde(skip)]
     pub contents: AnyValue,
 }
+
 #[cfg(not(target_arch = "wasm32"))]
 impl JsonMetricsFile {
     fn parse(&mut self) -> Result<(), DatasetMetricsFileParseError> {
@@ -243,6 +244,53 @@ impl JsonMetricsFile {
         })?;
 
         Ok(())
+    }
+}
+
+#[cfg_attr(feature = "python", gen_stub_pyclass_complex_enum)]
+#[db_json]
+#[serde(tag = "format")]
+#[cfg_attr(feature = "python", pyo3(module = "scamplepy.responses"))]
+pub enum ParsedMetrics {
+    #[serde(rename = "10x_single_row_csv")]
+    TenxSingleRowCsv(SingleRowCsvMetricsFile),
+    #[serde(rename = "10x_multi_row_csv_group")]
+    TenxMultiRowCsvGroup(MultiRowCsvMetricsFileGroup),
+    #[serde(rename = "10x_json")]
+    TenxJson(JsonMetricsFile),
+}
+
+#[cfg(not(target_arch = "wasm32"))]
+impl TryFrom<SingleRowCsvMetricsFile> for ParsedMetrics {
+    type Error = DatasetMetricsFileParseError;
+
+    fn try_from(mut metrics_file: SingleRowCsvMetricsFile) -> Result<Self, Self::Error> {
+        metrics_file.parse()?;
+        Ok(Self::TenxSingleRowCsv(metrics_file))
+    }
+}
+
+#[cfg(not(target_arch = "wasm32"))]
+impl TryFrom<MultiRowCsvMetricsFileGroup> for ParsedMetrics {
+    type Error = DatasetMetricsFileParseError;
+
+    fn try_from(mut metrics_files: MultiRowCsvMetricsFileGroup) -> Result<Self, Self::Error> {
+        for file in &mut metrics_files.inner {
+            file.parse()?;
+        }
+
+        Ok(Self::TenxMultiRowCsvGroup(metrics_files))
+    }
+}
+
+#[cfg(not(target_arch = "wasm32"))]
+impl TryFrom<JsonMetricsFile> for ParsedMetrics {
+    type Error = DatasetMetricsFileParseError;
+
+    fn try_from(mut metrics_file: JsonMetricsFile) -> Result<Self, Self::Error> {
+        metrics_file.parse()?;
+
+        Ok(Self::TenxJson(metrics_file))
     }
 }
 
@@ -259,7 +307,9 @@ pub struct NewChromiumDatasetCommon {
     #[garde(dive)]
     pub data_path: ValidString,
     pub delivered_at: OffsetDateTime,
-    pub gems_id: Uuid,
+    #[garde(length(min = 1))]
+    #[cfg_attr(feature = "app", diesel(skip_insertion))]
+    pub library_ids: Vec<Uuid>,
     #[garde(custom(validate_html))]
     pub web_summary: String,
 }
@@ -271,13 +321,13 @@ macro_rules! impl_dataset_constructor {
         #[pymethods]
         impl $dataset_struct {
             #[new]
-            #[pyo3(signature = (*, name, lab_id, data_path, delivered_at, gems_id, web_summary, metrics))]
+            #[pyo3(signature = (*, name, lab_id, data_path, delivered_at, library_ids, web_summary, metrics))]
             fn new(
                 name: ValidString,
                 lab_id: Uuid,
                 data_path: ValidString,
                 delivered_at: OffsetDateTime,
-                gems_id: Uuid,
+                library_ids: Vec<Uuid>,
                 web_summary: String,
                 metrics: $metrics_struct,
             ) -> Self {
@@ -287,7 +337,7 @@ macro_rules! impl_dataset_constructor {
                         lab_id,
                         data_path,
                         delivered_at,
-                        gems_id,
+                        library_ids,
                         web_summary,
                     },
                     metrics: metrics.into(),
@@ -424,23 +474,6 @@ impl_stub_type!(
         | NewCellrangerVdjDataset
 );
 
-#[db_json]
-#[serde(tag = "format")]
-#[cfg_attr(feature = "python", pyo3(module = "scamplepy.responses"))]
-pub enum ParsedMetrics {
-    #[serde(rename = "10x_single_row_csv")]
-    TenxSingleRowCsv(SingleRowCsvMetricsFile),
-    #[serde(rename = "10x_multi_row_csv_group")]
-    TenxMultiRowCsvGroup(MultiRowCsvMetricsFileGroup),
-    #[serde(rename = "10x_json")]
-    TenxJson(JsonMetricsFile),
-}
-
-#[cfg(feature = "python")]
-impl_stub_type!(
-    ParsedMetrics = SingleRowCsvMetricsFile | MultiRowCsvMetricsFileGroup | JsonMetricsFile
-);
-
 #[db_selection]
 #[cfg_attr(feature = "app", diesel(table_name = scamplers_schema::chromium_dataset))]
 pub struct ChromiumDataset {
@@ -478,6 +511,8 @@ pub struct ChromiumDatasetQuery {
     #[builder(default)]
     pub pagination: Pagination,
 }
+
+uuid_newtype!(ChromiumDatasetId);
 
 #[cfg(test)]
 mod tests {

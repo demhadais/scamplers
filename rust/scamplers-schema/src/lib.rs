@@ -56,9 +56,15 @@ diesel::table! {
         lab_id -> Uuid,
         data_path -> Text,
         delivered_at -> Timestamptz,
-        gems_id -> Uuid,
         metrics -> Jsonb,
         web_summary -> Text,
+    }
+}
+
+diesel::table! {
+    chromium_dataset_libraries (dataset_id, library_id) {
+        dataset_id -> Uuid,
+        library_id -> Uuid,
     }
 }
 
@@ -344,8 +350,9 @@ diesel::joinable!(cdna_preparers -> person (prepared_by));
 diesel::joinable!(chip_loading -> gems (gems_id));
 diesel::joinable!(chip_loading -> suspension (suspension_id));
 diesel::joinable!(chip_loading -> suspension_pool (suspension_pool_id));
-diesel::joinable!(chromium_dataset -> gems (gems_id));
 diesel::joinable!(chromium_dataset -> lab (lab_id));
+diesel::joinable!(chromium_dataset_libraries -> chromium_dataset (dataset_id));
+diesel::joinable!(chromium_dataset_libraries -> library (library_id));
 diesel::joinable!(chromium_run -> person (run_by));
 diesel::joinable!(chromium_run -> tenx_assay (assay_id));
 diesel::joinable!(committee_approval -> institution (institution_id));
@@ -389,6 +396,7 @@ diesel::allow_tables_to_appear_in_same_query!(
     cdna_preparers,
     chip_loading,
     chromium_dataset,
+    chromium_dataset_libraries,
     chromium_run,
     committee_approval,
     dual_index_set,

@@ -1,6 +1,7 @@
 use diesel::prelude::*;
-use scamplers_schema::{chip_loading, chromium_dataset, lab};
-use uuid::Uuid;
+use scamplers_schema::{
+    cdna, chip_loading, chromium_dataset, chromium_dataset_libraries, lab, library,
+};
 
 use crate::{
     apply_eq_any_filters, apply_ilike_filters, apply_tenx_assay_query, apply_time_filters,
@@ -8,12 +9,14 @@ use crate::{
         DbOperation,
         models::{
             Pagination,
-            dataset::chromium::{ChromiumDataset, ChromiumDatasetOrderBy, ChromiumDatasetQuery},
+            dataset::chromium::{
+                ChromiumDataset, ChromiumDatasetId, ChromiumDatasetOrderBy, ChromiumDatasetQuery,
+            },
             nucleic_acid::common::gems_to_assay,
             suspension::suspension::SuspensionQuery,
         },
     },
-    init_stmt,
+    impl_id_db_operation, init_stmt,
 };
 
 impl DbOperation<Vec<ChromiumDataset>> for ChromiumDatasetQuery {
@@ -46,24 +49,16 @@ impl DbOperation<Vec<ChromiumDataset>> for ChromiumDatasetQuery {
                 None
             };
 
-        let gems_query = chip_loading::table.select(chip_loading::gems_id);
-        let gems_ids: Vec<Uuid> = if let Some(suspension_and_suspension_pool_ids) =
-            suspension_and_suspension_pool_ids
-        {
-            gems_query
-                .filter(chip_loading::suspension_id.eq_any(&suspension_and_suspension_pool_ids))
-                .or_filter(
-                    chip_loading::suspension_pool_id.eq_any(&suspension_and_suspension_pool_ids),
-                )
-                .load(db_conn)?
-        } else {
-            gems_query.load(db_conn)?
-        };
-
-        let base_stmt = chromium_dataset::table
-            .inner_join(lab::table)
-            .inner_join(gems_to_assay())
-            .filter(chromium_dataset::gems_id.eq_any(gems_ids));
+        let base_stmt = chip_loading::table.inner_join(
+            gems_to_assay().inner_join(
+                cdna::table.inner_join(
+                    library::table.inner_join(
+                        chromium_dataset_libraries::table
+                            .inner_join(chromium_dataset::table.inner_join(lab::table)),
+                    ),
+                ),
+            ),
+        );
 
         let mut stmt = init_stmt!(
             stmt = base_stmt,
@@ -77,6 +72,14 @@ impl DbOperation<Vec<ChromiumDataset>> for ChromiumDatasetQuery {
 
         if let Some(tenx_assay_query) = self.tenx_assay.take() {
             stmt = apply_tenx_assay_query!(stmt, tenx_assay_query);
+        }
+
+        if let Some(suspension_and_suspension_pool_ids) = &suspension_and_suspension_pool_ids {
+            stmt = stmt
+                .filter(chip_loading::suspension_id.eq_any(suspension_and_suspension_pool_ids))
+                .or_filter(
+                    chip_loading::suspension_pool_id.eq_any(suspension_and_suspension_pool_ids),
+                );
         }
 
         let Self {
@@ -114,11 +117,15 @@ impl DbOperation<Vec<ChromiumDataset>> for ChromiumDatasetQuery {
     }
 }
 
+impl_id_db_operation!(
+    id_type = ChromiumDatasetId,
+    delegate_to = ChromiumDatasetQuery,
+    returns = ChromiumDataset
+);
+
 #[cfg(test)]
 mod tests {
-    use diesel::prelude::*;
     use rstest::rstest;
-    use scamplers_schema::{chromium_dataset, gems};
 
     use crate::db::{
         DbOperation,

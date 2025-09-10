@@ -70,10 +70,8 @@ pub struct ServerError {
 
 #[scamplers_error]
 #[error("{self:#?}")]
-pub struct DatasetCmdlineError {
-    pub chemistry: Option<String>,
-    pub expected_cmdlines: Vec<String>,
-    pub found_cmdline: String,
+pub struct ChromiumDatasetError {
+    pub message: String,
 }
 
 #[scamplers_error]
@@ -126,7 +124,7 @@ pub enum ScamplersError {
     Server(#[from] ServerError),
     MalformedRequest(#[from] MalformedRequestError),
     PermissionDenied(#[from] PermissionDeniedError),
-    DatasetCmdline(#[from] DatasetCmdlineError),
+    DatasetCmdline(#[from] ChromiumDatasetError),
     DatasetNMetricsFiles(#[from] DatasetNMetricsFilesError),
     DatasetMetricsFileParse(#[from] DatasetMetricsFileParseError),
     CdnaLibraryType(#[from] CdnaLibraryTypeError),

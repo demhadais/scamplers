@@ -12,34 +12,35 @@ use uuid::Uuid;
 use wasm_bindgen::prelude::*;
 
 #[cfg(target_arch = "wasm32")]
+use crate::db::models::person::CreatedUser;
+#[cfg(feature = "python")]
+use crate::db::models::{
+    chromium_run::NewChromiumRun,
+    dataset::chromium::NewChromiumDataset,
+    institution::NewInstitution,
+    multiplexing_tag::MultiplexingTag,
+    nucleic_acid::{cdna::NewCdnaGroup, library::NewLibrary},
+    person::PersonUpdate,
+    sequencing_run::NewSequencingRun,
+    specimen::NewSpecimen,
+    suspension::{pool::NewSuspensionPool, suspension::NewSuspension},
+};
+#[cfg(any(target_arch = "wasm32", feature = "python"))]
 use crate::db::models::{
     chromium_run::{ChromiumRun, ChromiumRunId, ChromiumRunQuery},
+    dataset::chromium::{ChromiumDataset, ChromiumDatasetId, ChromiumDatasetQuery},
     institution::{Institution, InstitutionId, InstitutionQuery},
     lab::{Lab, LabId, LabQuery, LabUpdate, NewLab},
-    person::{CreatedUser, NewPerson, Person, PersonId, PersonQuery},
+    nucleic_acid::{
+        cdna::{Cdna, CdnaId, CdnaQuery},
+        library::{Library, LibraryId, LibraryQuery},
+    },
+    person::{NewPerson, Person, PersonId, PersonQuery},
     sequencing_run::{SequencingRun, SequencingRunId, SequencingRunQuery},
     specimen::{Specimen, SpecimenId, SpecimenQuery},
     suspension::{
         pool::{SuspensionPool, SuspensionPoolId, SuspensionPoolQuery},
         suspension::{Suspension, SuspensionId, SuspensionQuery},
-    },
-};
-#[cfg(feature = "python")]
-use crate::db::models::{
-    chromium_run::{ChromiumRun, ChromiumRunId, ChromiumRunQuery, NewChromiumRun},
-    institution::{Institution, InstitutionId, InstitutionQuery, NewInstitution},
-    lab::{Lab, LabId, LabQuery, LabUpdate, NewLab},
-    multiplexing_tag::MultiplexingTag,
-    nucleic_acid::{
-        cdna::{Cdna, CdnaId, CdnaQuery, NewCdnaGroup},
-        library::{Library, LibraryId, LibraryQuery, NewLibrary},
-    },
-    person::{NewPerson, Person, PersonId, PersonQuery, PersonUpdate},
-    sequencing_run::{NewSequencingRun, SequencingRun, SequencingRunId, SequencingRunQuery},
-    specimen::{NewSpecimen, Specimen, SpecimenId, SpecimenQuery},
-    suspension::{
-        pool::{NewSuspensionPool, SuspensionPool, SuspensionPoolId, SuspensionPoolQuery},
-        suspension::{NewSuspension, Suspension, SuspensionId, SuspensionQuery},
     },
 };
 use crate::{
@@ -316,7 +317,10 @@ wasm_client_methods! {
     list_sequencing_runs(SequencingRunQuery) -> Vec<SequencingRun>;
     list_suspensions(SuspensionQuery) -> Vec<Suspension>;
     list_suspension_pools(SuspensionPoolQuery) -> Vec<SuspensionPool>;
-    list_chromium_runs(ChromiumRunQuery) -> Vec<ChromiumRun>
+    list_chromium_runs(ChromiumRunQuery) -> Vec<ChromiumRun>;
+    list_cdna(CdnaQuery) -> Vec<Cdna>;
+    list_libraries(LibraryQuery) -> Vec<Library>;
+    list_chromium_datasets(ChromiumDatasetQuery) -> Vec<ChromiumDataset>
 }
 
 #[cfg(target_arch = "wasm32")]
@@ -328,7 +332,10 @@ wasm_wrapped_data_methods! {
     fetch_sequencing_run(SequencingRunId(Uuid)) -> SequencingRun;
     fetch_suspension(SuspensionId(Uuid)) -> Suspension;
     fetch_suspension_pool(SuspensionPoolId(Uuid)) -> SuspensionPool;
-    fetch_chromium_run(ChromiumRunId(Uuid)) -> ChromiumRun
+    fetch_chromium_run(ChromiumRunId(Uuid)) -> ChromiumRun;
+    fetch_cdna(CdnaId(Uuid)) -> Cdna;
+    fetch_library(LibraryId(Uuid)) -> Library;
+    fetch_chromium_dataset(ChromiumDatasetId(Uuid)) -> ChromiumDataset
 }
 
 #[cfg(target_arch = "wasm32")]
@@ -369,7 +376,10 @@ python_client_methods! {
     list_cdna(CdnaQuery) -> Vec<Cdna>;
     create_library(NewLibrary) -> Library;
     fetch_library(LibraryId) -> Library;
-    list_libraries(LibraryQuery) -> Vec<Library>
+    list_libraries(LibraryQuery) -> Vec<Library>;
+    create_chromium_dataset(NewChromiumDataset) -> ChromiumDataset;
+    fetch_chromium_dataset(ChromiumDatasetId) -> ChromiumDataset;
+    list_chromium_datasets(ChromiumDatasetQuery) -> Vec<ChromiumDataset>
 }
 
 #[cfg(feature = "python")]

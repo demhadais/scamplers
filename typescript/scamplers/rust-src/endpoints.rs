@@ -7,6 +7,9 @@ use axum::{
 use crate::{
     db::models::{
         chromium_run::{ChromiumRun, ChromiumRunId, ChromiumRunQuery, NewChromiumRun},
+        dataset::chromium::{
+            ChromiumDataset, ChromiumDatasetId, ChromiumDatasetQuery, NewChromiumDataset,
+        },
         institution::{Institution, InstitutionId, InstitutionQuery, NewInstitution},
         lab::{Lab, LabId, LabQuery, LabUpdate, NewLab},
         multiplexing_tag::{MultiplexingTag, MultiplexingTagId},
@@ -281,6 +284,14 @@ impl_basic_endpoints!(
     id = LibraryId,
     query = LibraryQuery,
     response = Library
+);
+
+impl_basic_endpoints!(
+    path = "/chromium-datasets",
+    creation = NewChromiumDataset,
+    id = ChromiumDatasetId,
+    query = ChromiumDatasetQuery,
+    response = ChromiumDataset
 );
 
 impl Endpoint<NewPerson, CreatedUser> for Api {

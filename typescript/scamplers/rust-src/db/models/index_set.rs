@@ -8,6 +8,8 @@ use crate::db::models::index_set::{dual::NewDualIndexSet, single::NewSingleIndex
 mod common;
 mod dual;
 mod single;
+#[cfg(feature = "app")]
+pub use common::IndexSetName;
 
 #[derive(Deserialize, Validate)]
 #[serde(untagged)]

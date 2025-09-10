@@ -7,6 +7,9 @@ use crate::{
         DbOperation,
         models::{
             chromium_run::{ChromiumRun, ChromiumRunId, ChromiumRunQuery, NewChromiumRun},
+            dataset::chromium::{
+                ChromiumDataset, ChromiumDatasetId, ChromiumDatasetQuery, NewChromiumDataset,
+            },
             institution::{Institution, InstitutionId, InstitutionQuery, NewInstitution},
             lab::{Lab, LabId, LabQuery, LabUpdate, NewLab},
             multiplexing_tag::MultiplexingTag,
@@ -145,7 +148,10 @@ pub fn router() -> Router<AppState> {
         list_cdna(CdnaQuery) -> Vec<Cdna>;
         create_library(NewLibrary) -> Library;
         fetch_library(LibraryId) -> Library;
-        list_libraries(LibraryQuery) -> Vec<Library>
+        list_libraries(LibraryQuery) -> Vec<Library>;
+        create_chromium_dataset(NewChromiumDataset) -> ChromiumDataset;
+        fetch_chromium_dataset(ChromiumDatasetId) -> ChromiumDataset;
+        list_chromium_datasets(ChromiumDatasetQuery) -> Vec<ChromiumDataset>
     );
 
     router

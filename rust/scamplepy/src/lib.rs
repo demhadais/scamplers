@@ -8,6 +8,11 @@ use scamplers::{
             NewPoolMultiplexGems, NewSingleplexChipLoading, NewSingleplexChromiumRun,
             NewSingleplexGems,
         },
+        dataset::chromium::{
+            JsonMetricsFile, MultiRowCsvMetricsFile, NewCellrangerCountDataset,
+            NewCellrangerMultiDataset, NewCellrangerVdjDataset, NewCellrangerarcCountDataset,
+            NewCellrangeratacCountDataset, SingleRowCsvMetricsFile,
+        },
         institution::{InstitutionQuery, NewInstitution},
         lab::{LabQuery, NewLab},
         nucleic_acid::{
@@ -36,7 +41,7 @@ use scamplers::{
         units::{LengthUnit, MassUnit, VolumeUnit},
     },
     result::{
-        CdnaGemsError, CdnaLibraryTypeError, ClientError, DatasetCmdlineError,
+        CdnaGemsError, CdnaLibraryTypeError, ChromiumDatasetError, ClientError,
         DatasetMetricsFileParseError, DatasetNMetricsFilesError, DuplicateResourceError,
         InvalidDataError, InvalidMeasurementError, InvalidReferenceError, MalformedRequestError,
         PermissionDeniedError, ResourceNotFoundError, ScamplersErrorResponse, ServerError,
@@ -113,7 +118,7 @@ fn register_errors_submodule<'a>(parent: &'a Bound<PyModule>) -> PyResult<Module
         ServerError,
         CdnaGemsError,
         CdnaLibraryTypeError,
-        DatasetCmdlineError,
+        ChromiumDatasetError,
         DatasetNMetricsFilesError,
         DatasetMetricsFileParseError,
         InvalidMeasurementError,
@@ -190,54 +195,16 @@ fn register_create_submodule<'a>(parent: &'a Bound<PyModule>) -> PyResult<Module
         NewCdna,
         NewCdnaGroup,
         NewLibraryMeasurement,
-        NewLibrary
+        NewLibrary,
+        JsonMetricsFile,
+        MultiRowCsvMetricsFile,
+        SingleRowCsvMetricsFile,
+        NewCellrangerarcCountDataset,
+        NewCellrangeratacCountDataset,
+        NewCellrangerCountDataset,
+        NewCellrangerMultiDataset,
+        NewCellrangerVdjDataset
     );
-
-    // create_submodule.add_class::<suspension::MeasurementDataCore>()?;
-    // create_submodule.add_class::<BiologicalMaterial>()?;
-    // create_submodule.add_class::<CellCountingMethod>()?;
-    // create_submodule.add_class::<NewSuspension>()?;
-    // create_submodule.add_class::<NewSuspensionMeasurement>()?;
-    // create_submodule.add_class::<NewSuspensionPool>()?;
-    // create_submodule.add_class::<NewSuspensionPoolMeasurement>()?;
-
-    // create_submodule.add_class::<NewSingleplexChromiumRun>()?;
-    // create_submodule.add_class::<NewSingleplexGems>()?;
-    // create_submodule.add_class::<NewSingleplexChipLoading>()?;
-    // create_submodule.add_class::<SingleplexChromiumChip>()?;
-    // create_submodule.add_class::<NewOcmChromiumRun>()?;
-    // create_submodule.add_class::<NewOcmGems>()?;
-    // create_submodule.add_class::<NewOcmChipLoading>()?;
-    // create_submodule.add_class::<OcmChromiumChip>()?;
-    // create_submodule.add_class::<NewPoolMultiplexChromiumRun>()?;
-    // create_submodule.add_class::<NewPoolMultiplexGems>()?;
-    // create_submodule.add_class::<NewPoolMultiplexChipLoading>()?;
-    // create_submodule.add_class::<PoolMultiplexChromiumChip>()?;
-
-    // create_submodule.add_class::<LibraryType>()?;
-    // create_submodule.add_class::<NewLibraryTypeSpecification>()?;
-
-    // create_submodule.
-    // add_class::<nucleic_acid::common::ElectrophoreticMeasurementData>()?
-    // ; create_submodule.add_class::<nucleic_acid::common::Concentration>()?;
-    // create_submodule.add_class::<NewCdnaMeasurement>()?;
-    // create_submodule.add_class::<NewCdna>()?;
-    // create_submodule.add_class::<NewCdnaGroup>()?;
-    // create_submodule.add_class::<nucleic_acid::library::MeasurementData>()?;
-    // create_submodule.add_class::<NewLibraryMeasurement>()?;
-    // create_submodule.add_class::<NewLibrary>()?;
-
-    // create_submodule.add_class::<SingleRowCsvMetricsFile>()?;
-    // create_submodule.add_class::<MultiRowCsvMetricsFile>()?;
-    // create_submodule.add_class::<JsonMetricsFile>()?;
-
-    // create_submodule.add_class::<dataset::chromium::CellrangerarcCountDataset>()?
-    // ; create_submodule.
-    // add_class::<dataset::chromium::CellrangerCountDataset>()?;
-    // create_submodule.add_class::<dataset::chromium::CellrangerMultiDataset>()?;
-    // create_submodule.add_class::<dataset::chromium::CellrangerVdjDataset>()?;
-    // create_submodule.
-    // add_class::<dataset::chromium::CellrangeratacCountDataset>()?;
 
     parent.add_submodule(&create_submodule)?;
 
