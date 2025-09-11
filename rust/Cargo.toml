@@ -67,7 +67,7 @@ diesel_migrations = { version = "2.2.0", features = ["postgres"] }
 tracing-appender = "0.2.3"
 tracing = { version = "0.1.41", features = ["valuable"] }
 tower = { version = "0.5.2", default-features = false }
-tracing-subscriber = { version = "0.3.19", features = ["json"] }
+tracing-subscriber = { version = "0.3.20", features = ["json"] }
 argon2 = "0.5.3"
 tower-http = { version = "0.6.6", features = ["trace", "fs"] }
 rand = "0.9.1"
