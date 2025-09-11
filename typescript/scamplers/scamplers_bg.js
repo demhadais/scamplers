@@ -233,6 +233,26 @@ function debugString(val) {
     return className;
 }
 
+function _assertClass(instance, klass) {
+    if (!(instance instanceof klass)) {
+        throw new Error(`expected instance of ${klass.name}`);
+    }
+}
+
+let cachedUint16ArrayMemory0 = null;
+
+function getUint16ArrayMemory0() {
+    if (cachedUint16ArrayMemory0 === null || cachedUint16ArrayMemory0.byteLength === 0) {
+        cachedUint16ArrayMemory0 = new Uint16Array(wasm.memory.buffer);
+    }
+    return cachedUint16ArrayMemory0;
+}
+
+function getArrayU16FromWasm0(ptr, len) {
+    ptr = ptr >>> 0;
+    return getUint16ArrayMemory0().subarray(ptr / 2, ptr / 2 + len);
+}
+
 function passArray8ToWasm0(arg, malloc) {
     const ptr = malloc(arg.length * 1, 1) >>> 0;
     getUint8ArrayMemory0().set(arg, ptr / 1);
@@ -260,36 +280,16 @@ function passArrayJsValueToWasm0(array, malloc) {
     WASM_VECTOR_LEN = array.length;
     return ptr;
 }
-
-function _assertClass(instance, klass) {
-    if (!(instance instanceof klass)) {
-        throw new Error(`expected instance of ${klass.name}`);
-    }
-}
-
-let cachedUint16ArrayMemory0 = null;
-
-function getUint16ArrayMemory0() {
-    if (cachedUint16ArrayMemory0 === null || cachedUint16ArrayMemory0.byteLength === 0) {
-        cachedUint16ArrayMemory0 = new Uint16Array(wasm.memory.buffer);
-    }
-    return cachedUint16ArrayMemory0;
-}
-
-function getArrayU16FromWasm0(ptr, len) {
-    ptr = ptr >>> 0;
-    return getUint16ArrayMemory0().subarray(ptr / 2, ptr / 2 + len);
-}
 function __wbg_adapter_36(arg0, arg1) {
     wasm.wasm_bindgen__convert__closures_____invoke__h4925a75f0f082581(arg0, arg1);
 }
 
 function __wbg_adapter_39(arg0, arg1, arg2) {
-    wasm.closure410_externref_shim(arg0, arg1, arg2);
+    wasm.closure414_externref_shim(arg0, arg1, arg2);
 }
 
 function __wbg_adapter_1124(arg0, arg1, arg2, arg3) {
-    wasm.closure443_externref_shim(arg0, arg1, arg2, arg3);
+    wasm.closure447_externref_shim(arg0, arg1, arg2, arg3);
 }
 
 /**
@@ -5683,7 +5683,7 @@ export class MultiplexingTag {
     set tag_id(arg0) {
         const ptr0 = passStringToWasm0(arg0, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
         const len0 = WASM_VECTOR_LEN;
-        wasm.__wbg_set_multiplexingtag_tag_id(this.__wbg_ptr, ptr0, len0);
+        wasm.__wbg_set_gems_readable_id(this.__wbg_ptr, ptr0, len0);
     }
     /**
      * @returns {string}
@@ -11010,13 +11010,13 @@ export function __wbindgen_cb_drop(arg0) {
     return ret;
 };
 
-export function __wbindgen_closure_wrapper3883(arg0, arg1, arg2) {
-    const ret = makeMutClosure(arg0, arg1, 405, __wbg_adapter_36);
+export function __wbindgen_closure_wrapper3872(arg0, arg1, arg2) {
+    const ret = makeMutClosure(arg0, arg1, 409, __wbg_adapter_36);
     return ret;
 };
 
-export function __wbindgen_closure_wrapper3904(arg0, arg1, arg2) {
-    const ret = makeMutClosure(arg0, arg1, 409, __wbg_adapter_39);
+export function __wbindgen_closure_wrapper3893(arg0, arg1, arg2) {
+    const ret = makeMutClosure(arg0, arg1, 413, __wbg_adapter_39);
     return ret;
 };
 

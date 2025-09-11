@@ -24,6 +24,7 @@ pub enum BiologicalMaterial {
     pyo3_stub_gen::derive::gen_stub_pyclass_complex_enum
 )]
 #[db_json]
+#[serde(tag = "quantity", rename_all = "snake_case")]
 #[cfg_attr(feature = "python", pyo3(module = "scamplepy.common", set_all))]
 pub enum SuspensionMeasurementFields {
     Concentration {

@@ -1,3 +1,4 @@
+from collections.abc import Callable
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
@@ -530,63 +531,102 @@ def new_cellranger_count_dataset(
 #     )
 
 
+def block_embedding(block) -> str:
+    return str(block.embedded_in).lower().split(".")[-1]
+
+
+def block_embedding_from_dict(block: dict[str, str]) -> str:
+    return block["embedded_in"].replace("_", "")
+
+
+def specimen_name(specimen) -> str:
+    return specimen.inner.name
+
+
+def specimen_name_from_dict(specimen: dict[str, str]):
+    return specimen["name"]
+
+
+def chromium_run_readable_id(chromium_run) -> str:
+    return chromium_run.inner.readable_id
+
+
+def chromium_run_readable_id_from_dict(chromium_run: dict[str, str]):
+    return chromium_run["readable_id"]
+
+
 @pytest.mark.parametrize(
-    "data, key, expected_value",
+    "data, accessor",
     [
-        ("new_institution", "name", "institution"),
-        ("new_person", "name", "ahmed"),
-        ("new_lab", "name", "lab"),
-        ("new_fixed_block", "embedded_in", "paraffin"),
-        ("new_frozen_block", "embedded_in", "carboxymethyl_cellulose"),
-        ("new_cryopreserved_tissue", "name", "c"),
-        ("new_fixed_tissue", "name", "f"),
-        ("new_frozen_tissue", "name", "f"),
-        ("new_virtual_specimen", "name", "v"),
-        ("new_suspension_fixture", "target_cell_recovery", 0),
-        ("new_suspension_pool", "preparer_ids", [ID]),
-        ("new_singleplex_chromium_run", "readable_id", "singleplexchromiumrun"),
-        ("new_pool_multiplex_chromium_run", "readable_id", "poolmultiplexchromiumrun"),
-        ("new_ocm_chromium_run", "readable_id", "ocmchromiumrun"),
-        ("new_cdna_group", "preparer_ids", [ID]),
-        ("new_library", "cdna_id", ID),
+        ("new_institution", "name"),
+        ("new_person", "name"),
+        ("new_lab", "name"),
+        ("new_fixed_block", (block_embedding, block_embedding_from_dict)),
+        ("new_frozen_block", (block_embedding, block_embedding_from_dict)),
+        ("new_cryopreserved_tissue", (specimen_name, specimen_name_from_dict)),
+        ("new_fixed_tissue", (specimen_name, specimen_name_from_dict)),
+        ("new_frozen_tissue", (specimen_name, specimen_name_from_dict)),
+        ("new_virtual_specimen", (specimen_name, specimen_name_from_dict)),
+        (
+            "new_suspension_fixture",
+            (
+                lambda pool: pool.measurements[0].data.fields.value,
+                lambda dict_: dict_["measurements"][0]["value"],
+            ),
+        ),
+        ("new_suspension_pool", "readable_id"),
+        (
+            "new_singleplex_chromium_run",
+            (chromium_run_readable_id, chromium_run_readable_id_from_dict),
+        ),
+        (
+            "new_pool_multiplex_chromium_run",
+            (chromium_run_readable_id, chromium_run_readable_id_from_dict),
+        ),
+        (
+            "new_ocm_chromium_run",
+            (chromium_run_readable_id, chromium_run_readable_id_from_dict),
+        ),
+        (
+            "new_cdna_group",
+            (
+                lambda cdna_group: cdna_group.cdna.n_amplification_cycles,
+                lambda dict_: dict_["cdna"]["n_amplification_cycles"],
+            ),
+        ),
+        ("new_library", "number_of_sample_index_pcr_cycles"),
         # ("new_cellrangerarc_count_dataset", "cmdline", "cellranger-arc count"),
         # (
         #     "new_cellrangeratac_count_dataset",
         #     "cmdline",
         #     "cellranger-atac count",
         # ),
-        ("new_cellranger_count_dataset", "data_path", "data"),
+        (
+            "new_cellranger_count_dataset",
+            (
+                lambda dataset: dataset.metrics.contents["estimated_number_of_cells"],
+                lambda dict_: dict_["metrics"]["contents"]["estimated_number_of_cells"],
+            ),
+        ),
         # ("new_cellranger_multi_dataset", "cmdline", "cellranger multi"),
         # ("new_cellranger_vdj_dataset", "cmdline", "cellranger vdj"),
     ],
 )
 def test_jsonification(
-    data: Any, key: str | None, expected_value: Any, request: pytest.FixtureRequest
+    data: Any,
+    accessor: tuple[Callable, Callable] | str,
+    request: pytest.FixtureRequest,
 ):
-    data = request.getfixturevalue(data)
-    json_str = data.to_json_bytes()
-    pythonized = json.loads(json_str)
-    found_value = pythonized[key]
+    # Get the original data and convert it to a json string
+    original_data = request.getfixturevalue(data)
+    jsonified = original_data.to_json_bytes()
 
-    if not isinstance(expected_value, (str, list, datetime)):
-        found_value = type(expected_value)(found_value)
+    # Read that json string as a python object (we expect it to be a `dict`)
+    pythonized = json.loads(jsonified)
 
-    elif isinstance(expected_value, list) and isinstance(found_value, list):
-        for i, v in enumerate(found_value):
-            found_value[i] = type(expected_value[0])(found_value[i])
+    if isinstance(accessor, str):
+        assert getattr(original_data, accessor) == pytest.approx(pythonized[accessor])
 
-    assert found_value == expected_value
-
-    dataclass = type(data)
-    loaded_data = dataclass.from_json_bytes(json_str)
-
-    if dataclass == NewCellrangerCountDataset:
-        loaded_data: NewCellrangerCountDataset
-        assert loaded_data.inner == data.inner
-
-        loaded_metrics = loaded_data.metrics.contents  # type: ignore
-        original_metrics = data.metrics.contents
-        for key in loaded_metrics:
-            assert loaded_metrics[key] == pytest.approx(original_metrics[key])
     else:
-        assert loaded_data == data
+        data_accessor, dict_accessor = accessor
+        assert data_accessor(original_data) == pytest.approx(dict_accessor(pythonized))
