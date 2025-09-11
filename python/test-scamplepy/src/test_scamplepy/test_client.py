@@ -15,6 +15,7 @@ from .test_requests import (
     new_frozen_block,
     new_frozen_tissue,
     new_singleplex_chromium_run,
+    new_library,
 )
 
 # This is to prevent ruff from removing "unused imports"
@@ -29,6 +30,7 @@ __all__ = [
     "new_frozen_block",
     "new_frozen_tissue",
     "new_singleplex_chromium_run",
+    "new_library",
 ]
 
 

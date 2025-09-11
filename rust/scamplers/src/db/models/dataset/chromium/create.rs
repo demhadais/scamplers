@@ -125,7 +125,7 @@ impl NewChromiumDataset {
 
         if n_suspensions != n_metrics {
             return Err(DatasetNMetricsFilesError::builder()
-                .expected_n_metrics_files(n_suspensions as u64)
+                .expected_n_metrics_files(u64::try_from(n_suspensions).unwrap())
                 .found_n_metrics_files(u64::try_from(n_metrics).unwrap())
                 .build()
                 .into());
