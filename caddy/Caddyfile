@@ -1,10 +1,5 @@
-{$PUBLIC_URL} {
-    tls internal
-    reverse_proxy /api/* {$BACKEND_HOST}:{$BACKEND_PORT}
+{$PUBLIC_ADDRESS} {
+    {$TLS_SETTINGS}
+    reverse_proxy {$API_PATH}/* {$API_HOST}:{$API_PORT}
 	reverse_proxy {$FRONTEND_HOST}:{$FRONTEND_PORT}
-}
-
-api.{$PUBLIC_URL} {
-    tls internal
-	reverse_proxy {$BACKEND_HOST}:{$BACKEND_PORT}
 }

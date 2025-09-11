@@ -528,7 +528,7 @@ impl TestState {
                         unreachable!("all Chromium runs are instances of Flex Gene Expression")
                     };
 
-                let cdnas = cdna_lib_types_and_volumes
+                let cdna = cdna_lib_types_and_volumes
                     .into_iter()
                     .map(|(ty, cdna_vol)| {
                         NewCdna::builder()
@@ -545,7 +545,7 @@ impl TestState {
                     .collect();
 
                 if chromium_run.info.assay.id == flex_assay_id {
-                    let cdnas = NewCdnaGroup::Multiple(cdnas).execute(db_conn).unwrap();
+                    let cdnas = NewCdnaGroup::Multiple { cdna }.execute(db_conn).unwrap();
 
                     self.cdna_groups.push(
                         cdnas
@@ -694,7 +694,7 @@ impl TestState {
     }
 
     async fn new() -> Self {
-        let name = "scamplers-backend_unit_test";
+        let name = "scamplers-api_unit_test";
         let container = DevContainer::new(name, false).await.unwrap();
 
         let db_pool = create_db_pool(&container.db_url().await.unwrap()).unwrap();

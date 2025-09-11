@@ -6350,19 +6350,19 @@
     },
     {
       "tag_id": "OB1",
-      "type_": "ocm"
+      "type_": "on_chip_multiplexing"
     },
     {
       "tag_id": "OB2",
-      "type_": "ocm"
+      "type_": "on_chip_multiplexing"
     },
     {
       "tag_id": "OB3",
-      "type_": "ocm"
+      "type_": "on_chip_multiplexing"
     },
     {
       "tag_id": "OB4",
-      "type_": "ocm"
+      "type_": "on_chip_multiplexing"
     }
   ]
 }

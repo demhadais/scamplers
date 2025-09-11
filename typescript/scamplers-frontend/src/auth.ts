@@ -6,7 +6,7 @@ import {
 	MICROSOFT_ENTRA_ID_SECRET,
 	MICROSOFT_ENTRA_ID_ISSUER
 } from '$lib/server/secrets';
-import { scamplersClient } from '$lib/server/backend';
+import { serverApiClient } from '$lib/server/client';
 import { type JWT } from '@auth/core/jwt';
 import MicrosoftEntraID from '@auth/sveltekit/providers/microsoft-entra-id';
 
@@ -65,7 +65,7 @@ export const { handle, signIn, signOut } = SvelteKitAuth({
 			newPerson.email = email;
 			newPerson.institution_id = tid;
 
-			const createdUser = await scamplersClient.ms_login(newPerson);
+			const createdUser = await serverApiClient.ms_login(newPerson);
 
 			token.userId = createdUser.person.info.id_;
 			token.userApiKey = createdUser.api_key;

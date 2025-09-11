@@ -54,7 +54,7 @@ use crate::{
 #[cfg_attr(feature = "python", pyclass)]
 #[derive(Clone)]
 pub struct ScamplersClient {
-    backend_base_url: String,
+    api_base_url: String,
     client: reqwest::Client,
     api_key: Option<String>,
     #[cfg(feature = "python")]
@@ -93,14 +93,14 @@ impl ScamplersClient {
 
         #[cfg(not(feature = "python"))]
         return Self {
-            backend_base_url: api_base_url,
+            api_base_url,
             client,
             api_key,
         };
 
         #[cfg(feature = "python")]
         return Self {
-            backend_base_url: api_base_url,
+            api_base_url,
             client,
             api_key,
             runtime: Arc::new(Runtime::new().unwrap()),
@@ -144,13 +144,13 @@ impl ScamplersClient {
         Resp: DeserializeOwned,
     {
         let Self {
-            backend_base_url,
+            api_base_url,
             client,
             api_key,
             ..
         } = self;
 
-        let mut request = Api::request(client, backend_base_url, data);
+        let mut request = Api::request(client, api_base_url, data);
 
         if let Some(api_key) = api_key {
             request = request.header("X-API-Key", api_key);

@@ -21,17 +21,18 @@ services:
       interval: 5s
       timeout: 5s
       retries: 10
-  scamplers-backend:
+  scamplers-api:
     build:
       context: .
       dockerfile: rust/Dockerfile
       target: final
     environment:
-      PORT: &backend_port 8000
+      PORT: &api_port 8000
+      API_PATH: &api_path /api
       DB_HOST: postgres
       DB_PORT: *db_port
     expose:
-      - *backend_port
+      - *api_port
     secrets:
       - source: db_root_user
         uid: "10001"
@@ -51,7 +52,7 @@ services:
       postgres:
         condition: service_healthy
     healthcheck:
-      # TODO: interpolate backend_port
+      # TODO: interpolate api_port
       test: curl http://localhost:8000/health || exit 1
       interval: 5s
       start_period: 10s
@@ -62,15 +63,16 @@ services:
     build:
       context: typescript
       args:
+        API_ADDRESS_SERVER: ${SCAMPLERS_FRONTEND_API_ADDRESS_SERVER}
+        API_ADDRESS_CLIENT: ${SCAMPLERS_FRONTEND_API_ADDRESS_CLIENT}
+        API_PATH: *api_path
         NODE_ENV: production
       target: final
     environment:
       IN_DOCKER: "true"
       PORT: &frontend_port 8000
-      BACKEND_HOST: &backend_host scamplers-backend
-      BACKEND_PORT: *backend_port
     depends_on:
-      scamplers-backend:
+      scamplers-api:
         condition: service_healthy
     healthcheck:
       # TODO: interpolate frontend_port
@@ -94,11 +96,13 @@ services:
   caddy:
     image: caddy:2-alpine
     environment:
+      PUBLIC_ADDRESS: ${SCAMPLERS_PUBLIC_ADDRESS}
+      TLS: ${SCAMPLERS_TLS_SETTINGS-""}
       FRONTEND_HOST: scamplers-frontend
       FRONTEND_PORT: *frontend_port
-      BACKEND_HOST: *backend_host
-      BACKEND_PORT: *backend_port
-      PUBLIC_URL: ${SCAMPLERS_PUBLIC_URL}
+      API_HOST: scamplers-api
+      API_PORT: *api_port
+      API_PATH: *api_path
     restart: always
     cap_add:
       - NET_ADMIN

@@ -57,8 +57,8 @@ impl VecExt for Vec<&NewCdna> {
 impl NewCdnaGroup {
     fn as_groups(&self) -> Vec<Vec<&NewCdna>> {
         let cdnas = match self {
-            Self::Multiple(c) | Self::Ocm(c) => c.iter().collect(),
-            Self::Single(c) => vec![c],
+            Self::Multiple { cdna } | Self::OnChipMultiplexing { cdna } => cdna.iter().collect(),
+            Self::Single { cdna } => vec![cdna],
         };
 
         let mut grouped_cdnas = Vec::with_capacity(cdnas.len());
@@ -83,8 +83,8 @@ impl NewCdnaGroup {
 
     fn assay_id(&self, db_conn: &mut PgConnection) -> ScamplersResult<Option<Uuid>> {
         let cdna = match self {
-            Self::Single(cdna) => Some(cdna),
-            Self::Multiple(cdnas) | Self::Ocm(cdnas) => cdnas.first(),
+            Self::Single { cdna } => Some(cdna),
+            Self::Multiple { cdna } | Self::OnChipMultiplexing { cdna } => cdna.first(),
         };
 
         let Some(gems_id) = cdna.map(|c| c.gems_id) else {
@@ -128,8 +128,8 @@ impl NewCdnaGroup {
 
     fn into_vec(self) -> Vec<NewCdna> {
         match self {
-            Self::Multiple(c) | Self::Ocm(c) => c,
-            Self::Single(c) => vec![c],
+            Self::Multiple { cdna } | Self::OnChipMultiplexing { cdna } => cdna,
+            Self::Single { cdna } => vec![cdna],
         }
     }
 }

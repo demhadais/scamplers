@@ -74,14 +74,13 @@ fn initialize_logging(log_dir: Option<Utf8PathBuf>) {
 }
 
 fn app(app_state: AppState) -> Router {
+    let path = app_state.api_path().to_string();
     let api_router = api::router()
         .layer(TraceLayer::new_for_http())
         .route("/health", get(async || ()))
         .with_state(app_state);
 
-    Router::new()
-        .merge(api_router.clone())
-        .nest("/api", api_router)
+    Router::new().nest(&path, api_router)
 }
 
 async fn shutdown_signal(app_state: AppState) {

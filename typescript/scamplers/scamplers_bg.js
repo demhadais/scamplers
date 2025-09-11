@@ -281,14 +281,14 @@ function getArrayU16FromWasm0(ptr, len) {
     return getUint16ArrayMemory0().subarray(ptr / 2, ptr / 2 + len);
 }
 function __wbg_adapter_36(arg0, arg1) {
-    wasm.wasm_bindgen__convert__closures_____invoke__h6023645176357004(arg0, arg1);
+    wasm.wasm_bindgen__convert__closures_____invoke__h4925a75f0f082581(arg0, arg1);
 }
 
 function __wbg_adapter_39(arg0, arg1, arg2) {
     wasm.closure410_externref_shim(arg0, arg1, arg2);
 }
 
-function __wbg_adapter_1122(arg0, arg1, arg2, arg3) {
+function __wbg_adapter_1124(arg0, arg1, arg2, arg3) {
     wasm.closure443_externref_shim(arg0, arg1, arg2, arg3);
 }
 
@@ -348,6 +348,8 @@ export const UserRole = Object.freeze({
     BiologyStaff: 1, "1": "BiologyStaff",
     ComputationalStaff: 2, "2": "ComputationalStaff",
 });
+
+const __wbindgen_enum_RequestCache = ["default", "no-store", "reload", "no-cache", "force-cache", "only-if-cached"];
 
 const __wbindgen_enum_RequestCredentials = ["omit", "same-origin", "include"];
 
@@ -10597,7 +10599,7 @@ export function __wbg_chromiumrun_new(arg0) {
     return ret;
 };
 
-export function __wbg_clearTimeout_b1115618e821c3b2(arg0) {
+export function __wbg_clearTimeout_6222fede17abcb1a(arg0) {
     const ret = clearTimeout(arg0);
     return ret;
 };
@@ -10612,13 +10614,13 @@ export function __wbg_done_4d01f352bade43b7(arg0) {
     return ret;
 };
 
-export function __wbg_fetch_3afbdcc7ddbf16fe(arg0) {
-    const ret = fetch(arg0);
+export function __wbg_fetch_a8e43a4e138dfc93(arg0, arg1) {
+    const ret = arg0.fetch(arg1);
     return ret;
 };
 
-export function __wbg_fetch_a8e43a4e138dfc93(arg0, arg1) {
-    const ret = arg0.fetch(arg1);
+export function __wbg_fetch_f156d10be9a5c88a(arg0) {
+    const ret = fetch(arg0);
     return ret;
 };
 
@@ -10740,7 +10742,7 @@ export function __wbg_new_e30c39c06edaabf2(arg0, arg1) {
             const a = state0.a;
             state0.a = 0;
             try {
-                return __wbg_adapter_1122(a, state0.b, arg0, arg1);
+                return __wbg_adapter_1124(a, state0.b, arg0, arg1);
             } finally {
                 state0.a = a;
             }
@@ -10833,7 +10835,7 @@ export function __wbg_sequencingrun_new(arg0) {
     return ret;
 };
 
-export function __wbg_setTimeout_ca12ead8b48245e2(arg0, arg1) {
+export function __wbg_setTimeout_2b339866a2aa3789(arg0, arg1) {
     const ret = setTimeout(arg0, arg1);
     return ret;
 };
@@ -10849,6 +10851,10 @@ export function __wbg_set_fe4e79d1ed3b0e9b(arg0, arg1, arg2) {
 
 export function __wbg_setbody_971ec015fc13d6b4(arg0, arg1) {
     arg0.body = arg1;
+};
+
+export function __wbg_setcache_a94cd14dc0cc72a2(arg0, arg1) {
+    arg0.cache = __wbindgen_enum_RequestCache[arg1];
 };
 
 export function __wbg_setcredentials_920d91fb5984c94a(arg0, arg1) {

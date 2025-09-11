@@ -13,7 +13,7 @@ mod read;
 #[cfg_attr(feature = "python", pyo3(module = "scamplepy.create"))]
 pub enum MultiplexingTagType {
     FlexBarcode,
-    Ocm,
+    OnChipMultiplexing,
     #[serde(rename = "TotalSeq-A")]
     #[strum(serialize = "TotalSeq-A")]
     TotalSeqA,

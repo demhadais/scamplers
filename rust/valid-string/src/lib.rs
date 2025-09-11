@@ -215,7 +215,7 @@ mod python {
 }
 
 #[cfg(feature = "app")]
-mod backend {
+mod app {
     use diesel::{
         backend::Backend,
         deserialize::FromSql,

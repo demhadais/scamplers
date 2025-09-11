@@ -28,10 +28,12 @@ pub struct Config {
     db_name: String,
     #[arg(long, env = "SCAMPLERS_FRONTEND_TOKEN", default_value_t)]
     frontend_token: String,
-    #[arg(long, env = "SCAMPLERS_BACKEND_HOST", default_value_t = String::from("localhost"))]
+    #[arg(long, env = "SCAMPLERS_API_HOST", default_value_t = String::from("localhost"))]
     host: String,
-    #[arg(long, env = "SCAMPLERS_BACKEND_PORT", default_value_t = 8000)]
+    #[arg(long, env = "SCAMPLERS_API_PORT", default_value_t = 8000)]
     port: u16,
+    #[arg(long, env = "SCAMPLERS_API_PATH", default_value_t = String::from("/api"))]
+    api_path: String,
     #[arg(skip)]
     seed_data: Option<SeedData>,
     #[arg(long, env = "SCAMPLERS_SEED_DATA_PATH")]
@@ -87,6 +89,11 @@ impl Config {
         } = self;
 
         format!("{app_host}:{app_port}")
+    }
+
+    #[must_use]
+    pub fn api_path(&self) -> &str {
+        &self.api_path
     }
 
     #[must_use]

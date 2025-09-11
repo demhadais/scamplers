@@ -71,12 +71,7 @@ tracing-subscriber = { version = "0.3.19", features = ["json"] }
 argon2 = "0.5.3"
 tower-http = { version = "0.6.6", features = ["trace", "fs"] }
 rand = "0.9.1"
-reqwest = { version = "0.12.20", default-features = false, features = [
-    "rustls-tls",
-    "http2",
-    "charset",
-    "json",
-] }
+reqwest = { version = "0.12.23", features = [ "json" ] }
 url = { version = "2.5.4", features = ["serde"] }
 syn = { version = "2.0.102", features = ["full"] }
 quote = { version = "1.0.40" }

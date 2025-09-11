@@ -117,7 +117,7 @@ impl NewCdna {
 // - V(D)J
 
 #[base_model]
-#[serde(tag = "group_type")]
+#[serde(tag = "group_type", rename_all = "snake_case")]
 #[cfg_attr(feature = "python", gen_stub_pyclass_complex_enum)]
 #[cfg_attr(
     feature = "python",
@@ -125,9 +125,18 @@ impl NewCdna {
 )]
 #[derive(Jsonify, PyJsonify)]
 pub enum NewCdnaGroup {
-    Single(#[garde(dive)] NewCdna),
-    Multiple(#[garde(custom(validate_same_gems_ids), dive, length(max = 4))] Vec<NewCdna>),
-    Ocm(#[garde(custom(validate_same_gems_ids), dive, length(max = 16))] Vec<NewCdna>),
+    Single {
+        #[garde(dive)]
+        cdna: NewCdna,
+    },
+    Multiple {
+        #[garde(custom(validate_same_gems_ids), dive, length(max = 4))]
+        cdna: Vec<NewCdna>,
+    },
+    OnChipMultiplexing {
+        #[garde(custom(validate_same_gems_ids), dive, length(max = 16))]
+        cdna: Vec<NewCdna>,
+    },
 }
 
 #[allow(clippy::trivially_copy_pass_by_ref)]

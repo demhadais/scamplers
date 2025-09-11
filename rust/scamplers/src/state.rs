@@ -230,4 +230,11 @@ impl AppState {
             Self::Prod(s) => s.db_conn().await,
         }
     }
+
+    pub fn api_path(&self) -> &str {
+        match self {
+            Self::Dev(s) => s.core.core.config.api_path(),
+            Self::Prod(s) => s.config.api_path(),
+        }
+    }
 }
