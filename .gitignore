@@ -11,3 +11,12 @@ pkg
 
 # Python virtual environment (used for pre-commit during development)
 venv
+
+# Ruff formatter
+.ruff_cache
+
+# VSCode
+.vscode
+
+# Zed
+.zed

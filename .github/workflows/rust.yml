@@ -16,6 +16,8 @@ jobs:
 
       - name: Cache cargo files
         uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: "rust -> target"
 
       - name: Install diesel
         run: cargo install diesel_cli --no-default-features --features postgres
@@ -29,15 +31,30 @@ jobs:
 
       - name: Build
         working-directory: rust
-        run: cargo build --package scamplers-backend
+        run: |
+          cargo build --workspace --features app
+          cargo build --workspace --features python
+          rustup target add wasm32-unknown-unknown
+          cargo build --workspace --exclude scamplepy --exclude scamplers-schema --target wasm32-unknown-unknown
 
       - name: Lint
         working-directory: rust
-        run: cargo clippy --workspace --exclude scamplers-schema
+        run: |
+          cargo clippy --workspace --exclude scamplers-schema --features app
+          cargo clippy --workspace --exclude scamplers-schema --features python
+          rustup target add wasm32-unknown-unknown
+          cargo clippy --workspace --exclude scamplepy --exclude scamplers-schema --target wasm32-unknown-unknown
 
       - name: Test
         working-directory: rust
         run: ./test.sh
 
-      - name: Compare typescript/scamplers-core/rust-src to rust/scamplers-core/src
-        run: diff --recursive typescript/scamplers-core/rust-src rust/scamplers-core/src
+      - name: Compare typescript/scamplers/rust-src to rust/scamplers/src
+        run: diff --recursive typescript/scamplers/rust-src rust/scamplers/src
+
+      - name: Regenerate Python typestubs and compare to committed typestubs
+        working-directory: rust/scamplepy
+        run: |
+          mkdir committed-typestubs && cp -r scamplepy/* committed-typestubs
+          cargo run
+          diff --recursive committed-typestubs scamplepy

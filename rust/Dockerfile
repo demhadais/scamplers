@@ -12,26 +12,29 @@ RUN apt update && \
 RUN --mount=type=bind,source=rust/Cargo.toml,target=rust/Cargo.toml \
     --mount=type=bind,source=rust/Cargo.lock,target=rust/Cargo.lock \
     --mount=type=bind,source=rust/.cargo,target=rust/.cargo \
-    --mount=type=bind,source=rust/scamplers-schema,target=rust/scamplers-schema \
+    --mount=type=bind,source=rust/any-value,target=rust/any-value \
+    --mount=type=bind,source=rust/scamplepy,target=rust/scamplepy \
+    --mount=type=bind,source=rust/scamplers,target=rust/scamplers \
     --mount=type=bind,source=rust/scamplers-macros,target=rust/scamplers-macros \
+    --mount=type=bind,source=rust/scamplers-schema,target=rust/scamplers-schema \
+    --mount=type=bind,source=rust/time,target=rust/time \
     --mount=type=bind,source=rust/uuid,target=rust/uuid \
-    --mount=type=bind,source=rust/scamplers-core,target=rust/scamplers-core \
-    --mount=type=bind,source=rust/scamplers-backend,target=rust/scamplers-backend \
+    --mount=type=bind,source=rust/valid-string,target=rust/valid-string \
     --mount=type=bind,source=db,target=db \
     --mount=type=cache,target=/app/target/ \
     --mount=type=cache,target=/usr/local/cargo/git/db \
     --mount=type=cache,target=/usr/local/cargo/registry/ \
     cd rust && \
-    IN_DOCKER=true cargo build --locked --release && \
-    cp ./target/release/scamplers-backend /bin/scamplers-backend
+    IN_DOCKER=true cargo build --locked --release --features app && \
+    cp ./target/release/scamplers /bin/scamplers
 
 FROM debian:bookworm AS final
 
-RUN apt update && apt install curl --yes
+RUN apt update && apt install curl libpq-dev --yes
 
 RUN mkdir app
 
-COPY --from=build /bin/scamplers-backend /bin/
+COPY --from=build /bin/scamplers /bin/
 COPY --from=build /usr/local/cargo/bin/diesel /bin/
 COPY rust/scamplers-schema /app/scamplers-schema
 COPY db /app/db
@@ -51,4 +54,4 @@ USER appuser
 
 EXPOSE ${PORT}
 
-CMD /bin/check-schema.sh && /bin/scamplers-backend --log-dir logs --host 0.0.0.0 --port $PORT --secrets-dir /run/secrets --db-host $DB_HOST --db-port $DB_PORT
+CMD /bin/check-schema.sh && /bin/scamplers --log-dir logs --host 0.0.0.0 --port $PORT --secrets-dir /run/secrets --db-host $DB_HOST --db-port $DB_PORT

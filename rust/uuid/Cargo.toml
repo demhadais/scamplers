@@ -10,13 +10,17 @@ crate-type = ["cdylib", "lib"]
 _uuid = { workspace = true }
 serde = { workspace = true }
 diesel = { workspace = true, optional = true }
-diesel-async = { workspace = true, optional = true }
-valuable = { workspace = true, optional = true }
-wasm-bindgen = { workspace = true, optional = true }
+valuable = { workspace = true }
+pyo3 = { workspace = true, optional = true }
+pyo3-stub-gen = { workspace = true, optional = true }
 
 [lints]
 workspace = true
 
+[target.'cfg(target_arch = "wasm32")'.dependencies]
+_uuid = { workspace = true, features = ["js"] }
+wasm-bindgen = { workspace = true }
+
 [features]
-backend = ["diesel", "valuable", "_uuid/v7", "diesel-async"]
-typescript = ["wasm-bindgen", "_uuid/js"]
+app = ["diesel"]
+python = ["pyo3", "pyo3-stub-gen"]

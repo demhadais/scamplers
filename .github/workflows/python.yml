@@ -1,0 +1,30 @@
+name: Check scamplepy
+on:
+  push:
+    paths:
+      - rust/**
+      - python/**
+
+jobs:
+  check-python:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v4
+
+      - name: Install the latest version of uv
+        uses: astral-sh/setup-uv@v6
+
+      - name: Run tests
+        working-directory: python/test-scamplepy
+        run: uv run --module pytest
+
+      - name: Analyze types
+        working-directory: python/test-scamplepy
+        run: uv run --module pyright
+
+      - name: Lint and format
+        uses: astral-sh/ruff-action@v3
+        with:
+          src: python/test-scamplepy

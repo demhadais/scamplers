@@ -1,14 +1,14 @@
 import { SvelteKitAuth, type DefaultSession } from '@auth/sveltekit';
-import Entra from '@auth/sveltekit/providers/microsoft-entra-id';
-import { Institution, NewPerson } from 'scamplers-core';
+import { Institution, NewPerson } from 'scamplers';
 import {
 	AUTH_SECRET,
 	MICROSOFT_ENTRA_ID_ID,
 	MICROSOFT_ENTRA_ID_SECRET,
 	MICROSOFT_ENTRA_ID_ISSUER
 } from '$lib/server/secrets';
-import { scamplersClient } from '$lib/server/backend';
+import { serverApiClient } from '$lib/server/client';
 import { type JWT } from '@auth/core/jwt';
+import MicrosoftEntraID from '@auth/sveltekit/providers/microsoft-entra-id';
 
 declare module '@auth/sveltekit' {
 	interface Session {
@@ -29,7 +29,7 @@ declare module '@auth/core/jwt' {
 export const { handle, signIn, signOut } = SvelteKitAuth({
 	secret: AUTH_SECRET,
 	providers: [
-		Entra({
+		MicrosoftEntraID({
 			clientId: MICROSOFT_ENTRA_ID_ID,
 			clientSecret: MICROSOFT_ENTRA_ID_SECRET,
 			issuer: MICROSOFT_ENTRA_ID_ISSUER
@@ -60,16 +60,14 @@ export const { handle, signIn, signOut } = SvelteKitAuth({
 
 			const { name, email, oid, tid } = profile;
 
-			const newPerson = NewPerson.new()
-				.name(name)
-				.email(email)
-				.ms_user_id(oid)
-				.institution_id(tid)
-				.build();
+			const newPerson = new NewPerson(oid);
+			newPerson.name = name;
+			newPerson.email = email;
+			newPerson.institution_id = tid;
 
-			const createdUser = await scamplersClient.send_new_ms_login(newPerson);
+			const createdUser = await serverApiClient.ms_login(newPerson);
 
-			token.userId = createdUser.id;
+			token.userId = createdUser.person.info.id_;
 			token.userApiKey = createdUser.api_key;
 
 			return token;

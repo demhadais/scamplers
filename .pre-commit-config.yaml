@@ -7,9 +7,9 @@ repos:
         language: script
         pass_filenames: false
 
-      - id: build-scamplers-core
-        name: Build scamplers-core
-        entry: ./pre-commit_scripts/build-scamplers-core.sh
+      - id: build-scamplers-js
+        name: Build scamplers-js
+        entry: ./pre-commit_scripts/build-scamplers-js.sh
         language: script
         pass_filenames: false
 
@@ -19,10 +19,23 @@ repos:
         language: script
         pass_filenames: false
 
+      - id: generate-scamplepy-typestubs
+        name: Generate scamplepy typestubs
+        entry: ./pre-commit_scripts/generate-scamplepy-typestubs.sh
+        language: script
+        pass_filenames: false
+
   - repo: https://github.com/sqlfluff/sqlfluff
-    rev: 3.4.0
+    rev: 3.4.2
     hooks:
       - id: sqlfluff-lint
         exclude: ^db/migrations/00000000000000_diesel_initial_setup/down\.sql|migrations/0009_library-type-specification/up\.sql$
       - id: sqlfluff-fix
         exclude: ^db/migrations/00000000000000_diesel_initial_setup/down\.sql|migrations/0009_library-type-specification/up\.sql$
+
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.12.11
+    hooks:
+      - id: ruff-check
+        args: [--fix]
+      - id: ruff-format

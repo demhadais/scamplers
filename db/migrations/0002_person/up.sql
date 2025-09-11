@@ -1,6 +1,6 @@
 create table person (
     id uuid primary key default uuidv7(),
-    link text generated always as ('/people/' || id) stored not null,
+    links jsonb generated always as (construct_links('people', id, '{"specimens", "datasets"}')) stored not null,
     name text not null,
     email text unique,
     institution_id uuid references institution on delete restrict on update restrict not null,

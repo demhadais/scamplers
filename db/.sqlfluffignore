@@ -2,4 +2,4 @@
 migrations/00000000000000_diesel_initial_setup/down.sql
 
 # sqlfluff also doesn't like 'µ' :/
-migrations/0009_library-type-specification/up.sql
+migrations/0008_library-type-specification/up.sql

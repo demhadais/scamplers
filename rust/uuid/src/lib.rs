@@ -1,17 +1,20 @@
-use {
-    _uuid::Bytes,
-    serde::{Deserialize, Serialize},
-    std::{fmt::Display, str::FromStr},
-};
+use std::{fmt::Display, str::FromStr};
 
-#[cfg(feature = "backend")]
+use _uuid::Bytes;
+#[cfg(feature = "app")]
 use diesel::{deserialize::FromSqlRow, expression::AsExpression, sql_types};
+#[cfg(feature = "python")]
+use pyo3::prelude::*;
+use serde::{Deserialize, Serialize};
 
-#[cfg_attr(feature = "backend", derive(FromSqlRow, AsExpression))]
-#[cfg_attr(feature = "backend", diesel(sql_type = sql_types::Uuid))]
 #[derive(
     Clone, Copy, Eq, Ord, PartialEq, PartialOrd, Debug, Hash, Default, Deserialize, Serialize,
 )]
+#[cfg_attr(feature = "python", derive(IntoPyObject, FromPyObject))]
+#[cfg_attr(feature = "app", derive(FromSqlRow, AsExpression))]
+#[cfg_attr(feature = "python", pyo3(transparent))]
+#[cfg_attr(feature = "app", diesel(sql_type = sql_types::Uuid))]
+#[serde(transparent)]
 pub struct Uuid(_uuid::Uuid);
 
 impl Display for Uuid {
@@ -29,6 +32,12 @@ impl FromStr for Uuid {
     }
 }
 
+impl From<Uuid> for Vec<Uuid> {
+    fn from(value: Uuid) -> Self {
+        vec![value]
+    }
+}
+
 impl Uuid {
     #[must_use]
     pub fn as_bytes(&self) -> &Bytes {
@@ -36,16 +45,31 @@ impl Uuid {
         inner.as_bytes()
     }
 
-    #[cfg(feature = "backend")]
+    #[must_use]
+    pub fn nil() -> Self {
+        Self(_uuid::Uuid::nil())
+    }
+
     #[must_use]
     pub fn now_v7() -> Self {
         Self(_uuid::Uuid::now_v7())
     }
 }
 
-#[cfg(feature = "typescript")]
-mod typescript {
+impl valuable::Valuable for Uuid {
+    fn as_value(&self) -> valuable::Value<'_> {
+        self.as_bytes().as_value()
+    }
+
+    fn visit(&self, visit: &mut dyn valuable::Visit) {
+        self.as_bytes().visit(visit);
+    }
+}
+
+#[cfg(target_arch = "wasm32")]
+mod wasm32 {
     use std::str::FromStr;
+
     use wasm_bindgen::{
         JsValue,
         convert::{
@@ -56,19 +80,21 @@ mod typescript {
         describe::{WasmDescribe, WasmDescribeVector},
     };
 
-    impl WasmDescribe for super::Uuid {
+    use super::Uuid;
+
+    impl WasmDescribe for Uuid {
         fn describe() {
             String::describe();
         }
     }
 
-    impl From<super::Uuid> for JsValue {
-        fn from(val: super::Uuid) -> Self {
+    impl From<Uuid> for JsValue {
+        fn from(val: Uuid) -> Self {
             val.to_string().into()
         }
     }
 
-    impl TryFromJsValue for super::Uuid {
+    impl TryFromJsValue for Uuid {
         type Error = _uuid::Error;
 
         fn try_from_js_value(value: JsValue) -> Result<Self, Self::Error> {
@@ -76,7 +102,7 @@ mod typescript {
         }
     }
 
-    impl IntoWasmAbi for super::Uuid {
+    impl IntoWasmAbi for Uuid {
         type Abi = <String as IntoWasmAbi>::Abi;
 
         fn into_abi(self) -> Self::Abi {
@@ -84,7 +110,7 @@ mod typescript {
         }
     }
 
-    impl FromWasmAbi for super::Uuid {
+    impl FromWasmAbi for Uuid {
         type Abi = <Self as IntoWasmAbi>::Abi;
 
         unsafe fn from_abi(js: Self::Abi) -> Self {
@@ -92,25 +118,25 @@ mod typescript {
         }
     }
 
-    impl OptionIntoWasmAbi for super::Uuid {
+    impl OptionIntoWasmAbi for Uuid {
         fn none() -> Self::Abi {
             <String as OptionIntoWasmAbi>::none()
         }
     }
 
-    impl OptionFromWasmAbi for super::Uuid {
+    impl OptionFromWasmAbi for Uuid {
         fn is_none(abi: &Self::Abi) -> bool {
             <String as OptionFromWasmAbi>::is_none(abi)
         }
     }
 
-    impl WasmDescribeVector for super::Uuid {
+    impl WasmDescribeVector for Uuid {
         fn describe_vector() {
             Vec::<String>::describe();
         }
     }
 
-    impl VectorIntoWasmAbi for super::Uuid {
+    impl VectorIntoWasmAbi for Uuid {
         type Abi = <String as VectorIntoWasmAbi>::Abi;
 
         fn vector_into_abi(vector: Box<[Self]>) -> Self::Abi {
@@ -118,7 +144,7 @@ mod typescript {
         }
     }
 
-    impl VectorFromWasmAbi for super::Uuid {
+    impl VectorFromWasmAbi for Uuid {
         type Abi = <String as VectorFromWasmAbi>::Abi;
 
         unsafe fn vector_from_abi(js: Self::Abi) -> Box<[Self]> {
@@ -127,29 +153,30 @@ mod typescript {
     }
 }
 
-#[cfg(feature = "backend")]
-mod backend {
-    use {
-        super::Uuid,
-        diesel::{
-            backend::Backend,
-            deserialize::FromSql,
-            pg::Pg,
-            serialize::{Output, ToSql},
-            sql_types,
-        },
-        valuable::{Valuable, Value},
-    };
+#[cfg(feature = "python")]
+mod python {
+    use pyo3_stub_gen::{PyStubType, TypeInfo};
 
-    impl Valuable for Uuid {
-        fn as_value(&self) -> Value<'_> {
-            self.as_bytes().as_value()
-        }
+    use super::Uuid;
 
-        fn visit(&self, visit: &mut dyn valuable::Visit) {
-            self.as_bytes().visit(visit);
+    impl PyStubType for Uuid {
+        fn type_output() -> TypeInfo {
+            TypeInfo::with_module("uuid.UUID", "uuid".into())
         }
     }
+}
+
+#[cfg(feature = "app")]
+mod app {
+    use diesel::{
+        backend::Backend,
+        deserialize::FromSql,
+        pg::Pg,
+        serialize::{Output, ToSql},
+        sql_types,
+    };
+
+    use super::Uuid;
 
     impl FromSql<sql_types::Uuid, Pg> for Uuid {
         fn from_sql(bytes: <Pg as Backend>::RawValue<'_>) -> diesel::deserialize::Result<Self> {
