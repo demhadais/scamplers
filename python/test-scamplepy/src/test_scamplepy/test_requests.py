@@ -1,4 +1,5 @@
 from datetime import UTC, datetime
+from pathlib import Path
 from typing import Any
 import pytest
 import maturin_import_hook
@@ -10,15 +11,20 @@ from scamplepy.common import (
     BiologicalMaterial,
     CellCountingMethod,
     LengthUnit,
+    LibraryMeasurementData,
     LibraryType,
     MassUnit,
     SuspensionMeasurementFields,
     VolumeUnit,
     ElectrophoreticMeasurementData,
+    NucleicAcidConcentration,
 )
 from scamplepy.create import (
     ComplianceCommitteeType,
     NewCdnaGroup,
+    NewCellrangerCountDataset,
+    NewLibrary,
+    NewLibraryMeasurement,
     NewSingleplexChipLoading,
     NewSuspensionMeasurement,
     FrozenBlockEmbeddingMatrix,
@@ -44,12 +50,7 @@ from scamplepy.create import (
     NewCdnaMeasurement,
     FixedBlockEmbeddingMatrix,
     BlockFixative,
-    # NucleicAcidConcentration,
-    OcmChromiumChip,
-    PoolMultiplexChromiumChip,
-    # PoolMultiplexChromiumChip,
-    # SingleRowCsvMetricsFile,
-    SingleplexChromiumChip,
+    SingleRowCsvMetricsFile,
     SpecimenMeasurementData,
     TissueFixative,
     SuspensionFixative,
@@ -57,25 +58,27 @@ from scamplepy.create import (
     UserRole,
     NewSuspensionPool,
     NewSuspensionPoolMeasurement,
-    # CellrangerCountDataset,
 )
 from uuid import UUID
 
 ID = UUID(int=0)
 TIME = datetime(year=1999, month=1, day=1, tzinfo=UTC)
 
-# SINGLE_ROW_CSV = SingleRowCsvMetricsFile(
-#     filename="summary.csv",
-#     raw_contents="",
-# )
-# CELLRANGERATAC_COUNT_JSON = JsonMetricsFile(
-#     filename="summary.json",
-#     raw_contents="",
-# )
-# CELLRANGER_MULTI_CSV = MultiRowCsvMetricsFile(
-#     filename="sample/summary.csv",
-#     raw_contents="",
-# )
+SINGLE_ROW_CSV = SingleRowCsvMetricsFile(
+    filename="summary.csv",
+    raw_contents=(
+        Path(__file__).parent.parent.parent.parent.parent
+        / "rust"
+        / "scamplers"
+        / "src"
+        / "db"
+        / "models"
+        / "dataset"
+        / "chromium"
+        / "test-data"
+        / "single-row.csv"
+    ).read_text(),
+)
 
 
 @pytest.fixture
@@ -320,14 +323,13 @@ def new_singleplex_chromium_run(
 ) -> NewSingleplexChromiumRun:
     return NewSingleplexChromiumRun(
         readable_id="singleplexchromiumrun",
+        assay_id=ID,
         run_at=TIME,
         succeeded=True,
         run_by=run_by,
-        chip=SingleplexChromiumChip.Gemx3p,
         gems=[
             NewSingleplexGems(
                 readable_id=gems_readable_id,
-                chemistry=chemistry,
                 suspension_id=suspension_id,
                 suspension_volume_loaded=_suspension_volume(),
                 buffer_volume_loaded=_suspension_volume(),
@@ -342,14 +344,13 @@ def new_pool_multiplex_chromium_run(
 ) -> NewPoolMultiplexChromiumRun:
     return NewPoolMultiplexChromiumRun(
         readable_id="poolmultiplexchromiumrun",
+        assay_id=ID,
         run_at=TIME,
         succeeded=True,
         run_by=run_by,
-        chip=PoolMultiplexChromiumChip.GemxFx,
         gems=[
             NewPoolMultiplexGems(
                 readable_id="",
-                chemistry="",
                 suspension_pool_id=suspension_pool_id,
                 suspension_volume_loaded=_suspension_volume(),
                 buffer_volume_loaded=_suspension_volume(),
@@ -364,14 +365,13 @@ def new_ocm_chromium_run(
 ) -> NewOcmChromiumRun:
     return NewOcmChromiumRun(
         readable_id="ocmchromiumrun",
+        assay_id=ID,
         run_at=TIME,
         succeeded=True,
         run_by=run_by,
-        chip=OcmChromiumChip.GemxOcm3p,
         gems=[
             NewOcmGems(
                 readable_id="",
-                chemistry="",
                 loading=[
                     NewSingleplexChipLoading(
                         suspension_id=suspension_id,
@@ -418,36 +418,39 @@ def new_cdna_group() -> NewCdnaGroup:
     return NewCdnaGroup.Single(_new_cdna())
 
 
-# def _library_electrophoretic_measurement() -> LibraryMeasurementData:
-#     return LibraryMeasurementData.Electrophoretic(_electrophoretic_measurement_data())
+def _library_electrophoretic_measurement() -> LibraryMeasurementData:
+    return LibraryMeasurementData.Electrophoretic(_electrophoretic_measurement_data())
 
 
-# def _library_fluormetric_measurement() -> LibraryMeasurementData:
-#     return LibraryMeasurementData.Fluorometric(
-#         measured_at=TIME,
-#         instrument_name="mayonnaise",
-#         concentration=NucleicAcidConcentration(
-#             value=0, unit=(MassUnit.Picogram, VolumeUnit.Microliter)
-#         ),
-#     )
+def _library_fluormetric_measurement() -> LibraryMeasurementData:
+    return LibraryMeasurementData.Fluorometric(
+        measured_at=TIME,
+        instrument_name="mayonnaise",
+        concentration=NucleicAcidConcentration(
+            value=0, unit=(MassUnit.Picogram, VolumeUnit.Microliter)
+        ),
+    )
 
-# @pytest.fixture
-# def new_library(cdna_id: UUID = ID, person_id: UUID = ID) -> NewLibrary:
-#     return NewLibrary(
-#         readable_id="library",
-#         cdna_id=cdna_id,
-#         number_of_sample_index_pcr_cycles=0,
-#         target_reads_per_cell=0,
-#         prepared_at=TIME,
-#         preparer_ids=[person_id],
-#         measurements=[
-#             NewLibraryMeasurement(measured_by=person_id, data=m)
-#             for m in [
-#                 _library_electrophoretic_measurement(),
-#                 _library_fluormetric_measurement(),
-#             ]
-#         ],
-#     )
+
+@pytest.fixture
+def new_library(cdna_id: UUID = ID, person_id: UUID = ID) -> NewLibrary:
+    return NewLibrary(
+        readable_id="library",
+        cdna_id=cdna_id,
+        number_of_sample_index_pcr_cycles=0,
+        target_reads_per_cell=0,
+        prepared_at=TIME,
+        preparer_ids=[person_id],
+        volume_mcl=40.0,
+        measurements=[
+            NewLibraryMeasurement(measured_by=person_id, data=m)
+            for m in [
+                _library_electrophoretic_measurement(),
+                _library_fluormetric_measurement(),
+            ]
+        ],
+    )
+
 
 # @pytest.fixture
 # def new_cellrangerarc_count_dataset(
@@ -479,19 +482,22 @@ def new_cdna_group() -> NewCdnaGroup:
 #     )
 
 
-# @pytest.fixture
-# def new_cellranger_count_dataset(
-#     lab_id: UUID = ID, gems_id: UUID = ID
-# ) -> CellrangerCountDataset:
-#     return CellrangerCountDataset(
-#         name="",
-#         lab_id=lab_id,
-#         data_path="data",
-#         delivered_at=TIME,
-#         gems_id=gems_id,
-#         web_summary=WEB_SUMMARY,
-#         metrics=SINGLE_ROW_CSV,
-#     )
+@pytest.fixture
+def new_cellranger_count_dataset(
+    lab_id: UUID = ID, gems_id: UUID = ID
+) -> NewCellrangerCountDataset:
+    ds = NewCellrangerCountDataset(
+        name="",
+        lab_id=lab_id,
+        library_ids=[ID],
+        data_path="data",
+        delivered_at=TIME,
+        web_summary="",
+        metrics=SINGLE_ROW_CSV,
+    )
+    assert ds.metrics.contents["estimated_number_of_cells"] == 65_558  # type: ignore
+
+    return ds
 
 
 # @pytest.fixture
@@ -538,18 +544,18 @@ def new_cdna_group() -> NewCdnaGroup:
         ("new_virtual_specimen", "name", "v"),
         ("new_suspension_fixture", "target_cell_recovery", 0),
         ("new_suspension_pool", "preparer_ids", [ID]),
-        ("new_singleplex_chromium_run", "chip", "GEM-X 3'"),
-        ("new_pool_multiplex_chromium_run", "chip", "GEM-X FX"),
-        ("new_ocm_chromium_run", "chip", "GEM-X OCM 3'"),
+        ("new_singleplex_chromium_run", "readable_id", "singleplexchromiumrun"),
+        ("new_pool_multiplex_chromium_run", "readable_id", "poolmultiplexchromiumrun"),
+        ("new_ocm_chromium_run", "readable_id", "ocmchromiumrun"),
         ("new_cdna_group", "preparer_ids", [ID]),
-        # ("new_library", "cdna_id", ID),
+        ("new_library", "cdna_id", ID),
         # ("new_cellrangerarc_count_dataset", "cmdline", "cellranger-arc count"),
         # (
         #     "new_cellrangeratac_count_dataset",
         #     "cmdline",
         #     "cellranger-atac count",
         # ),
-        # ("new_cellranger_count_dataset", "cmdline", "cellranger count"),
+        ("new_cellranger_count_dataset", "data_path", "data"),
         # ("new_cellranger_multi_dataset", "cmdline", "cellranger multi"),
         # ("new_cellranger_vdj_dataset", "cmdline", "cellranger vdj"),
     ],
@@ -572,4 +578,15 @@ def test_jsonification(
     assert found_value == expected_value
 
     dataclass = type(data)
-    assert dataclass.from_json_bytes(json_str) == data
+    loaded_data = dataclass.from_json_bytes(json_str)
+
+    if dataclass == NewCellrangerCountDataset:
+        loaded_data: NewCellrangerCountDataset
+        assert loaded_data.inner == data.inner
+
+        loaded_metrics = loaded_data.metrics.contents  # type: ignore
+        original_metrics = data.metrics.contents
+        for key in loaded_metrics:
+            assert loaded_metrics[key] == pytest.approx(original_metrics[key])
+    else:
+        assert loaded_data == data

@@ -141,7 +141,6 @@ pub struct SingleRowCsvMetricsFile {
     pub filename: String,
     #[garde(dive)]
     pub raw_contents: ValidString,
-    #[serde(skip)]
     pub contents: HashMap<String, AnyValue>,
 }
 
@@ -173,7 +172,6 @@ pub struct MultiRowCsvMetricsFile {
     pub filename: String,
     #[garde(dive)]
     pub raw_contents: ValidString,
-    #[serde(skip)]
     pub contents: Vec<HashMap<String, AnyValue>>,
 }
 
@@ -233,7 +231,6 @@ pub struct JsonMetricsFile {
     pub filename: String,
     #[garde(dive)]
     pub raw_contents: ValidString,
-    #[serde(skip)]
     pub contents: AnyValue,
 }
 
@@ -546,7 +543,9 @@ mod tests {
     use pretty_assertions::assert_eq;
     use rstest::rstest;
 
-    use crate::db::models::dataset::chromium::{MultiRowCsvMetricsFile, SingleRowCsvMetricsFile};
+    use crate::db::models::dataset::chromium::{
+        JsonMetricsFile, MultiRowCsvMetricsFile, SingleRowCsvMetricsFile,
+    };
 
     #[rstest]
     fn parse_single_row_csv() {
@@ -563,6 +562,24 @@ mod tests {
         assert_eq!(
             metrics.contents["estimated_number_of_cells"],
             AnyValue::from(65_558.0)
+        );
+    }
+
+    #[rstest]
+    fn parse_cellranger_atac_count_json() {
+        let json = include_str!("chromium/test-data/cellranger-atac_count.json");
+
+        let mut metrics = JsonMetricsFile {
+            filename: String::default(),
+            raw_contents: json.into(),
+            contents: AnyValue::default(),
+        };
+
+        metrics.parse().unwrap();
+
+        assert_eq!(
+            metrics.contents["annotated_cells"],
+            serde_json::Value::Number(serde_json::Number::from(5725))
         );
     }
 

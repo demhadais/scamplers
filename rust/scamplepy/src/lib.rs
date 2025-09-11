@@ -16,6 +16,7 @@ use scamplers::{
         institution::{InstitutionQuery, NewInstitution},
         lab::{LabQuery, NewLab},
         nucleic_acid::{
+            self,
             cdna::{CdnaQuery, NewCdna, NewCdnaGroup, NewCdnaMeasurement},
             common::ElectrophoreticMeasurementData,
             library::{self, LibraryQuery, NewLibrary, NewLibraryMeasurement},
@@ -145,6 +146,7 @@ fn register_common_submodule<'a>(parent: &'a Bound<PyModule>) -> PyResult<Module
         SuspensionMeasurementFields,
         BiologicalMaterial,
         ElectrophoreticMeasurementData,
+        nucleic_acid::common::Concentration,
         LibraryType,
         library::MeasurementData
     );

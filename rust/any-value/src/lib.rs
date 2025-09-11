@@ -19,6 +19,15 @@ pub struct AnyValue(serde_json::Value);
 pub struct AnyValue(#[serde(with = "serde_wasm_bindgen::preserve")] JsValue);
 
 #[cfg(not(target_arch = "wasm32"))]
+impl<'a> std::ops::Index<&'a str> for AnyValue {
+    type Output = serde_json::Value;
+
+    fn index(&self, index: &'a str) -> &Self::Output {
+        &self.0[index]
+    }
+}
+
+#[cfg(not(target_arch = "wasm32"))]
 impl Display for AnyValue {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         self.0.fmt(f)

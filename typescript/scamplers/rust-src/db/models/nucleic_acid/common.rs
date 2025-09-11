@@ -48,6 +48,7 @@ impl Concentration {
 }
 
 #[cfg(feature = "python")]
+#[gen_stub_pymethods]
 #[pymethods]
 impl Concentration {
     #[new]

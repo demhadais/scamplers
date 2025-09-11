@@ -106,12 +106,12 @@ pub struct NewLibrary {
 #[pymethods]
 impl NewLibrary {
     #[new]
-    #[pyo3(signature = (*, readable_id, cdna_id, number_of_sample_index_pcr_cycles, volume_µl, target_reads_per_cell, prepared_at, preparer_ids, single_index_set_name=None, dual_index_set_name=None, measurements=Vec::new(), notes=None))]
+    #[pyo3(signature = (*, readable_id, cdna_id, number_of_sample_index_pcr_cycles, volume_mcl, target_reads_per_cell, prepared_at, preparer_ids, single_index_set_name=None, dual_index_set_name=None, measurements=Vec::new(), notes=None))]
     fn new(
         readable_id: ValidString,
         cdna_id: Uuid,
         number_of_sample_index_pcr_cycles: i32,
-        volume_µl: f32,
+        volume_mcl: f32,
         target_reads_per_cell: i32,
         prepared_at: OffsetDateTime,
         preparer_ids: Vec<Uuid>,
@@ -126,7 +126,7 @@ impl NewLibrary {
             single_index_set_name,
             dual_index_set_name,
             number_of_sample_index_pcr_cycles,
-            volume_µl,
+            volume_µl: volume_mcl,
             target_reads_per_cell,
             prepared_at,
             preparer_ids,

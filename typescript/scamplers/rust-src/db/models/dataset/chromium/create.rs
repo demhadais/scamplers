@@ -87,7 +87,6 @@ impl NewChromiumDataset {
         db_conn: &mut PgConnection,
     ) -> ScamplersResult<()> {
         #![allow(clippy::cast_sign_loss)]
-        #[allow(clippy::cast_possible_truncation)]
         let Self::CellrangerMulti(NewCellrangerMultiDataset { metrics, .. }) = self else {
             return Ok(());
         };
@@ -122,12 +121,12 @@ impl NewChromiumDataset {
         // Cast up to i128 on the incredibly improbable chance that one of the numbers
         // doesn't fit into the data type of the other :)
         let n_suspensions = i128::from(n_suspensions);
-        let metrics_len = metrics.len() as i128;
+        let n_metrics = metrics.len() as i128;
 
-        if n_suspensions != metrics_len {
+        if n_suspensions != n_metrics {
             return Err(DatasetNMetricsFilesError::builder()
                 .expected_n_metrics_files(n_suspensions as u64)
-                .found_n_metrics_files(metrics.len() as u64)
+                .found_n_metrics_files(u64::try_from(n_metrics).unwrap())
                 .build()
                 .into());
         }
