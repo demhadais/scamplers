@@ -29,8 +29,8 @@ use crate::{
                 NewPoolMultiplexGems,
             },
             dataset::chromium::{
-                ChromiumDataset, ChromiumDatasetSummary, MultiRowCsvMetricsFile,
-                NewCellrangerMultiDataset, NewChromiumDataset, NewChromiumDatasetCommon,
+                ChromiumDataset, MultiRowCsvMetricsFile, NewCellrangerMultiDataset,
+                NewChromiumDataset, NewChromiumDatasetCommon,
             },
             institution::{Institution, InstitutionId, NewInstitution},
             lab::{Lab, NewLab},
