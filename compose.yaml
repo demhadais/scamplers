@@ -97,7 +97,7 @@ services:
     image: caddy:2-alpine
     environment:
       PUBLIC_ADDRESS: ${SCAMPLERS_PUBLIC_ADDRESS}
-      TLS: ${SCAMPLERS_TLS_SETTINGS-""}
+      TLS_SETTINGS: ${SCAMPLERS_TLS_SETTINGS-""}
       FRONTEND_HOST: scamplers-frontend
       FRONTEND_PORT: *frontend_port
       API_HOST: scamplers-api
