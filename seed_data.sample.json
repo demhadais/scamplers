@@ -291,7 +291,7 @@
       "name": "Universal 5' Gene Expression",
       "chemistry_version": "v3 - GEM-X",
       "protocol_url": "https://www.10xgenomics.com/support/universal-five-prime-gene-expression/documentation/steps/library-prep/chromium-gem-x-single-cell-5-v3-gene-expression-user-guide",
-      "sample_multiplexing": "on_chip_multiplexing",
+      "sample_multiplexing": "singleplex",
       "cmdlines": ["cellranger multi"],
       "chromium_chip": "GEM-X 5'",
       "platform": "chromium",

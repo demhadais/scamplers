@@ -5,18 +5,20 @@ use scamplers_schema::{
 
 use crate::{
     apply_eq_any_filters, apply_ilike_filters, apply_tenx_assay_query, apply_time_filters,
+    attach_children_to_parents,
     db::{
         DbOperation,
         models::{
             Pagination,
             dataset::chromium::{
-                ChromiumDataset, ChromiumDatasetId, ChromiumDatasetOrderBy, ChromiumDatasetQuery,
+                ChromiumDataset, ChromiumDatasetId, ChromiumDatasetLibrary, ChromiumDatasetOrderBy,
+                ChromiumDatasetQuery, ChromiumDatasetSummary,
             },
             nucleic_acid::common::gems_to_assay,
             suspension::suspension::SuspensionQuery,
         },
     },
-    impl_id_db_operation, init_stmt,
+    group_children, impl_id_db_operation, init_stmt,
 };
 
 impl DbOperation<Vec<ChromiumDataset>> for ChromiumDatasetQuery {
@@ -49,21 +51,16 @@ impl DbOperation<Vec<ChromiumDataset>> for ChromiumDatasetQuery {
                 None
             };
 
-        let base_stmt = chip_loading::table.inner_join(
-            gems_to_assay().inner_join(
-                cdna::table.inner_join(
-                    library::table.inner_join(
-                        chromium_dataset_libraries::table
-                            .inner_join(chromium_dataset::table.inner_join(lab::table)),
-                    ),
-                ),
-            ),
+        let base_stmt = chromium_dataset::table.inner_join(lab::table).inner_join(
+            chromium_dataset_libraries::table.inner_join(library::table.inner_join(
+                cdna::table.inner_join(gems_to_assay().inner_join(chip_loading::table)),
+            )),
         );
 
         let mut stmt = init_stmt!(
             stmt = base_stmt,
             query = &self,
-            output_type = ChromiumDataset,
+            output_type = ChromiumDatasetSummary,
             orderby_spec = {
                 ChromiumDatasetOrderBy::DeliveredAt => chromium_dataset::delivered_at,
                 ChromiumDatasetOrderBy::Name => chromium_dataset::name
@@ -74,12 +71,13 @@ impl DbOperation<Vec<ChromiumDataset>> for ChromiumDatasetQuery {
             stmt = apply_tenx_assay_query!(stmt, tenx_assay_query);
         }
 
-        if let Some(suspension_and_suspension_pool_ids) = &suspension_and_suspension_pool_ids {
-            stmt = stmt
-                .filter(chip_loading::suspension_id.eq_any(suspension_and_suspension_pool_ids))
-                .or_filter(
-                    chip_loading::suspension_pool_id.eq_any(suspension_and_suspension_pool_ids),
-                );
+        if let Some(suspension_and_suspension_pool_ids) =
+            suspension_and_suspension_pool_ids.as_ref()
+        {
+            let condition = chip_loading::suspension_id
+                .eq_any(suspension_and_suspension_pool_ids)
+                .or(chip_loading::suspension_pool_id.eq_any(suspension_and_suspension_pool_ids));
+            stmt = stmt.filter(condition);
         }
 
         let Self {
@@ -113,7 +111,26 @@ impl DbOperation<Vec<ChromiumDataset>> for ChromiumDatasetQuery {
             }
         );
 
-        Ok(stmt.load(db_conn)?)
+        let dataset_summaries = stmt.load(db_conn)?;
+
+        let library_ids = ChromiumDatasetLibrary::belonging_to(&dataset_summaries)
+            .select(ChromiumDatasetLibrary::as_select())
+            .load(db_conn)?;
+
+        let grouped_library_ids =
+            group_children!(parents = dataset_summaries, children = library_ids)
+                .map(|v| v.iter().map(|mapping| mapping.library_id).collect());
+
+        let datasets = attach_children_to_parents!(
+            parents = dataset_summaries,
+            children = [grouped_library_ids],
+            transform_fn = |(summary, library_ids)| ChromiumDataset {
+                summary,
+                library_ids
+            }
+        );
+
+        Ok(datasets)
     }
 }
 
@@ -125,16 +142,26 @@ impl_id_db_operation!(
 
 #[cfg(test)]
 mod tests {
+    use std::i64;
+
+    use diesel::prelude::*;
+    use pretty_assertions::assert_eq;
     use rstest::rstest;
+    use scamplers_schema::{
+        cdna, chip_loading, chromium_dataset, chromium_dataset_libraries, library,
+    };
+    use uuid::Uuid;
 
     use crate::db::{
         DbOperation,
         models::{
+            Pagination,
             dataset::chromium::{ChromiumDatasetOrderBy, ChromiumDatasetQuery},
             specimen::{
                 BlockEmbeddingMatrix, SpecimenQuery, SpecimenType,
                 block::FrozenBlockEmbeddingMatrix,
             },
+            suspension::suspension::SuspensionQuery,
         },
         test_util::db_conn,
     };
@@ -142,7 +169,7 @@ mod tests {
     #[rstest]
     #[awt]
     #[tokio::test]
-    async fn specific_dataset_query(#[future] db_conn: deadpool_diesel::postgres::Connection) {
+    async fn dataset_query_by_specimens(#[future] db_conn: deadpool_diesel::postgres::Connection) {
         let specimen_query = SpecimenQuery::builder()
             .frozen(true)
             .types([SpecimenType::Block])
@@ -152,13 +179,61 @@ mod tests {
             .build();
 
         let query = ChromiumDatasetQuery::builder()
-            .specimen(specimen_query)
+            .specimen(specimen_query.clone())
             .order_by(ChromiumDatasetOrderBy::DeliveredAt { descending: false })
             .build();
 
-        let _ = db_conn
+        let loaded_datasets = db_conn
             .interact(|db_conn| query.execute(db_conn).unwrap())
             .await
             .unwrap();
+        let loaded_dataset_ids = loaded_datasets.iter().map(|ds| ds.summary.id);
+        let loaded_gems_ids = chromium_dataset::table
+            .inner_join(
+                chromium_dataset_libraries::table
+                    .inner_join(library::table.inner_join(cdna::table)),
+            )
+            .filter(chromium_dataset::id.eq_any(loaded_dataset_ids))
+            .select(cdna::gems_id.assume_not_null());
+        let mut loaded_gems_ids: Vec<Uuid> = db_conn
+            .interact(move |db_conn| loaded_gems_ids.load(db_conn).unwrap())
+            .await
+            .unwrap();
+        loaded_gems_ids.sort();
+
+        let suspensions_matching_specimen_query = SuspensionQuery::builder()
+            .specimen(specimen_query)
+            .pagination(Pagination {
+                limit: i64::MAX,
+                offset: 0,
+            })
+            .build();
+        let suspensions_and_suspension_pools = db_conn
+            .interact(|db_conn| {
+                suspensions_matching_specimen_query
+                    .execute(db_conn)
+                    .unwrap()
+            })
+            .await
+            .unwrap();
+        let suspensions_and_suspension_pool_ids: Vec<_> = suspensions_and_suspension_pools
+            .iter()
+            .map(|s| s.info.summary.pooled_into.unwrap_or(s.info.id_))
+            .collect();
+
+        let condition = chip_loading::suspension_id
+            .eq_any(suspensions_and_suspension_pool_ids.clone())
+            .or(chip_loading::suspension_pool_id.eq_any(suspensions_and_suspension_pool_ids));
+        let query = chip_loading::table
+            .filter(condition)
+            .select(chip_loading::gems_id)
+            .distinct();
+        let mut independently_loaded_gems_ids: Vec<Uuid> = db_conn
+            .interact(move |db_conn| query.load(db_conn).unwrap())
+            .await
+            .unwrap();
+        independently_loaded_gems_ids.sort();
+
+        assert_eq!(loaded_gems_ids, independently_loaded_gems_ids);
     }
 }

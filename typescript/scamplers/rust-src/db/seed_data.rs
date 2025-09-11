@@ -76,7 +76,10 @@ pub async fn insert_seed_data(
         let result: ScamplersResult<Person> = app_admin.execute(db_conn);
         duplicate_resource_ok(result)?;
 
-        tenx_assays.execute(db_conn)?;
+        // This is a loop of like 25 max
+        for assay in tenx_assays {
+            duplicate_resource_ok(assay.execute(db_conn))?;
+        }
 
         multiplexing_tags.execute(db_conn)?;
 

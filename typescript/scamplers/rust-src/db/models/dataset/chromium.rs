@@ -3,6 +3,8 @@ use std::collections::HashMap;
 use std::str::FromStr;
 
 use any_value::AnyValue;
+#[cfg(feature = "app")]
+use diesel::prelude::*;
 #[cfg(not(target_arch = "wasm32"))]
 use heck::ToSnekCase;
 #[cfg(feature = "python")]
@@ -17,6 +19,8 @@ use scamplers_macros::{
 use time::OffsetDateTime;
 use uuid::Uuid;
 use valid_string::ValidString;
+#[cfg(target_arch = "wasm32")]
+use wasm_bindgen::prelude::*;
 
 #[cfg(not(target_arch = "wasm32"))]
 use crate::result::DatasetMetricsFileParseError;
@@ -189,7 +193,6 @@ impl_metrics_methods!(MultiRowCsvMetricsFile);
 
 #[cfg_attr(feature = "python", pyo3_stub_gen::derive::gen_stub_pyclass)]
 #[db_json]
-#[serde(transparent)]
 #[garde(transparent)]
 #[cfg_attr(
     feature = "python",
@@ -197,28 +200,28 @@ impl_metrics_methods!(MultiRowCsvMetricsFile);
 )]
 pub struct MultiRowCsvMetricsFileGroup {
     #[garde(dive, length(min = 1))]
-    inner: Vec<MultiRowCsvMetricsFile>,
+    files: Vec<MultiRowCsvMetricsFile>,
 }
 
 impl MultiRowCsvMetricsFileGroup {
     #[must_use]
     pub fn len(&self) -> usize {
-        self.inner.len()
+        self.files.len()
     }
 
     #[must_use]
     pub fn is_empty(&self) -> bool {
-        self.inner.is_empty()
+        self.files.is_empty()
     }
 
     pub fn as_mut_slice(&mut self) -> &mut [MultiRowCsvMetricsFile] {
-        self.inner.as_mut_slice()
+        self.files.as_mut_slice()
     }
 }
 
 impl From<Vec<MultiRowCsvMetricsFile>> for MultiRowCsvMetricsFileGroup {
     fn from(inner: Vec<MultiRowCsvMetricsFile>) -> Self {
-        Self { inner }
+        Self { files: inner }
     }
 }
 
@@ -275,7 +278,7 @@ impl TryFrom<MultiRowCsvMetricsFileGroup> for ParsedMetrics {
     type Error = DatasetMetricsFileParseError;
 
     fn try_from(mut metrics_files: MultiRowCsvMetricsFileGroup) -> Result<Self, Self::Error> {
-        for file in &mut metrics_files.inner {
+        for file in &mut metrics_files.files {
             file.parse()?;
         }
 
@@ -476,7 +479,7 @@ impl_stub_type!(
 
 #[db_selection]
 #[cfg_attr(feature = "app", diesel(table_name = scamplers_schema::chromium_dataset))]
-pub struct ChromiumDataset {
+pub struct ChromiumDatasetSummary {
     pub id: Uuid,
     #[cfg_attr(target_arch = "wasm32", wasm_bindgen(readonly))]
     pub links: Links,
@@ -490,6 +493,27 @@ pub struct ChromiumDataset {
     #[cfg_attr(target_arch = "wasm32", wasm_bindgen(skip))]
     pub metrics: ParsedMetrics,
     pub web_summary: String,
+}
+
+#[cfg(feature = "app")]
+#[derive(Insertable, Identifiable, Associations, Selectable, Queryable)]
+#[diesel(table_name = scamplers_schema::chromium_dataset_libraries, primary_key(dataset_id, library_id), belongs_to(ChromiumDatasetSummary, foreign_key = dataset_id))]
+struct ChromiumDatasetLibrary {
+    dataset_id: Uuid,
+    library_id: Uuid,
+}
+
+#[cfg_attr(target_arch = "wasm32", wasm_bindgen(getter_with_clone))]
+#[cfg_attr(feature = "python", pyo3_stub_gen::derive::gen_stub_pyclass)]
+#[cfg_attr(
+    feature = "python",
+    pyclass(eq, get_all, module = "scamplepy.responses")
+)]
+#[base_model]
+pub struct ChromiumDataset {
+    #[serde(flatten)]
+    pub summary: ChromiumDatasetSummary,
+    pub library_ids: Vec<Uuid>,
 }
 
 define_ordering_enum! { ChromiumDatasetOrderBy { DeliveredAt, Name }, default = DeliveredAt }

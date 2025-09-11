@@ -1,6 +1,7 @@
 use diesel::prelude::*;
 use scamplers_schema::{
-    cdna, chip_loading, chromium_dataset, gems, library, suspension, tenx_assay,
+    cdna, chip_loading, chromium_dataset, chromium_dataset_libraries, gems, library,
+    sequencing_submissions, suspension, tenx_assay,
 };
 use uuid::Uuid;
 
@@ -9,13 +10,14 @@ use crate::{
         DbOperation,
         models::{
             dataset::chromium::{
-                ChromiumDataset, ChromiumDatasetId, NewCellrangerCountDataset,
-                NewCellrangerMultiDataset, NewCellrangerVdjDataset, NewCellrangerarcCountDataset,
-                NewCellrangeratacCountDataset, NewChromiumDataset, NewChromiumDatasetCommon,
-                ParsedMetrics,
+                ChromiumDataset, ChromiumDatasetId, ChromiumDatasetLibrary,
+                NewCellrangerCountDataset, NewCellrangerMultiDataset, NewCellrangerVdjDataset,
+                NewCellrangerarcCountDataset, NewCellrangeratacCountDataset, NewChromiumDataset,
+                NewChromiumDatasetCommon, ParsedMetrics,
             },
             nucleic_acid::common::gems_to_assay,
         },
+        util::{ManyToMany, ManyToManyChildrenWithSelfId},
     },
     result::{
         ChromiumDatasetError, DatasetMetricsFileParseError, DatasetNMetricsFilesError,
@@ -84,6 +86,8 @@ impl NewChromiumDataset {
         gems_id: Uuid,
         db_conn: &mut PgConnection,
     ) -> ScamplersResult<()> {
+        #![allow(clippy::cast_sign_loss)]
+        #[allow(clippy::cast_possible_truncation)]
         let Self::CellrangerMulti(NewCellrangerMultiDataset { metrics, .. }) = self else {
             return Ok(());
         };
@@ -115,12 +119,37 @@ impl NewChromiumDataset {
             .count()
             .get_result(db_conn)?;
 
-        if n_suspensions != metrics.len() as i64 {
+        // Cast up to i128 on the incredibly improbable chance that one of the numbers
+        // doesn't fit into the data type of the other :)
+        let n_suspensions = i128::from(n_suspensions);
+        let metrics_len = metrics.len() as i128;
+
+        if n_suspensions != metrics_len {
             return Err(DatasetNMetricsFilesError::builder()
                 .expected_n_metrics_files(n_suspensions as u64)
                 .found_n_metrics_files(metrics.len() as u64)
                 .build()
                 .into());
+        }
+
+        Ok(())
+    }
+
+    fn validate_libraries_were_sequenced(&self, db_conn: &mut PgConnection) -> ScamplersResult<()> {
+        let library_ids = &self.inner().library_ids;
+
+        let sequenced_libraries = sequencing_submissions::table
+            .filter(sequencing_submissions::library_id.eq_any(&self.inner().library_ids))
+            .select(sequencing_submissions::library_id)
+            .load(db_conn)?;
+
+        for lib_id in library_ids {
+            if !sequenced_libraries.contains(lib_id) {
+                return Err(ChromiumDatasetError::builder()
+                    .message(format!("{lib_id} was not sequenced"))
+                    .build()
+                    .into());
+            }
         }
 
         Ok(())
@@ -169,6 +198,21 @@ impl TryFrom<NewChromiumDataset> for GenericNewChromiumDataset {
     }
 }
 
+impl ManyToMany for ChromiumDatasetLibrary {
+    fn new(parent_id: Uuid, child_id: Uuid) -> Self {
+        Self {
+            dataset_id: parent_id,
+            library_id: child_id,
+        }
+    }
+}
+
+impl ManyToManyChildrenWithSelfId<ChromiumDatasetLibrary> for GenericNewChromiumDataset {
+    fn mtm_children(&self) -> &[Uuid] {
+        &self.inner.library_ids
+    }
+}
+
 impl DbOperation<ChromiumDataset> for NewChromiumDataset {
     fn execute(
         self,
@@ -177,13 +221,19 @@ impl DbOperation<ChromiumDataset> for NewChromiumDataset {
         let (gems_id, expected_cmdlines) = self.gems_id_and_expected_cmdlines(db_conn)?;
         self.validate_cmdline(&expected_cmdlines)?;
         self.validate_n_metrics_files(gems_id, db_conn)?;
+        self.validate_libraries_were_sequenced(db_conn)?;
 
         let generic = GenericNewChromiumDataset::try_from(self)?;
 
         let id = diesel::insert_into(chromium_dataset::table)
-            .values(generic)
+            .values(&generic)
             .returning(chromium_dataset::id)
             .get_result(db_conn)?;
+
+        let dataset_library_mappings = generic.mtm_children_with_self_id(id);
+        diesel::insert_into(chromium_dataset_libraries::table)
+            .values(dataset_library_mappings)
+            .execute(db_conn)?;
 
         ChromiumDatasetId(id).execute(db_conn)
     }

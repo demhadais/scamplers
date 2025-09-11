@@ -160,6 +160,7 @@ pub struct SuspensionPoolMeasurement {
 )]
 #[base_model]
 pub struct SuspensionPool {
+    #[serde(flatten)]
     pub summary: SuspensionPoolSummary,
     pub suspensions: Vec<SuspensionSummary>,
     pub preparers: Vec<Uuid>,

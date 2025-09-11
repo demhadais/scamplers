@@ -3,7 +3,7 @@ use uuid::Uuid;
 
 use crate::{
     db::models::{
-        DefaultVec, Pagination,
+        DefaultVec, Links, Pagination,
         tenx_assay::chromium::{LibraryType, NewChromiumAssay, SampleMultiplexing},
     },
     define_ordering_enum, uuid_newtype,
@@ -26,10 +26,12 @@ pub enum NewTenxAssay {
 #[cfg_attr(feature = "app", diesel(table_name = scamplers_schema::tenx_assay))]
 pub struct TenxAssay {
     pub id: Uuid,
+    #[cfg_attr(target_arch = "wasm32", wasm_bindgen(readonly))]
+    pub links: Links,
     pub name: String,
     #[cfg_attr(target_arch = "wasm32", wasm_bindgen(skip))]
-    pub library_types: Option<Vec<Option<String>>>,
-    pub sample_multiplexing: Option<String>,
+    pub library_types: Option<Vec<Option<LibraryType>>>,
+    pub sample_multiplexing: Option<SampleMultiplexing>,
     pub chemistry_version: String,
     pub protocol_url: String,
     pub chromium_chip: Option<String>,
@@ -37,7 +39,7 @@ pub struct TenxAssay {
     pub cmdlines: Option<Vec<Option<String>>>,
 }
 
-define_ordering_enum! {TenxAssayOrderBy { Name }, default = Name}
+define_ordering_enum! {TenxAssayOrderBy { Name, LibraryTypes }, default = Name}
 
 #[db_query]
 pub struct TenxAssayQuery {

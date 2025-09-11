@@ -204,7 +204,7 @@ macro_rules! impl_wasm_order_by {
 #[macro_export]
 macro_rules! uuid_newtype {
     ($name:ident) => {
-        #[derive(Clone, Copy, serde::Deserialize, serde::Serialize, valuable::Valuable)]
+        #[derive(Debug, Clone, Copy, serde::Deserialize, serde::Serialize, valuable::Valuable)]
         #[cfg_attr(feature = "python", derive(pyo3::IntoPyObject, pyo3::FromPyObject))]
         #[cfg_attr(feature = "python", pyo3(transparent))]
         #[serde(transparent)]
@@ -252,7 +252,8 @@ macro_rules! impl_id_db_operation {
                 self,
                 db_conn: &mut diesel::PgConnection,
             ) -> $crate::result::ScamplersResult<$ret> {
-                let results = $delegated::builder().ids(self).build().execute(db_conn)?;
+                let query = $delegated::builder().ids(self).build();
+                let results = query.execute(db_conn)?;
 
                 return Ok(results.into_iter().next().ok_or(
                     $crate::result::ResourceNotFoundError::builder()

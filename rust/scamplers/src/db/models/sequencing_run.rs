@@ -56,7 +56,6 @@ pub struct NewSequencingRun {
     #[garde(dive)]
     pub readable_id: ValidString,
     pub begun_at: OffsetDateTime,
-    #[builder(default)]
     #[garde(dive)]
     #[cfg_attr(feature = "app", diesel(skip_insertion))]
     pub libraries: Vec<NewSequencingSubmission>,

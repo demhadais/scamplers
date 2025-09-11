@@ -112,6 +112,15 @@ where
     }
 }
 
+impl<T, const N: usize> From<[T; N]> for DefaultVec<T>
+where
+    T: Valuable + Clone,
+{
+    fn from(value: [T; N]) -> Self {
+        Self(value.to_vec())
+    }
+}
+
 impl<O> IntoIterator for DefaultVec<O>
 where
     O: Valuable,

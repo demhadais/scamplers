@@ -24,6 +24,7 @@ use crate::{
             pool::{NewSuspensionPool, SuspensionPool, SuspensionPoolId, SuspensionPoolQuery},
             suspension::{NewSuspension, Suspension, SuspensionId, SuspensionQuery},
         },
+        tenx_assay::{NewTenxAssay, TenxAssay, TenxAssayId, TenxAssayQuery},
     },
     extract::{Base64JsonQuery, RelativesQuery, ValidJsonBody},
 };
@@ -190,12 +191,20 @@ impl_basic_endpoints!(
     response = SequencingRun
 );
 
-impl_basic_endpoints! {
+impl_basic_endpoints!(
+    path = "/10x-assays",
+    creation = NewTenxAssay,
+    id = TenxAssayId,
+    query = TenxAssayQuery,
+    response = TenxAssay
+);
+
+impl_basic_endpoints!(
     path = "/multiplexing-tags",
     id = MultiplexingTagId,
     query = (),
     response = MultiplexingTag
-}
+);
 
 impl_basic_endpoints! {
     path = "/suspensions",

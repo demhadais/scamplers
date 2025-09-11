@@ -29,8 +29,8 @@ use crate::{
                 NewPoolMultiplexGems,
             },
             dataset::chromium::{
-                ChromiumDataset, MultiRowCsvMetricsFile, NewCellrangerMultiDataset,
-                NewChromiumDataset, NewChromiumDatasetCommon,
+                ChromiumDataset, ChromiumDatasetSummary, MultiRowCsvMetricsFile,
+                NewCellrangerMultiDataset, NewChromiumDataset, NewChromiumDatasetCommon,
             },
             institution::{Institution, InstitutionId, NewInstitution},
             lab::{Lab, NewLab},
@@ -42,6 +42,7 @@ use crate::{
                 library::{self, Library, NewLibrary, NewLibraryMeasurement},
             },
             person::{NewPerson, Person, PersonQuery},
+            sequencing_run::{NewSequencingRun, NewSequencingSubmission, SequencingRun},
             specimen::{
                 self, NewSpecimen, Species, Specimen,
                 block::{
@@ -60,7 +61,10 @@ use crate::{
                 },
                 suspension::{NewSuspension, NewSuspensionMeasurement, SuspensionMeasurementData},
             },
-            tenx_assay::{TenxAssay, TenxAssayQuery, chromium::LibraryType},
+            tenx_assay::{
+                TenxAssay, TenxAssayQuery,
+                chromium::{LibraryType, SampleMultiplexing},
+            },
             units::{MassUnit, VolumeUnit},
         },
         seed_data::{SeedData, insert_seed_data},
@@ -103,7 +107,7 @@ pub const N_SUSPENSIONS_PER_POOL: usize = 2;
 // The remaining specimens will become singular suspensions
 pub const N_SUSPENSIONS: usize = N_SPECIMENS - (N_SUSPENSION_POOLS * N_SUSPENSIONS_PER_POOL);
 
-const N_TENX_ASSAYS: usize = 20;
+const N_TENX_ASSAYS: usize = 15;
 
 const N_GEMS_PER_NONOCM_CHROMIUM_RUN: usize = 8;
 const N_GEMS_PER_OCM_CHROMIUM_RUN: usize = 2;
@@ -142,7 +146,7 @@ pub struct TestState {
     chromium_runs: Vec<ChromiumRun>,
     cdna_groups: Vec<Vec<(Cdna, f32, &'static str)>>,
     libraries: Vec<Vec<Library>>,
-    // sequencing_runs: Vec<SequencingRunSummary>,
+    sequencing_runs: Vec<SequencingRun>,
     chromium_datasets: Vec<ChromiumDataset>,
 }
 impl TestState {
@@ -335,19 +339,23 @@ impl TestState {
         self.multiplexing_tags.choose_unwrap(&mut self.rng).id
     }
 
+    fn suspension_volume(&mut self) -> suspension::common::SuspensionMeasurementFields {
+        suspension::common::SuspensionMeasurementFields::Volume {
+            measured_at: self.random_time(),
+            value: 10.0,
+            unit: VolumeUnit::Microliter,
+        }
+    }
+
     fn new_suspensions(&mut self, n: usize, for_pool: bool) -> Vec<NewSuspension> {
         let mut new_suspensions = Vec::with_capacity(n);
         for i in 0..n {
             let new_suspension_measurements: Vec<_> = (0..2)
-                .map(|i| {
+                .map(|_| {
                     NewSuspensionMeasurement::builder()
                         .measured_by(self.random_person_id())
                         .data(SuspensionMeasurementData {
-                            fields: suspension::common::SuspensionMeasurementFields::Volume {
-                                measured_at: self.random_time(),
-                                value: 10.0 * i as f32,
-                                unit: VolumeUnit::Microliter,
-                            },
+                            fields: self.suspension_volume(),
                             is_post_hybridization: for_pool,
                         })
                         .build()
@@ -374,15 +382,16 @@ impl TestState {
             new_suspensions.push(new_suspension);
         }
 
-        new_suspensions
-    }
-
-    fn suspension_volume(&mut self) -> suspension::common::SuspensionMeasurementFields {
-        suspension::common::SuspensionMeasurementFields::Volume {
-            measured_at: self.random_time(),
-            value: 10.0,
-            unit: VolumeUnit::Microliter,
+        // Ensure uniqueness
+        let mut last_multiplexing_tag_id = Some(Uuid::nil());
+        for s in &mut new_suspensions {
+            while s.multiplexing_tag_id == last_multiplexing_tag_id {
+                s.multiplexing_tag_id = Some(self.random_multiplexing_tag_id());
+            }
+            last_multiplexing_tag_id = s.multiplexing_tag_id;
         }
+
+        new_suspensions
     }
 
     fn insert_suspension_pools(&mut self, db_conn: &mut PgConnection) {
@@ -424,7 +433,7 @@ impl TestState {
             .filter(|a| {
                 a.name == "Flex Gene Expression"
                     && a.chemistry_version == "v1 - GEM-X"
-                    && a.sample_multiplexing == Some("flex_barcode".to_string())
+                    && a.sample_multiplexing == Some(SampleMultiplexing::FlexBarcode)
             })
             .collect();
 
@@ -589,6 +598,33 @@ impl TestState {
         }
     }
 
+    fn insert_sequencing_runs(&mut self, db_conn: &mut PgConnection) {
+        let time = self.random_time();
+        let libraries: Vec<_> = self
+            .libraries
+            .iter()
+            .flat_map(|libraries| {
+                libraries.iter().map(|l| {
+                    NewSequencingSubmission::builder()
+                        .library_id(l.info.id_)
+                        .submitted_at(time)
+                        .build()
+                })
+            })
+            .collect();
+
+        let sequencing_run = NewSequencingRun::builder()
+            .readable_id(format!("SR{}", Uuid::now_v7()))
+            .begun_at(self.random_time())
+            .finished_at(self.random_time())
+            .libraries(libraries)
+            .build()
+            .execute(db_conn)
+            .unwrap();
+
+        self.sequencing_runs.push(sequencing_run);
+    }
+
     fn insert_chromium_datasets(&mut self, db_conn: &mut PgConnection) {
         for library_group in self.libraries.clone() {
             let library_ids: Vec<_> = library_group.iter().map(|l| l.info.id_).collect();
@@ -648,6 +684,7 @@ impl TestState {
                 self.insert_pool_multiplexed_chromium_runs(db_conn);
                 self.insert_cdna(db_conn);
                 self.insert_libraries(db_conn);
+                self.insert_sequencing_runs(db_conn);
                 self.insert_chromium_datasets(db_conn);
 
                 self
@@ -678,7 +715,7 @@ impl TestState {
             ),
             cdna_groups: Vec::with_capacity(N_CDNA),
             libraries: Vec::with_capacity(N_LIBRARIES),
-            // sequencing_runs: Vec::with_capacity(N_SEQUENCING_RUNS),
+            sequencing_runs: Vec::with_capacity(N_SEQUENCING_RUNS),
             chromium_datasets: Vec::with_capacity(N_CHROMIUM_DATASETS),
         };
 
@@ -714,10 +751,10 @@ macro_rules! data_fixtures {
     };
 }
 
-data_fixtures!((institutions, Institution); (people, Person); (labs, Lab); (specimens, Specimen); (suspension_pools, SuspensionPool));
+data_fixtures!((institutions, Institution); (people, Person); (labs, Lab); (specimens, Specimen); (suspension_pools, SuspensionPool); (tenx_assays, TenxAssay); (chromium_datasets, ChromiumDataset));
 
 #[bon::builder]
-fn extract_filter_sort<Record>(
+fn filter_and_sort<Record>(
     data: Vec<Record>,
     filter: Option<fn(&Record) -> bool>,
     sort_by: Option<fn(&Record, &Record) -> Ordering>,
@@ -749,7 +786,7 @@ pub async fn test_query<Query, Record>(
     Query: 'static + DbOperation<Vec<Record>> + Default + Send,
     Record: 'static + Debug + PartialEq + Send + Sync,
 {
-    let data = extract_filter_sort()
+    let data = filter_and_sort()
         .data(all_data)
         .maybe_filter(filter)
         .maybe_sort_by(sort_by)

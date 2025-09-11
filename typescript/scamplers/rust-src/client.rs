@@ -396,28 +396,3 @@ impl ScamplersClient {
 python_client_list_relatives_methods! {
     list_person_specimens(PersonId, SpecimenQuery) -> Vec<Specimen>;
 }
-
-// #[cfg(feature = "python")]
-// macro_rules! impl_chromium_dataset_creation {
-//     ($(($method_name:ident, $request_type:path));*) => {
-//         $(#[pymethods]
-//         impl ScamplersClient {
-//             async fn $method_name(
-//                 &self,
-//                 data: $request_type,
-//             ) -> Result<DatasetSummary, ScamplersCoreErrorResponse> {
-//                 let client = self.clone();
-//                 client.send_request_python(NewDataset::from(data),
-// Method::POST).await             }
-//         })*
-//     };
-// }
-
-// #[cfg(feature = "python")]
-// impl_chromium_dataset_creation!(
-//     (create_cellrangerarc_count_dataset,CellrangerarcCountDataset);
-//     (create_cellrangeratac_count_dataset, CellrangeratacCountDataset);
-//     (create_cellranger_count_dataset, CellrangerCountDataset);
-//     (create_cellranger_multi_dataset, CellrangerMultiDataset);
-//     (create_cellranger_vdj_dataset, CellrangerVdjDataset)
-// );

@@ -4,7 +4,7 @@ use scamplers_schema::{library_type_specification, tenx_assay};
 use crate::db::{
     DbOperation,
     models::tenx_assay::{
-        NewTenxAssay,
+        NewTenxAssay, TenxAssay, TenxAssayId,
         chromium::{LibraryTypeSpecification, NewChromiumAssay},
     },
     util::{ChildrenWithSelfId, SetParentId},
@@ -29,37 +29,34 @@ impl NewChromiumAssay {
             .iter()
             .map(|spec| spec.library_type)
             .collect();
+
+        self.library_types.sort();
     }
 }
 
-impl DbOperation<()> for Vec<NewTenxAssay> {
-    fn execute(self, db_conn: &mut diesel::PgConnection) -> crate::result::ScamplersResult<()> {
-        let mut chromium_assays = Vec::with_capacity(self.len());
-
-        for assay in self {
-            match assay {
-                NewTenxAssay::Chromium(mut a) => {
-                    a.set_library_types();
-                    chromium_assays.push(a);
-                }
+impl DbOperation<TenxAssay> for NewTenxAssay {
+    fn execute(
+        self,
+        db_conn: &mut diesel::PgConnection,
+    ) -> crate::result::ScamplersResult<TenxAssay> {
+        let mut assay = match self {
+            NewTenxAssay::Chromium(mut a) => {
+                a.set_library_types();
+                a
             }
-        }
+        };
 
-        let ids = diesel::insert_into(tenx_assay::table)
-            .values(&chromium_assays)
-            .on_conflict_do_nothing()
+        let id = diesel::insert_into(tenx_assay::table)
+            .values(&assay)
             .returning(tenx_assay::id)
-            .get_results(db_conn)?;
+            .get_result(db_conn)?;
 
-        let mut lib_type_specs = Vec::with_capacity(chromium_assays.len());
-        for (assay, id) in chromium_assays.iter_mut().zip(&ids) {
-            lib_type_specs.extend(&*assay.children_with_self_id(*id));
-        }
+        let lib_type_specs = assay.children_with_self_id(id);
 
         diesel::insert_into(library_type_specification::table)
-            .values(lib_type_specs)
+            .values(&*lib_type_specs)
             .execute(db_conn)?;
 
-        Ok(())
+        TenxAssayId(id).execute(db_conn)
     }
 }

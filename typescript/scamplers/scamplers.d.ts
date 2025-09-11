@@ -126,20 +126,8 @@ export class CdnaSummary {
 export class ChromiumDataset {
   private constructor();
   free(): void;
-  to_json_bytes(): Uint8Array;
-  to_json_string(): string;
-  to_base64_json(): string;
-  static from_json_bytes(json_bytes: Uint8Array): ChromiumDataset;
-  static from_json_string(json_str: string): ChromiumDataset;
-  static from_base64_json(base64_json_bytes: string): ChromiumDataset;
-  id: string;
-  readonly links: Map<any, any>;
-  name: string;
-  lab: LabSummary;
-  data_path: string;
-  delivered_at: Date;
-  tenx_assay: TenxAssay;
-  web_summary: string;
+  summary: ChromiumDatasetSummary;
+  library_ids: string[];
 }
 export class ChromiumDatasetError {
   private constructor();
@@ -174,6 +162,24 @@ export class ChromiumDatasetQuery {
   set specimen(value: SpecimenQuery | null | undefined);
   order_by: OrderBy[];
   pagination: Pagination;
+}
+export class ChromiumDatasetSummary {
+  private constructor();
+  free(): void;
+  to_json_bytes(): Uint8Array;
+  to_json_string(): string;
+  to_base64_json(): string;
+  static from_json_bytes(json_bytes: Uint8Array): ChromiumDatasetSummary;
+  static from_json_string(json_str: string): ChromiumDatasetSummary;
+  static from_base64_json(base64_json_bytes: string): ChromiumDatasetSummary;
+  id: string;
+  readonly links: Map<any, any>;
+  name: string;
+  lab: LabSummary;
+  data_path: string;
+  delivered_at: Date;
+  tenx_assay: TenxAssay;
+  web_summary: string;
 }
 export class ChromiumRun {
   private constructor();
@@ -1013,9 +1019,10 @@ export class TenxAssay {
   static from_json_string(json_str: string): TenxAssay;
   static from_base64_json(base64_json_bytes: string): TenxAssay;
   id: string;
+  readonly links: Map<any, any>;
   name: string;
-  get sample_multiplexing(): string;
-  set sample_multiplexing(value: string | null | undefined);
+  get sample_multiplexing(): SampleMultiplexing | undefined;
+  set sample_multiplexing(value: SampleMultiplexing | null | undefined);
   chemistry_version: string;
   protocol_url: string;
   get chromium_chip(): string;

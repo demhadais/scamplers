@@ -26,6 +26,7 @@ use crate::{
                 pool::{NewSuspensionPool, SuspensionPool, SuspensionPoolId, SuspensionPoolQuery},
                 suspension::{NewSuspension, Suspension, SuspensionId, SuspensionQuery},
             },
+            tenx_assay::{NewTenxAssay, TenxAssay, TenxAssayId, TenxAssayQuery},
         },
     },
     endpoints::{Api, Endpoint},
@@ -133,6 +134,9 @@ pub fn router() -> Router<AppState> {
         create_sequencing_run(NewSequencingRun) -> SequencingRun;
         list_sequencing_runs(SequencingRunQuery) -> Vec<SequencingRun>;
         fetch_sequencing_run(SequencingRunId) -> SequencingRun;
+        create_tenx_assays(NewTenxAssay) -> TenxAssay;
+        fetch_tenx_assay(TenxAssayId) -> TenxAssay;
+        list_tenx_assays(TenxAssayQuery) -> Vec<TenxAssay>;
         list_multiplexing_tags(()) -> Vec<MultiplexingTag>;
         create_suspension(NewSuspension) -> Suspension;
         fetch_suspension(SuspensionId) -> Suspension;
