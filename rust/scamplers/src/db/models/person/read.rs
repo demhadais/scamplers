@@ -1,5 +1,5 @@
 use diesel::{prelude::*, sql_types::Text};
-use scamplers_schema::{institution, person};
+use scamplers_schema::person;
 
 use crate::{
     apply_eq_any_filters, apply_ilike_filters,
@@ -20,7 +20,7 @@ impl DbOperation<Vec<Person>> for PersonQuery {
         self,
         db_conn: &mut diesel::PgConnection,
     ) -> crate::result::ScamplersResult<Vec<Person>> {
-        let mut stmt = init_stmt!(stmt = person::table.inner_join(institution::table), query = &self, output_type = PersonSummaryWithParents, orderby_spec = {PersonOrderBy::Name => person::name, PersonOrderBy::Email => person::email });
+        let mut stmt = init_stmt!(PersonSummaryWithParents, query = &self, orderby_spec = {PersonOrderBy::Name => person::name, PersonOrderBy::Email => person::email });
 
         let Self {
             ids,

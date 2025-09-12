@@ -1,6 +1,6 @@
 pub use common::{NewChipLoadingCommon, NewChromiumRunCommon, NewGemsCommon};
 #[cfg(feature = "app")]
-use diesel::Associations;
+use diesel::{Associations, prelude::*};
 pub use ocm::{NewOcmChromiumRun, NewOcmGems};
 pub use pool_multiplex::{
     NewPoolMultiplexChipLoading, NewPoolMultiplexChromiumRun, NewPoolMultiplexGems,
@@ -10,6 +10,8 @@ use pyo3::prelude::*;
 #[cfg(feature = "python")]
 use pyo3_stub_gen::impl_stub_type;
 use scamplers_macros::{base_model, db_query, db_selection};
+#[cfg(feature = "app")]
+use scamplers_schema::{chromium_run, tenx_assay};
 pub use singleplex::{NewSingleplexChipLoading, NewSingleplexChromiumRun, NewSingleplexGems};
 use time::OffsetDateTime;
 use uuid::Uuid;
@@ -48,7 +50,7 @@ impl_stub_type!(
 );
 
 #[db_selection]
-#[cfg_attr(feature = "app", diesel(table_name = scamplers_schema::chromium_run))]
+#[cfg_attr(feature = "app", diesel(table_name = chromium_run, base_query = chromium_run::table.inner_join(tenx_assay::table)))]
 pub struct ChromiumRunSummaryWithParents {
     pub id: Uuid,
     #[cfg_attr(target_arch = "wasm32", wasm_bindgen(skip))]

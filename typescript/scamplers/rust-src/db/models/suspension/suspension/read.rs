@@ -1,5 +1,5 @@
 use diesel::prelude::*;
-use scamplers_schema::{multiplexing_tag, specimen, suspension};
+use scamplers_schema::suspension;
 
 use crate::{
     apply_eq_any_filters, attach_children_to_parents,
@@ -18,11 +18,7 @@ impl DbOperation<Vec<Suspension>> for SuspensionQuery {
         mut self,
         db_conn: &mut PgConnection,
     ) -> crate::result::ScamplersResult<Vec<Suspension>> {
-        let base_stmt = suspension::table
-            .inner_join(specimen::table)
-            .left_join(multiplexing_tag::table);
-
-        let mut stmt = init_stmt!(stmt = base_stmt, query = &self, output_type = SuspensionSummaryWithParents, orderby_spec = { SuspensionOrderBy::CreatedAt => suspension::created_at, SuspensionOrderBy::ReadableId => suspension::readable_id });
+        let mut stmt = init_stmt!(SuspensionSummaryWithParents, query = &self, orderby_spec = { SuspensionOrderBy::CreatedAt => suspension::created_at, SuspensionOrderBy::ReadableId => suspension::readable_id });
 
         if let Some(specimen_query) = self.specimen.take() {
             stmt = crate::apply_specimen_query!(stmt, specimen_query);

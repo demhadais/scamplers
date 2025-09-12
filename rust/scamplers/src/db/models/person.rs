@@ -1,3 +1,5 @@
+#[cfg(feature = "app")]
+use diesel::prelude::*;
 #[cfg(feature = "python")]
 use pyo3::prelude::*;
 #[cfg(feature = "python")]
@@ -7,7 +9,7 @@ use scamplers_macros::{
     db_simple_enum, db_update,
 };
 #[cfg(feature = "app")]
-use scamplers_schema::person;
+use scamplers_schema::{institution, person};
 use uuid::Uuid;
 use valid_string::ValidString;
 #[cfg(target_arch = "wasm32")]
@@ -101,7 +103,7 @@ pub struct PersonSummary {
 }
 
 #[db_selection]
-#[cfg_attr(feature = "app", diesel(table_name = person))]
+#[cfg_attr(feature = "app", diesel(table_name = person, base_query = person::table.inner_join(institution::table)))]
 pub struct PersonSummaryWithParents {
     #[cfg_attr(feature = "app", diesel(column_name = id))]
     pub id_: Uuid,

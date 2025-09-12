@@ -30,10 +30,9 @@ impl AsIlike for &Vec<String> {
 
 #[macro_export]
 macro_rules! init_stmt {
-    (stmt = $stmt_base:expr, query = $query:expr, output_type = $output_struct:ident, orderby_spec = {$($enum_variant:path => $db_col:expr),*}) => {
+    ($select:ident, query = $query:expr, orderby_spec = {$($enum_variant:path => $db_col:expr),*}) => {
         {
-            let mut stmt = $stmt_base
-            .select($output_struct::as_select())
+            let mut stmt = $select::query()
             .limit($query.pagination.limit)
             .offset($query.pagination.offset)
             .into_boxed();

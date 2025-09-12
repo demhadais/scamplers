@@ -1,5 +1,5 @@
 use diesel::prelude::*;
-use scamplers_schema::{lab, person, specimen};
+use scamplers_schema::specimen;
 
 use crate::{
     apply_eq_any_filters, attach_children_to_parents,
@@ -64,13 +64,7 @@ macro_rules! apply_specimen_query {
 
 impl DbOperation<Vec<Specimen>> for SpecimenQuery {
     fn execute(self, db_conn: &mut PgConnection) -> crate::result::ScamplersResult<Vec<Specimen>> {
-        let submitter_join_condition = specimen::submitted_by.eq(person::id);
-
-        let base_stmt = specimen::table
-            .inner_join(lab::table)
-            .inner_join(person::table.on(submitter_join_condition));
-
-        let mut stmt = init_stmt!(stmt = base_stmt, query = &self, output_type = SpecimenSummaryWithParents, orderby_spec = { SpecimenOrderBy::Name => specimen::name, SpecimenOrderBy::ReadableId => specimen::readable_id, SpecimenOrderBy::ReceivedAt => specimen::received_at });
+        let mut stmt = init_stmt!(SpecimenSummaryWithParents, query = &self, orderby_spec = { SpecimenOrderBy::Name => specimen::name, SpecimenOrderBy::ReadableId => specimen::readable_id, SpecimenOrderBy::ReceivedAt => specimen::received_at });
 
         stmt = apply_specimen_query!(stmt, self);
 
