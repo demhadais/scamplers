@@ -1,8 +1,12 @@
+#[cfg(feature = "app")]
+use diesel::prelude::*;
 #[cfg(feature = "python")]
 use pyo3::prelude::*;
 use scamplers_macros::{
     Jsonify, PyJsonify, WasmJsonify, base_model, db_insertion, db_query, db_selection, db_update,
 };
+#[cfg(feature = "app")]
+use scamplers_schema::{lab, person};
 use uuid::Uuid;
 use valid_string::ValidString;
 #[cfg(target_arch = "wasm32")]
@@ -66,7 +70,7 @@ pub struct LabSummary {
 }
 
 #[db_selection]
-#[cfg_attr(feature = "app", diesel(table_name = scamplers_schema::lab))]
+#[cfg_attr(feature = "app", diesel(table_name = lab, base_query=lab::table.inner_join(person::table)))]
 pub struct LabSummaryWithParents {
     // We include the ID even though it's already in `LabSummary` so that we can have
     // `diesel::Identifiable` on this struct

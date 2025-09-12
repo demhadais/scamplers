@@ -16,12 +16,18 @@ use regex::Regex;
 use scamplers_macros::{
     Jsonify, PyJsonify, base_model, db_insertion, db_json, db_query, db_selection,
 };
+#[cfg(feature = "app")]
+use scamplers_schema::{
+    cdna, chip_loading, chromium_dataset, chromium_dataset_libraries, lab, library,
+};
 use time::OffsetDateTime;
 use uuid::Uuid;
 use valid_string::ValidString;
 #[cfg(target_arch = "wasm32")]
 use wasm_bindgen::prelude::*;
 
+#[cfg(feature = "app")]
+use crate::db::models::nucleic_acid::common::gems_to_assay;
 #[cfg(not(target_arch = "wasm32"))]
 use crate::result::DatasetMetricsFileParseError;
 use crate::{
@@ -475,7 +481,7 @@ impl_stub_type!(
 );
 
 #[db_selection]
-#[cfg_attr(feature = "app", diesel(table_name = scamplers_schema::chromium_dataset))]
+#[cfg_attr(feature = "app", diesel(table_name = chromium_dataset, base_query = chromium_dataset::table.inner_join(lab::table).inner_join(chromium_dataset_libraries::table.inner_join(library::table.inner_join(cdna::table.inner_join(gems_to_assay().inner_join(chip_loading::table)))))))]
 pub struct ChromiumDatasetSummary {
     pub id: Uuid,
     #[cfg_attr(target_arch = "wasm32", wasm_bindgen(readonly))]

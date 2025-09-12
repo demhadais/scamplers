@@ -1,5 +1,5 @@
 use diesel::prelude::*;
-use scamplers_schema::{chromium_run, tenx_assay};
+use scamplers_schema::chromium_run;
 
 use crate::{
     apply_eq_any_filters, apply_eq_filters, apply_ilike_filters, apply_tenx_assay_query,
@@ -20,9 +20,8 @@ impl DbOperation<Vec<ChromiumRun>> for ChromiumRunQuery {
         db_conn: &mut diesel::PgConnection,
     ) -> crate::result::ScamplersResult<Vec<ChromiumRun>> {
         let mut stmt = init_stmt!(
-            stmt = chromium_run::table.inner_join(tenx_assay::table),
+            ChromiumRunSummaryWithParents,
             query = &self,
-            output_type = ChromiumRunSummaryWithParents,
             orderby_spec = { ChromiumRunOrderBy::RunAt => chromium_run::run_at }
         );
 

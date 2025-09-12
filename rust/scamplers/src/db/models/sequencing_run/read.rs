@@ -18,9 +18,7 @@ impl DbOperation<Vec<SequencingRun>> for SequencingRunQuery {
         self,
         db_conn: &mut diesel::PgConnection,
     ) -> crate::result::ScamplersResult<Vec<SequencingRun>> {
-        let base_stmt = sequencing_run::table;
-
-        let mut stmt = init_stmt!(stmt = base_stmt, query = &self, output_type = SequencingRunSummary, orderby_spec = { SequencingRunOrderBy::BegunAt => sequencing_run::begun_at, SequencingRunOrderBy::FinishedAt => sequencing_run::finished_at, SequencingRunOrderBy::ReadableId => sequencing_run::readable_id });
+        let mut stmt = init_stmt!(SequencingRunSummary, query = &self, orderby_spec = { SequencingRunOrderBy::BegunAt => sequencing_run::begun_at, SequencingRunOrderBy::FinishedAt => sequencing_run::finished_at, SequencingRunOrderBy::ReadableId => sequencing_run::readable_id });
 
         let Self { ids, .. } = &self;
 

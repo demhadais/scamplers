@@ -59,8 +59,8 @@ impl DbOperation<Vec<TenxAssay>> for TenxAssayQuery {
         db_conn: &mut diesel::PgConnection,
     ) -> crate::result::ScamplersResult<Vec<TenxAssay>> {
         let mut stmt = init_stmt!(
-            stmt = tenx_assay::table,
-            query = self, output_type = TenxAssay,
+            TenxAssay,
+            query = self,
             orderby_spec = {
                 TenxAssayOrderBy::Name => tenx_assay::name,
                 TenxAssayOrderBy::LibraryTypes => tenx_assay::library_types

@@ -7,6 +7,8 @@ use pyo3_stub_gen::{derive::gen_stub_pymethods, impl_stub_type};
 use scamplers_macros::{
     Jsonify, PyJsonify, WasmJsonify, base_model, db_query, db_selection, db_simple_enum,
 };
+#[cfg(feature = "app")]
+use scamplers_schema::{lab, person, specimen};
 use time::OffsetDateTime;
 use uuid::Uuid;
 #[cfg(target_arch = "wasm32")]
@@ -135,7 +137,7 @@ impl SpecimenSummary {
 }
 
 #[db_selection]
-#[cfg_attr(feature = "app", diesel(table_name = scamplers_schema::specimen))]
+#[cfg_attr(feature = "app", diesel(table_name = specimen, base_query = specimen::table.inner_join(lab::table).inner_join(person::table.on(specimen::submitted_by.eq(person::id)))))]
 pub struct SpecimenSummaryWithParents {
     #[cfg_attr(feature = "app", diesel(column_name = id))]
     pub id_: Uuid,

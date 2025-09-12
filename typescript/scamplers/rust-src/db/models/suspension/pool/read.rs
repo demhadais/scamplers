@@ -21,9 +21,7 @@ impl DbOperation<Vec<SuspensionPool>> for SuspensionPoolQuery {
         self,
         db_conn: &mut diesel::PgConnection,
     ) -> crate::result::ScamplersResult<Vec<SuspensionPool>> {
-        let base_stmt = suspension_pool::table;
-
-        let mut stmt = init_stmt!(stmt = base_stmt, query = &self, output_type = SuspensionPoolSummary, orderby_spec = { SuspensionPoolOrderBy::Name => suspension_pool::name, SuspensionPoolOrderBy::PooledAt => suspension_pool::pooled_at, SuspensionPoolOrderBy::ReadableId => suspension_pool::readable_id });
+        let mut stmt = init_stmt!(SuspensionPoolSummary, query = &self, orderby_spec = { SuspensionPoolOrderBy::Name => suspension_pool::name, SuspensionPoolOrderBy::PooledAt => suspension_pool::pooled_at, SuspensionPoolOrderBy::ReadableId => suspension_pool::readable_id });
 
         let Self { ids, .. } = &self;
 

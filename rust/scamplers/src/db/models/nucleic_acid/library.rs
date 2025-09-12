@@ -8,7 +8,7 @@ use scamplers_macros::{
     Jsonify, PyJsonify, WasmJsonify, base_model, db_insertion, db_json, db_query, db_selection,
 };
 #[cfg(feature = "app")]
-use scamplers_schema::library_preparers;
+use scamplers_schema::{cdna, library, library_preparers};
 use time::OffsetDateTime;
 use uuid::Uuid;
 use valid_string::ValidString;
@@ -152,7 +152,7 @@ pub struct LibrarySummary {
 }
 
 #[db_selection]
-#[cfg_attr(feature = "app", diesel(table_name = scamplers_schema::library))]
+#[cfg_attr(feature = "app", diesel(table_name = library, base_query = library::table.inner_join(cdna::table)))]
 pub struct LibrarySummaryWithParents {
     #[cfg_attr(feature = "app", diesel(column_name = id))]
     pub id_: Uuid,

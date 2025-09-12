@@ -18,9 +18,7 @@ impl DbOperation<Vec<Library>> for LibraryQuery {
         self,
         db_conn: &mut diesel::PgConnection,
     ) -> crate::result::ScamplersResult<Vec<Library>> {
-        let base_stmt = library::table.inner_join(cdna::table);
-
-        let mut stmt = init_stmt!(stmt = base_stmt, query = &self, output_type = LibrarySummaryWithParents, orderby_spec = {LibraryOrderBy::PreparedAt => library::prepared_at, LibraryOrderBy::ReadableId => library::readable_id});
+        let mut stmt = init_stmt!(LibrarySummaryWithParents, query = &self, orderby_spec = {LibraryOrderBy::PreparedAt => library::prepared_at, LibraryOrderBy::ReadableId => library::readable_id});
 
         let Self {
             ids, library_types, ..

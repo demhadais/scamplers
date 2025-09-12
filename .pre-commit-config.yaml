@@ -34,7 +34,7 @@ repos:
         exclude: ^db/migrations/00000000000000_diesel_initial_setup/down\.sql|migrations/0009_library-type-specification/up\.sql$
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.12.11
+    rev: v0.13.0
     hooks:
       - id: ruff-check
         args: [--fix]

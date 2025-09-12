@@ -11,7 +11,7 @@ use crate::{
 
 impl DbOperation<Vec<Institution>> for InstitutionQuery {
     fn execute(self, db_conn: &mut diesel::PgConnection) -> ScamplersResult<Vec<Institution>> {
-        let mut stmt = init_stmt!(stmt = institution::table, query = &self, output_type = Institution, orderby_spec = { InstitutionOrderBy::Name => institution::name });
+        let mut stmt = init_stmt!(Institution, query = &self, orderby_spec = { InstitutionOrderBy::Name => institution::name });
 
         let Self { ids, names, .. } = &self;
 

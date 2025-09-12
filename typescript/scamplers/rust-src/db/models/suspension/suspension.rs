@@ -6,7 +6,7 @@ use pyo3::prelude::*;
 use pyo3_stub_gen::derive::gen_stub_pymethods;
 use scamplers_macros::{base_model, db_insertion, db_json, db_query, db_selection};
 #[cfg(feature = "app")]
-use scamplers_schema::suspension_preparers;
+use scamplers_schema::{multiplexing_tag, specimen, suspension, suspension_preparers};
 use time::OffsetDateTime;
 use uuid::Uuid;
 use valid_string::ValidString;
@@ -138,7 +138,7 @@ impl NewSuspension {
 
 #[db_selection]
 #[cfg_attr(feature = "app", derive(Associations))]
-#[cfg_attr(feature = "app", diesel(table_name = scamplers_schema::suspension, belongs_to(SuspensionPoolSummary, foreign_key = pooled_into)))]
+#[cfg_attr(feature = "app", diesel(table_name = suspension, belongs_to(SuspensionPoolSummary, foreign_key = pooled_into)))]
 pub struct SuspensionSummary {
     pub id: Uuid,
     #[cfg_attr(target_arch = "wasm32", wasm_bindgen(readonly))]
@@ -154,7 +154,7 @@ pub struct SuspensionSummary {
 }
 
 #[db_selection]
-#[cfg_attr(feature = "app", diesel(table_name = scamplers_schema::suspension))]
+#[cfg_attr(feature = "app", diesel(table_name = suspension, base_query = suspension::table.inner_join(specimen::table).inner_join(multiplexing_tag::table)))]
 pub struct SuspensionSummaryWithParents {
     #[cfg_attr(feature = "app", diesel(column_name = id))]
     pub id_: Uuid,

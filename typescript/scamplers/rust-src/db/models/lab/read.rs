@@ -23,7 +23,7 @@ impl DbOperation<Vec<Lab>> for LabQuery {
             member_id: Uuid,
         }
 
-        let mut stmt = init_stmt!(stmt = lab::table.inner_join(person::table), query = &self, output_type = LabSummaryWithParents, orderby_spec = { LabOrderBy::Name => lab::name });
+        let mut stmt = init_stmt!(LabSummaryWithParents, query = &self, orderby_spec = { LabOrderBy::Name => lab::name });
 
         let Self { ids, names, .. } = &self;
 

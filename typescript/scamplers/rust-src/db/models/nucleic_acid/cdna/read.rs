@@ -17,11 +17,9 @@ impl DbOperation<Vec<Cdna>> for CdnaQuery {
         self,
         db_conn: &mut diesel::PgConnection,
     ) -> crate::result::ScamplersResult<Vec<Cdna>> {
-        let base_stmt = cdna::table;
-
         let mut stmt = init_stmt!(
-            stmt = base_stmt,
-            query = &self, output_type = CdnaSummary,
+            CdnaSummary,
+            query = &self,
             orderby_spec = {
                 CdnaOrderBy::PreparedAt => cdna::prepared_at,
                 CdnaOrderBy::ReadableId => cdna::readable_id

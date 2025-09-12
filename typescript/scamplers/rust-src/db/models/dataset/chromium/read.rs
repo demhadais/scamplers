@@ -1,7 +1,5 @@
 use diesel::prelude::*;
-use scamplers_schema::{
-    cdna, chip_loading, chromium_dataset, chromium_dataset_libraries, lab, library,
-};
+use scamplers_schema::{chip_loading, chromium_dataset};
 
 use crate::{
     apply_eq_any_filters, apply_ilike_filters, apply_tenx_assay_query, apply_time_filters,
@@ -14,7 +12,6 @@ use crate::{
                 ChromiumDataset, ChromiumDatasetId, ChromiumDatasetLibrary, ChromiumDatasetOrderBy,
                 ChromiumDatasetQuery, ChromiumDatasetSummary,
             },
-            nucleic_acid::common::gems_to_assay,
             suspension::suspension::SuspensionQuery,
         },
     },
@@ -51,16 +48,9 @@ impl DbOperation<Vec<ChromiumDataset>> for ChromiumDatasetQuery {
                 None
             };
 
-        let base_stmt = chromium_dataset::table.inner_join(lab::table).inner_join(
-            chromium_dataset_libraries::table.inner_join(library::table.inner_join(
-                cdna::table.inner_join(gems_to_assay().inner_join(chip_loading::table)),
-            )),
-        );
-
         let mut stmt = init_stmt!(
-            stmt = base_stmt,
+            ChromiumDatasetSummary,
             query = &self,
-            output_type = ChromiumDatasetSummary,
             orderby_spec = {
                 ChromiumDatasetOrderBy::DeliveredAt => chromium_dataset::delivered_at,
                 ChromiumDatasetOrderBy::Name => chromium_dataset::name
