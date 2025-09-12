@@ -355,6 +355,7 @@ mod tests {
         field2: Option<String>,
         field3: Uuid,
         field4: OffsetDateTime,
+        field5: Vec<Option<i32>>,
     }
 
     impl Jsonify for Data {}
@@ -366,6 +367,7 @@ mod tests {
             field2: Some("bar".to_string()),
             field3: Uuid::now_v7(),
             field4: OffsetDateTime::now_utc(),
+            field5: vec![Some(42), None, None, Some(42)],
         }
     }
 

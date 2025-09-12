@@ -273,9 +273,10 @@ impl FromRequestParts<AppState> for Frontend {
 #[cfg(test)]
 mod tests {
     use pretty_assertions::assert_eq;
+    use rstest::rstest;
 
     use super::ApiKey;
-    #[test]
+    #[rstest]
     fn api_key_prefix_matches_hash_prefix() {
         let api_key = ApiKey::new();
         let hashed = api_key.hash();
