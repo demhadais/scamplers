@@ -113,7 +113,7 @@ An [OpenAPI](https://www.openapis.org) specification will be generated, but for 
   ```json
   {"names": ["ahmed", "said"]}
   ```
-  means "look for people whose name contains any of 'ahmed' or 'said' case-insensitively
+  means "look for people whose name contains any of 'ahmed' or 'said' case-insensitively"
 - an empty array means "don't filter by this field"
 - all parameters are strings
 ### **Endpoints**
