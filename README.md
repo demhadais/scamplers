@@ -129,7 +129,7 @@ An [OpenAPI](https://www.openapis.org) specification will be generated, but for 
 - [`/chromium-runs`](#institutions)
 - [`/cdna`](#cdna-incomplete)
 - [`/libraries`](#libraries-incomplete)
-- [`/chromium-datasets`](#chromium-datasets)
+- [`/chromium-datasets`](#chromium-datasets-incomplete)
 ### **Institutions**
 ```jsonc
 {
