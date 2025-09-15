@@ -138,7 +138,7 @@ An [OpenAPI](https://www.openapis.org) specification will be generated, but for 
   "names": [],
   // array of `OrderBy` objects
   "order_by": [{ "field": "name", "descending": false }],
-  // array of `Pagination` objects
+  // Pagination object
   "pagination": { "limit": 500, "offset": 0 },
 }
 ```
@@ -153,7 +153,7 @@ An [OpenAPI](https://www.openapis.org) specification will be generated, but for 
   "ms_user_ids": [],
   // array of `OrderBy` objects
   "order_by": [{ "field": "name", "descending": false }],
-  // array of `Pagination` objects
+  // Pagination object
   "pagination": { "limit": 500, "offset": 0 },
 }
 ```
@@ -165,7 +165,7 @@ An [OpenAPI](https://www.openapis.org) specification will be generated, but for 
   "names": [],
   // array of `OrderBy` objects
   "order_by": [{ "field": "name", "descending": false }],
-  // array of `Pagination` objects
+  // Pagination object
   "pagination": { "limit": 500, "offset": 0 },
 }
 ```
@@ -195,7 +195,7 @@ An [OpenAPI](https://www.openapis.org) specification will be generated, but for 
   "cryopreserved": null,
   // array of `OrderBy` objects
   "order_by": [{ "field": "received_at", "descending": false }],
-  // array of `Pagination` objects
+  // Pagination object
   "pagination": { "limit": 500, "offset": 0 },
 }
 ```
@@ -206,7 +206,7 @@ An [OpenAPI](https://www.openapis.org) specification will be generated, but for 
   "ids": [],
   // array of `OrderBy` objects
   "order_by": [{ "field": "begun_at", "descending": false }],
-  // array of `Pagination` objects
+  // Pagination object
   "pagination": { "limit": 500, "offset": 0 },
 }
 ```
@@ -223,11 +223,11 @@ An [OpenAPI](https://www.openapis.org) specification will be generated, but for 
   "chromium_chips": [],
   // array of `OrderBy` objects
   "order_by": [{ "field": "name", "descending": false }],
-  // array of `Pagination` objects
+  // Pagination object
   "pagination": { "limit": 500, "offset": 0 },
 }
 ```
-A [10x Genomics Chromium](https://www.10xgenomics.com/platforms/chromium) is defined in part by the combination of library types generated. A query like
+A [10x Genomics Chromium](https://www.10xgenomics.com/platforms/chromium) assay is defined in part by the combination of library types generated. A query like
 ```jsonc
 {
   "library_types": [
@@ -262,7 +262,7 @@ is equivalent to
   "specimen": null,
   // array of `OrderBy` objects
   "order_by": [{ "field": "created_at", "descending": false }],
-  // array of `Pagination` objects
+  // Pagination object
   "pagination": { "limit": 500, "offset": 0 },
 }
 ```
@@ -273,7 +273,7 @@ is equivalent to
   "ids": [],
   // array of `OrderBy` objects
   "order_by": [{ "field": "pooled_at", "descending": false }],
-  // array of `Pagination` objects
+  // Pagination object
   "pagination": { "limit": 500, "offset": 0 },
 }
 ```
@@ -294,7 +294,7 @@ is equivalent to
   "notes": [],
   // array of `OrderBy` objects
   "order_by": [{ "field": "run_at", "descending": false }],
-  // array of `Pagination` objects
+  // Pagination object
   "pagination": { "limit": 500, "offset": 0 },
 }
 ```
@@ -305,7 +305,7 @@ is equivalent to
   "ids": [],
   // array of `OrderBy` objects
   "order_by": [{ "field": "prepared_at", "descending": false }],
-  // array of `Pagination` objects
+  // Pagination object
   "pagination": { "limit": 500, "offset": 0 },
 }
 ```
@@ -317,7 +317,7 @@ is equivalent to
   "library_types": [],
   // array of `OrderBy` objects
   "order_by": [{ "field": "prepared_at", "descending": false }],
-  // array of `Pagination` objects
+  // Pagination object
   "pagination": { "limit": 500, "offset": 0 },
 }
 ```
@@ -339,7 +339,7 @@ is equivalent to
   "specimen": null,
   // array of `OrderBy` objects
   "order_by": [{ "field": "delivered_at", "descending": false }],
-  // array of `Pagination` objects
+  // Pagination object
   "pagination": { "limit": 500, "offset": 0 },
 }
 ```
