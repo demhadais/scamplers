@@ -119,17 +119,16 @@ An [OpenAPI](https://www.openapis.org) specification will be generated, but for 
 ### **Endpoints**
 - [`/institutions`](#institutions)
 - [`/people`](#people)
-- [`/people/{id}/specimens`]
 - [`/labs`](#labs)
 - [`/specimens`](#specimens)
 - [`/sequencing-runs`](#sequencing-runs-(incomplete))
 - [`/10x-assays`](#10x-assays)
 - [`/multiplexing-tags`](#multiplexing-tags)
-- [`/suspensions`](#suspensions)
-- [`/suspension-pools`](#suspension-pools)
+- [`/suspensions`](#suspensions-(incomplete))
+- [`/suspension-pools`](#suspension-pools-(incomplete))
 - [`/chromium-runs`](#institutions)
-- [`/cdna`](#cdna)
-- [`/libraries`](#libraries)
+- [`/cdna`](#cdna-(incomplete))
+- [`/libraries`](#libraries-(incomplete))
 - [`/chromium-datasets`](#chromium-datasets)
 ### **Institutions**
 ```jsonc
@@ -137,7 +136,7 @@ An [OpenAPI](https://www.openapis.org) specification will be generated, but for 
   // array of UUIDs
   "ids": [],
   "names": [],
-  // array of `OrderBy` objects. These will be omitted in the rest of the queries
+  // array of `OrderBy` objects
   "order_by": [{ "field": "name", "descending": false }],
   // array of `Pagination` objects
   "pagination": { "limit": 500, "offset": 0 },
@@ -152,7 +151,10 @@ An [OpenAPI](https://www.openapis.org) specification will be generated, but for 
   "emails": [],
   "orcids": [],
   "ms_user_ids": [],
-  ...
+  // array of `OrderBy` objects
+  "order_by": [{ "field": "name", "descending": false }],
+  // array of `Pagination` objects
+  "pagination": { "limit": 500, "offset": 0 },
 }
 ```
 ### **Labs**
@@ -161,7 +163,10 @@ An [OpenAPI](https://www.openapis.org) specification will be generated, but for 
   // array of UUIDs (encoded as strings)
   "ids": [],
   "names": [],
-  ...
+  // array of `OrderBy` objects
+  "order_by": [{ "field": "name", "descending": false }],
+  // array of `Pagination` objects
+  "pagination": { "limit": 500, "offset": 0 },
 }
 ```
 ### **Specimens**
@@ -188,7 +193,10 @@ An [OpenAPI](https://www.openapis.org) specification will be generated, but for 
   "frozen": null,
   // optional boolean
   "cryopreserved": null,
-  ...
+  // array of `OrderBy` objects
+  "order_by": [{ "field": "received_at", "descending": false }],
+  // array of `Pagination` objects
+  "pagination": { "limit": 500, "offset": 0 },
 }
 ```
 ### **Sequencing runs (incomplete)**
@@ -196,7 +204,10 @@ An [OpenAPI](https://www.openapis.org) specification will be generated, but for 
 {
   // array of UUIDs (encoded as strings)
   "ids": [],
-  ...
+  // array of `OrderBy` objects
+  "order_by": [{ "field": "begun_at", "descending": false }],
+  // array of `Pagination` objects
+  "pagination": { "limit": 500, "offset": 0 },
 }
 ```
 ### **10x Assays**
@@ -210,7 +221,10 @@ An [OpenAPI](https://www.openapis.org) specification will be generated, but for 
   "sample_multiplexing": [],
   "chemistry_versions": [],
   "chromium_chips": [],
-  ...
+  // array of `OrderBy` objects
+  "order_by": [{ "field": "name", "descending": false }],
+  // array of `Pagination` objects
+  "pagination": { "limit": 500, "offset": 0 },
 }
 ```
 A [10x Genomics Chromium](https://www.10xgenomics.com/platforms/chromium) is defined in part by the combination of library types generated. A query like
@@ -246,7 +260,10 @@ is equivalent to
   "ids": [],
   // optional SpecimenQuery object, as shown above
   "specimen": null,
-  ...
+  // array of `OrderBy` objects
+  "order_by": [{ "field": "created_at", "descending": false }],
+  // array of `Pagination` objects
+  "pagination": { "limit": 500, "offset": 0 },
 }
 ```
 ### **Suspension pools (incomplete)**
@@ -254,7 +271,10 @@ is equivalent to
 {
   // array of UUIDs (encoded as strings)
   "ids": [],
-  ...
+  // array of `OrderBy` objects
+  "order_by": [{ "field": "pooled_at", "descending": false }],
+  // array of `Pagination` objects
+  "pagination": { "limit": 500, "offset": 0 },
 }
 ```
 ### **Chromium runs**
@@ -272,7 +292,10 @@ is equivalent to
   // optional boolean
   "succeeded": null,
   "notes": [],
-  ...
+  // array of `OrderBy` objects
+  "order_by": [{ "field": "run_at", "descending": false }],
+  // array of `Pagination` objects
+  "pagination": { "limit": 500, "offset": 0 },
 }
 ```
 ### **cDNA (incomplete)**
@@ -280,7 +303,10 @@ is equivalent to
 {
   // array of UUIDs (encoded as strings)
   "ids": [],
-  ...
+  // array of `OrderBy` objects
+  "order_by": [{ "field": "prepared_at", "descending": false }],
+  // array of `Pagination` objects
+  "pagination": { "limit": 500, "offset": 0 },
 }
 ```
 ### **Libraries (incomplete)**
@@ -289,7 +315,10 @@ is equivalent to
   // array of UUIDs (encoded as strings)
   "ids": [],
   "library_types": [],
-  ...
+  // array of `OrderBy` objects
+  "order_by": [{ "field": "prepared_at", "descending": false }],
+  // array of `Pagination` objects
+  "pagination": { "limit": 500, "offset": 0 },
 }
 ```
 ### **Chromium Datasets (incomplete)**
@@ -306,7 +335,11 @@ is equivalent to
   "delivered_after": null,
   // optional TenxAssayQuery object, as shown above
   "tenx_assay": null,
+  // optional SpecimenQuery object, as shown above
   "specimen": null,
-  ...
+  // array of `OrderBy` objects
+  "order_by": [{ "field": "delivered_at", "descending": false }],
+  // array of `Pagination` objects
+  "pagination": { "limit": 500, "offset": 0 },
 }
 ```
