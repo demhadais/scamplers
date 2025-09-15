@@ -107,7 +107,7 @@ with httpx.Client() as client:
     )
 ```
 ## **API specification**
-An [OpenAPI](https://www.openapis.org) specification will be generated, but for now, here is a list of endpoints and an example query. Note the following behaviors, which apply to all parameters for all endpoints unless otherwise specified:
+The following is a list of endpionts an the default query for each endpoint. Note the following behaviors, which apply to all parameters for all endpoints unless otherwise specified:
 - an array means "match **any** of the following values"
 - strings are searched as case-insensitive substrings. For example:
   ```json
