@@ -1,21 +1,22 @@
-import pytest
 import maturin_import_hook
+import pytest
 
 maturin_import_hook.install()
 
 from scamplepy import ScamplersClient
+
 from .test_requests import (
-    new_cellranger_count_dataset,
     # new_cellranger_multi_dataset,
     # new_cellrangeratac_count_dataset,
     new_cdna_group,
+    new_cellranger_count_dataset,
     new_cryopreserved_tissue,
     new_fixed_block,
     new_fixed_tissue,
     new_frozen_block,
     new_frozen_tissue,
-    new_singleplex_chromium_run,
     new_library,
+    new_singleplex_chromium_run,
 )
 
 # This is to prevent ruff from removing "unused imports"

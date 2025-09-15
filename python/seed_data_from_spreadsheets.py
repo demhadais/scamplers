@@ -1,8 +1,8 @@
-from pathlib import Path
 import csv
 import json
-from copy import deepcopy
 import sys
+from copy import deepcopy
+from pathlib import Path
 
 # A mapping of our homemade names to the names 10x uses in their product offerings. Right now, this is a minimal list containing the assays we perform as of September 2025.
 MAP = {
@@ -121,7 +121,7 @@ library_types = "Chromium(Library Types).csv"
 assays = "Chromium(Assays).csv"
 
 library_types, assays = [
-    list(csv.DictReader(((base / p).read_text().removeprefix("\ufeff").splitlines())))
+    list(csv.DictReader((base / p).read_text().removeprefix("\ufeff").splitlines()))
     for p in (library_types, assays)
 ]
 
@@ -153,13 +153,13 @@ for assay in assays:
                 .replace(" ", "_"),
                 "index_kit": library_spec["Index Kit"],
                 "cdna_volume_µl": int(
-                    library_spec["Pre-amplification/cDNA Volume (μl)"]
+                    library_spec["Pre-amplification/cDNA Volume (μl)"],
                 ),
                 "library_volume_µl": int(library_spec["Library Volume (µl)"]),
-            }
+            },
         )
         updated_assay_spec["library_type_specifications"].sort(
-            key=lambda s: s["library_type"]
+            key=lambda s: s["library_type"],
         )
 
     output.append(updated_assay_spec)
@@ -177,5 +177,5 @@ print(
             ),
         ),
         ensure_ascii=False,
-    )
+    ),
 )
