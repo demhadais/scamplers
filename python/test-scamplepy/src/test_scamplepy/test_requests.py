@@ -1,66 +1,68 @@
+import json
 from collections.abc import Callable
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
-import pytest
+
 import maturin_import_hook
-import json
+import pytest
 
 maturin_import_hook.install()
+
+from uuid import UUID
 
 from scamplepy.common import (
     BiologicalMaterial,
     CellCountingMethod,
+    ElectrophoreticMeasurementData,
     LengthUnit,
     LibraryMeasurementData,
     LibraryType,
     MassUnit,
+    NucleicAcidConcentration,
     SuspensionMeasurementFields,
     VolumeUnit,
-    ElectrophoreticMeasurementData,
-    NucleicAcidConcentration,
 )
 from scamplepy.create import (
+    BlockFixative,
     ComplianceCommitteeType,
+    FixedBlockEmbeddingMatrix,
+    FrozenBlockEmbeddingMatrix,
+    NewCdna,
     NewCdnaGroup,
+    NewCdnaMeasurement,
     NewCellrangerCountDataset,
+    NewCommitteeApproval,
+    NewCryopreservedTissue,
+    NewFixedBlock,
+    NewFixedTissue,
+    NewFrozenBlock,
+    NewFrozenTissue,
+    NewInstitution,
+    NewLab,
     NewLibrary,
     NewLibraryMeasurement,
-    NewSingleplexChipLoading,
-    NewSuspensionMeasurement,
-    FrozenBlockEmbeddingMatrix,
-    NewCommitteeApproval,
-    NewInstitution,
+    NewOcmChromiumRun,
     NewOcmGems,
     NewPerson,
-    NewLab,
-    NewFixedBlock,
-    NewFrozenBlock,
-    NewCryopreservedTissue,
-    NewFixedTissue,
-    NewFrozenTissue,
     NewPoolMultiplexChromiumRun,
     NewPoolMultiplexGems,
+    NewSingleplexChipLoading,
+    NewSingleplexChromiumRun,
     NewSingleplexGems,
     NewSpecimenMeasurement,
-    NewVirtualSpecimen,
     NewSuspension,
-    NewSingleplexChromiumRun,
-    NewOcmChromiumRun,
-    NewCdna,
-    NewCdnaMeasurement,
-    FixedBlockEmbeddingMatrix,
-    BlockFixative,
-    SingleRowCsvMetricsFile,
-    SpecimenMeasurementData,
-    TissueFixative,
-    SuspensionFixative,
-    Species,
-    UserRole,
+    NewSuspensionMeasurement,
     NewSuspensionPool,
     NewSuspensionPoolMeasurement,
+    NewVirtualSpecimen,
+    SingleRowCsvMetricsFile,
+    Species,
+    SpecimenMeasurementData,
+    SuspensionFixative,
+    TissueFixative,
+    UserRole,
 )
-from uuid import UUID
 
 ID = UUID(int=0)
 TIME = datetime(year=1999, month=1, day=1, tzinfo=UTC)
@@ -104,13 +106,17 @@ def new_lab(pi_id: UUID = ID) -> NewLab:
 
 def _specimen_dv200() -> SpecimenMeasurementData:
     return SpecimenMeasurementData.Dv200(
-        measured_at=TIME, instrument_name="mayonnaise", value=0.5
+        measured_at=TIME,
+        instrument_name="mayonnaise",
+        value=0.5,
     )
 
 
 def _specimen_rin() -> SpecimenMeasurementData:
     return SpecimenMeasurementData.Rin(
-        measured_at=TIME, instrument_name="mayonnaise", value=5
+        measured_at=TIME,
+        instrument_name="mayonnaise",
+        value=5,
     )
 
 
@@ -156,7 +162,8 @@ def new_frozen_block(person_id: UUID = ID, lab_id: UUID = ID) -> NewFrozenBlock:
 
 @pytest.fixture
 def new_cryopreserved_tissue(
-    person_id: UUID = ID, lab_id: UUID = ID
+    person_id: UUID = ID,
+    lab_id: UUID = ID,
 ) -> NewCryopreservedTissue:
     return NewCryopreservedTissue(
         readable_id="cryopreservedtissue",
@@ -227,13 +234,17 @@ def _suspension_mean_diameter() -> SuspensionMeasurementFields:
 
 def _suspension_viability() -> SuspensionMeasurementFields:
     return SuspensionMeasurementFields.Viability(
-        measured_at=TIME, value=0, instrument_name=""
+        measured_at=TIME,
+        value=0,
+        instrument_name="",
     )
 
 
 def _suspension_volume() -> SuspensionMeasurementFields:
     return SuspensionMeasurementFields.Volume(
-        measured_at=TIME, value=0, unit=VolumeUnit.Microliter
+        measured_at=TIME,
+        value=0,
+        unit=VolumeUnit.Microliter,
     )
 
 
@@ -251,7 +262,9 @@ def _new_suspension_measurements(
 ) -> list[NewSuspensionMeasurement]:
     return [
         NewSuspensionMeasurement(
-            measured_by=measured_by, data=m, is_post_hybridization=True
+            measured_by=measured_by,
+            data=m,
+            is_post_hybridization=True,
         )
         for m in _all_suspension_measurement_data_common()
     ]
@@ -286,7 +299,9 @@ def _new_suspension_pool_measurements(
 ) -> list[NewSuspensionPoolMeasurement]:
     return [
         NewSuspensionPoolMeasurement(
-            measured_by=measured_by, data=m, is_post_storage=True
+            measured_by=measured_by,
+            data=m,
+            is_post_storage=True,
         )
         for m in _all_suspension_measurement_data_common()
     ]
@@ -334,14 +349,15 @@ def new_singleplex_chromium_run(
                 suspension_id=suspension_id,
                 suspension_volume_loaded=_suspension_volume(),
                 buffer_volume_loaded=_suspension_volume(),
-            )
+            ),
         ],
     )
 
 
 @pytest.fixture
 def new_pool_multiplex_chromium_run(
-    run_by: UUID = ID, suspension_pool_id: UUID = ID
+    run_by: UUID = ID,
+    suspension_pool_id: UUID = ID,
 ) -> NewPoolMultiplexChromiumRun:
     return NewPoolMultiplexChromiumRun(
         readable_id="poolmultiplexchromiumrun",
@@ -355,14 +371,15 @@ def new_pool_multiplex_chromium_run(
                 suspension_pool_id=suspension_pool_id,
                 suspension_volume_loaded=_suspension_volume(),
                 buffer_volume_loaded=_suspension_volume(),
-            )
+            ),
         ],
     )
 
 
 @pytest.fixture
 def new_ocm_chromium_run(
-    run_by: UUID = ID, suspension_id: UUID = ID
+    run_by: UUID = ID,
+    suspension_id: UUID = ID,
 ) -> NewOcmChromiumRun:
     return NewOcmChromiumRun(
         readable_id="ocmchromiumrun",
@@ -378,9 +395,9 @@ def new_ocm_chromium_run(
                         suspension_id=suspension_id,
                         suspension_volume_loaded=_suspension_volume(),
                         buffer_volume_loaded=_suspension_volume(),
-                    )
+                    ),
                 ],
-            )
+            ),
         ],
     )
 
@@ -408,7 +425,7 @@ def _new_cdna(gems_id: UUID = ID, person_id: UUID = ID) -> NewCdna:
             NewCdnaMeasurement(
                 measured_by=person_id,
                 data=_electrophoretic_measurement_data(),
-            )
+            ),
         ],
         preparer_ids=[person_id],
     )
@@ -428,7 +445,8 @@ def _library_fluormetric_measurement() -> LibraryMeasurementData:
         measured_at=TIME,
         instrument_name="mayonnaise",
         concentration=NucleicAcidConcentration(
-            value=0, unit=(MassUnit.Picogram, VolumeUnit.Microliter)
+            value=0,
+            unit=(MassUnit.Picogram, VolumeUnit.Microliter),
         ),
     )
 
@@ -485,7 +503,8 @@ def new_library(cdna_id: UUID = ID, person_id: UUID = ID) -> NewLibrary:
 
 @pytest.fixture
 def new_cellranger_count_dataset(
-    lab_id: UUID = ID, gems_id: UUID = ID
+    lab_id: UUID = ID,
+    gems_id: UUID = ID,
 ) -> NewCellrangerCountDataset:
     ds = NewCellrangerCountDataset(
         name="",
