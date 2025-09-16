@@ -104,7 +104,7 @@ macro_rules! impl_basic_endpoints {
             ) -> reqwest::RequestBuilder {
                 use crate::db::models::Jsonify;
                 let path = <Self as Endpoint<$query, Vec<$response>>>::PATH;
-                client.get(format!("{base_url}{path}?{}", query.to_base64_json()))
+                client.get(format!("{base_url}{path}")).query(&["query", &query.to_base64_json()])
             }
         })?
 
@@ -142,7 +142,7 @@ macro_rules! impl_basic_endpoints {
                 use crate::db::models::Jsonify;
                 let path = <Self as Endpoint<($id, $relative_query), $relatives>>::PATH;
                 let path = path.replace("{id}", &id.to_string());
-                client.get(format!("{base_url}{path}?{}", relatives_query.to_base64_json()))
+                client.get(format!("{base_url}{path}")).query(&["query", &relatives_query.to_base64_json()])
             }
         })*
     };
@@ -268,7 +268,9 @@ impl Endpoint<CdnaQuery, Vec<Cdna>> for Api {
     ) -> reqwest::RequestBuilder {
         use crate::db::models::Jsonify;
         let path = <Self as Endpoint<CdnaQuery, Vec<Cdna>>>::PATH;
-        client.get(format!("{base_url}{path}?{}", query.to_base64_json()))
+        client
+            .get(format!("{base_url}{path}"))
+            .query(&["query", &query.to_base64_json()])
     }
 }
 
