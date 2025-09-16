@@ -1,4 +1,4 @@
-# **scamplers**
+# **[scamplers](https://ctscmongo01lp.jax.org)**
 [scamplers](https://ctscmongo01lp.jax.org) is a web application and RESTful API that aggregates, displays, and allows comprehensive querying of single-cell biological data.
 ### **Using the API**
 First, obtain an API key:
@@ -119,7 +119,7 @@ The following is a list of endpionts an the default query for each endpoint. Not
 ### **Endpoints**
 - [`/institutions`](#institutions)
 - [`/people`](#people)
-- [`/labs`](#labs)
+- [`/labs`](#labs-incomplete)
 - [`/specimens`](#specimens)
 - [`/sequencing-runs`](#sequencing-runs-incomplete)
 - [`/10x-assays`](#10x-assays)
@@ -150,6 +150,7 @@ The following is a list of endpionts an the default query for each endpoint. Not
   "names": [],
   "emails": [],
   "orcids": [],
+  // array of UUIDs (encoded as strings)
   "ms_user_ids": [],
   // array of `OrderBy` objects
   "order_by": [{ "field": "name", "descending": false }],
@@ -157,7 +158,7 @@ The following is a list of endpionts an the default query for each endpoint. Not
   "pagination": { "limit": 500, "offset": 0 },
 }
 ```
-### **Labs**
+### **Labs (incomplete)**
 ```jsonc
 {
   // array of UUIDs (encoded as strings)
@@ -253,7 +254,6 @@ is equivalent to
 {}
 ```
 ### **Suspensions (incomplete)**
-*incomplete*
 ```jsonc
 {
   // array of UUIDs (encoded as strings)
