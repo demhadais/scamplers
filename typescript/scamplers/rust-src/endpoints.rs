@@ -104,7 +104,7 @@ macro_rules! impl_basic_endpoints {
             ) -> reqwest::RequestBuilder {
                 use crate::db::models::Jsonify;
                 let path = <Self as Endpoint<$query, Vec<$response>>>::PATH;
-                client.get(format!("{base_url}{path}")).query(&["query", &query.to_base64_json()])
+                client.get(format!("{base_url}{path}")).query(&[("query", &query.to_base64_json())])
             }
         })?
 
@@ -142,7 +142,7 @@ macro_rules! impl_basic_endpoints {
                 use crate::db::models::Jsonify;
                 let path = <Self as Endpoint<($id, $relative_query), $relatives>>::PATH;
                 let path = path.replace("{id}", &id.to_string());
-                client.get(format!("{base_url}{path}")).query(&["query", &relatives_query.to_base64_json()])
+                client.get(format!("{base_url}{path}")).query(&[("query", &relatives_query.to_base64_json())])
             }
         })*
     };
@@ -270,7 +270,7 @@ impl Endpoint<CdnaQuery, Vec<Cdna>> for Api {
         let path = <Self as Endpoint<CdnaQuery, Vec<Cdna>>>::PATH;
         client
             .get(format!("{base_url}{path}"))
-            .query(&["query", &query.to_base64_json()])
+            .query(&[("query", &query.to_base64_json())])
     }
 }
 
@@ -324,5 +324,58 @@ impl Endpoint<NewPerson, CreatedUser> for Api {
                 <Self as Endpoint<NewPerson, CreatedUser>>::PATH
             ))
             .json(&data)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use std::fmt::Display;
+
+    use axum::{
+        Json,
+        extract::Path,
+        http::{Method, StatusCode},
+    };
+    use rstest::rstest;
+    use scamplers_macros::Jsonify;
+
+    use super::{Api, Endpoint};
+    use crate::extract::{Base64JsonQuery, ValidJsonBody};
+    #[derive(serde::Deserialize, serde::Serialize, Jsonify)]
+    struct Creation;
+    #[derive(serde::Deserialize, serde::Serialize, Jsonify)]
+    struct Id;
+
+    impl Display for Id {
+        fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+            "id".fmt(f)
+        }
+    }
+
+    #[derive(serde::Deserialize, serde::Serialize, Jsonify)]
+    struct Query;
+    #[derive(serde::Deserialize, serde::Serialize, Jsonify)]
+    struct Response;
+
+    impl_basic_endpoints!(
+        path = "/test",
+        creation = Creation,
+        id = Id,
+        query = Query,
+        response = Response
+    );
+
+    #[rstest]
+    #[tokio::test]
+    async fn query_serialization() {
+        let client = reqwest::Client::new();
+        <Api as Endpoint<Query, Vec<Response>>>::request(
+            &client,
+            "https://postman-echo.com/get",
+            Query,
+        )
+        .send()
+        .await
+        .unwrap();
     }
 }
