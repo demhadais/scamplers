@@ -965,8 +965,8 @@ export class SuspensionQuery {
   static from_base64_json(base64_json_bytes: string): SuspensionQuery;
   constructor();
   ids: string[];
-  get specimen(): SpecimenQuery | undefined;
-  set specimen(value: SpecimenQuery | null | undefined);
+  get parent_specimen(): SpecimenQuery | undefined;
+  set parent_specimen(value: SpecimenQuery | null | undefined);
   order_by: OrderBy[];
   pagination: Pagination;
 }

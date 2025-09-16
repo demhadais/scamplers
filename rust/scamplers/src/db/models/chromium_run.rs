@@ -8,7 +8,7 @@ pub use pool_multiplex::{
 #[cfg(feature = "python")]
 use pyo3::prelude::*;
 #[cfg(feature = "python")]
-use pyo3_stub_gen::impl_stub_type;
+use pyo3_stub_gen::{derive::gen_stub_pymethods, impl_stub_type};
 use scamplers_macros::{base_model, db_query, db_selection};
 #[cfg(feature = "app")]
 use scamplers_schema::{chromium_run, tenx_assay};
@@ -101,6 +101,38 @@ pub struct ChromiumRunQuery {
     pub order_by: DefaultVec<ChromiumRunOrderBy>,
     #[builder(default)]
     pub pagination: Pagination,
+}
+
+#[cfg(feature = "python")]
+#[gen_stub_pymethods]
+#[pymethods]
+impl ChromiumRunQuery {
+    #[new]
+    #[pyo3(signature = (*, ids=Vec::default(), readable_ids=Vec::default(), assay=None, run_before=None, run_after=None, succeeded=None, notes=Vec::default(), order_by=DefaultVec::default(), limit=Pagination::default().limit, offset=Pagination::default().offset))]
+    fn new(
+        ids: Vec<Uuid>,
+        readable_ids: Vec<String>,
+        assay: Option<TenxAssayQuery>,
+        run_before: Option<OffsetDateTime>,
+        run_after: Option<OffsetDateTime>,
+        succeeded: Option<bool>,
+        notes: Vec<String>,
+        order_by: DefaultVec<ChromiumRunOrderBy>,
+        limit: i64,
+        offset: i64,
+    ) -> Self {
+        Self {
+            ids,
+            readable_ids,
+            assay,
+            run_before,
+            run_after,
+            succeeded,
+            notes,
+            order_by,
+            pagination: Pagination { limit, offset },
+        }
+    }
 }
 
 uuid_newtype!(ChromiumRunId);

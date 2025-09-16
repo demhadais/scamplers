@@ -2,6 +2,8 @@
 use diesel::prelude::*;
 #[cfg(feature = "python")]
 use pyo3::prelude::*;
+#[cfg(feature = "python")]
+use pyo3_stub_gen::derive::gen_stub_pymethods;
 use scamplers_macros::{base_model, db_insertion, db_json, db_query, db_selection};
 #[cfg(feature = "app")]
 use scamplers_schema::suspension_pool_preparers;
@@ -177,6 +179,26 @@ pub struct SuspensionPoolQuery {
     pub order_by: DefaultVec<SuspensionPoolOrderBy>,
     #[builder(default)]
     pub pagination: Pagination,
+}
+
+#[cfg(feature = "python")]
+#[gen_stub_pymethods]
+#[pymethods]
+impl SuspensionPoolQuery {
+    #[new]
+    #[pyo3(signature = (*, ids=Vec::default(), order_by=DefaultVec::default(), limit=Pagination::default().limit, offset=Pagination::default().offset))]
+    fn new(
+        ids: Vec<Uuid>,
+        order_by: DefaultVec<SuspensionPoolOrderBy>,
+        limit: i64,
+        offset: i64,
+    ) -> Self {
+        Self {
+            ids,
+            order_by,
+            pagination: Pagination { limit, offset },
+        }
+    }
 }
 
 uuid_newtype!(SuspensionPoolId);
