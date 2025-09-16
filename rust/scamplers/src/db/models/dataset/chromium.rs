@@ -10,7 +10,10 @@ use heck::ToSnekCase;
 #[cfg(feature = "python")]
 use pyo3::prelude::*;
 #[cfg(feature = "python")]
-use pyo3_stub_gen::{derive::gen_stub_pyclass_complex_enum, impl_stub_type};
+use pyo3_stub_gen::{
+    derive::{gen_stub_pyclass_complex_enum, gen_stub_pymethods},
+    impl_stub_type,
+};
 #[cfg(not(target_arch = "wasm32"))]
 use regex::Regex;
 use scamplers_macros::{
@@ -537,6 +540,38 @@ pub struct ChromiumDatasetQuery {
     pub order_by: DefaultVec<ChromiumDatasetOrderBy>,
     #[builder(default)]
     pub pagination: Pagination,
+}
+
+#[cfg(feature = "python")]
+#[gen_stub_pymethods]
+#[pymethods]
+impl ChromiumDatasetQuery {
+    #[new]
+    #[pyo3(signature = (*, ids = Vec::new(), names=Vec::new(), lab_ids=Vec::new(), delivered_before=None, delivered_after=None, tenx_assay=None, specimen=None, order_by = DefaultVec::default(), limit = Pagination::default().limit, offset = Pagination::default().offset))]
+    fn new(
+        ids: Vec<Uuid>,
+        names: Vec<String>,
+        lab_ids: Vec<Uuid>,
+        delivered_before: Option<OffsetDateTime>,
+        delivered_after: Option<OffsetDateTime>,
+        tenx_assay: Option<TenxAssayQuery>,
+        specimen: Option<SpecimenQuery>,
+        order_by: DefaultVec<ChromiumDatasetOrderBy>,
+        limit: i64,
+        offset: i64,
+    ) -> Self {
+        Self {
+            ids,
+            names,
+            lab_ids,
+            delivered_before,
+            delivered_after,
+            tenx_assay,
+            specimen,
+            order_by,
+            pagination: Pagination { limit, offset },
+        }
+    }
 }
 
 uuid_newtype!(ChromiumDatasetId);

@@ -216,4 +216,19 @@ pub struct CdnaQuery {
     pub pagination: Pagination,
 }
 
+#[cfg(feature = "python")]
+#[gen_stub_pymethods]
+#[pymethods]
+impl CdnaQuery {
+    #[new]
+    #[pyo3(signature = (*, ids = Vec::new(), order_by = DefaultVec::default(), limit = Pagination::default().limit, offset = Pagination::default().offset))]
+    fn new(ids: Vec<Uuid>, order_by: DefaultVec<CdnaOrderBy>, limit: i64, offset: i64) -> Self {
+        Self {
+            ids,
+            order_by,
+            pagination: Pagination { limit, offset },
+        }
+    }
+}
+
 uuid_newtype!(CdnaId);

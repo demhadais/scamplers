@@ -1,5 +1,7 @@
 #[cfg(feature = "python")]
 use pyo3::prelude::*;
+#[cfg(feature = "python")]
+use pyo3_stub_gen::derive::gen_stub_pymethods;
 use scamplers_macros::{db_insertion, db_query, db_selection};
 use uuid::Uuid;
 use valid_string::ValidString;
@@ -58,4 +60,26 @@ pub struct InstitutionQuery {
     pub order_by: DefaultVec<InstitutionOrderBy>,
     #[builder(default)]
     pub pagination: Pagination,
+}
+
+#[cfg(feature = "python")]
+#[gen_stub_pymethods]
+#[pymethods]
+impl InstitutionQuery {
+    #[new]
+    #[pyo3(signature = (*, ids=Vec::default(), names=Vec::default(), order_by=DefaultVec::default(), limit=Pagination::default().limit, offset=Pagination::default().offset))]
+    fn new(
+        ids: Vec<Uuid>,
+        names: Vec<String>,
+        order_by: DefaultVec<InstitutionOrderBy>,
+        limit: i64,
+        offset: i64,
+    ) -> Self {
+        Self {
+            ids,
+            names,
+            order_by,
+            pagination: Pagination { limit, offset },
+        }
+    }
 }

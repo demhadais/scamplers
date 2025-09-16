@@ -20,7 +20,7 @@ impl DbOperation<Vec<Suspension>> for SuspensionQuery {
     ) -> crate::result::ScamplersResult<Vec<Suspension>> {
         let mut stmt = init_stmt!(SuspensionSummaryWithParents, query = &self, orderby_spec = { SuspensionOrderBy::CreatedAt => suspension::created_at, SuspensionOrderBy::ReadableId => suspension::readable_id });
 
-        if let Some(specimen_query) = self.specimen.take() {
+        if let Some(specimen_query) = self.parent_specimen.take() {
             stmt = crate::apply_specimen_query!(stmt, specimen_query);
         }
 

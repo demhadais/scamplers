@@ -281,7 +281,7 @@ function getArrayU16FromWasm0(ptr, len) {
     return getUint16ArrayMemory0().subarray(ptr / 2, ptr / 2 + len);
 }
 function __wbg_adapter_36(arg0, arg1) {
-    wasm.wasm_bindgen__convert__closures_____invoke__h75a39455876636ec(arg0, arg1);
+    wasm.wasm_bindgen__convert__closures_____invoke__h1deaf1198d29ac0a(arg0, arg1);
 }
 
 function __wbg_adapter_39(arg0, arg1, arg2) {
@@ -9648,20 +9648,20 @@ export class SuspensionQuery {
     /**
      * @returns {SpecimenQuery | undefined}
      */
-    get specimen() {
-        const ret = wasm.__wbg_get_suspensionquery_specimen(this.__wbg_ptr);
+    get parent_specimen() {
+        const ret = wasm.__wbg_get_suspensionquery_parent_specimen(this.__wbg_ptr);
         return ret === 0 ? undefined : SpecimenQuery.__wrap(ret);
     }
     /**
      * @param {SpecimenQuery | null} [arg0]
      */
-    set specimen(arg0) {
+    set parent_specimen(arg0) {
         let ptr0 = 0;
         if (!isLikeNone(arg0)) {
             _assertClass(arg0, SpecimenQuery);
             ptr0 = arg0.__destroy_into_raw();
         }
-        wasm.__wbg_set_suspensionquery_specimen(this.__wbg_ptr, ptr0);
+        wasm.__wbg_set_suspensionquery_parent_specimen(this.__wbg_ptr, ptr0);
     }
     /**
      * @returns {OrderBy[]}
@@ -11010,12 +11010,12 @@ export function __wbindgen_cb_drop(arg0) {
     return ret;
 };
 
-export function __wbindgen_closure_wrapper3788(arg0, arg1, arg2) {
+export function __wbindgen_closure_wrapper3792(arg0, arg1, arg2) {
     const ret = makeMutClosure(arg0, arg1, 406, __wbg_adapter_36);
     return ret;
 };
 
-export function __wbindgen_closure_wrapper3810(arg0, arg1, arg2) {
+export function __wbindgen_closure_wrapper3813(arg0, arg1, arg2) {
     const ret = makeMutClosure(arg0, arg1, 410, __wbg_adapter_39);
     return ret;
 };

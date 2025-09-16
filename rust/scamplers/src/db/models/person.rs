@@ -192,7 +192,7 @@ pub struct PersonQuery {
 #[pymethods]
 impl PersonQuery {
     #[new]
-    #[pyo3(signature = (*, ids=Vec::new(), names=Vec::new(), emails=Vec::new(), orcids=Vec::new(), ms_user_ids=Vec::new(), order_by=DefaultVec::default(), pagination=Pagination::default()))]
+    #[pyo3(signature = (*, ids=Vec::new(), names=Vec::new(), emails=Vec::new(), orcids=Vec::new(), ms_user_ids=Vec::new(), order_by=DefaultVec::default(), limit=Pagination::default().limit, offset=Pagination::default().offset))]
     fn new(
         ids: Vec<Uuid>,
         names: Vec<String>,
@@ -200,7 +200,8 @@ impl PersonQuery {
         orcids: Vec<String>,
         ms_user_ids: Vec<Uuid>,
         order_by: DefaultVec<PersonOrderBy>,
-        pagination: Pagination,
+        limit: i64,
+        offset: i64,
     ) -> Self {
         Self {
             ids,
@@ -209,7 +210,7 @@ impl PersonQuery {
             orcids,
             ms_user_ids,
             order_by,
-            pagination,
+            pagination: Pagination { limit, offset },
         }
     }
 }

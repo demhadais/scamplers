@@ -214,4 +214,26 @@ pub struct LibraryQuery {
     pub order_by: DefaultVec<LibraryOrderBy>,
 }
 
+#[cfg(feature = "python")]
+#[gen_stub_pymethods]
+#[pymethods]
+impl LibraryQuery {
+    #[new]
+    #[pyo3(signature = (*, ids = Vec::new(), library_types=Vec::default(), order_by = DefaultVec::default(), limit = Pagination::default().limit, offset = Pagination::default().offset))]
+    fn new(
+        ids: Vec<Uuid>,
+        library_types: Vec<LibraryType>,
+        order_by: DefaultVec<LibraryOrderBy>,
+        limit: i64,
+        offset: i64,
+    ) -> Self {
+        Self {
+            ids,
+            library_types,
+            order_by,
+            pagination: Pagination { limit, offset },
+        }
+    }
+}
+
 uuid_newtype!(LibraryId);

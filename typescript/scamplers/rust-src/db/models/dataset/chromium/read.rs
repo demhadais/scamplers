@@ -33,7 +33,7 @@ impl DbOperation<Vec<ChromiumDataset>> for ChromiumDatasetQuery {
                 // query
                 Some(
                     SuspensionQuery::builder()
-                        .specimen(specimen_query)
+                        .parent_specimen(specimen_query)
                         .pagination(Pagination {
                             limit: i64::MAX,
                             offset: 0,
@@ -192,7 +192,7 @@ mod tests {
         loaded_gems_ids.sort();
 
         let suspensions_matching_specimen_query = SuspensionQuery::builder()
-            .specimen(specimen_query)
+            .parent_specimen(specimen_query)
             .pagination(Pagination {
                 limit: i64::MAX,
                 offset: 0,

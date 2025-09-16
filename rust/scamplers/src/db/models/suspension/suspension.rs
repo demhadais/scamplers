@@ -208,7 +208,7 @@ define_ordering_enum! { SuspensionOrderBy{ CreatedAt, ReadableId }, default = Cr
 pub struct SuspensionQuery {
     #[builder(default)]
     pub ids: Vec<Uuid>,
-    pub specimen: Option<SpecimenQuery>,
+    pub parent_specimen: Option<SpecimenQuery>,
     #[builder(default)]
     pub order_by: DefaultVec<SuspensionOrderBy>,
     #[builder(default)]
@@ -220,18 +220,19 @@ pub struct SuspensionQuery {
 #[pymethods]
 impl SuspensionQuery {
     #[new]
-    #[pyo3(signature = (*, ids = Vec::new(), specimen = None, order_by = DefaultVec::default(), pagination = Pagination::default()))]
+    #[pyo3(signature = (*, ids = Vec::new(), parent_specimen = None, order_by = DefaultVec::default(), limit = Pagination::default().limit, offset = Pagination::default().offset))]
     fn new(
         ids: Vec<Uuid>,
-        specimen: Option<SpecimenQuery>,
+        parent_specimen: Option<SpecimenQuery>,
         order_by: DefaultVec<SuspensionOrderBy>,
-        pagination: Pagination,
+        limit: i64,
+        offset: i64,
     ) -> Self {
         Self {
             ids,
-            specimen,
+            parent_specimen,
             order_by,
-            pagination,
+            pagination: Pagination { limit, offset },
         }
     }
 }

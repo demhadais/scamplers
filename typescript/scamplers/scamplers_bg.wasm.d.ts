@@ -976,8 +976,8 @@ export const __wbg_set_suspension_measurements: (a: number, b: number, c: number
 export const __wbg_suspensionquery_free: (a: number, b: number) => void;
 export const __wbg_get_suspensionquery_ids: (a: number) => [number, number];
 export const __wbg_set_suspensionquery_ids: (a: number, b: number, c: number) => void;
-export const __wbg_get_suspensionquery_specimen: (a: number) => number;
-export const __wbg_set_suspensionquery_specimen: (a: number, b: number) => void;
+export const __wbg_get_suspensionquery_parent_specimen: (a: number) => number;
+export const __wbg_set_suspensionquery_parent_specimen: (a: number, b: number) => void;
 export const __wbg_get_suspensionquery_order_by: (a: number) => [number, number];
 export const __wbg_set_suspensionquery_order_by: (a: number, b: number, c: number) => void;
 export const __wbg_get_suspensionquery_pagination: (a: number) => number;
@@ -1026,7 +1026,7 @@ export const __wbindgen_realloc: (a: number, b: number, c: number, d: number) =>
 export const __wbindgen_export_5: WebAssembly.Table;
 export const __wbindgen_free: (a: number, b: number, c: number) => void;
 export const __externref_drop_slice: (a: number, b: number) => void;
-export const wasm_bindgen__convert__closures_____invoke__h75a39455876636ec: (a: number, b: number) => void;
+export const wasm_bindgen__convert__closures_____invoke__h1deaf1198d29ac0a: (a: number, b: number) => void;
 export const closure411_externref_shim: (a: number, b: number, c: any) => void;
 export const closure444_externref_shim: (a: number, b: number, c: any, d: any) => void;
 export const __wbindgen_start: () => void;
