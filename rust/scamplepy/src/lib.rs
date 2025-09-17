@@ -4,27 +4,27 @@ use scamplers::{
     db::models::{
         WasmPythonOrderBy,
         chromium_run::{
-            ChromiumRunQuery, NewOcmChromiumRun, NewOcmGems, NewPoolMultiplexChromiumRun,
-            NewPoolMultiplexGems, NewSingleplexChipLoading, NewSingleplexChromiumRun,
-            NewSingleplexGems,
+            ChromiumRun, ChromiumRunQuery, NewOcmChromiumRun, NewOcmGems,
+            NewPoolMultiplexChromiumRun, NewPoolMultiplexGems, NewSingleplexChipLoading,
+            NewSingleplexChromiumRun, NewSingleplexGems,
         },
         dataset::chromium::{
-            JsonMetricsFile, MultiRowCsvMetricsFile, NewCellrangerCountDataset,
+            ChromiumDataset, JsonMetricsFile, MultiRowCsvMetricsFile, NewCellrangerCountDataset,
             NewCellrangerMultiDataset, NewCellrangerVdjDataset, NewCellrangerarcCountDataset,
             NewCellrangeratacCountDataset, SingleRowCsvMetricsFile,
         },
-        institution::{InstitutionQuery, NewInstitution},
-        lab::{LabQuery, NewLab},
+        institution::{Institution, InstitutionQuery, NewInstitution},
+        lab::{Lab, LabQuery, NewLab},
         nucleic_acid::{
             self,
-            cdna::{CdnaQuery, NewCdna, NewCdnaGroup, NewCdnaMeasurement},
+            cdna::{Cdna, CdnaQuery, NewCdna, NewCdnaGroup, NewCdnaMeasurement},
             common::ElectrophoreticMeasurementData,
-            library::{self, LibraryQuery, NewLibrary, NewLibraryMeasurement},
+            library::{self, Library, LibraryQuery, NewLibrary, NewLibraryMeasurement},
         },
-        person::{NewPerson, PersonQuery, UserRole},
-        sequencing_run::{NewSequencingRun, SequencingRunQuery},
+        person::{NewPerson, Person, PersonQuery, UserRole},
+        sequencing_run::{NewSequencingRun, SequencingRun, SequencingRunQuery},
         specimen::{
-            self, Species, SpecimenQuery, SpecimenType,
+            self, Species, Specimen, SpecimenQuery, SpecimenType,
             block::{
                 BlockFixative, FixedBlockEmbeddingMatrix, FrozenBlockEmbeddingMatrix,
                 NewFixedBlock, NewFrozenBlock,
@@ -38,7 +38,7 @@ use scamplers::{
             pool::{NewSuspensionPool, NewSuspensionPoolMeasurement, SuspensionPoolQuery},
             suspension::{NewSuspension, NewSuspensionMeasurement, SuspensionQuery},
         },
-        tenx_assay::chromium::LibraryType,
+        tenx_assay::{TenxAssay, chromium::LibraryType},
         units::{LengthUnit, MassUnit, VolumeUnit},
     },
     result::{
@@ -235,6 +235,28 @@ fn register_query_submodule<'a>(parent: &'a Bound<PyModule>) -> PyResult<ModuleW
     parent.add_submodule(&query_submodule)?;
 
     Ok((scamplers::QUERY_SUBMODULE_NAME, query_submodule))
+}
+
+fn register_responses_submodule<'a>(parent: &'a Bound<PyModule>) -> PyResult<ModuleWithName<'a>> {
+    let responses_submodule = PyModule::new(parent.py(), scamplers::RESPONSES_SUBMODULE_NAME)?;
+
+    add_classes!(
+        responses_submodule,
+        Institution,
+        Person,
+        Lab,
+        Specimen,
+        TenxAssay,
+        SequencingRun,
+        ChromiumRun,
+        Cdna,
+        Library,
+        ChromiumDataset
+    );
+
+    parent.add_submodule(&responses_submodule)?;
+
+    Ok((scamplers::RESPONSES_SUBMODULE_NAME, responses_submodule))
 }
 
 define_stub_info_gatherer!(stub_info);
