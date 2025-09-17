@@ -247,12 +247,6 @@ function makeMutClosure(arg0, arg1, dtor, f) {
     return real;
 }
 
-function _assertClass(instance, klass) {
-    if (!(instance instanceof klass)) {
-        throw new Error(`expected instance of ${klass.name}`);
-    }
-}
-
 function passArray8ToWasm0(arg, malloc) {
     const ptr = malloc(arg.length * 1, 1) >>> 0;
     getUint8ArrayMemory0().set(arg, ptr / 1);
@@ -270,6 +264,12 @@ function passArrayJsValueToWasm0(array, malloc) {
     return ptr;
 }
 
+function _assertClass(instance, klass) {
+    if (!(instance instanceof klass)) {
+        throw new Error(`expected instance of ${klass.name}`);
+    }
+}
+
 let cachedUint16ArrayMemory0 = null;
 
 function getUint16ArrayMemory0() {
@@ -283,16 +283,16 @@ function getArrayU16FromWasm0(ptr, len) {
     ptr = ptr >>> 0;
     return getUint16ArrayMemory0().subarray(ptr / 2, ptr / 2 + len);
 }
-function __wbg_adapter_14(arg0, arg1, arg2) {
-    wasm.closure458_externref_shim(arg0, arg1, arg2);
-}
-
-function __wbg_adapter_31(arg0, arg1) {
+function __wbg_adapter_28(arg0, arg1) {
     wasm.wasm_bindgen__convert__closures_____invoke__h05f561151028f331(arg0, arg1);
 }
 
+function __wbg_adapter_35(arg0, arg1, arg2) {
+    wasm.closure460_externref_shim(arg0, arg1, arg2);
+}
+
 function __wbg_adapter_1122(arg0, arg1, arg2, arg3) {
-    wasm.closure479_externref_shim(arg0, arg1, arg2, arg3);
+    wasm.closure481_externref_shim(arg0, arg1, arg2, arg3);
 }
 
 /**
@@ -11099,6 +11099,12 @@ export function __wbindgen_cast_45c41c2f89ce6d9f(arg0, arg1) {
     return ret;
 };
 
+export function __wbindgen_cast_776076354d5d9563(arg0, arg1) {
+    // Cast intrinsic for `Closure(Closure { dtor_idx: 459, function: Function { arguments: [Externref], shim_idx: 460, ret: Unit, inner_ret: Some(Unit) }, mutable: true }) -> Externref`.
+    const ret = makeMutClosure(arg0, arg1, 459, __wbg_adapter_35);
+    return ret;
+};
+
 export function __wbindgen_cast_7e9c58eeb11b0a6f(arg0, arg1) {
     var v0 = getCachedStringFromWasm0(arg0, arg1);
     // Cast intrinsic for `Ref(CachedString) -> Externref`.
@@ -11106,9 +11112,9 @@ export function __wbindgen_cast_7e9c58eeb11b0a6f(arg0, arg1) {
     return ret;
 };
 
-export function __wbindgen_cast_830d2e277bf97812(arg0, arg1) {
-    // Cast intrinsic for `Closure(Closure { dtor_idx: 457, function: Function { arguments: [Externref], shim_idx: 458, ret: Unit, inner_ret: Some(Unit) }, mutable: true }) -> Externref`.
-    const ret = makeMutClosure(arg0, arg1, 457, __wbg_adapter_14);
+export function __wbindgen_cast_9c5a940046464ed1(arg0, arg1) {
+    // Cast intrinsic for `Closure(Closure { dtor_idx: 441, function: Function { arguments: [], shim_idx: 442, ret: Unit, inner_ret: Some(Unit) }, mutable: true }) -> Externref`.
+    const ret = makeMutClosure(arg0, arg1, 441, __wbg_adapter_28);
     return ret;
 };
 
@@ -11133,12 +11139,6 @@ export function __wbindgen_cast_c15a5e554ce1a329(arg0, arg1) {
     wasm.__wbindgen_free(arg0, arg1 * 4, 4);
     // Cast intrinsic for `Vector(NamedExternref("SequencingRun")) -> Externref`.
     const ret = v0;
-    return ret;
-};
-
-export function __wbindgen_cast_d40d1de55fe59430(arg0, arg1) {
-    // Cast intrinsic for `Closure(Closure { dtor_idx: 439, function: Function { arguments: [], shim_idx: 440, ret: Unit, inner_ret: Some(Unit) }, mutable: true }) -> Externref`.
-    const ret = makeMutClosure(arg0, arg1, 439, __wbg_adapter_31);
     return ret;
 };
 

@@ -9,9 +9,9 @@ use scamplers::{
             NewSingleplexChromiumRun, NewSingleplexGems,
         },
         dataset::chromium::{
-            ChromiumDataset, JsonMetricsFile, MultiRowCsvMetricsFile, NewCellrangerCountDataset,
-            NewCellrangerMultiDataset, NewCellrangerVdjDataset, NewCellrangerarcCountDataset,
-            NewCellrangeratacCountDataset, SingleRowCsvMetricsFile,
+            ChromiumDataset, ChromiumDatasetQuery, JsonMetricsFile, MultiRowCsvMetricsFile,
+            NewCellrangerCountDataset, NewCellrangerMultiDataset, NewCellrangerVdjDataset,
+            NewCellrangerarcCountDataset, NewCellrangeratacCountDataset, SingleRowCsvMetricsFile,
         },
         institution::{Institution, InstitutionQuery, NewInstitution},
         lab::{Lab, LabQuery, NewLab},
@@ -230,7 +230,8 @@ fn register_query_submodule<'a>(parent: &'a Bound<PyModule>) -> PyResult<ModuleW
         SuspensionPoolQuery,
         ChromiumRunQuery,
         CdnaQuery,
-        LibraryQuery
+        LibraryQuery,
+        ChromiumDatasetQuery
     );
 
     parent.add_submodule(&query_submodule)?;

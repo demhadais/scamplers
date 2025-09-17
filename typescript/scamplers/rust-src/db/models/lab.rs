@@ -2,6 +2,8 @@
 use diesel::prelude::*;
 #[cfg(feature = "python")]
 use pyo3::prelude::*;
+#[cfg(feature = "python")]
+use pyo3_stub_gen::derive::gen_stub_pymethods;
 use scamplers_macros::{
     Jsonify, PyJsonify, WasmJsonify, base_model, db_insertion, db_query, db_selection, db_update,
 };
@@ -140,6 +142,28 @@ pub struct LabQuery {
     pub order_by: DefaultVec<LabOrderBy>,
     #[builder(default)]
     pub pagination: Pagination,
+}
+
+#[cfg(feature = "python")]
+#[gen_stub_pymethods]
+#[pymethods]
+impl LabQuery {
+    #[new]
+    #[pyo3(signature = (*, ids=Vec::default(), names=Vec::default(), order_by=DefaultVec::default(), limit=Pagination::default().limit, offset=Pagination::default().offset))]
+    fn new(
+        ids: Vec<Uuid>,
+        names: Vec<String>,
+        order_by: DefaultVec<LabOrderBy>,
+        limit: i64,
+        offset: i64,
+    ) -> Self {
+        Self {
+            ids,
+            names,
+            order_by,
+            pagination: Pagination { limit, offset },
+        }
+    }
 }
 
 uuid_newtype!(LabId);
