@@ -41,7 +41,7 @@ where
 
         let Some(("query", raw_value)) = raw_querystring.split_once('=') else {
             return Err(err(&anyhow!(
-                "query string must be of the form 'query=<base64-encoded json'"
+                "query string must be of the form 'query=<base64-encoded json>'"
             )));
         };
 
@@ -76,7 +76,7 @@ mod tests {
     }
 
     #[rstest]
-    #[case("?query=eyJmaWVsZCI6ImludGVyZXN0aW5nIGRhdGEifQ==", "interesting data")]
+    #[case("?query=eyJmaWVsZCI6ImludGVyZXN0aW5nIGRhdGEifQ", "interesting data")]
     #[case("", "")]
     #[case("?", "")]
     #[tokio::test]
