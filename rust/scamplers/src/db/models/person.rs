@@ -61,14 +61,20 @@ pub struct NewPerson {
 #[pymethods]
 impl NewPerson {
     #[new]
-    #[pyo3(signature = (*, name, email, institution_id, roles=Vec::new()))]
-    fn new(name: ValidString, email: String, institution_id: Uuid, roles: Vec<UserRole>) -> Self {
+    #[pyo3(signature = (*, name, email, institution_id, ms_user_id=None, roles=Vec::new()))]
+    fn new(
+        name: ValidString,
+        email: String,
+        institution_id: Uuid,
+        ms_user_id: Option<Uuid>,
+        roles: Vec<UserRole>,
+    ) -> Self {
         Self {
             name,
             email,
             institution_id,
+            ms_user_id,
             roles,
-            ms_user_id: None,
             orcid: None,
         }
     }
