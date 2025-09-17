@@ -76,7 +76,7 @@ mod tests {
     }
 
     #[rstest]
-    #[case("?query=eyJmaWVsZCI6ImludGVyZXN0aW5nIGRhdGEifQ==", "interesting data")]
+    #[case("?query=eyJmaWVsZCI6ImludGVyZXN0aW5nIGRhdGEifQ", "interesting data")]
     #[case("", "")]
     #[case("?", "")]
     #[tokio::test]

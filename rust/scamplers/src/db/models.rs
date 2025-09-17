@@ -331,8 +331,9 @@ pub trait Jsonify: DeserializeOwned + Serialize {
     fn from_base64_json(base64_json_bytes: &str) -> anyhow::Result<Self> {
         use base64::engine::Engine;
 
-        let decoded =
-            ::base64::engine::general_purpose::URL_SAFE_NO_PAD.decode(base64_json_bytes)?;
+        let decoded = base64::engine::general_purpose::URL_SAFE_NO_PAD
+            .decode(base64_json_bytes)
+            .or_else(|_| base64::engine::general_purpose::URL_SAFE.decode(base64_json_bytes))?;
 
         Self::from_json_bytes(&decoded)
     }

@@ -57,7 +57,7 @@ valuable = { version = "0.1.1", features = ["derive"] }
 garde = { version = "0.22.0", features = ["derive", "email", "serde", "regex"] }
 strum = { version = "0.27.2", features = ["derive"] }
 scraper = { version = "0.23.1", features = ["serde"] }
-wasm-bindgen = { version = "0.2.101", features = ["enable-interning"] }
+wasm-bindgen = { version = "0.2.103", features = ["enable-interning"] }
 dotenvy = { version = "0.15.7" }
 testcontainers-modules = { version = "0.11.6", features = [
     "postgres",
