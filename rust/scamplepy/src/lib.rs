@@ -60,6 +60,7 @@ fn scamplepy(module: &Bound<'_, PyModule>) -> PyResult<()> {
         register_common_submodule(module)?,
         register_create_submodule(module)?,
         register_query_submodule(module)?,
+        register_responses_submodule(module)?,
     ];
 
     let python = module.py();
