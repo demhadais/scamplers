@@ -36,7 +36,7 @@ pub struct NewVirtualSpecimen {
     #[cfg_attr(feature = "app", diesel(embed))]
     pub inner: NewSpecimenCommon,
     #[serde(skip, default = "SpecimenType::suspension")]
-    #[builder(default = SpecimenType::Suspension)]
+    #[builder(skip = SpecimenType::Suspension)]
     pub type_: SpecimenType,
     pub fixative: Option<SuspensionFixative>,
 }
