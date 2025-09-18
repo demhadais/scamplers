@@ -141,6 +141,7 @@ pub struct NewFrozenBlock {
     pub type_: SpecimenType,
     pub embedded_in: FrozenBlockEmbeddingMatrix,
     pub fixative: Option<BlockFixative>,
+    #[builder(skip = true)]
     #[garde(custom(super::common::is_true))]
     pub frozen: bool,
 }

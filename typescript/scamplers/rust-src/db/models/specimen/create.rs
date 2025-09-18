@@ -21,7 +21,9 @@ impl NewSpecimen {
             Self::CryopreservedTissue(t) => &mut t.inner,
             Self::FixedTissue(t) => &mut t.inner,
             Self::FrozenTissue(t) => &mut t.inner,
-            Self::Suspension(s) => &mut s.inner,
+            Self::CryopreservedSuspension(s) => &mut s.inner,
+            Self::FixedOrFreshSuspension(s) => &mut s.inner,
+            Self::FrozenSuspension(s) => &mut s.inner,
         }
     }
 }
@@ -34,7 +36,9 @@ impl AsGenericNewSpecimen for NewSpecimen {
             Self::FixedTissue(s) => s.inner(),
             Self::FrozenBlock(s) => s.inner(),
             Self::FrozenTissue(s) => s.inner(),
-            Self::Suspension(s) => s.inner(),
+            Self::CryopreservedSuspension(s) => s.inner(),
+            Self::FixedOrFreshSuspension(s) => s.inner(),
+            Self::FrozenSuspension(s) => s.inner(),
         }
     }
 
@@ -45,7 +49,9 @@ impl AsGenericNewSpecimen for NewSpecimen {
             Self::FixedTissue(s) => s.variable_fields(),
             Self::FrozenBlock(s) => s.variable_fields(),
             Self::FrozenTissue(s) => s.variable_fields(),
-            Self::Suspension(s) => s.variable_fields(),
+            Self::CryopreservedSuspension(s) => s.variable_fields(),
+            Self::FixedOrFreshSuspension(s) => s.variable_fields(),
+            Self::FrozenSuspension(s) => s.variable_fields(),
         }
     }
 }
@@ -60,7 +66,9 @@ impl<'a> Insertable<specimen::table> for &'a NewSpecimen {
             NewSpecimen::FixedTissue(s) => s.as_generic(),
             NewSpecimen::FrozenBlock(s) => s.as_generic(),
             NewSpecimen::FrozenTissue(s) => s.as_generic(),
-            NewSpecimen::Suspension(s) => s.as_generic(),
+            NewSpecimen::CryopreservedSuspension(s) => s.as_generic(),
+            NewSpecimen::FixedOrFreshSuspension(s) => s.as_generic(),
+            NewSpecimen::FrozenSuspension(s) => s.as_generic(),
         };
 
         generic.values()

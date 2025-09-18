@@ -17,11 +17,15 @@
                     Chromium Run
                         |
                         ^
-                      GEMs ──< Dataset
+                       GEMs
                         |
                         ^
                       cDNA ──< Measurement
                         |
                         ^
-Sequencing Run >──< Library ──< Measurement
+Sequencing Run >──<  Library ──< Measurement
+                        ^
+                        |
+                        v
+                Chromium Dataset
 ```

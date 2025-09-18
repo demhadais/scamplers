@@ -21,13 +21,13 @@ use crate::{
 
 #[db_insertion]
 #[cfg_attr(feature = "app", diesel(table_name = scamplers_schema::specimen))]
-pub struct NewCryopreservedTissue {
+pub struct NewCryopreservedSuspension {
     #[serde(flatten)]
     #[garde(dive)]
     #[cfg_attr(feature = "app", diesel(embed))]
     pub inner: NewSpecimenCommon,
-    #[serde(skip, default = "SpecimenType::tissue")]
-    #[builder(skip = SpecimenType::Tissue)]
+    #[serde(skip, default = "SpecimenType::suspension")]
+    #[builder(skip = SpecimenType::Suspension)]
     pub type_: SpecimenType,
     #[garde(dive)]
     pub storage_buffer: Option<ValidString>,
@@ -36,12 +36,12 @@ pub struct NewCryopreservedTissue {
     pub cryopreserved: bool,
 }
 
-impl_constrained_py_setter! { NewCryopreservedTissue::set_type_(SpecimenType) = SpecimenType::Tissue }
+impl_constrained_py_setter! { NewCryopreservedSuspension::set_type_(SpecimenType) = SpecimenType::Suspension }
 
-impl_constrained_py_setter! { NewCryopreservedTissue::set_cryopreserved(bool) = true }
+impl_constrained_py_setter! { NewCryopreservedSuspension::set_cryopreserved(bool) = true }
 
 #[cfg(feature = "app")]
-impl AsGenericNewSpecimen for NewCryopreservedTissue {
+impl AsGenericNewSpecimen for NewCryopreservedSuspension {
     fn inner(&self) -> &NewSpecimenCommon {
         &self.inner
     }
@@ -68,7 +68,7 @@ impl AsGenericNewSpecimen for NewCryopreservedTissue {
 #[cfg(feature = "python")]
 #[pyo3_stub_gen::derive::gen_stub_pymethods]
 #[pymethods]
-impl NewCryopreservedTissue {
+impl NewCryopreservedSuspension {
     #[new]
     #[pyo3(signature = (*, readable_id, name, submitted_by, lab_id, received_at, species, storage_buffer=None, measurements=Vec::new(), committee_approvals=Vec::new(), notes=None, returned_at=None, returned_by=None))]
     fn new(
@@ -99,7 +99,7 @@ impl NewCryopreservedTissue {
                 returned_by,
                 measurements,
             },
-            type_: SpecimenType::Tissue,
+            type_: SpecimenType::Suspension,
             cryopreserved: true,
             storage_buffer,
         }
@@ -109,30 +109,28 @@ impl NewCryopreservedTissue {
 #[db_simple_enum]
 #[cfg_attr(feature = "python", pyo3(module = "scamplepy.common"))]
 #[derive(Default)]
-pub enum TissueFixative {
+pub enum SuspensionFixative {
     #[default]
-    DithiobisSuccinimidylropionate,
+    FormaldehydeDerivative,
 }
 
 #[db_insertion]
 #[cfg_attr(feature = "app", diesel(table_name = scamplers_schema::specimen))]
-pub struct NewFixedTissue {
+pub struct NewFixedOrFreshSuspension {
     #[serde(flatten)]
     #[garde(dive)]
     #[cfg_attr(feature = "app", diesel(embed))]
     pub inner: NewSpecimenCommon,
-    #[serde(skip, default = "SpecimenType::tissue")]
-    #[builder(skip = SpecimenType::Tissue)]
+    #[serde(skip, default = "SpecimenType::suspension")]
+    #[builder(skip = SpecimenType::Suspension)]
     pub type_: SpecimenType,
-    pub fixative: TissueFixative,
-    #[garde(dive)]
-    pub storage_buffer: Option<ValidString>,
+    pub fixative: Option<SuspensionFixative>,
 }
 
-impl_constrained_py_setter! { NewFixedTissue::set_type_(SpecimenType) = SpecimenType::Tissue }
+impl_constrained_py_setter! { NewFixedOrFreshSuspension::set_type_(SpecimenType) = SpecimenType::Suspension }
 
 #[cfg(feature = "app")]
-impl AsGenericNewSpecimen for NewFixedTissue {
+impl AsGenericNewSpecimen for NewFixedOrFreshSuspension {
     fn inner(&self) -> &NewSpecimenCommon {
         &self.inner
     }
@@ -141,19 +139,16 @@ impl AsGenericNewSpecimen for NewFixedTissue {
         use crate::db::models::specimen::Fixative;
 
         let Self {
-            type_,
-            fixative,
-            storage_buffer,
-            ..
+            type_, fixative, ..
         } = self;
 
         VariableFields {
             type_: *type_,
-            fixative: Some(Fixative::Tissue(*fixative)),
-            storage_buffer: storage_buffer.as_ref(),
+            fixative: fixative.map(Fixative::Suspension),
             embedded_in: None,
             cryopreserved: false,
             frozen: false,
+            storage_buffer: None,
         }
     }
 }
@@ -161,9 +156,9 @@ impl AsGenericNewSpecimen for NewFixedTissue {
 #[cfg(feature = "python")]
 #[pyo3_stub_gen::derive::gen_stub_pymethods]
 #[pymethods]
-impl NewFixedTissue {
+impl NewFixedOrFreshSuspension {
     #[new]
-    #[pyo3(signature = (*, readable_id, name, submitted_by, lab_id, received_at, species, fixative, storage_buffer=None, measurements=Vec::new(), committee_approvals=Vec::new(), notes=None, returned_at=None, returned_by=None))]
+    #[pyo3(signature = (*, readable_id, name, submitted_by, lab_id, received_at, species, fixative=None, measurements=Vec::new(), committee_approvals=Vec::new(), notes=None, returned_at=None, returned_by=None))]
     fn new(
         readable_id: ValidString,
         name: ValidString,
@@ -171,8 +166,7 @@ impl NewFixedTissue {
         lab_id: Uuid,
         received_at: OffsetDateTime,
         species: Vec<Species>,
-        fixative: TissueFixative,
-        storage_buffer: Option<ValidString>,
+        fixative: Option<SuspensionFixative>,
         measurements: Vec<NewSpecimenMeasurement>,
         committee_approvals: Vec<NewCommitteeApproval>,
         notes: Option<ValidString>,
@@ -194,51 +188,43 @@ impl NewFixedTissue {
                 measurements,
             },
             fixative,
-            type_: SpecimenType::Tissue,
-            storage_buffer,
+            type_: SpecimenType::Suspension,
         }
     }
 }
 
 #[db_insertion]
 #[cfg_attr(feature = "app", diesel(table_name = scamplers_schema::specimen))]
-pub struct NewFrozenTissue {
+pub struct NewFrozenSuspension {
     #[serde(flatten)]
     #[garde(dive)]
     #[cfg_attr(feature = "app", diesel(embed))]
     pub inner: NewSpecimenCommon,
-    #[serde(skip, default = "SpecimenType::tissue")]
-    #[builder(skip = SpecimenType::Tissue)]
+    #[serde(skip, default = "SpecimenType::suspension")]
+    #[builder(skip = SpecimenType::Suspension)]
     pub type_: SpecimenType,
-    #[garde(dive)]
-    pub storage_buffer: Option<ValidString>,
     #[builder(skip = true)]
     #[garde(custom(super::common::is_true))]
     pub frozen: bool,
 }
 
-impl_constrained_py_setter! { NewFrozenTissue::set_type_(SpecimenType) = SpecimenType::Tissue }
+impl_constrained_py_setter! { NewFrozenSuspension::set_type_(SpecimenType) = SpecimenType::Tissue }
 
-impl_constrained_py_setter! { NewFrozenTissue::set_frozen(bool) = true }
+impl_constrained_py_setter! { NewFrozenSuspension::set_frozen(bool) = true }
 
 #[cfg(feature = "app")]
-impl AsGenericNewSpecimen for NewFrozenTissue {
+impl AsGenericNewSpecimen for NewFrozenSuspension {
     fn inner(&self) -> &NewSpecimenCommon {
         &self.inner
     }
 
     fn variable_fields(&self) -> VariableFields<'_> {
-        let Self {
-            type_,
-            storage_buffer,
-            frozen,
-            ..
-        } = self;
+        let Self { type_, frozen, .. } = self;
 
         VariableFields {
             type_: *type_,
             frozen: *frozen,
-            storage_buffer: storage_buffer.as_ref(),
+            storage_buffer: None,
             fixative: None,
             embedded_in: None,
             cryopreserved: false,
@@ -249,9 +235,9 @@ impl AsGenericNewSpecimen for NewFrozenTissue {
 #[cfg(feature = "python")]
 #[pyo3_stub_gen::derive::gen_stub_pymethods]
 #[pymethods]
-impl NewFrozenTissue {
+impl NewFrozenSuspension {
     #[new]
-    #[pyo3(signature = (*, readable_id, name, submitted_by, lab_id, received_at, species, storage_buffer=None, measurements=Vec::new(), committee_approvals=Vec::new(), notes=None, returned_at=None, returned_by=None))]
+    #[pyo3(signature = (*, readable_id, name, submitted_by, lab_id, received_at, species, measurements=Vec::new(), committee_approvals=Vec::new(), notes=None, returned_at=None, returned_by=None))]
     fn new(
         readable_id: ValidString,
         name: ValidString,
@@ -259,7 +245,6 @@ impl NewFrozenTissue {
         lab_id: Uuid,
         received_at: OffsetDateTime,
         species: Vec<Species>,
-        storage_buffer: Option<ValidString>,
         measurements: Vec<NewSpecimenMeasurement>,
         committee_approvals: Vec<NewCommitteeApproval>,
         notes: Option<ValidString>,
@@ -282,7 +267,6 @@ impl NewFrozenTissue {
             },
             type_: SpecimenType::Tissue,
             frozen: true,
-            storage_buffer,
         }
     }
 }

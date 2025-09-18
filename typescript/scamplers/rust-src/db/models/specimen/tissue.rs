@@ -31,6 +31,7 @@ pub struct NewCryopreservedTissue {
     pub type_: SpecimenType,
     #[garde(dive)]
     pub storage_buffer: Option<ValidString>,
+    #[builder(skip = true)]
     #[garde(custom(super::common::is_true))]
     pub cryopreserved: bool,
 }
@@ -211,6 +212,7 @@ pub struct NewFrozenTissue {
     pub type_: SpecimenType,
     #[garde(dive)]
     pub storage_buffer: Option<ValidString>,
+    #[builder(skip = true)]
     #[garde(custom(super::common::is_true))]
     pub frozen: bool,
 }

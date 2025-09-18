@@ -24,8 +24,11 @@ use crate::{
                 BlockFixative, FixedBlockEmbeddingMatrix, FrozenBlockEmbeddingMatrix,
                 NewFixedBlock, NewFrozenBlock,
             },
+            suspension::{
+                NewCryopreservedSuspension, NewFixedOrFreshSuspension, NewFrozenSuspension,
+                SuspensionFixative,
+            },
             tissue::{NewCryopreservedTissue, NewFixedTissue, NewFrozenTissue, TissueFixative},
-            virtual_::{NewVirtualSpecimen, SuspensionFixative},
         },
     },
     define_ordering_enum, uuid_newtype,
@@ -37,8 +40,8 @@ pub mod common;
 mod create;
 #[cfg(feature = "app")]
 pub mod read;
+pub mod suspension;
 pub mod tissue;
-pub mod virtual_;
 
 #[base_model]
 #[serde(tag = "type", rename_all = "snake_case")]
@@ -49,7 +52,9 @@ pub enum NewSpecimen {
     FixedTissue(#[garde(dive)] NewFixedTissue),
     FrozenBlock(#[garde(dive)] NewFrozenBlock),
     FrozenTissue(#[garde(dive)] NewFrozenTissue),
-    Suspension(#[garde(dive)] NewVirtualSpecimen),
+    CryopreservedSuspension(#[garde(dive)] NewCryopreservedSuspension),
+    FixedOrFreshSuspension(#[garde(dive)] NewFixedOrFreshSuspension),
+    FrozenSuspension(#[garde(dive)] NewFrozenSuspension),
 }
 
 #[cfg(feature = "python")]
@@ -59,7 +64,9 @@ impl_stub_type!(
         | NewFrozenTissue
         | NewFixedBlock
         | NewFrozenBlock
-        | NewVirtualSpecimen
+        | NewCryopreservedSuspension
+        | NewFixedOrFreshSuspension
+        | NewFrozenSuspension
 );
 
 #[db_simple_enum]
