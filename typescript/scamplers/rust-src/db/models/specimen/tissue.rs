@@ -109,7 +109,7 @@ impl NewCryopreservedTissue {
 #[db_simple_enum]
 #[cfg_attr(feature = "python", pyo3(module = "scamplepy.common"))]
 pub enum TissueFixative {
-    DithiobisSuccinimidylropionate,
+    DithiobisSuccinimidylpropionate,
 }
 
 #[db_insertion]

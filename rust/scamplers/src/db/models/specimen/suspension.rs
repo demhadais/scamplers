@@ -109,7 +109,7 @@ impl NewCryopreservedSuspension {
 #[db_simple_enum]
 #[cfg_attr(feature = "python", pyo3(module = "scamplepy.common"))]
 pub enum SuspensionFixative {
-    DithiobisSuccinimidylropionate,
+    DithiobisSuccinimidylpropionate,
     FormaldehydeDerivative,
 }
 
