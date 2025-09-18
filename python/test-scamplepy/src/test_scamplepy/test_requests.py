@@ -55,7 +55,7 @@ from scamplepy.create import (
     NewSuspensionMeasurement,
     NewSuspensionPool,
     NewSuspensionPoolMeasurement,
-    NewVirtualSpecimen,
+    NewFixedOrFreshSuspension,
     SingleRowCsvMetricsFile,
     Species,
     SpecimenMeasurementData,
@@ -165,7 +165,7 @@ def new_cryopreserved_tissue(
     person_id: UUID = ID,
     lab_id: UUID = ID,
 ) -> NewCryopreservedTissue:
-    return NewCryopreservedTissue(
+    tissue = NewCryopreservedTissue(
         readable_id="cryopreservedtissue",
         name="c",
         submitted_by=person_id,
@@ -173,6 +173,14 @@ def new_cryopreserved_tissue(
         received_at=TIME,
         species=[Species.RattusNorvegicus],
     )
+    tissue.cryopreserved = True
+
+    try:
+        tissue.cryopreserved = False
+    except ValueError as e:
+        assert str(e) == "field can only be true"
+
+    return tissue
 
 
 @pytest.fixture
@@ -201,9 +209,11 @@ def new_frozen_tissue(person_id: UUID = ID, lab_id: UUID = ID) -> NewFrozenTissu
 
 
 @pytest.fixture
-def new_virtual_specimen(person_id: UUID = ID, lab_id: UUID = ID) -> NewVirtualSpecimen:
-    return NewVirtualSpecimen(
-        readable_id="virtualspecimen",
+def new_fixed_suspension_specimen(
+    person_id: UUID = ID, lab_id: UUID = ID
+) -> NewFixedOrFreshSuspension:
+    return NewFixedOrFreshSuspension(
+        readable_id="fixedorfreshsuspension",
         name="v",
         submitted_by=person_id,
         lab_id=lab_id,
@@ -585,7 +595,7 @@ def chromium_run_readable_id_from_dict(chromium_run: dict[str, str]):
         ("new_cryopreserved_tissue", (specimen_name, specimen_name_from_dict)),
         ("new_fixed_tissue", (specimen_name, specimen_name_from_dict)),
         ("new_frozen_tissue", (specimen_name, specimen_name_from_dict)),
-        ("new_virtual_specimen", (specimen_name, specimen_name_from_dict)),
+        ("new_fixed_suspension_specimen", (specimen_name, specimen_name_from_dict)),
         (
             "new_suspension_fixture",
             (

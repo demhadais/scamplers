@@ -44,7 +44,7 @@ pub struct NewFixedBlock {
     #[cfg_attr(feature = "app", diesel(embed))]
     pub inner: NewSpecimenCommon,
     #[serde(skip, default = "SpecimenType::block")]
-    #[builder(default = SpecimenType::Block)]
+    #[builder(skip = SpecimenType::Block)]
     pub type_: SpecimenType,
     pub embedded_in: FixedBlockEmbeddingMatrix,
     pub fixative: BlockFixative,
@@ -137,10 +137,11 @@ pub struct NewFrozenBlock {
     #[cfg_attr(feature = "app", diesel(embed))]
     pub inner: NewSpecimenCommon,
     #[serde(skip, default = "SpecimenType::block")]
-    #[builder(default = SpecimenType::Block)]
+    #[builder(skip = SpecimenType::Block)]
     pub type_: SpecimenType,
     pub embedded_in: FrozenBlockEmbeddingMatrix,
     pub fixative: Option<BlockFixative>,
+    #[builder(skip = true)]
     #[garde(custom(super::common::is_true))]
     pub frozen: bool,
 }

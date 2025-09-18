@@ -27,10 +27,11 @@ pub struct NewCryopreservedTissue {
     #[cfg_attr(feature = "app", diesel(embed))]
     pub inner: NewSpecimenCommon,
     #[serde(skip, default = "SpecimenType::tissue")]
-    #[builder(default = SpecimenType::Tissue)]
+    #[builder(skip = SpecimenType::Tissue)]
     pub type_: SpecimenType,
     #[garde(dive)]
     pub storage_buffer: Option<ValidString>,
+    #[builder(skip = true)]
     #[garde(custom(super::common::is_true))]
     pub cryopreserved: bool,
 }
@@ -121,7 +122,7 @@ pub struct NewFixedTissue {
     #[cfg_attr(feature = "app", diesel(embed))]
     pub inner: NewSpecimenCommon,
     #[serde(skip, default = "SpecimenType::tissue")]
-    #[builder(default = SpecimenType::Tissue)]
+    #[builder(skip = SpecimenType::Tissue)]
     pub type_: SpecimenType,
     pub fixative: TissueFixative,
     #[garde(dive)]
@@ -207,10 +208,11 @@ pub struct NewFrozenTissue {
     #[cfg_attr(feature = "app", diesel(embed))]
     pub inner: NewSpecimenCommon,
     #[serde(skip, default = "SpecimenType::tissue")]
-    #[builder(default = SpecimenType::Tissue)]
+    #[builder(skip = SpecimenType::Tissue)]
     pub type_: SpecimenType,
     #[garde(dive)]
     pub storage_buffer: Option<ValidString>,
+    #[builder(skip = true)]
     #[garde(custom(super::common::is_true))]
     pub frozen: bool,
 }

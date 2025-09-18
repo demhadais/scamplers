@@ -1,3 +1,5 @@
+from collections.abc import Callable
+from typing import Any
 import maturin_import_hook
 import pytest
 
@@ -41,25 +43,24 @@ def scamplers_client() -> ScamplersClient:
 
 
 @pytest.mark.parametrize(
-    "method_name, fixture",
+    "method, fixture",
     [
-        ("create_specimen", "new_fixed_block"),
-        ("create_specimen", "new_frozen_block"),
-        ("create_specimen", "new_cryopreserved_tissue"),
-        ("create_specimen", "new_fixed_tissue"),
-        ("create_specimen", "new_frozen_tissue"),
-        ("create_chromium_run", "new_singleplex_chromium_run"),
-        ("create_cdna", "new_cdna_group"),
-        ("create_library", "new_library"),
-        ("create_chromium_dataset", "new_cellranger_count_dataset"),
+        (ScamplersClient.create_specimen, "new_fixed_block"),
+        (ScamplersClient.create_specimen, "new_frozen_block"),
+        (ScamplersClient.create_specimen, "new_cryopreserved_tissue"),
+        (ScamplersClient.create_specimen, "new_fixed_tissue"),
+        (ScamplersClient.create_specimen, "new_frozen_tissue"),
+        (ScamplersClient.create_chromium_run, "new_singleplex_chromium_run"),
+        (ScamplersClient.create_cdna, "new_cdna_group"),
+        (ScamplersClient.create_library, "new_library"),
+        (ScamplersClient.create_chromium_dataset, "new_cellranger_count_dataset"),
     ],
 )
 def test_client(
     scamplers_client: ScamplersClient,
-    method_name: str,
+    method: Callable[[ScamplersClient, Any], Any],
     fixture: str,
     request: pytest.FixtureRequest,
 ):
-    method = scamplers_client.__getattribute__(method_name)
     data = request.getfixturevalue(fixture)
-    _ = method(data)
+    _ = method(scamplers_client, data)

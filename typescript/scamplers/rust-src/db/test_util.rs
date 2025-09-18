@@ -50,6 +50,7 @@ use crate::{
                     NewFixedBlock, NewFrozenBlock,
                 },
                 common::{NewSpecimenCommon, NewSpecimenMeasurement},
+                suspension::{NewCryopreservedSuspension, NewFrozenSuspension},
                 tissue::{NewCryopreservedTissue, NewFixedTissue, NewFrozenTissue, TissueFixative},
             },
             suspension::{
@@ -280,10 +281,20 @@ impl TestState {
                 .name(format!("specimen{i}"))
                 .build();
 
-            let new_specimen: NewSpecimen = if i % 5 == 0 {
+            let new_specimen: NewSpecimen = if i % 7 == 0 {
+                let s = NewCryopreservedSuspension::builder()
+                    .inner(inner_specimen)
+                    .storage_buffer("buffer")
+                    .build();
+
+                NewSpecimen::CryopreservedSuspension(s)
+            } else if i % 6 == 0 {
+                let s = NewFrozenSuspension::builder().inner(inner_specimen).build();
+
+                NewSpecimen::FrozenSuspension(s)
+            } else if i % 5 == 0 {
                 let s = NewCryopreservedTissue::builder()
                     .inner(inner_specimen)
-                    .cryopreserved(true)
                     .storage_buffer("buffer")
                     .build();
 
@@ -296,10 +307,7 @@ impl TestState {
 
                 NewSpecimen::FixedTissue(s)
             } else if i % 3 == 0 {
-                let s = NewFrozenTissue::builder()
-                    .inner(inner_specimen)
-                    .frozen(true)
-                    .build();
+                let s = NewFrozenTissue::builder().inner(inner_specimen).build();
 
                 NewSpecimen::FrozenTissue(s)
             } else if i % 2 == 0 {
@@ -318,7 +326,6 @@ impl TestState {
 
                 let s = NewFrozenBlock::builder()
                     .inner(inner_specimen)
-                    .frozen(true)
                     .embedded_in(random_embedding_matrix)
                     .build();
 

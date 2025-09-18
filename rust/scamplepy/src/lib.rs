@@ -30,8 +30,11 @@ use scamplers::{
                 NewFixedBlock, NewFrozenBlock,
             },
             common::{ComplianceCommitteeType, NewCommitteeApproval, NewSpecimenMeasurement},
+            suspension::{
+                NewCryopreservedSuspension, NewFixedOrFreshSuspension, NewFrozenSuspension,
+                SuspensionFixative,
+            },
             tissue::{NewCryopreservedTissue, NewFixedTissue, NewFrozenTissue, TissueFixative},
-            virtual_::{NewVirtualSpecimen, SuspensionFixative},
         },
         suspension::{
             common::{BiologicalMaterial, CellCountingMethod, SuspensionMeasurementFields},
@@ -175,7 +178,9 @@ fn register_create_submodule<'a>(parent: &'a Bound<PyModule>) -> PyResult<Module
         NewFixedTissue,
         NewFrozenTissue,
         TissueFixative,
-        NewVirtualSpecimen,
+        NewCryopreservedSuspension,
+        NewFixedOrFreshSuspension,
+        NewFrozenSuspension,
         SuspensionFixative,
         Species,
         specimen::common::MeasurementData,
