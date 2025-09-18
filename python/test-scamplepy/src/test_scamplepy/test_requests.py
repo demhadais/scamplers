@@ -192,7 +192,7 @@ def new_fixed_tissue(person_id: UUID = ID, lab_id: UUID = ID) -> NewFixedTissue:
         lab_id=lab_id,
         received_at=TIME,
         species=[Species.HomoSapiens],
-        fixative=TissueFixative.DithiobisSuccinimidylropionate,
+        fixative=TissueFixative.DithiobisSuccinimidylpropionate,
     )
 
 
