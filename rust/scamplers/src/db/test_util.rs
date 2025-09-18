@@ -302,7 +302,7 @@ impl TestState {
             } else if i % 4 == 0 {
                 let s = NewFixedTissue::builder()
                     .inner(inner_specimen)
-                    .fixative(TissueFixative::DithiobisSuccinimidylropionate)
+                    .fixative(TissueFixative::DithiobisSuccinimidylpropionate)
                     .build();
 
                 NewSpecimen::FixedTissue(s)

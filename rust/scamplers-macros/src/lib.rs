@@ -292,6 +292,17 @@ pub fn db_simple_enum(_attr: TokenStream, input: TokenStream) -> TokenStream {
                 ToSql::<sql_types::Text, Pg>::to_sql(as_str, &mut out.reborrow())
             }
         }
+
+        #[cfg(feature = "python")]
+        #[::pyo3_stub_gen::derive::gen_stub_pymethods]
+        #[::pyo3::pymethods]
+        impl #ident {
+            #[new]
+            fn new(s: &str) -> ::pyo3::PyResult<Self> {
+                use std::str::FromStr;
+                Self::from_str(s).map_err(|e| ::pyo3::exceptions::PyValueError::new_err(e.to_string()))
+            }
+        }
     };
 
     output.into()

@@ -22,17 +22,13 @@ use crate::{
 
 #[db_simple_enum]
 #[cfg_attr(feature = "python", pyo3(module = "scamplepy.common"))]
-#[derive(Default)]
 pub enum FixedBlockEmbeddingMatrix {
-    #[default]
     Paraffin,
 }
 
 #[db_simple_enum]
 #[cfg_attr(feature = "python", pyo3(module = "scamplepy.common"))]
-#[derive(Default)]
 pub enum BlockFixative {
-    #[default]
     FormaldehydeDerivative,
 }
 
