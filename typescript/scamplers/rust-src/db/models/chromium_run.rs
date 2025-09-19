@@ -108,7 +108,7 @@ pub struct ChromiumRunQuery {
 #[pymethods]
 impl ChromiumRunQuery {
     #[new]
-    #[pyo3(signature = (*, ids=Vec::default(), readable_ids=Vec::default(), assay=None, run_before=None, run_after=None, succeeded=None, notes=Vec::default(), order_by=DefaultVec::default(), limit=Pagination::default().limit, offset=Pagination::default().offset))]
+    #[pyo3(signature = (*, ids=Vec::default(), readable_ids=Vec::default(), assay=None, run_before=None, run_after=None, succeeded=None, notes=Vec::default(), order_by=DefaultVec::default(), limit=Pagination::default().limit, offset=Pagination::default_offset()))]
     fn new(
         ids: Vec<Uuid>,
         readable_ids: Vec<String>,

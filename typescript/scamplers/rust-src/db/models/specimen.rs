@@ -287,7 +287,7 @@ pub struct SpecimenQuery {
 #[pymethods]
 impl SpecimenQuery {
     #[new]
-    #[pyo3(signature = (*,ids = Vec::new(), names = Vec::new(), submitters = Vec::new(), labs = Vec::new(), received_before = None, received_after = None, species = Vec::new(), notes = Vec::new(), types = Vec::new(), embedded_in = Vec::new(), fixatives = Vec::new(), storage_buffers = Vec::new(), frozen = None, cryopreserved = None, order_by = DefaultVec::default(), limit = Pagination::default().limit, offset = Pagination::default().offset))]
+    #[pyo3(signature = (*,ids = Vec::new(), names = Vec::new(), submitters = Vec::new(), labs = Vec::new(), received_before = None, received_after = None, species = Vec::new(), notes = Vec::new(), types = Vec::new(), embedded_in = Vec::new(), fixatives = Vec::new(), storage_buffers = Vec::new(), frozen = None, cryopreserved = None, order_by = DefaultVec::default(), limit = Pagination::default().limit, offset = Pagination::default_offset()))]
     #[must_use]
     pub fn new(
         ids: Vec<Uuid>,

@@ -220,7 +220,7 @@ pub struct SuspensionQuery {
 #[pymethods]
 impl SuspensionQuery {
     #[new]
-    #[pyo3(signature = (*, ids = Vec::new(), parent_specimen = None, order_by = DefaultVec::default(), limit = Pagination::default().limit, offset = Pagination::default().offset))]
+    #[pyo3(signature = (*, ids = Vec::new(), parent_specimen = None, order_by = DefaultVec::default(), limit = Pagination::default().limit, offset = Pagination::default_offset()))]
     fn new(
         ids: Vec<Uuid>,
         parent_specimen: Option<SpecimenQuery>,

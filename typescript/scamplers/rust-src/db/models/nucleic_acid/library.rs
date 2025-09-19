@@ -219,7 +219,7 @@ pub struct LibraryQuery {
 #[pymethods]
 impl LibraryQuery {
     #[new]
-    #[pyo3(signature = (*, ids = Vec::new(), library_types=Vec::default(), order_by = DefaultVec::default(), limit = Pagination::default().limit, offset = Pagination::default().offset))]
+    #[pyo3(signature = (*, ids = Vec::new(), library_types=Vec::default(), order_by = DefaultVec::default(), limit = Pagination::default().limit, offset = Pagination::default_offset()))]
     fn new(
         ids: Vec<Uuid>,
         library_types: Vec<LibraryType>,

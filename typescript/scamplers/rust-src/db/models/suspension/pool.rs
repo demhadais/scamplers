@@ -186,7 +186,7 @@ pub struct SuspensionPoolQuery {
 #[pymethods]
 impl SuspensionPoolQuery {
     #[new]
-    #[pyo3(signature = (*, ids=Vec::default(), order_by=DefaultVec::default(), limit=Pagination::default().limit, offset=Pagination::default().offset))]
+    #[pyo3(signature = (*, ids=Vec::default(), order_by=DefaultVec::default(), limit=Pagination::default().limit, offset=Pagination::default_offset()))]
     fn new(
         ids: Vec<Uuid>,
         order_by: DefaultVec<SuspensionPoolOrderBy>,

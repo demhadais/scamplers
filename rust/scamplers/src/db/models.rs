@@ -81,16 +81,30 @@ impl WasmPythonOrderBy {
 )]
 #[base_model]
 pub struct Pagination {
+    #[serde(default = "Pagination::default_limit")]
     pub limit: i64,
+    #[serde(default = "Pagination::default_offset")]
     #[garde(range(min = 1))]
     pub offset: i64,
+}
+
+impl Pagination {
+    #[must_use]
+    pub const fn default_limit() -> i64 {
+        500
+    }
+
+    #[must_use]
+    pub const fn default_offset() -> i64 {
+        0
+    }
 }
 
 impl Default for Pagination {
     fn default() -> Self {
         Self {
-            limit: 500,
-            offset: 0,
+            limit: Self::default_limit(),
+            offset: Self::default_offset(),
         }
     }
 }

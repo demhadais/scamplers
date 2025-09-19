@@ -221,7 +221,7 @@ pub struct CdnaQuery {
 #[pymethods]
 impl CdnaQuery {
     #[new]
-    #[pyo3(signature = (*, ids = Vec::new(), order_by = DefaultVec::default(), limit = Pagination::default().limit, offset = Pagination::default().offset))]
+    #[pyo3(signature = (*, ids = Vec::new(), order_by = DefaultVec::default(), limit = Pagination::default().limit, offset = Pagination::default_offset()))]
     fn new(ids: Vec<Uuid>, order_by: DefaultVec<CdnaOrderBy>, limit: i64, offset: i64) -> Self {
         Self {
             ids,
