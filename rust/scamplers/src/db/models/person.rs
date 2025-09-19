@@ -198,7 +198,7 @@ pub struct PersonQuery {
 #[pymethods]
 impl PersonQuery {
     #[new]
-    #[pyo3(signature = (*, ids=Vec::new(), names=Vec::new(), emails=Vec::new(), orcids=Vec::new(), ms_user_ids=Vec::new(), order_by=DefaultVec::default(), limit=Pagination::default().limit, offset=Pagination::default().offset))]
+    #[pyo3(signature = (*, ids=Vec::new(), names=Vec::new(), emails=Vec::new(), orcids=Vec::new(), ms_user_ids=Vec::new(), order_by=DefaultVec::default(), limit=Pagination::default().limit, offset=Pagination::default_offset()))]
     fn new(
         ids: Vec<Uuid>,
         names: Vec<String>,

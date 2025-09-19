@@ -149,7 +149,7 @@ pub struct LabQuery {
 #[pymethods]
 impl LabQuery {
     #[new]
-    #[pyo3(signature = (*, ids=Vec::default(), names=Vec::default(), order_by=DefaultVec::default(), limit=Pagination::default().limit, offset=Pagination::default().offset))]
+    #[pyo3(signature = (*, ids=Vec::default(), names=Vec::default(), order_by=DefaultVec::default(), limit=Pagination::default().limit, offset=Pagination::default_offset()))]
     fn new(
         ids: Vec<Uuid>,
         names: Vec<String>,

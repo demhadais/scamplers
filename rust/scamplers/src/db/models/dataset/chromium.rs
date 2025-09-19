@@ -547,7 +547,7 @@ pub struct ChromiumDatasetQuery {
 #[pymethods]
 impl ChromiumDatasetQuery {
     #[new]
-    #[pyo3(signature = (*, ids = Vec::new(), names=Vec::new(), lab_ids=Vec::new(), delivered_before=None, delivered_after=None, tenx_assay=None, specimen=None, order_by = DefaultVec::default(), limit = Pagination::default().limit, offset = Pagination::default().offset))]
+    #[pyo3(signature = (*, ids = Vec::new(), names=Vec::new(), lab_ids=Vec::new(), delivered_before=None, delivered_after=None, tenx_assay=None, specimen=None, order_by = DefaultVec::default(), limit = Pagination::default().limit, offset = Pagination::default_offset()))]
     fn new(
         ids: Vec<Uuid>,
         names: Vec<String>,
