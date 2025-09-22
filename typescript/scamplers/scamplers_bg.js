@@ -283,16 +283,16 @@ function getArrayU16FromWasm0(ptr, len) {
     ptr = ptr >>> 0;
     return getUint16ArrayMemory0().subarray(ptr / 2, ptr / 2 + len);
 }
-function __wbg_adapter_16(arg0, arg1) {
+function __wbg_adapter_22(arg0, arg1, arg2) {
+    wasm.closure458_externref_shim(arg0, arg1, arg2);
+}
+
+function __wbg_adapter_33(arg0, arg1) {
     wasm.wasm_bindgen__convert__closures_____invoke__h05f561151028f331(arg0, arg1);
 }
 
-function __wbg_adapter_31(arg0, arg1, arg2) {
-    wasm.closure457_externref_shim(arg0, arg1, arg2);
-}
-
-function __wbg_adapter_1122(arg0, arg1, arg2, arg3) {
-    wasm.closure478_externref_shim(arg0, arg1, arg2, arg3);
+function __wbg_adapter_1120(arg0, arg1, arg2, arg3) {
+    wasm.closure479_externref_shim(arg0, arg1, arg2, arg3);
 }
 
 /**
@@ -7482,7 +7482,7 @@ export class SequencingRunQuery {
      * @returns {Pagination}
      */
     get pagination() {
-        const ret = wasm.__wbg_get_chromiumdatasetquery_pagination(this.__wbg_ptr);
+        const ret = wasm.__wbg_get_sequencingrunquery_pagination(this.__wbg_ptr);
         return Pagination.__wrap(ret);
     }
     /**
@@ -7491,7 +7491,7 @@ export class SequencingRunQuery {
     set pagination(arg0) {
         _assertClass(arg0, Pagination);
         var ptr0 = arg0.__destroy_into_raw();
-        wasm.__wbg_set_chromiumdatasetquery_pagination(this.__wbg_ptr, ptr0);
+        wasm.__wbg_set_sequencingrunquery_pagination(this.__wbg_ptr, ptr0);
     }
     /**
      * @returns {Uint8Array}
@@ -7598,7 +7598,7 @@ export class SequencingRunSummary {
     set id(arg0) {
         const ptr0 = passStringToWasm0(arg0, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
         const len0 = WASM_VECTOR_LEN;
-        wasm.__wbg_set_chromiumdatasetsummary_id(this.__wbg_ptr, ptr0, len0);
+        wasm.__wbg_set_sequencingrunsummary_id(this.__wbg_ptr, ptr0, len0);
     }
     /**
      * @returns {Map<any, any>}
@@ -9687,7 +9687,7 @@ export class SuspensionQuery {
      * @returns {Pagination}
      */
     get pagination() {
-        const ret = wasm.__wbg_get_suspensionquery_pagination(this.__wbg_ptr);
+        const ret = wasm.__wbg_get_sequencingrunquery_pagination(this.__wbg_ptr);
         return Pagination.__wrap(ret);
     }
     /**
@@ -9696,7 +9696,7 @@ export class SuspensionQuery {
     set pagination(arg0) {
         _assertClass(arg0, Pagination);
         var ptr0 = arg0.__destroy_into_raw();
-        wasm.__wbg_set_suspensionquery_pagination(this.__wbg_ptr, ptr0);
+        wasm.__wbg_set_sequencingrunquery_pagination(this.__wbg_ptr, ptr0);
     }
     /**
      * @returns {Uint8Array}
@@ -9908,19 +9908,6 @@ export class SuspensionSummary {
      */
     set target_cell_recovery(arg0) {
         wasm.__wbg_set_suspensionsummary_target_cell_recovery(this.__wbg_ptr, arg0);
-    }
-    /**
-     * @returns {number}
-     */
-    get target_reads_per_cell() {
-        const ret = wasm.__wbg_get_suspensionsummary_target_reads_per_cell(this.__wbg_ptr);
-        return ret;
-    }
-    /**
-     * @param {number} arg0
-     */
-    set target_reads_per_cell(arg0) {
-        wasm.__wbg_set_suspensionsummary_target_reads_per_cell(this.__wbg_ptr, arg0);
     }
     /**
      * @returns {string}
@@ -10740,7 +10727,7 @@ export function __wbg_new_d5e3800b120e37e1(arg0, arg1) {
             const a = state0.a;
             state0.a = 0;
             try {
-                return __wbg_adapter_1122(a, state0.b, arg0, arg1);
+                return __wbg_adapter_1120(a, state0.b, arg0, arg1);
             } finally {
                 state0.a = a;
             }
@@ -11106,17 +11093,17 @@ export function __wbindgen_cast_7e9c58eeb11b0a6f(arg0, arg1) {
     return ret;
 };
 
+export function __wbindgen_cast_830d2e277bf97812(arg0, arg1) {
+    // Cast intrinsic for `Closure(Closure { dtor_idx: 457, function: Function { arguments: [Externref], shim_idx: 458, ret: Unit, inner_ret: Some(Unit) }, mutable: true }) -> Externref`.
+    const ret = makeMutClosure(arg0, arg1, 457, __wbg_adapter_22);
+    return ret;
+};
+
 export function __wbindgen_cast_9ed9d84624444210(arg0, arg1) {
     var v0 = getArrayJsValueFromWasm0(arg0, arg1).slice();
     wasm.__wbindgen_free(arg0, arg1 * 4, 4);
     // Cast intrinsic for `Vector(NamedExternref("ChromiumDataset")) -> Externref`.
     const ret = v0;
-    return ret;
-};
-
-export function __wbindgen_cast_a300551b7bc45fbd(arg0, arg1) {
-    // Cast intrinsic for `Closure(Closure { dtor_idx: 438, function: Function { arguments: [], shim_idx: 439, ret: Unit, inner_ret: Some(Unit) }, mutable: true }) -> Externref`.
-    const ret = makeMutClosure(arg0, arg1, 438, __wbg_adapter_16);
     return ret;
 };
 
@@ -11136,15 +11123,15 @@ export function __wbindgen_cast_c15a5e554ce1a329(arg0, arg1) {
     return ret;
 };
 
-export function __wbindgen_cast_d6cd19b81560fd6e(arg0) {
-    // Cast intrinsic for `F64 -> Externref`.
-    const ret = arg0;
+export function __wbindgen_cast_d40d1de55fe59430(arg0, arg1) {
+    // Cast intrinsic for `Closure(Closure { dtor_idx: 439, function: Function { arguments: [], shim_idx: 440, ret: Unit, inner_ret: Some(Unit) }, mutable: true }) -> Externref`.
+    const ret = makeMutClosure(arg0, arg1, 439, __wbg_adapter_33);
     return ret;
 };
 
-export function __wbindgen_cast_d9a2dd683ea9c96a(arg0, arg1) {
-    // Cast intrinsic for `Closure(Closure { dtor_idx: 456, function: Function { arguments: [Externref], shim_idx: 457, ret: Unit, inner_ret: Some(Unit) }, mutable: true }) -> Externref`.
-    const ret = makeMutClosure(arg0, arg1, 456, __wbg_adapter_31);
+export function __wbindgen_cast_d6cd19b81560fd6e(arg0) {
+    // Cast intrinsic for `F64 -> Externref`.
+    const ret = arg0;
     return ret;
 };
 

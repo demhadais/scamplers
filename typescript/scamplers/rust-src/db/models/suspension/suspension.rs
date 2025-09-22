@@ -83,8 +83,6 @@ pub struct NewSuspension {
     pub biological_material: BiologicalMaterial,
     #[garde(range(min = 0.0))]
     pub target_cell_recovery: f32,
-    #[garde(range(min = 0))]
-    pub target_reads_per_cell: i32,
     #[cfg_attr(feature = "app", diesel(skip_insertion))]
     pub preparer_ids: Vec<Uuid>,
     #[garde(dive)]
@@ -105,13 +103,12 @@ pub struct NewSuspension {
 #[pymethods]
 impl NewSuspension {
     #[new]
-    #[pyo3(signature = (*, readable_id, parent_specimen_id, biological_material, target_cell_recovery, target_reads_per_cell, preparer_ids, measurements=Vec::new(), created_at=None, multiplexing_tag_id=None,lysis_duration_minutes=None,notes=None))]
+    #[pyo3(signature = (*, readable_id, parent_specimen_id, biological_material, target_cell_recovery, preparer_ids, measurements=Vec::new(), created_at=None, multiplexing_tag_id=None,lysis_duration_minutes=None,notes=None))]
     fn new(
         readable_id: ValidString,
         parent_specimen_id: Uuid,
         biological_material: BiologicalMaterial,
         target_cell_recovery: f32,
-        target_reads_per_cell: i32,
         preparer_ids: Vec<Uuid>,
         measurements: Vec<NewSuspensionMeasurement>,
         created_at: Option<OffsetDateTime>,
@@ -124,7 +121,6 @@ impl NewSuspension {
             parent_specimen_id,
             biological_material,
             target_cell_recovery,
-            target_reads_per_cell,
             preparer_ids,
             measurements,
             created_at,
@@ -149,7 +145,6 @@ pub struct SuspensionSummary {
     pub created_at: Option<OffsetDateTime>,
     pub lysis_duration_minutes: Option<f32>,
     pub target_cell_recovery: f32,
-    pub target_reads_per_cell: i32,
     pub notes: Option<String>,
 }
 

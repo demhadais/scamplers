@@ -280,7 +280,6 @@ diesel::table! {
         multiplexing_tag_id -> Nullable<Uuid>,
         lysis_duration_minutes -> Nullable<Float4>,
         target_cell_recovery -> Float4,
-        target_reads_per_cell -> Int4,
         notes -> Nullable<Text>,
     }
 }

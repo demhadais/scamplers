@@ -374,7 +374,6 @@ impl TestState {
                 .readable_id(Uuid::now_v7().to_string())
                 .parent_specimen_id(self.random_specimen_id())
                 .target_cell_recovery(5_000.0 + i as f32)
-                .target_reads_per_cell(50_000 + i as i32)
                 .measurements(new_suspension_measurements)
                 .preparer_ids(self.random_people_ids(2));
 
