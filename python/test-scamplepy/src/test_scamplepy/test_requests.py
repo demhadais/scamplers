@@ -292,7 +292,6 @@ def new_suspension(
         biological_material=BiologicalMaterial.Cells,
         created_at=TIME,
         target_cell_recovery=0,
-        target_reads_per_cell=0,
         preparer_ids=[person_id],
         measurements=_new_suspension_measurements(person_id),
         multiplexing_tag_id=multiplexing_tag_id,

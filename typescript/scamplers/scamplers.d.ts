@@ -990,7 +990,6 @@ export class SuspensionSummary {
   get lysis_duration_minutes(): number | undefined;
   set lysis_duration_minutes(value: number | null | undefined);
   target_cell_recovery: number;
-  target_reads_per_cell: number;
   get notes(): string;
   set notes(value: string | null | undefined);
 }
