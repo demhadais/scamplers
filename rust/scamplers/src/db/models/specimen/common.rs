@@ -81,7 +81,7 @@ pub enum MeasurementData {
     Rin {
         measured_at: OffsetDateTime,
         #[garde(dive)]
-        instrument_name: ValidString,
+        instrument_name: Option<ValidString>,
         #[garde(range(min = 1.0, max = 10.0))]
         value: f32,
     },
@@ -89,7 +89,7 @@ pub enum MeasurementData {
     Dv200 {
         measured_at: OffsetDateTime,
         #[garde(dive)]
-        instrument_name: ValidString,
+        instrument_name: Option<ValidString>,
         #[garde(range(min = 0.0, max = 1.0))]
         value: f32,
     },

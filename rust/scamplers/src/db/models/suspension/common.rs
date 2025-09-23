@@ -30,7 +30,7 @@ pub enum SuspensionMeasurementFields {
     Concentration {
         measured_at: OffsetDateTime,
         #[garde(dive)]
-        instrument_name: ValidString,
+        instrument_name: Option<ValidString>,
         counting_method: CellCountingMethod,
         #[garde(range(min = 0.0))]
         value: f32,
@@ -45,14 +45,14 @@ pub enum SuspensionMeasurementFields {
     Viability {
         measured_at: OffsetDateTime,
         #[garde(dive)]
-        instrument_name: ValidString,
+        instrument_name: Option<ValidString>,
         #[garde(range(min = 0.0, max = 1.0))]
         value: f32,
     },
     MeanDiameter {
         measured_at: OffsetDateTime,
         #[garde(dive)]
-        instrument_name: ValidString,
+        instrument_name: Option<ValidString>,
         #[garde(range(min = 0.0))]
         value: f32,
         unit: (BiologicalMaterial, LengthUnit),
