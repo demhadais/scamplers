@@ -88,7 +88,6 @@ export class CdnaMeasurement {
   id: string;
   cdna_id: string;
   measured_by: string;
-  data: ElectrophoreticMeasurementData;
 }
 export class CdnaQuery {
   free(): void;
@@ -301,16 +300,6 @@ export class DuplicateResourceError {
   entity: string;
   fields: string[];
   values: string[];
-}
-export class ElectrophoreticMeasurementData {
-  private constructor();
-  free(): void;
-  measured_at: Date;
-  instrument_name: string;
-  get mean_size_bp(): number | undefined;
-  set mean_size_bp(value: number | null | undefined);
-  concentration: Concentration;
-  readonly sizing_range: Uint16Array;
 }
 export class EmptyStringError {
   private constructor();

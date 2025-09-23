@@ -3,7 +3,7 @@ use diesel::prelude::*;
 #[cfg(feature = "python")]
 use pyo3::prelude::*;
 #[cfg(feature = "python")]
-use pyo3_stub_gen::derive::{gen_stub_pyclass, gen_stub_pymethods};
+use pyo3_stub_gen::derive::{gen_stub_pyclass, gen_stub_pyclass_complex_enum, gen_stub_pymethods};
 use scamplers_macros::db_json;
 #[cfg(feature = "app")]
 use scamplers_schema::{chromium_run, gems, tenx_assay};
@@ -70,61 +70,36 @@ fn electrophoretic_sizing_range((min, max): &(u16, u16), _: &()) -> garde::Resul
     Ok(())
 }
 
-#[cfg_attr(target_arch = "wasm32", wasm_bindgen(getter_with_clone))]
-#[cfg_attr(feature = "python", gen_stub_pyclass)]
+#[cfg_attr(feature = "python", gen_stub_pyclass_complex_enum)]
 #[db_json]
-#[cfg_attr(feature = "python", pyo3(module = "scamplepy.common", set_all))]
-#[derive(bon::Builder)]
-#[builder(on(_, into))]
-pub struct ElectrophoreticMeasurementData {
-    pub measured_at: OffsetDateTime,
-    #[garde(dive)]
-    pub instrument_name: ValidString,
-    #[garde(range(min = 0.0))]
-    pub mean_size_bp: Option<f32>,
-    #[garde(custom(electrophoretic_sizing_range))]
-    #[cfg_attr(target_arch = "wasm32", wasm_bindgen(skip))]
-    pub sizing_range: (u16, u16),
-    #[garde(dive)]
-    pub concentration: Concentration,
-}
-
-#[cfg(target_arch = "wasm32")]
-#[wasm_bindgen]
-impl ElectrophoreticMeasurementData {
-    #[wasm_bindgen(getter)]
-    #[must_use]
-    pub fn sizing_range(&self) -> Vec<u16> {
-        let (min, max) = self.sizing_range;
-        [min, max].to_vec()
-    }
-}
-
-#[cfg(feature = "python")]
-#[gen_stub_pymethods]
-#[pymethods]
-impl ElectrophoreticMeasurementData {
-    #[new]
-    #[pyo3(signature = (*, measured_at, instrument_name, mean_size_bp, sizing_range, concentration_value, concentration_unit))]
-    fn new(
+#[serde(tag = "type")]
+#[cfg_attr(
+    feature = "python",
+    pyo3(
+        name = "NucleicAcidMeasurementData",
+        module = "scamplepy.common",
+        set_all
+    )
+)]
+pub enum MeasurementData {
+    Electrophoretic {
         measured_at: OffsetDateTime,
+        #[garde(dive)]
         instrument_name: ValidString,
+        #[garde(range(min = 0.0))]
         mean_size_bp: Option<f32>,
+        #[garde(custom(electrophoretic_sizing_range))]
         sizing_range: (u16, u16),
-        concentration_value: f32,
-        concentration_unit: (MassUnit, VolumeUnit),
-    ) -> Self {
-        Self {
-            measured_at,
-            instrument_name,
-            mean_size_bp,
-            sizing_range,
-            concentration: Concentration {
-                value: concentration_value,
-                unit: concentration_unit,
-            },
-        }
-    }
+        #[garde(dive)]
+        concentration: Concentration,
+    },
+    Fluorometric {
+        measured_at: OffsetDateTime,
+        #[garde(dive)]
+        instrument_name: ValidString,
+        #[garde(dive)]
+        concentration: Concentration,
+    },
 }
 
 #[cfg(feature = "app")]

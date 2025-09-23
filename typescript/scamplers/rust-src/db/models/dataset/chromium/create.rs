@@ -15,7 +15,7 @@ use crate::{
                 NewCellrangerarcCountDataset, NewCellrangeratacCountDataset, NewChromiumDataset,
                 NewChromiumDatasetCommon, ParsedMetrics,
             },
-            nucleic_acid::common::gems_to_assay,
+            nucleic_acid::gems_to_assay,
         },
         util::{ManyToMany, ManyToManyChildrenWithSelfId},
     },

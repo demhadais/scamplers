@@ -18,8 +18,7 @@ use scamplers::{
         nucleic_acid::{
             self,
             cdna::{Cdna, CdnaQuery, NewCdna, NewCdnaGroup, NewCdnaMeasurement},
-            common::ElectrophoreticMeasurementData,
-            library::{self, Library, LibraryQuery, NewLibrary, NewLibraryMeasurement},
+            library::{Library, LibraryQuery, NewLibrary, NewLibraryMeasurement},
         },
         person::{NewPerson, Person, PersonQuery, UserRole},
         sequencing_run::{NewSequencingRun, SequencingRun, SequencingRunQuery},
@@ -149,10 +148,9 @@ fn register_common_submodule<'a>(parent: &'a Bound<PyModule>) -> PyResult<Module
         CellCountingMethod,
         SuspensionMeasurementFields,
         BiologicalMaterial,
-        ElectrophoreticMeasurementData,
-        nucleic_acid::common::Concentration,
-        LibraryType,
-        library::MeasurementData
+        nucleic_acid::Concentration,
+        nucleic_acid::MeasurementData,
+        LibraryType
     );
 
     parent.add_submodule(&common_submodule)?;

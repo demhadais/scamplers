@@ -3,9 +3,9 @@ use diesel::prelude::*;
 #[cfg(feature = "python")]
 use pyo3::prelude::*;
 #[cfg(feature = "python")]
-use pyo3_stub_gen::derive::{gen_stub_pyclass_complex_enum, gen_stub_pymethods};
+use pyo3_stub_gen::derive::gen_stub_pymethods;
 use scamplers_macros::{
-    Jsonify, PyJsonify, WasmJsonify, base_model, db_insertion, db_json, db_query, db_selection,
+    Jsonify, PyJsonify, WasmJsonify, base_model, db_insertion, db_query, db_selection,
 };
 #[cfg(feature = "app")]
 use scamplers_schema::{cdna, library, library_preparers};
@@ -16,10 +16,7 @@ use valid_string::ValidString;
 use crate::{
     db::models::{
         DefaultVec, Links, Pagination,
-        nucleic_acid::{
-            cdna::CdnaSummary,
-            common::{Concentration, ElectrophoreticMeasurementData},
-        },
+        nucleic_acid::{cdna::CdnaSummary, common::MeasurementData},
         tenx_assay::chromium::LibraryType,
     },
     define_ordering_enum, uuid_newtype,
@@ -29,24 +26,6 @@ use crate::{
 mod create;
 #[cfg(feature = "app")]
 mod read;
-
-#[cfg_attr(feature = "python", gen_stub_pyclass_complex_enum)]
-#[db_json]
-#[serde(tag = "type")]
-#[cfg_attr(
-    feature = "python",
-    pyo3(name = "LibraryMeasurementData", module = "scamplepy.common", set_all)
-)]
-pub enum MeasurementData {
-    Electrophoretic(ElectrophoreticMeasurementData),
-    Fluorometric {
-        measured_at: OffsetDateTime,
-        #[garde(dive)]
-        instrument_name: ValidString,
-        #[garde(dive)]
-        concentration: Concentration,
-    },
-}
 
 #[db_insertion]
 #[cfg_attr(feature = "app", diesel(table_name = scamplers_schema::library_measurement))]
