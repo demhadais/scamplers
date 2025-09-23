@@ -1,3 +1,4 @@
+use any_value::AnyValue;
 #[cfg(feature = "app")]
 use diesel::prelude::*;
 #[cfg(feature = "python")]
@@ -140,8 +141,6 @@ pub struct NewSpecimenCommon {
     #[garde(dive)]
     #[cfg_attr(feature = "app", diesel(skip_insertion))]
     pub committee_approvals: Vec<NewCommitteeApproval>,
-    #[garde(dive)]
-    pub notes: Option<ValidString>,
     pub returned_at: Option<OffsetDateTime>,
     pub returned_by: Option<Uuid>,
     #[serde(default)]
@@ -149,6 +148,7 @@ pub struct NewSpecimenCommon {
     #[builder(default)]
     #[cfg_attr(feature = "app", diesel(skip_insertion))]
     pub measurements: Vec<NewSpecimenMeasurement>,
+    pub additional_data: Option<AnyValue>,
 }
 
 #[allow(clippy::trivially_copy_pass_by_ref)]
@@ -163,23 +163,22 @@ pub(super) fn is_true(value: &bool, _: &()) -> garde::Result {
 #[cfg(feature = "app")]
 #[derive(Insertable)]
 #[diesel(table_name = scamplers_schema::specimen)]
-pub struct VariableFields<'a> {
+pub struct VariableFields {
     pub type_: SpecimenType,
     pub embedded_in: Option<BlockEmbeddingMatrix>,
     pub fixative: Option<Fixative>,
     pub cryopreserved: bool,
     pub frozen: bool,
-    pub storage_buffer: Option<&'a ValidString>,
 }
 
 #[cfg(feature = "app")]
-pub type GenericNewSpecimen<'a> = (&'a NewSpecimenCommon, VariableFields<'a>);
+pub type GenericNewSpecimen<'a> = (&'a NewSpecimenCommon, VariableFields);
 
 #[cfg(feature = "app")]
 pub trait AsGenericNewSpecimen {
     fn inner(&self) -> &NewSpecimenCommon;
 
-    fn variable_fields(&self) -> VariableFields<'_>;
+    fn variable_fields(&self) -> VariableFields;
 
     fn as_generic(&self) -> GenericNewSpecimen<'_> {
         (self.inner(), self.variable_fields())

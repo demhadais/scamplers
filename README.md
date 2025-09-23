@@ -189,11 +189,12 @@ The following is a list of endpionts an the default query for each endpoint. Not
   "types": [],
   "embedded_in": [],
   "fixatives": [],
-  "storage_buffers": [],
   // optional boolean
   "frozen": null,
   // optional boolean
   "cryopreserved": null,
+  // optional object of arbitrary keys and values to search
+  "additional_data": null,
   // array of `OrderBy` objects
   "order_by": [{ "field": "received_at", "descending": false }],
   // Pagination object

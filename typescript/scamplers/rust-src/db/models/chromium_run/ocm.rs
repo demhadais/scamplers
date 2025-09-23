@@ -1,4 +1,6 @@
 #[cfg(feature = "python")]
+use any_value::AnyValue;
+#[cfg(feature = "python")]
 use pyo3::prelude::*;
 use scamplers_macros::db_insertion;
 #[cfg(feature = "python")]
@@ -62,7 +64,7 @@ pub struct NewOcmChromiumRun {
 #[pymethods]
 impl NewOcmChromiumRun {
     #[new]
-    #[pyo3(signature = (*, readable_id, assay_id, run_at, succeeded, run_by, gems, notes=None))]
+    #[pyo3(signature = (*, readable_id, assay_id, run_at, succeeded, run_by, gems, additional_data=None))]
     fn new(
         readable_id: ValidString,
         assay_id: Uuid,
@@ -70,7 +72,7 @@ impl NewOcmChromiumRun {
         succeeded: bool,
         run_by: Uuid,
         gems: Vec<NewOcmGems>,
-        notes: Option<ValidString>,
+        additional_data: Option<AnyValue>,
     ) -> Self {
         Self {
             inner: NewChromiumRunCommon {
@@ -79,7 +81,7 @@ impl NewOcmChromiumRun {
                 run_at,
                 run_by,
                 succeeded,
-                notes,
+                additional_data,
             },
             gems,
         }

@@ -1,3 +1,4 @@
+use any_value::{AnyValue, WithSnakeCaseKeys};
 use diesel::{PgConnection, prelude::*};
 use scamplers_schema::{cdna, library, library_measurement, library_preparers, tenx_assay};
 use uuid::Uuid;
@@ -88,6 +89,13 @@ impl NewLibrary {
         }
         .into())
     }
+
+    fn snake_case_additional_data(&mut self) {
+        self.additional_data = self
+            .additional_data
+            .take()
+            .map(AnyValue::with_snake_case_keys);
+    }
 }
 
 impl DbOperation<Library> for NewLibrary {
@@ -96,6 +104,8 @@ impl DbOperation<Library> for NewLibrary {
         db_conn: &mut diesel::PgConnection,
     ) -> crate::result::ScamplersResult<Library> {
         self.validate_type_and_volume(db_conn)?;
+
+        self.snake_case_additional_data();
 
         let id = diesel::insert_into(library::table)
             .values(&self)

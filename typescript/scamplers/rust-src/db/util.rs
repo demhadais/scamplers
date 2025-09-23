@@ -109,6 +109,19 @@ macro_rules! apply_ilike_filters {
 }
 
 #[macro_export]
+macro_rules! apply_jsonb_contains_filters {
+    ($stmt:expr, filters = {$($col:expr => $value:expr),*}) => {{
+        $(
+            if let Some(value) = $value {
+                $stmt = $stmt.filter($col.contains(value));
+            }
+        )*
+
+        $stmt
+    }};
+}
+
+#[macro_export]
 macro_rules! define_ordering_enum {
     {$name:ident { $($variant:ident),* }, default = $default:ident} => {
         #[derive(Clone, Debug, PartialEq, ::serde::Serialize, ::serde::Deserialize, ::strum::EnumString, ::strum::Display, ::valuable::Valuable)]

@@ -1,3 +1,4 @@
+use any_value::AnyValue;
 #[cfg(feature = "app")]
 use diesel::{Associations, prelude::*};
 #[cfg(feature = "python")]
@@ -94,8 +95,7 @@ pub struct NewSuspension {
     pub multiplexing_tag_id: Option<Uuid>,
     #[garde(range(min = 0.0))]
     pub lysis_duration_minutes: Option<f32>,
-    #[garde(dive)]
-    pub notes: Option<ValidString>,
+    pub additional_data: Option<AnyValue>,
 }
 
 #[cfg(feature = "python")]
@@ -103,7 +103,7 @@ pub struct NewSuspension {
 #[pymethods]
 impl NewSuspension {
     #[new]
-    #[pyo3(signature = (*, readable_id, parent_specimen_id, biological_material, target_cell_recovery, preparer_ids, measurements=Vec::new(), created_at=None, multiplexing_tag_id=None,lysis_duration_minutes=None,notes=None))]
+    #[pyo3(signature = (*, readable_id, parent_specimen_id, biological_material, target_cell_recovery, preparer_ids, measurements=Vec::new(), created_at=None, multiplexing_tag_id=None, lysis_duration_minutes=None, additional_data=None))]
     fn new(
         readable_id: ValidString,
         parent_specimen_id: Uuid,
@@ -114,7 +114,7 @@ impl NewSuspension {
         created_at: Option<OffsetDateTime>,
         multiplexing_tag_id: Option<Uuid>,
         lysis_duration_minutes: Option<f32>,
-        notes: Option<ValidString>,
+        additional_data: Option<AnyValue>,
     ) -> Self {
         Self {
             readable_id,
@@ -127,7 +127,7 @@ impl NewSuspension {
             pooled_into: None,
             multiplexing_tag_id,
             lysis_duration_minutes,
-            notes,
+            additional_data,
         }
     }
 }
@@ -145,7 +145,7 @@ pub struct SuspensionSummary {
     pub created_at: Option<OffsetDateTime>,
     pub lysis_duration_minutes: Option<f32>,
     pub target_cell_recovery: f32,
-    pub notes: Option<String>,
+    pub additional_data: Option<AnyValue>,
 }
 
 #[db_selection]

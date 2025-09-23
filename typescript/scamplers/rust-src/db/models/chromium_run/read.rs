@@ -2,8 +2,8 @@ use diesel::prelude::*;
 use scamplers_schema::chromium_run;
 
 use crate::{
-    apply_eq_any_filters, apply_eq_filters, apply_ilike_filters, apply_tenx_assay_query,
-    apply_time_filters, attach_children_to_parents,
+    apply_eq_any_filters, apply_eq_filters, apply_ilike_filters, apply_jsonb_contains_filters,
+    apply_tenx_assay_query, apply_time_filters, attach_children_to_parents,
     db::{
         DbOperation,
         models::chromium_run::{
@@ -35,7 +35,7 @@ impl DbOperation<Vec<ChromiumRun>> for ChromiumRunQuery {
             run_before,
             run_after,
             succeeded,
-            notes,
+            additional_data,
             ..
         } = &self;
 
@@ -49,8 +49,7 @@ impl DbOperation<Vec<ChromiumRun>> for ChromiumRunQuery {
         stmt = apply_ilike_filters!(
             stmt,
             filters = {
-                chromium_run::readable_id => readable_ids,
-                chromium_run::notes => notes
+                chromium_run::readable_id => readable_ids
             }
         );
 
@@ -65,6 +64,12 @@ impl DbOperation<Vec<ChromiumRun>> for ChromiumRunQuery {
             stmt,
             filters = {
                 chromium_run::run_at => (run_before, run_after)
+            }
+        );
+
+        stmt = apply_jsonb_contains_filters!(stmt,
+            filters = {
+                chromium_run::additional_data => additional_data
             }
         );
 

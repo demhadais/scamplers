@@ -1,3 +1,4 @@
+use any_value::AnyValue;
 #[cfg(feature = "app")]
 use diesel::prelude::*;
 #[cfg(feature = "python")]
@@ -72,8 +73,7 @@ pub struct NewCdna {
     pub measurements: Vec<NewCdnaMeasurement>,
     #[garde(dive)]
     pub storage_location: Option<ValidString>,
-    #[garde(dive)]
-    pub notes: Option<ValidString>,
+    pub additional_data: Option<AnyValue>,
 }
 
 #[cfg(feature = "python")]
@@ -81,7 +81,7 @@ pub struct NewCdna {
 #[pymethods]
 impl NewCdna {
     #[new]
-    #[pyo3(signature = (*, library_type, readable_id, prepared_at, gems_id, n_amplification_cycles, volume_mcl, preparer_ids, measurements=Vec::new(), storage_location=None, notes=None))]
+    #[pyo3(signature = (*, library_type, readable_id, prepared_at, gems_id, n_amplification_cycles, volume_mcl, preparer_ids, measurements=Vec::new(), storage_location=None, additional_data=None))]
     fn new(
         library_type: LibraryType,
         readable_id: ValidString,
@@ -92,7 +92,7 @@ impl NewCdna {
         preparer_ids: Vec<Uuid>,
         measurements: Vec<NewCdnaMeasurement>,
         storage_location: Option<ValidString>,
-        notes: Option<ValidString>,
+        additional_data: Option<AnyValue>,
     ) -> Self {
         Self {
             library_type,
@@ -104,7 +104,7 @@ impl NewCdna {
             preparer_ids,
             measurements,
             storage_location,
-            notes,
+            additional_data,
         }
     }
 }
@@ -165,7 +165,7 @@ pub struct CdnaSummary {
     pub prepared_at: OffsetDateTime,
     pub n_amplification_cycles: i32,
     pub storage_location: Option<String>,
-    pub notes: Option<String>,
+    pub additional_data: Option<AnyValue>,
 }
 
 #[cfg(feature = "app")]

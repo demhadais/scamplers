@@ -1,3 +1,4 @@
+use any_value::{AnyValue, WithSnakeCaseKeys};
 use diesel::prelude::*;
 use scamplers_schema::{cdna, cdna_measurement, cdna_preparers, gems, tenx_assay};
 use uuid::Uuid;
@@ -134,6 +135,15 @@ impl NewCdnaGroup {
     }
 }
 
+impl NewCdna {
+    fn snake_case_additional_data(&mut self) {
+        self.additional_data = self
+            .additional_data
+            .take()
+            .map(AnyValue::with_snake_case_keys);
+    }
+}
+
 impl DbOperation<Vec<Cdna>> for NewCdnaGroup {
     fn execute(
         self,
@@ -142,6 +152,10 @@ impl DbOperation<Vec<Cdna>> for NewCdnaGroup {
         self.validate_library_types(db_conn)?;
 
         let mut cdnas = self.into_vec();
+
+        for cdna in &mut cdnas {
+            cdna.snake_case_additional_data();
+        }
 
         let ids = diesel::insert_into(cdna::table)
             .values(&cdnas)

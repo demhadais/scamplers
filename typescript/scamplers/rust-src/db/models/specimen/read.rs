@@ -33,9 +33,7 @@ macro_rules! apply_specimen_query {
         $stmt = $crate::apply_ilike_filters!(
             $stmt,
             filters = {
-                specimen::name => &$query.names,
-                specimen::notes => &$query.notes,
-                specimen::storage_buffer => &$query.storage_buffers
+                specimen::name => &$query.names
             }
         );
 
@@ -51,6 +49,13 @@ macro_rules! apply_specimen_query {
             $stmt,
             filters = {
                 specimen::received_at => ($query.received_before, $query.received_after)
+            }
+        );
+
+        $stmt = $crate::apply_jsonb_contains_filters!(
+            $stmt,
+            filters = {
+                specimen::additional_data => $query.additional_data
             }
         );
 
@@ -96,6 +101,7 @@ impl_id_db_operation!(
 #[cfg(test)]
 mod tests {
     #![allow(clippy::cast_possible_wrap)]
+    use any_value::any_value;
     use rstest::rstest;
 
     use crate::db::{
@@ -160,14 +166,22 @@ mod tests {
                     .embedded_in
                     .as_ref()
                     .is_some_and(|e| e == "carboxymethyl_cellulose")
+                && s.info.summary.additional_data.as_ref().is_some_and(|d| {
+                    d.get("secret").is_some_and(|t| {
+                        t.as_str()
+                            .is_some_and(|s| s == "the krabby-patty secret formular")
+                    })
+                })
         }
 
+        // This query tests the ability of `additional_data` to be case-insensitive
         let query = SpecimenQuery::builder()
             .frozen(true)
             .types([SpecimenType::Block])
             .embedded_in([BlockEmbeddingMatrix::Frozen(
                 FrozenBlockEmbeddingMatrix::CarboxymethylCellulose,
             )])
+            .additional_data(any_value!({"secret": "the krabby-patty secret formular"}))
             .order_by(SpecimenOrderBy::Name { descending: true })
             .pagination(Pagination {
                 limit: N_SPECIMENS as i64,

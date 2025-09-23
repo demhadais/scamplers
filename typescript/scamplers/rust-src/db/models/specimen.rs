@@ -1,3 +1,4 @@
+use any_value::AnyValue;
 #[cfg(feature = "app")]
 use diesel::{expression::AsExpression, prelude::*};
 #[cfg(feature = "python")]
@@ -120,14 +121,13 @@ pub struct SpecimenSummary {
     pub received_at: OffsetDateTime,
     #[cfg_attr(target_arch = "wasm32", wasm_bindgen(skip))]
     pub species: Vec<Option<String>>, // Option<String> doesn't implement VectorFromWasmAbi :)
-    pub notes: Option<String>,
     pub returned_at: Option<OffsetDateTime>,
     pub type_: SpecimenType,
     pub embedded_in: Option<String>,
     pub fixative: Option<String>,
     pub frozen: bool,
     pub cryopreserved: bool,
-    pub storage_buffer: Option<String>,
+    pub additional_data: Option<AnyValue>,
 }
 
 #[cfg(target_arch = "wasm32")]
@@ -263,8 +263,6 @@ pub struct SpecimenQuery {
     #[builder(default)]
     pub species: Vec<Species>,
     #[builder(default)]
-    pub notes: Vec<String>,
-    #[builder(default)]
     pub types: Vec<SpecimenType>,
     #[cfg_attr(target_arch = "wasm32", wasm_bindgen(skip))]
     #[builder(default)]
@@ -272,10 +270,9 @@ pub struct SpecimenQuery {
     #[cfg_attr(target_arch = "wasm32", wasm_bindgen(skip))]
     #[builder(default)]
     pub fixatives: Vec<Fixative>,
-    #[builder(default)]
-    pub storage_buffers: Vec<String>,
     pub frozen: Option<bool>,
     pub cryopreserved: Option<bool>,
+    pub additional_data: Option<AnyValue>,
     #[builder(default)]
     pub order_by: DefaultVec<SpecimenOrderBy>,
     #[builder(default)]
@@ -287,7 +284,7 @@ pub struct SpecimenQuery {
 #[pymethods]
 impl SpecimenQuery {
     #[new]
-    #[pyo3(signature = (*,ids = Vec::new(), names = Vec::new(), submitters = Vec::new(), labs = Vec::new(), received_before = None, received_after = None, species = Vec::new(), notes = Vec::new(), types = Vec::new(), embedded_in = Vec::new(), fixatives = Vec::new(), storage_buffers = Vec::new(), frozen = None, cryopreserved = None, order_by = DefaultVec::default(), limit = Pagination::default().limit, offset = Pagination::default_offset()))]
+    #[pyo3(signature = (*,ids = Vec::new(), names = Vec::new(), submitters = Vec::new(), labs = Vec::new(), received_before = None, received_after = None, species = Vec::new(), types = Vec::new(), embedded_in = Vec::new(), fixatives = Vec::new(), frozen = None, cryopreserved = None, additional_data = None, order_by = DefaultVec::default(), limit = Pagination::default().limit, offset = Pagination::default_offset()))]
     #[must_use]
     pub fn new(
         ids: Vec<Uuid>,
@@ -297,13 +294,12 @@ impl SpecimenQuery {
         received_before: Option<OffsetDateTime>,
         received_after: Option<OffsetDateTime>,
         species: Vec<Species>,
-        notes: Vec<String>,
         types: Vec<SpecimenType>,
         embedded_in: Vec<BlockEmbeddingMatrix>,
         fixatives: Vec<Fixative>,
-        storage_buffers: Vec<String>,
         frozen: Option<bool>,
         cryopreserved: Option<bool>,
+        additional_data: Option<AnyValue>,
         order_by: DefaultVec<SpecimenOrderBy>,
         limit: i64,
         offset: i64,
@@ -316,13 +312,12 @@ impl SpecimenQuery {
             received_before,
             received_after,
             species,
-            notes,
             types,
             embedded_in,
             fixatives,
-            storage_buffers,
             frozen,
             cryopreserved,
+            additional_data,
             order_by,
             pagination: Pagination { limit, offset },
         }

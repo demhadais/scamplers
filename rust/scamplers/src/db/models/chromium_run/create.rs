@@ -1,3 +1,4 @@
+use any_value::{AnyValue, WithSnakeCaseKeys};
 use diesel::prelude::*;
 use scamplers_schema::{chip_loading, chromium_run, gems};
 
@@ -93,8 +94,46 @@ impl ChildrenWithSelfId<NewPoolMultiplexChipLoading> for NewPoolMultiplexGems {
     }
 }
 
+impl NewChromiumRun {
+    fn snake_case_additional_data(&mut self) {
+        let inner = match self {
+            Self::Singleplex(NewSingleplexChromiumRun { inner, .. })
+            | Self::Ocm(NewOcmChromiumRun { inner, .. })
+            | Self::PoolMultiplex(NewPoolMultiplexChromiumRun { inner, .. }) => inner,
+        };
+
+        inner.additional_data = inner
+            .additional_data
+            .take()
+            .map(AnyValue::with_snake_case_keys);
+    }
+}
+
+impl NewSingleplexChipLoading {
+    fn snake_case_additional_data(&mut self) {
+        self.inner.additional_data = self
+            .inner
+            .additional_data
+            .take()
+            .map(AnyValue::with_snake_case_keys);
+    }
+}
+
+impl NewPoolMultiplexChipLoading {
+    fn snake_case_additional_data(&mut self) {
+        self.inner.additional_data = self
+            .inner
+            .additional_data
+            .take()
+            .map(AnyValue::with_snake_case_keys);
+    }
+}
+
 impl DbOperation<ChromiumRun> for NewChromiumRun {
-    fn execute(self, db_conn: &mut PgConnection) -> crate::result::ScamplersResult<ChromiumRun> {
+    fn execute(
+        mut self,
+        db_conn: &mut PgConnection,
+    ) -> crate::result::ScamplersResult<ChromiumRun> {
         use NewChromiumRun::{Ocm, PoolMultiplex, Singleplex};
 
         macro_rules! insert_gems_and_loadings {
@@ -108,12 +147,20 @@ impl DbOperation<ChromiumRun> for NewChromiumRun {
 
                 for (ng, created) in new_gems.into_iter().zip(gems_ids) {
                     let loadings = ng.children_with_self_id(created);
+
+                    // This is much simpler than implementing the method for
+                    for loading in &mut *loadings {
+                        loading.snake_case_additional_data();
+                    }
+
                     diesel::insert_into(chip_loading::table)
                         .values(&*loadings)
                         .execute(db_conn)?;
                 }
             }};
         }
+
+        self.snake_case_additional_data();
 
         let chromium_run_id = diesel::insert_into(chromium_run::table)
             .values(&self)
