@@ -16,7 +16,7 @@ diesel::table! {
         gems_id -> Nullable<Uuid>,
         n_amplification_cycles -> Int4,
         storage_location -> Nullable<Text>,
-        notes -> Nullable<Text>,
+        additional_data -> Nullable<Jsonb>,
     }
 }
 
@@ -44,7 +44,7 @@ diesel::table! {
         suspension_pool_id -> Nullable<Uuid>,
         suspension_volume_loaded -> Jsonb,
         buffer_volume_loaded -> Jsonb,
-        notes -> Nullable<Text>,
+        additional_data -> Nullable<Jsonb>,
     }
 }
 
@@ -77,7 +77,7 @@ diesel::table! {
         run_at -> Timestamptz,
         run_by -> Uuid,
         succeeded -> Bool,
-        notes -> Nullable<Text>,
+        additional_data -> Nullable<Jsonb>,
     }
 }
 
@@ -151,7 +151,7 @@ diesel::table! {
         number_of_sample_index_pcr_cycles -> Int4,
         target_reads_per_cell -> Int4,
         prepared_at -> Timestamptz,
-        notes -> Nullable<Text>,
+        additional_data -> Nullable<Jsonb>,
     }
 }
 
@@ -215,7 +215,7 @@ diesel::table! {
         readable_id -> Text,
         begun_at -> Timestamptz,
         finished_at -> Nullable<Timestamptz>,
-        notes -> Nullable<Text>,
+        additional_data -> Nullable<Jsonb>,
     }
 }
 
@@ -246,7 +246,6 @@ diesel::table! {
         lab_id -> Uuid,
         received_at -> Timestamptz,
         species -> Array<Nullable<Text>>,
-        notes -> Nullable<Text>,
         returned_at -> Nullable<Timestamptz>,
         returned_by -> Nullable<Uuid>,
         #[sql_name = "type"]
@@ -255,7 +254,7 @@ diesel::table! {
         fixative -> Nullable<Text>,
         frozen -> Bool,
         cryopreserved -> Bool,
-        storage_buffer -> Nullable<Text>,
+        additional_data -> Nullable<Jsonb>,
     }
 }
 
@@ -280,7 +279,7 @@ diesel::table! {
         multiplexing_tag_id -> Nullable<Uuid>,
         lysis_duration_minutes -> Nullable<Float4>,
         target_cell_recovery -> Float4,
-        notes -> Nullable<Text>,
+        additional_data -> Nullable<Jsonb>,
     }
 }
 
@@ -300,7 +299,7 @@ diesel::table! {
         readable_id -> Text,
         name -> Text,
         pooled_at -> Timestamptz,
-        notes -> Nullable<Text>,
+        additional_data -> Nullable<Jsonb>,
     }
 }
 

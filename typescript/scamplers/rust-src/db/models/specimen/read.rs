@@ -33,9 +33,7 @@ macro_rules! apply_specimen_query {
         $stmt = $crate::apply_ilike_filters!(
             $stmt,
             filters = {
-                specimen::name => &$query.names,
-                specimen::notes => &$query.notes,
-                specimen::storage_buffer => &$query.storage_buffers
+                specimen::name => &$query.names
             }
         );
 
@@ -57,6 +55,13 @@ macro_rules! apply_specimen_query {
         if !$query.species.is_empty() {
             $stmt = $stmt.filter(specimen::species.overlaps_with($query.species));
         }
+
+        $stmt = $crate::apply_jsonb_contains_filters!(
+            $stmt,
+            filters = {
+                specimen::additional_data => $query.additional_data
+            }
+        );
 
         $stmt
     }};
@@ -96,6 +101,7 @@ impl_id_db_operation!(
 #[cfg(test)]
 mod tests {
     #![allow(clippy::cast_possible_wrap)]
+    use any_value::any_value;
     use rstest::rstest;
 
     use crate::db::{
@@ -160,6 +166,12 @@ mod tests {
                     .embedded_in
                     .as_ref()
                     .is_some_and(|e| e == "carboxymethyl_cellulose")
+                && s.info.summary.additional_data.as_ref().is_some_and(|d| {
+                    d.get("secret").is_some_and(|t| {
+                        t.as_str()
+                            .is_some_and(|s| s == "the krabby-patty secret formular")
+                    })
+                })
         }
 
         let query = SpecimenQuery::builder()
@@ -168,6 +180,7 @@ mod tests {
             .embedded_in([BlockEmbeddingMatrix::Frozen(
                 FrozenBlockEmbeddingMatrix::CarboxymethylCellulose,
             )])
+            .additional_data(any_value!({"secret": "the krabby-patty secret formular"}))
             .order_by(SpecimenOrderBy::Name { descending: true })
             .pagination(Pagination {
                 limit: N_SPECIMENS as i64,

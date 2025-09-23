@@ -1,10 +1,13 @@
 #[cfg(feature = "python")]
+use any_value::AnyValue;
+#[cfg(feature = "python")]
 use pyo3::prelude::*;
 use scamplers_macros::{db_insertion, db_simple_enum};
 #[cfg(feature = "python")]
 use time::OffsetDateTime;
 #[cfg(feature = "python")]
 use uuid::Uuid;
+#[cfg(feature = "python")]
 use valid_string::ValidString;
 
 #[cfg(feature = "app")]
@@ -29,8 +32,6 @@ pub struct NewCryopreservedTissue {
     #[serde(skip, default = "SpecimenType::tissue")]
     #[builder(skip = SpecimenType::Tissue)]
     pub type_: SpecimenType,
-    #[garde(dive)]
-    pub storage_buffer: Option<ValidString>,
     #[builder(skip = true)]
     #[garde(custom(super::common::is_true))]
     pub cryopreserved: bool,
@@ -46,18 +47,16 @@ impl AsGenericNewSpecimen for NewCryopreservedTissue {
         &self.inner
     }
 
-    fn variable_fields(&self) -> VariableFields<'_> {
+    fn variable_fields(&self) -> VariableFields {
         let Self {
             type_,
             cryopreserved,
-            storage_buffer,
             ..
         } = self;
 
         VariableFields {
             type_: *type_,
             cryopreserved: *cryopreserved,
-            storage_buffer: storage_buffer.as_ref(),
             fixative: None,
             embedded_in: None,
             frozen: false,
@@ -70,7 +69,7 @@ impl AsGenericNewSpecimen for NewCryopreservedTissue {
 #[pymethods]
 impl NewCryopreservedTissue {
     #[new]
-    #[pyo3(signature = (*, readable_id, name, submitted_by, lab_id, received_at, species, storage_buffer=None, measurements=Vec::new(), committee_approvals=Vec::new(), notes=None, returned_at=None, returned_by=None))]
+    #[pyo3(signature = (*, readable_id, name, submitted_by, lab_id, received_at, species, measurements=Vec::new(), committee_approvals=Vec::new(), returned_at=None, returned_by=None, additional_data=None))]
     fn new(
         readable_id: ValidString,
         name: ValidString,
@@ -78,12 +77,11 @@ impl NewCryopreservedTissue {
         lab_id: Uuid,
         received_at: OffsetDateTime,
         species: Vec<Species>,
-        storage_buffer: Option<ValidString>,
         measurements: Vec<NewSpecimenMeasurement>,
         committee_approvals: Vec<NewCommitteeApproval>,
-        notes: Option<ValidString>,
         returned_at: Option<OffsetDateTime>,
         returned_by: Option<Uuid>,
+        additional_data: Option<AnyValue>,
     ) -> Self {
         Self {
             inner: NewSpecimenCommon {
@@ -94,14 +92,13 @@ impl NewCryopreservedTissue {
                 received_at,
                 species,
                 committee_approvals,
-                notes,
                 returned_at,
                 returned_by,
                 measurements,
+                additional_data,
             },
             type_: SpecimenType::Tissue,
             cryopreserved: true,
-            storage_buffer,
         }
     }
 }
@@ -123,8 +120,6 @@ pub struct NewFixedTissue {
     #[builder(skip = SpecimenType::Tissue)]
     pub type_: SpecimenType,
     pub fixative: TissueFixative,
-    #[garde(dive)]
-    pub storage_buffer: Option<ValidString>,
 }
 
 impl_constrained_py_setter! { NewFixedTissue::set_type_(SpecimenType) = SpecimenType::Tissue }
@@ -135,20 +130,16 @@ impl AsGenericNewSpecimen for NewFixedTissue {
         &self.inner
     }
 
-    fn variable_fields(&self) -> VariableFields<'_> {
+    fn variable_fields(&self) -> VariableFields {
         use crate::db::models::specimen::Fixative;
 
         let Self {
-            type_,
-            fixative,
-            storage_buffer,
-            ..
+            type_, fixative, ..
         } = self;
 
         VariableFields {
             type_: *type_,
             fixative: Some(Fixative::Tissue(*fixative)),
-            storage_buffer: storage_buffer.as_ref(),
             embedded_in: None,
             cryopreserved: false,
             frozen: false,
@@ -161,7 +152,7 @@ impl AsGenericNewSpecimen for NewFixedTissue {
 #[pymethods]
 impl NewFixedTissue {
     #[new]
-    #[pyo3(signature = (*, readable_id, name, submitted_by, lab_id, received_at, species, fixative, storage_buffer=None, measurements=Vec::new(), committee_approvals=Vec::new(), notes=None, returned_at=None, returned_by=None))]
+    #[pyo3(signature = (*, readable_id, name, submitted_by, lab_id, received_at, species, fixative, measurements=Vec::new(), committee_approvals=Vec::new(), returned_at=None, returned_by=None, additional_data=None))]
     fn new(
         readable_id: ValidString,
         name: ValidString,
@@ -170,12 +161,11 @@ impl NewFixedTissue {
         received_at: OffsetDateTime,
         species: Vec<Species>,
         fixative: TissueFixative,
-        storage_buffer: Option<ValidString>,
         measurements: Vec<NewSpecimenMeasurement>,
         committee_approvals: Vec<NewCommitteeApproval>,
-        notes: Option<ValidString>,
         returned_at: Option<OffsetDateTime>,
         returned_by: Option<Uuid>,
+        additional_data: Option<AnyValue>,
     ) -> Self {
         Self {
             inner: NewSpecimenCommon {
@@ -186,14 +176,13 @@ impl NewFixedTissue {
                 received_at,
                 species,
                 committee_approvals,
-                notes,
                 returned_at,
                 returned_by,
                 measurements,
+                additional_data,
             },
             fixative,
             type_: SpecimenType::Tissue,
-            storage_buffer,
         }
     }
 }
@@ -208,8 +197,6 @@ pub struct NewFrozenTissue {
     #[serde(skip, default = "SpecimenType::tissue")]
     #[builder(skip = SpecimenType::Tissue)]
     pub type_: SpecimenType,
-    #[garde(dive)]
-    pub storage_buffer: Option<ValidString>,
     #[builder(skip = true)]
     #[garde(custom(super::common::is_true))]
     pub frozen: bool,
@@ -225,18 +212,12 @@ impl AsGenericNewSpecimen for NewFrozenTissue {
         &self.inner
     }
 
-    fn variable_fields(&self) -> VariableFields<'_> {
-        let Self {
-            type_,
-            storage_buffer,
-            frozen,
-            ..
-        } = self;
+    fn variable_fields(&self) -> VariableFields {
+        let Self { type_, frozen, .. } = self;
 
         VariableFields {
             type_: *type_,
             frozen: *frozen,
-            storage_buffer: storage_buffer.as_ref(),
             fixative: None,
             embedded_in: None,
             cryopreserved: false,
@@ -249,7 +230,7 @@ impl AsGenericNewSpecimen for NewFrozenTissue {
 #[pymethods]
 impl NewFrozenTissue {
     #[new]
-    #[pyo3(signature = (*, readable_id, name, submitted_by, lab_id, received_at, species, storage_buffer=None, measurements=Vec::new(), committee_approvals=Vec::new(), notes=None, returned_at=None, returned_by=None))]
+    #[pyo3(signature = (*, readable_id, name, submitted_by, lab_id, received_at, species, measurements=Vec::new(), committee_approvals=Vec::new(), returned_at=None, returned_by=None, additional_data=None))]
     fn new(
         readable_id: ValidString,
         name: ValidString,
@@ -257,12 +238,11 @@ impl NewFrozenTissue {
         lab_id: Uuid,
         received_at: OffsetDateTime,
         species: Vec<Species>,
-        storage_buffer: Option<ValidString>,
         measurements: Vec<NewSpecimenMeasurement>,
         committee_approvals: Vec<NewCommitteeApproval>,
-        notes: Option<ValidString>,
         returned_at: Option<OffsetDateTime>,
         returned_by: Option<Uuid>,
+        additional_data: Option<AnyValue>,
     ) -> Self {
         Self {
             inner: NewSpecimenCommon {
@@ -273,14 +253,13 @@ impl NewFrozenTissue {
                 received_at,
                 species,
                 committee_approvals,
-                notes,
                 returned_at,
                 returned_by,
                 measurements,
+                additional_data,
             },
             type_: SpecimenType::Tissue,
             frozen: true,
-            storage_buffer,
         }
     }
 }

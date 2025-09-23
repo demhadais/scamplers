@@ -1,3 +1,4 @@
+use any_value::AnyValue;
 #[cfg(feature = "app")]
 use diesel::prelude::*;
 #[cfg(feature = "python")]
@@ -62,8 +63,7 @@ pub struct NewSequencingRun {
     #[cfg_attr(feature = "app", diesel(skip_insertion))]
     pub libraries: Vec<NewSequencingSubmission>,
     pub finished_at: Option<OffsetDateTime>,
-    #[garde(dive)]
-    pub notes: Option<ValidString>,
+    pub additional_data: Option<AnyValue>,
 }
 
 #[cfg(feature = "python")]
@@ -71,20 +71,20 @@ pub struct NewSequencingRun {
 #[pymethods]
 impl NewSequencingRun {
     #[new]
-    #[pyo3(signature = (*, readable_id, begun_at, libraries, finished_at=None, notes=None))]
+    #[pyo3(signature = (*, readable_id, begun_at, libraries, finished_at=None, additional_data = None))]
     fn new(
         readable_id: ValidString,
         begun_at: OffsetDateTime,
         libraries: Vec<NewSequencingSubmission>,
         finished_at: Option<OffsetDateTime>,
-        notes: Option<ValidString>,
+        additional_data: Option<AnyValue>,
     ) -> Self {
         Self {
             readable_id,
             begun_at,
             libraries,
             finished_at,
-            notes,
+            additional_data,
         }
     }
 }
@@ -98,7 +98,7 @@ pub struct SequencingRunSummary {
     pub readable_id: String,
     pub begun_at: OffsetDateTime,
     pub finished_at: Option<OffsetDateTime>,
-    pub notes: Option<String>,
+    pub additional_data: Option<AnyValue>,
 }
 
 #[base_model]

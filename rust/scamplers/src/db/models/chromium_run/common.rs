@@ -1,3 +1,4 @@
+use any_value::AnyValue;
 use scamplers_macros::db_insertion;
 use time::OffsetDateTime;
 use uuid::Uuid;
@@ -29,8 +30,7 @@ pub struct NewChipLoadingCommon {
     pub suspension_volume_loaded: SuspensionMeasurementFields,
     #[garde(custom(SuspensionMeasurementFields::is_volume), dive)]
     pub buffer_volume_loaded: SuspensionMeasurementFields,
-    #[garde(dive)]
-    pub notes: Option<ValidString>,
+    pub additional_data: Option<AnyValue>,
 }
 
 #[db_insertion]
@@ -43,6 +43,5 @@ pub struct NewChromiumRunCommon {
     pub run_at: OffsetDateTime,
     pub run_by: Uuid,
     pub succeeded: bool,
-    #[garde(dive)]
-    pub notes: Option<ValidString>,
+    pub additional_data: Option<AnyValue>,
 }

@@ -4,10 +4,11 @@
 #![allow(clippy::cast_precision_loss)]
 use std::{cmp::Ordering, collections::HashSet, fmt::Debug};
 
+use any_value::any_value;
 use deadpool_diesel::postgres::Pool;
 use diesel::{PgConnection, prelude::*};
 use diesel_migrations::{EmbeddedMigrations, MigrationHarness, embed_migrations};
-use pretty_assertions::assert_eq;
+use pretty_assertions::{assert_eq, assert_ne};
 use rand::{
     SeedableRng,
     rngs::StdRng,
@@ -270,7 +271,7 @@ impl TestState {
                 .build();
 
             let random_species = Species::VARIANTS.choose(&mut self.rng).copied().unwrap();
-            let inner_specimen = NewSpecimenCommon::builder()
+            let mut inner_specimen = NewSpecimenCommon::builder()
                 .readable_id(Uuid::now_v7().to_string())
                 .submitted_by(self.random_person_id())
                 .lab_id(self.random_lab_id())
@@ -281,20 +282,24 @@ impl TestState {
                 .build();
 
             let new_specimen: NewSpecimen = if i % 7 == 0 {
+                inner_specimen.additional_data = Some(any_value!({"Tissue": "Soul"}));
+
                 let s = NewCryopreservedSuspension::builder()
                     .inner(inner_specimen)
-                    .storage_buffer("buffer")
                     .build();
 
                 NewSpecimen::CryopreservedSuspension(s)
             } else if i % 6 == 0 {
+                inner_specimen.additional_data = Some(any_value!({"Condition": "Excellent"}));
+
                 let s = NewFrozenSuspension::builder().inner(inner_specimen).build();
 
                 NewSpecimen::FrozenSuspension(s)
             } else if i % 5 == 0 {
+                inner_specimen.additional_data = Some(any_value!({"Storage Buffer": "Chowder"}));
+
                 let s = NewCryopreservedTissue::builder()
                     .inner(inner_specimen)
-                    .storage_buffer("buffer")
                     .build();
 
                 NewSpecimen::CryopreservedTissue(s)
@@ -318,6 +323,9 @@ impl TestState {
 
                 NewSpecimen::FixedBlock(s)
             } else {
+                inner_specimen.additional_data =
+                    Some(any_value!({"Secret": "the krabby-patty secret formular"}));
+
                 let random_embedding_matrix = FrozenBlockEmbeddingMatrix::VARIANTS
                     .choose(&mut self.rng)
                     .copied()
@@ -796,9 +804,13 @@ pub async fn test_query<Query, Record>(
         .maybe_sort_by(sort_by)
         .call();
 
+    assert_ne!(data.len(), 0, "no records found after data was filtered");
+
     let perform_test = move |db_conn: &mut PgConnection| {
         db_conn.test_transaction::<_, ScamplersError, _>(|tx| {
             let loaded_records = db_query.execute(tx).unwrap();
+
+            assert_ne!(loaded_records.len(), 0, "no records loaded from database");
 
             assert_eq!(
                 loaded_records.len(),

@@ -1,3 +1,4 @@
+use any_value::AnyValue;
 #[cfg(feature = "app")]
 use diesel::prelude::*;
 #[cfg(feature = "python")]
@@ -91,8 +92,7 @@ pub struct NewSuspensionPool {
     #[serde(default)]
     #[cfg_attr(feature = "app", diesel(skip_insertion))]
     pub measurements: Vec<NewSuspensionPoolMeasurement>,
-    #[garde(dive)]
-    pub notes: Option<ValidString>,
+    pub additional_data: Option<AnyValue>,
 }
 
 #[cfg(feature = "python")]
@@ -100,7 +100,7 @@ pub struct NewSuspensionPool {
 #[pymethods]
 impl NewSuspensionPool {
     #[new]
-    #[pyo3(signature = (*, readable_id, name, pooled_at, suspensions, preparer_ids, measurements=Vec::new(), notes=None))]
+    #[pyo3(signature = (*, readable_id, name, pooled_at, suspensions, preparer_ids, measurements=Vec::new(), additional_data=None))]
     fn new(
         readable_id: ValidString,
         name: ValidString,
@@ -108,7 +108,7 @@ impl NewSuspensionPool {
         suspensions: Vec<NewSuspension>,
         preparer_ids: Vec<Uuid>,
         measurements: Vec<NewSuspensionPoolMeasurement>,
-        notes: Option<ValidString>,
+        additional_data: Option<AnyValue>,
     ) -> Self {
         Self {
             readable_id,
@@ -117,7 +117,7 @@ impl NewSuspensionPool {
             suspensions,
             preparer_ids,
             measurements,
-            notes,
+            additional_data,
         }
     }
 }
@@ -131,7 +131,7 @@ pub struct SuspensionPoolSummary {
     pub readable_id: String,
     pub name: String,
     pub pooled_at: OffsetDateTime,
-    pub notes: Option<String>,
+    pub additional_data: Option<AnyValue>,
 }
 
 #[cfg(feature = "app")]

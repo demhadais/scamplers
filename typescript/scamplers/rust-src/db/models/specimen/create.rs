@@ -1,3 +1,4 @@
+use any_value::{AnyValue, WithSnakeCaseKeys};
 use diesel::prelude::*;
 use scamplers_schema::{committee_approval, specimen, specimen_measurement};
 
@@ -26,6 +27,14 @@ impl NewSpecimen {
             Self::FrozenSuspension(s) => &mut s.inner,
         }
     }
+
+    fn snake_case_additional_data(&mut self) {
+        let inner = self.inner_mut();
+        inner.additional_data = inner
+            .additional_data
+            .take()
+            .map(AnyValue::with_snake_case_keys);
+    }
 }
 
 impl AsGenericNewSpecimen for NewSpecimen {
@@ -42,7 +51,7 @@ impl AsGenericNewSpecimen for NewSpecimen {
         }
     }
 
-    fn variable_fields(&self) -> VariableFields<'_> {
+    fn variable_fields(&self) -> VariableFields {
         match self {
             Self::CryopreservedTissue(s) => s.variable_fields(),
             Self::FixedBlock(s) => s.variable_fields(),
@@ -121,6 +130,8 @@ impl ChildrenWithSelfId<NewSpecimenMeasurement> for NewSpecimen {
 
 impl DbOperation<Specimen> for NewSpecimen {
     fn execute(mut self, db_conn: &mut PgConnection) -> crate::result::ScamplersResult<Specimen> {
+        self.snake_case_additional_data();
+
         let self_id = diesel::insert_into(specimen::table)
             .values(&self)
             .returning(specimen::id)

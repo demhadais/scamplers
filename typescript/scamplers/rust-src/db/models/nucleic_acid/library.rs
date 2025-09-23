@@ -1,3 +1,4 @@
+use any_value::AnyValue;
 #[cfg(feature = "app")]
 use diesel::prelude::*;
 #[cfg(feature = "python")]
@@ -76,8 +77,7 @@ pub struct NewLibrary {
     pub preparer_ids: Vec<Uuid>,
     #[cfg_attr(feature = "app", diesel(skip_insertion))]
     pub measurements: Vec<NewLibraryMeasurement>,
-    #[garde(dive)]
-    pub notes: Option<ValidString>,
+    pub additional_data: Option<AnyValue>,
 }
 
 #[cfg(feature = "python")]
@@ -85,7 +85,7 @@ pub struct NewLibrary {
 #[pymethods]
 impl NewLibrary {
     #[new]
-    #[pyo3(signature = (*, readable_id, cdna_id, number_of_sample_index_pcr_cycles, volume_mcl, target_reads_per_cell, prepared_at, preparer_ids, single_index_set_name=None, dual_index_set_name=None, measurements=Vec::new(), notes=None))]
+    #[pyo3(signature = (*, readable_id, cdna_id, number_of_sample_index_pcr_cycles, volume_mcl, target_reads_per_cell, prepared_at, preparer_ids, single_index_set_name=None, dual_index_set_name=None, measurements=Vec::new(), additional_data=None))]
     fn new(
         readable_id: ValidString,
         cdna_id: Uuid,
@@ -97,7 +97,7 @@ impl NewLibrary {
         single_index_set_name: Option<ValidString>,
         dual_index_set_name: Option<ValidString>,
         measurements: Vec<NewLibraryMeasurement>,
-        notes: Option<ValidString>,
+        additional_data: Option<AnyValue>,
     ) -> Self {
         Self {
             readable_id,
@@ -110,7 +110,7 @@ impl NewLibrary {
             prepared_at,
             preparer_ids,
             measurements,
-            notes,
+            additional_data,
         }
     }
 }
@@ -127,7 +127,7 @@ pub struct LibrarySummary {
     pub number_of_sample_index_pcr_cycles: i32,
     pub target_reads_per_cell: i32,
     pub prepared_at: OffsetDateTime,
-    pub notes: Option<String>,
+    pub additional_data: Option<AnyValue>,
 }
 
 #[db_selection]

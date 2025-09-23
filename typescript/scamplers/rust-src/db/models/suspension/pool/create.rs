@@ -1,3 +1,4 @@
+use any_value::{AnyValue, WithSnakeCaseKeys};
 use diesel::prelude::*;
 use scamplers_schema::{suspension_pool, suspension_pool_measurement, suspension_pool_preparers};
 use uuid::Uuid;
@@ -64,11 +65,22 @@ impl ManyToManyChildrenWithSelfId<SuspensionPoolPreparer> for NewSuspensionPool 
     }
 }
 
+impl NewSuspensionPool {
+    fn snake_case_additional_data(&mut self) {
+        self.additional_data = self
+            .additional_data
+            .take()
+            .map(AnyValue::with_snake_case_keys);
+    }
+}
+
 impl DbOperation<SuspensionPool> for NewSuspensionPool {
     fn execute(
         mut self,
         db_conn: &mut diesel::PgConnection,
     ) -> crate::result::ScamplersResult<SuspensionPool> {
+        self.snake_case_additional_data();
+
         let id = diesel::insert_into(suspension_pool::table)
             .values(&self)
             .returning(suspension_pool::id)

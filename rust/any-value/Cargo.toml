@@ -12,9 +12,15 @@ serde = { workspace = true }
 diesel = { workspace = true, optional = true }
 valuable = { workspace = true }
 pyo3 = { workspace = true, optional = true }
+heck = { workspace = true }
+pyo3-stub-gen = { workspace = true, optional = true }
 
 [lints]
 workspace = true
+
+[dev-dependencies]
+rstest = { workspace = true }
+pretty_assertions = { workspace = true }
 
 [target.'cfg(target_arch = "wasm32")'.dependencies]
 wasm-bindgen = { workspace = true }
@@ -22,4 +28,4 @@ serde-wasm-bindgen = { workspace = true }
 
 [features]
 app = ["diesel"]
-python = ["pyo3"]
+python = ["pyo3", "pyo3-stub-gen"]

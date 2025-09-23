@@ -1,4 +1,6 @@
 #[cfg(feature = "python")]
+use any_value::AnyValue;
+#[cfg(feature = "python")]
 use pyo3::prelude::*;
 use scamplers_macros::db_insertion;
 #[cfg(feature = "python")]
@@ -28,12 +30,12 @@ pub struct NewPoolMultiplexChipLoading {
 #[pymethods]
 impl NewPoolMultiplexChipLoading {
     #[new]
-    #[pyo3(signature = (*, suspension_pool_id, suspension_volume_loaded, buffer_volume_loaded, notes=None))]
+    #[pyo3(signature = (*, suspension_pool_id, suspension_volume_loaded, buffer_volume_loaded, additional_data=None))]
     fn new(
         suspension_pool_id: Uuid,
         suspension_volume_loaded: SuspensionMeasurementFields,
         buffer_volume_loaded: SuspensionMeasurementFields,
-        notes: Option<ValidString>,
+        additional_data: Option<AnyValue>,
     ) -> Self {
         Self {
             suspension_pool_id,
@@ -41,7 +43,7 @@ impl NewPoolMultiplexChipLoading {
                 gems_id: Uuid::default(),
                 suspension_volume_loaded,
                 buffer_volume_loaded,
-                notes,
+                additional_data,
             },
         }
     }
@@ -64,13 +66,13 @@ pub struct NewPoolMultiplexGems {
 #[pymethods]
 impl NewPoolMultiplexGems {
     #[new]
-    #[pyo3(signature = (*, readable_id, suspension_pool_id, suspension_volume_loaded, buffer_volume_loaded, notes=None))]
+    #[pyo3(signature = (*, readable_id, suspension_pool_id, suspension_volume_loaded, buffer_volume_loaded, additional_data=None))]
     fn new(
         readable_id: ValidString,
         suspension_pool_id: Uuid,
         suspension_volume_loaded: SuspensionMeasurementFields,
         buffer_volume_loaded: SuspensionMeasurementFields,
-        notes: Option<ValidString>,
+        additional_data: Option<AnyValue>,
     ) -> Self {
         Self {
             inner: NewGemsCommon {
@@ -83,7 +85,7 @@ impl NewPoolMultiplexGems {
                     gems_id: Uuid::default(),
                     suspension_volume_loaded,
                     buffer_volume_loaded,
-                    notes,
+                    additional_data,
                 },
             }],
         }
@@ -107,7 +109,7 @@ pub struct NewPoolMultiplexChromiumRun {
 #[pymethods]
 impl NewPoolMultiplexChromiumRun {
     #[new]
-    #[pyo3(signature = (*, readable_id, assay_id, run_at, run_by, succeeded, gems, notes=None))]
+    #[pyo3(signature = (*, readable_id, assay_id, run_at, run_by, succeeded, gems, additional_data=None))]
     fn new(
         readable_id: ValidString,
         assay_id: Uuid,
@@ -115,7 +117,7 @@ impl NewPoolMultiplexChromiumRun {
         run_by: Uuid,
         succeeded: bool,
         gems: Vec<NewPoolMultiplexGems>,
-        notes: Option<ValidString>,
+        additional_data: Option<AnyValue>,
     ) -> Self {
         Self {
             inner: NewChromiumRunCommon {
@@ -124,7 +126,7 @@ impl NewPoolMultiplexChromiumRun {
                 run_at,
                 run_by,
                 succeeded,
-                notes,
+                additional_data,
             },
             gems,
         }

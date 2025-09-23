@@ -119,8 +119,8 @@ export class CdnaSummary {
   n_amplification_cycles: number;
   get storage_location(): string;
   set storage_location(value: string | null | undefined);
-  get notes(): string;
-  set notes(value: string | null | undefined);
+  get additional_data(): any | undefined;
+  set additional_data(value: any | null | undefined);
 }
 export class ChromiumDataset {
   private constructor();
@@ -205,9 +205,10 @@ export class ChromiumRunQuery {
   set run_after(value: Date | null | undefined);
   get succeeded(): boolean | undefined;
   set succeeded(value: boolean | null | undefined);
-  notes: string[];
   order_by: OrderBy[];
   pagination: Pagination;
+  get additional_data(): any | undefined;
+  set additional_data(value: any | null | undefined);
 }
 export class ChromiumRunSummaryWithParents {
   private constructor();
@@ -219,13 +220,14 @@ export class ChromiumRunSummaryWithParents {
   static from_json_string(json_str: string): ChromiumRunSummaryWithParents;
   static from_base64_json(base64_json_bytes: string): ChromiumRunSummaryWithParents;
   id: string;
+  readonly links: Map<any, any>;
   readable_id: string;
   run_at: Date;
   run_by: string;
   succeeded: boolean;
-  get notes(): string;
-  set notes(value: string | null | undefined);
   assay: TenxAssay;
+  get additional_data(): any | undefined;
+  set additional_data(value: any | null | undefined);
 }
 export class ClientError {
   private constructor();
@@ -522,8 +524,8 @@ export class LibrarySummary {
   number_of_sample_index_pcr_cycles: number;
   target_reads_per_cell: number;
   prepared_at: Date;
-  get notes(): string;
-  set notes(value: string | null | undefined);
+  get additional_data(): any | undefined;
+  set additional_data(value: any | null | undefined);
 }
 export class LibrarySummaryWithParents {
   private constructor();
@@ -762,8 +764,8 @@ export class SequencingRunSummary {
   begun_at: Date;
   get finished_at(): Date | undefined;
   set finished_at(value: Date | null | undefined);
-  get notes(): string;
-  set notes(value: string | null | undefined);
+  get additional_data(): any | undefined;
+  set additional_data(value: any | null | undefined);
 }
 export class ServerError {
   private constructor();
@@ -820,13 +822,13 @@ export class SpecimenQuery {
   get received_after(): Date | undefined;
   set received_after(value: Date | null | undefined);
   species: any[];
-  notes: string[];
   types: any[];
-  storage_buffers: string[];
   get frozen(): boolean | undefined;
   set frozen(value: boolean | null | undefined);
   get cryopreserved(): boolean | undefined;
   set cryopreserved(value: boolean | null | undefined);
+  get additional_data(): any | undefined;
+  set additional_data(value: any | null | undefined);
   order_by: OrderBy[];
   pagination: Pagination;
 }
@@ -844,8 +846,6 @@ export class SpecimenSummary {
   readable_id: string;
   name: string;
   received_at: Date;
-  get notes(): string;
-  set notes(value: string | null | undefined);
   get returned_at(): Date | undefined;
   set returned_at(value: Date | null | undefined);
   type_: SpecimenType;
@@ -855,8 +855,8 @@ export class SpecimenSummary {
   set fixative(value: string | null | undefined);
   frozen: boolean;
   cryopreserved: boolean;
-  get storage_buffer(): string;
-  set storage_buffer(value: string | null | undefined);
+  get additional_data(): any | undefined;
+  set additional_data(value: any | null | undefined);
   readonly species: string[];
 }
 export class SpecimenSummaryWithParents {
@@ -941,8 +941,8 @@ export class SuspensionPoolSummary {
   readable_id: string;
   name: string;
   pooled_at: Date;
-  get notes(): string;
-  set notes(value: string | null | undefined);
+  get additional_data(): any | undefined;
+  set additional_data(value: any | null | undefined);
 }
 export class SuspensionQuery {
   free(): void;
@@ -979,8 +979,8 @@ export class SuspensionSummary {
   get lysis_duration_minutes(): number | undefined;
   set lysis_duration_minutes(value: number | null | undefined);
   target_cell_recovery: number;
-  get notes(): string;
-  set notes(value: string | null | undefined);
+  get additional_data(): any | undefined;
+  set additional_data(value: any | null | undefined);
 }
 export class SuspensionSummaryWithParents {
   private constructor();

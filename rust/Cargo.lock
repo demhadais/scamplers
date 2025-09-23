@@ -96,7 +96,11 @@ name = "any-value"
 version = "0.1.0"
 dependencies = [
  "diesel",
+ "heck",
+ "pretty_assertions",
  "pyo3",
+ "pyo3-stub-gen",
+ "rstest",
  "serde",
  "serde-wasm-bindgen",
  "serde_json",

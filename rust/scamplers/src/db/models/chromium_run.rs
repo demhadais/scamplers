@@ -1,3 +1,4 @@
+use any_value::AnyValue;
 pub use common::{NewChipLoadingCommon, NewChromiumRunCommon, NewGemsCommon};
 #[cfg(feature = "app")]
 use diesel::{Associations, prelude::*};
@@ -53,15 +54,15 @@ impl_stub_type!(
 #[cfg_attr(feature = "app", diesel(table_name = chromium_run, base_query = chromium_run::table.inner_join(tenx_assay::table)))]
 pub struct ChromiumRunSummaryWithParents {
     pub id: Uuid,
-    #[cfg_attr(target_arch = "wasm32", wasm_bindgen(skip))]
+    #[cfg_attr(target_arch = "wasm32", wasm_bindgen(readonly))]
     pub links: Links,
     pub readable_id: String,
     pub run_at: OffsetDateTime,
     pub run_by: Uuid,
     pub succeeded: bool,
-    pub notes: Option<String>,
     #[cfg_attr(feature = "app", diesel(embed))]
     pub assay: TenxAssay,
+    pub additional_data: Option<AnyValue>,
 }
 
 #[db_selection]
@@ -96,11 +97,10 @@ pub struct ChromiumRunQuery {
     pub run_after: Option<OffsetDateTime>,
     pub succeeded: Option<bool>,
     #[builder(default)]
-    pub notes: Vec<String>,
-    #[builder(default)]
     pub order_by: DefaultVec<ChromiumRunOrderBy>,
     #[builder(default)]
     pub pagination: Pagination,
+    pub additional_data: Option<AnyValue>,
 }
 
 #[cfg(feature = "python")]
@@ -108,7 +108,7 @@ pub struct ChromiumRunQuery {
 #[pymethods]
 impl ChromiumRunQuery {
     #[new]
-    #[pyo3(signature = (*, ids=Vec::default(), readable_ids=Vec::default(), assay=None, run_before=None, run_after=None, succeeded=None, notes=Vec::default(), order_by=DefaultVec::default(), limit=Pagination::default().limit, offset=Pagination::default_offset()))]
+    #[pyo3(signature = (*, ids=Vec::default(), readable_ids=Vec::default(), assay=None, run_before=None, run_after=None, succeeded=None, additional_data=None, order_by=DefaultVec::default(), limit=Pagination::default().limit, offset=Pagination::default_offset()))]
     fn new(
         ids: Vec<Uuid>,
         readable_ids: Vec<String>,
@@ -116,7 +116,7 @@ impl ChromiumRunQuery {
         run_before: Option<OffsetDateTime>,
         run_after: Option<OffsetDateTime>,
         succeeded: Option<bool>,
-        notes: Vec<String>,
+        additional_data: Option<AnyValue>,
         order_by: DefaultVec<ChromiumRunOrderBy>,
         limit: i64,
         offset: i64,
@@ -128,7 +128,7 @@ impl ChromiumRunQuery {
             run_before,
             run_after,
             succeeded,
-            notes,
+            additional_data,
             order_by,
             pagination: Pagination { limit, offset },
         }

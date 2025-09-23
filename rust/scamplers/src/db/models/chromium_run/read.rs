@@ -1,3 +1,4 @@
+use any_value::AnyValue;
 use diesel::prelude::*;
 use scamplers_schema::chromium_run;
 
@@ -10,9 +11,16 @@ use crate::{
             ChromiumRun, ChromiumRunId, ChromiumRunOrderBy, ChromiumRunQuery,
             ChromiumRunSummaryWithParents, Gems,
         },
+        util::{AdditionalData, FilterByAdditionalData},
     },
     group_children, impl_id_db_operation, init_stmt,
 };
+
+impl AdditionalData for ChromiumRunSummaryWithParents {
+    fn additional_data(&self) -> Option<&AnyValue> {
+        self.additional_data.as_ref()
+    }
+}
 
 impl DbOperation<Vec<ChromiumRun>> for ChromiumRunQuery {
     fn execute(
@@ -35,7 +43,7 @@ impl DbOperation<Vec<ChromiumRun>> for ChromiumRunQuery {
             run_before,
             run_after,
             succeeded,
-            notes,
+            additional_data,
             ..
         } = &self;
 
@@ -49,8 +57,7 @@ impl DbOperation<Vec<ChromiumRun>> for ChromiumRunQuery {
         stmt = apply_ilike_filters!(
             stmt,
             filters = {
-                chromium_run::readable_id => readable_ids,
-                chromium_run::notes => notes
+                chromium_run::readable_id => readable_ids
             }
         );
 
@@ -68,7 +75,10 @@ impl DbOperation<Vec<ChromiumRun>> for ChromiumRunQuery {
             }
         );
 
-        let chromium_run_summaries = stmt.load(db_conn)?;
+        let mut chromium_run_summaries = stmt.load(db_conn)?;
+
+        chromium_run_summaries =
+            chromium_run_summaries.filter_by_additional_data(additional_data.as_ref());
 
         let gems = Gems::belonging_to(&chromium_run_summaries)
             .select(Gems::as_select())

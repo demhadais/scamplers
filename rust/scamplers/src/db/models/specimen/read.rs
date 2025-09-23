@@ -9,6 +9,7 @@ use crate::{
             Specimen, SpecimenId, SpecimenMeasurement, SpecimenOrderBy, SpecimenQuery,
             SpecimenSummaryWithParents,
         },
+        util::FilterByAdditionalData,
     },
     group_children, impl_id_db_operation, init_stmt,
 };
@@ -33,9 +34,7 @@ macro_rules! apply_specimen_query {
         $stmt = $crate::apply_ilike_filters!(
             $stmt,
             filters = {
-                specimen::name => &$query.names,
-                specimen::notes => &$query.notes,
-                specimen::storage_buffer => &$query.storage_buffers
+                specimen::name => &$query.names
             }
         );
 
@@ -68,7 +67,10 @@ impl DbOperation<Vec<Specimen>> for SpecimenQuery {
 
         stmt = apply_specimen_query!(stmt, self);
 
-        let specimen_records = stmt.load(db_conn)?;
+        let mut specimen_records = stmt.load(db_conn)?;
+
+        specimen_records =
+            specimen_records.filter_by_additional_data(self.additional_data.as_ref());
 
         let measurements = SpecimenMeasurement::belonging_to(&specimen_records)
             .select(SpecimenMeasurement::as_select())
@@ -96,6 +98,7 @@ impl_id_db_operation!(
 #[cfg(test)]
 mod tests {
     #![allow(clippy::cast_possible_wrap)]
+    use any_value::any_value;
     use rstest::rstest;
 
     use crate::db::{
@@ -160,14 +163,22 @@ mod tests {
                     .embedded_in
                     .as_ref()
                     .is_some_and(|e| e == "carboxymethyl_cellulose")
+                && s.info.summary.additional_data.as_ref().is_some_and(|d| {
+                    d.get("secret").is_some_and(|t| {
+                        t.as_str()
+                            .is_some_and(|s| s == "the krabby-patty secret formular")
+                    })
+                })
         }
 
+        // This query tests the ability of `additional_data` to be case-insensitive
         let query = SpecimenQuery::builder()
             .frozen(true)
             .types([SpecimenType::Block])
             .embedded_in([BlockEmbeddingMatrix::Frozen(
                 FrozenBlockEmbeddingMatrix::CarboxymethylCellulose,
             )])
+            .additional_data(any_value!({"secret": "the_krabby-patty_SecretFormular"}))
             .order_by(SpecimenOrderBy::Name { descending: true })
             .pagination(Pagination {
                 limit: N_SPECIMENS as i64,

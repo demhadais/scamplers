@@ -1,4 +1,6 @@
 #[cfg(feature = "python")]
+use any_value::AnyValue;
+#[cfg(feature = "python")]
 use pyo3::prelude::*;
 use scamplers_macros::{db_insertion, db_simple_enum};
 #[cfg(feature = "python")]
@@ -54,7 +56,7 @@ impl AsGenericNewSpecimen for NewFixedBlock {
         &self.inner
     }
 
-    fn variable_fields(&self) -> VariableFields<'_> {
+    fn variable_fields(&self) -> VariableFields {
         use crate::db::models::specimen::{BlockEmbeddingMatrix, Fixative};
 
         let Self {
@@ -70,7 +72,6 @@ impl AsGenericNewSpecimen for NewFixedBlock {
             fixative: Some(Fixative::Block(*fixative)),
             frozen: false,
             cryopreserved: false,
-            storage_buffer: None,
         }
     }
 }
@@ -80,7 +81,7 @@ impl AsGenericNewSpecimen for NewFixedBlock {
 #[pymethods]
 impl NewFixedBlock {
     #[new]
-    #[pyo3(signature = (*, readable_id, name, submitted_by, lab_id, received_at, species, embedded_in, fixative, measurements=Vec::new(), committee_approvals=Vec::new(), notes=None, returned_at=None, returned_by=None))]
+    #[pyo3(signature = (*, readable_id, name, submitted_by, lab_id, received_at, species, embedded_in, fixative, measurements=Vec::new(), committee_approvals=Vec::new(), returned_at=None, returned_by=None, additional_data=None))]
     fn new(
         readable_id: ValidString,
         name: ValidString,
@@ -92,9 +93,9 @@ impl NewFixedBlock {
         fixative: BlockFixative,
         measurements: Vec<NewSpecimenMeasurement>,
         committee_approvals: Vec<NewCommitteeApproval>,
-        notes: Option<ValidString>,
         returned_at: Option<OffsetDateTime>,
         returned_by: Option<Uuid>,
+        additional_data: Option<AnyValue>,
     ) -> Self {
         Self {
             inner: NewSpecimenCommon {
@@ -105,10 +106,10 @@ impl NewFixedBlock {
                 received_at,
                 species,
                 committee_approvals,
-                notes,
                 returned_at,
                 returned_by,
                 measurements,
+                additional_data,
             },
             embedded_in,
             fixative,
@@ -152,7 +153,7 @@ impl AsGenericNewSpecimen for NewFrozenBlock {
         &self.inner
     }
 
-    fn variable_fields(&self) -> VariableFields<'_> {
+    fn variable_fields(&self) -> VariableFields {
         use crate::db::models::specimen::{BlockEmbeddingMatrix, Fixative};
 
         let Self {
@@ -169,7 +170,6 @@ impl AsGenericNewSpecimen for NewFrozenBlock {
             fixative: fixative.map(Fixative::Block),
             frozen: *frozen,
             cryopreserved: false,
-            storage_buffer: None,
         }
     }
 }
@@ -179,7 +179,7 @@ impl AsGenericNewSpecimen for NewFrozenBlock {
 #[pymethods]
 impl NewFrozenBlock {
     #[new]
-    #[pyo3(signature = (*, readable_id, name, submitted_by, lab_id, received_at, species, embedded_in, fixative=None, measurements=Vec::new(), committee_approvals=Vec::new(), notes=None, returned_at=None, returned_by=None))]
+    #[pyo3(signature = (*, readable_id, name, submitted_by, lab_id, received_at, species, embedded_in, fixative=None, measurements=Vec::new(), committee_approvals=Vec::new(), returned_at=None, returned_by=None, additional_data=None))]
     fn new(
         readable_id: ValidString,
         name: ValidString,
@@ -191,9 +191,9 @@ impl NewFrozenBlock {
         fixative: Option<BlockFixative>,
         measurements: Vec<NewSpecimenMeasurement>,
         committee_approvals: Vec<NewCommitteeApproval>,
-        notes: Option<ValidString>,
         returned_at: Option<OffsetDateTime>,
         returned_by: Option<Uuid>,
+        additional_data: Option<AnyValue>,
     ) -> Self {
         Self {
             inner: NewSpecimenCommon {
@@ -204,10 +204,10 @@ impl NewFrozenBlock {
                 received_at,
                 species,
                 committee_approvals,
-                notes,
                 returned_at,
                 returned_by,
                 measurements,
+                additional_data,
             },
             embedded_in,
             fixative,
