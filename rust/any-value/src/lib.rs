@@ -53,6 +53,7 @@ where
 
 #[cfg(not(target_arch = "wasm32"))]
 pub trait WithSnakeCaseKeys {
+    #[must_use]
     fn with_snake_case_keys(self) -> Self;
 }
 
