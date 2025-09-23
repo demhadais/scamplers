@@ -9,7 +9,6 @@ use crate::{
             Specimen, SpecimenId, SpecimenMeasurement, SpecimenOrderBy, SpecimenQuery,
             SpecimenSummaryWithParents,
         },
-        util::FilterByAdditionalData,
     },
     group_children, impl_id_db_operation, init_stmt,
 };
@@ -53,6 +52,13 @@ macro_rules! apply_specimen_query {
             }
         );
 
+        $stmt = $crate::apply_jsonb_contains_filters!(
+            $stmt,
+            filters = {
+                specimen::additional_data => $query.additional_data
+            }
+        );
+
         if !$query.species.is_empty() {
             $stmt = $stmt.filter(specimen::species.overlaps_with($query.species));
         }
@@ -67,10 +73,7 @@ impl DbOperation<Vec<Specimen>> for SpecimenQuery {
 
         stmt = apply_specimen_query!(stmt, self);
 
-        let mut specimen_records = stmt.load(db_conn)?;
-
-        specimen_records =
-            specimen_records.filter_by_additional_data(self.additional_data.as_ref());
+        let specimen_records = stmt.load(db_conn)?;
 
         let measurements = SpecimenMeasurement::belonging_to(&specimen_records)
             .select(SpecimenMeasurement::as_select())

@@ -75,73 +75,6 @@ impl WithSnakeCaseKeys for serde_json::Value {
 }
 
 #[cfg(not(target_arch = "wasm32"))]
-trait SerdeJsonValueExtension {
-    fn case_insensitive_contains(&self, other: &Self) -> bool;
-}
-
-// This may pose a performance bottleneck
-#[cfg(not(target_arch = "wasm32"))]
-impl SerdeJsonValueExtension for serde_json::Value {
-    fn case_insensitive_contains(&self, other: &Self) -> bool {
-        use heck::ToSnekCase;
-        use serde_json::Value;
-
-        match (self, other) {
-            (Self::String(self_), Self::String(other)) => {
-                self_.to_snek_case().contains(&other.to_snek_case())
-            }
-            (Self::Object(self_), Self::Object(other)) => {
-                for (other_key, other_val) in other {
-                    let Some(self_val) = self_.get(other_key) else {
-                        return false;
-                    };
-
-                    if !self_val.case_insensitive_contains(other_val) {
-                        return false;
-                    }
-                }
-
-                true
-            }
-            (Self::Array(self_), Self::Array(other)) => {
-                let (self_simples, self_complexes): (Vec<_>, Vec<_>) =
-                    self_.iter().partition(|item| {
-                        matches!(item, Value::Number(_) | Value::Bool(_) | Value::Null)
-                    });
-
-                let (other_simples, other_complexes): (Vec<_>, Vec<_>) =
-                    other.iter().partition(|item| {
-                        matches!(item, Value::Number(_) | Value::Bool(_) | Value::Null)
-                    });
-
-                for other_val in other_simples {
-                    if !self_simples.contains(&other_val) {
-                        return false;
-                    }
-                }
-
-                let mut found: Vec<_> = other_complexes.iter().map(|_| false).collect();
-                for (i, other_complex) in other_complexes.iter().enumerate() {
-                    for self_complex in &self_complexes {
-                        if self_complex.case_insensitive_contains(other_complex) {
-                            found[i] = true;
-                            break;
-                        }
-                    }
-                }
-
-                if !found.is_empty() {
-                    return found.iter().all(|b| *b);
-                }
-
-                true
-            }
-            (self_, other) => self_ == other,
-        }
-    }
-}
-
-#[cfg(not(target_arch = "wasm32"))]
 impl AnyValue {
     #[must_use]
     pub fn is_string(&self) -> bool {
@@ -151,11 +84,6 @@ impl AnyValue {
     #[must_use]
     pub fn get<I: serde_json::value::Index>(&self, index: I) -> Option<&serde_json::Value> {
         self.0.get(index)
-    }
-
-    #[must_use]
-    pub fn case_insensitive_contains(&self, other: &Self) -> bool {
-        self.0.case_insensitive_contains(&other.0)
     }
 }
 
@@ -389,66 +317,5 @@ mod tests {
         let expected = expected;
 
         assert_eq!(snake_cased, expected);
-    }
-
-    #[rstest]
-    fn contains() {
-        let container = any_value!(
-            {
-                "a_string": "A Titlecased String",
-                "another string": "bar",
-                "number": 100.0,
-                "map": {"key": "val", "anotherkey": "anotherval"},
-                "my_array": [10, 25],
-                "my_string_array": ["Foo", "A Big sentence"],
-                "my_object_array": [{"key1": "value"}]
-            }
-        );
-
-        let subset = any_value!(
-            {
-                "a_string": "a_titlecased_string",
-                "number": 100.0,
-                "map": {"key": "val", "anotherkey": "anotherval"},
-                "my_array": [10],
-                "my_string_array": ["foo", "big"],
-                "my_object_array": [{"key1": "Value"}]
-            }
-        );
-
-        assert!(container.case_insensitive_contains(&subset));
-    }
-
-    #[rstest]
-    fn does_not_contain() {
-        let container = any_value!(
-            {
-                "a_string": "A Titlecased String",
-                "another string": "bar",
-                "number": 100.0,
-                "map": {"key": "val", "anotherkey": "anotherval"},
-                "my_array": [10, 25]
-            }
-        );
-
-        let subset = any_value!(
-            {"a_string": "a_snakecased_string"}
-        );
-        assert!(!container.case_insensitive_contains(&subset));
-
-        let subset = any_value!(
-            {"my_array": [20]}
-        );
-        assert!(!container.case_insensitive_contains(&subset));
-
-        let subset = any_value!(
-            {"nonexistent_key": "value"}
-        );
-        assert!(!container.case_insensitive_contains(&subset));
-
-        let subset = any_value!(
-            {"number": 10}
-        );
-        assert!(!container.case_insensitive_contains(&subset));
     }
 }

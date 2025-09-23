@@ -67,8 +67,7 @@ impl DbOperation<Vec<ChromiumRun>> for ChromiumRunQuery {
             }
         );
 
-        stmt = apply_jsonb_contains_filters!(
-            stmt,
+        stmt = apply_jsonb_contains_filters!(stmt,
             filters = {
                 chromium_run::additional_data => additional_data
             }

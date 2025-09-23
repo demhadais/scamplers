@@ -1,4 +1,3 @@
-use any_value::AnyValue;
 use uuid::Uuid;
 
 pub trait AsIlike {
@@ -26,32 +25,6 @@ impl AsIlike for &[String] {
 impl AsIlike for &Vec<String> {
     fn as_ilike(&self) -> String {
         self.as_slice().as_ilike()
-    }
-}
-
-#[cfg(not(target_arch = "wasm32"))]
-pub trait AdditionalData {
-    fn additional_data(&self) -> Option<&AnyValue>;
-}
-
-#[cfg(not(target_arch = "wasm32"))]
-pub trait FilterByAdditionalData {
-    fn filter_by_additional_data(self, additional_data: Option<&AnyValue>) -> Self;
-}
-
-#[cfg(not(target_arch = "wasm32"))]
-impl<T: AdditionalData> FilterByAdditionalData for Vec<T> {
-    fn filter_by_additional_data(self, additional_data: Option<&AnyValue>) -> Self {
-        if let Some(additional_data) = additional_data {
-            self.into_iter()
-                .filter(|item| {
-                    item.additional_data()
-                        .is_some_and(|data| data.case_insensitive_contains(additional_data))
-                })
-                .collect()
-        } else {
-            self
-        }
     }
 }
 
@@ -128,6 +101,19 @@ macro_rules! apply_ilike_filters {
         $(
             if !$strings.is_empty() {
                 $stmt = $stmt.filter($col.ilike($strings.as_ilike()))
+            }
+        )*
+
+        $stmt
+    }};
+}
+
+#[macro_export]
+macro_rules! apply_jsonb_contains_filters {
+    ($stmt:expr, filters = {$($col:expr => $value:expr),*}) => {{
+        $(
+            if let Some(value) = $value {
+                $stmt = $stmt.filter($col.contains(value));
             }
         )*
 

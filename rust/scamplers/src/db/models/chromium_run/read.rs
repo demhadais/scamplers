@@ -1,26 +1,18 @@
-use any_value::AnyValue;
 use diesel::prelude::*;
 use scamplers_schema::chromium_run;
 
 use crate::{
-    apply_eq_any_filters, apply_eq_filters, apply_ilike_filters, apply_tenx_assay_query,
-    apply_time_filters, attach_children_to_parents,
+    apply_eq_any_filters, apply_eq_filters, apply_ilike_filters, apply_jsonb_contains_filters,
+    apply_tenx_assay_query, apply_time_filters, attach_children_to_parents,
     db::{
         DbOperation,
         models::chromium_run::{
             ChromiumRun, ChromiumRunId, ChromiumRunOrderBy, ChromiumRunQuery,
             ChromiumRunSummaryWithParents, Gems,
         },
-        util::{AdditionalData, FilterByAdditionalData},
     },
     group_children, impl_id_db_operation, init_stmt,
 };
-
-impl AdditionalData for ChromiumRunSummaryWithParents {
-    fn additional_data(&self) -> Option<&AnyValue> {
-        self.additional_data.as_ref()
-    }
-}
 
 impl DbOperation<Vec<ChromiumRun>> for ChromiumRunQuery {
     fn execute(
@@ -75,10 +67,13 @@ impl DbOperation<Vec<ChromiumRun>> for ChromiumRunQuery {
             }
         );
 
-        let mut chromium_run_summaries = stmt.load(db_conn)?;
+        stmt = apply_jsonb_contains_filters!(stmt,
+            filters = {
+                chromium_run::additional_data => additional_data
+            }
+        );
 
-        chromium_run_summaries =
-            chromium_run_summaries.filter_by_additional_data(additional_data.as_ref());
+        let chromium_run_summaries = stmt.load(db_conn)?;
 
         let gems = Gems::belonging_to(&chromium_run_summaries)
             .select(Gems::as_select())

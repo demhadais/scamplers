@@ -52,16 +52,16 @@ macro_rules! apply_specimen_query {
             }
         );
 
-        if !$query.species.is_empty() {
-            $stmt = $stmt.filter(specimen::species.overlaps_with($query.species));
-        }
-
         $stmt = $crate::apply_jsonb_contains_filters!(
             $stmt,
             filters = {
                 specimen::additional_data => $query.additional_data
             }
         );
+
+        if !$query.species.is_empty() {
+            $stmt = $stmt.filter(specimen::species.overlaps_with($query.species));
+        }
 
         $stmt
     }};
@@ -174,13 +174,14 @@ mod tests {
                 })
         }
 
+        // This query tests the ability of `additional_data` to be case-insensitive
         let query = SpecimenQuery::builder()
             .frozen(true)
             .types([SpecimenType::Block])
             .embedded_in([BlockEmbeddingMatrix::Frozen(
                 FrozenBlockEmbeddingMatrix::CarboxymethylCellulose,
             )])
-            .additional_data(any_value!({"secret": "the krabby-patty secret formular"}))
+            .additional_data(any_value!({"secret": "the_krabby-patty_SecretFormular"}))
             .order_by(SpecimenOrderBy::Name { descending: true })
             .pagination(Pagination {
                 limit: N_SPECIMENS as i64,
