@@ -328,10 +328,13 @@ pub fn db_json(_attr: TokenStream, input: TokenStream) -> TokenStream {
         #[cfg(feature = "app")]
         impl ::diesel::deserialize::FromSql<::diesel::sql_types::Jsonb, ::diesel::pg::Pg> for #ident {
             fn from_sql(bytes: <::diesel::pg::Pg as ::diesel::backend::Backend>::RawValue<'_>) -> ::diesel::deserialize::Result<Self> {
-                use ::diesel::{deserialize::FromSql, sql_types, pg::Pg};
+                let bytes = bytes.as_bytes();
 
-                let json: ::serde_json::Value = FromSql::<sql_types::Jsonb, Pg>::from_sql(bytes)?;
-                Ok(::serde_json::from_value(json).unwrap())
+                if bytes[0] != 1 {
+                    return Err("Unsupported JSONB encoding version".into());
+                }
+
+                ::serde_json::from_slice(&bytes[1..]).map_err(|_| "Invalid Json".into())
             }
         }
 
@@ -341,10 +344,12 @@ pub fn db_json(_attr: TokenStream, input: TokenStream) -> TokenStream {
                 &'b self,
                 out: &mut diesel::serialize::Output<'b, '_, diesel::pg::Pg>,
             ) -> ::diesel::serialize::Result {
-                use ::diesel::{serialize::ToSql, sql_types, pg::Pg};
+                use ::std::io::prelude::*;
 
-                let as_json = ::serde_json::to_value(self).unwrap();
-                ToSql::<sql_types::Jsonb, Pg>::to_sql(&as_json, &mut out.reborrow())
+                out.write_all(&[1])?;
+                ::serde_json::to_writer(out, self)
+                    .map(|_| ::diesel::serialize::IsNull::No)
+                    .map_err(Into::into)
             }
         }
     };
