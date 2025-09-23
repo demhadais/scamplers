@@ -264,7 +264,7 @@ impl TestState {
                 .measured_by(self.random_person_id())
                 .data(specimen::common::MeasurementData::Rin {
                     measured_at: self.random_time(),
-                    instrument_name: "mayonnaise".into(),
+                    instrument_name: Some("mayonnaise".into()),
                     value: 5.0,
                 })
                 .build();
