@@ -30,7 +30,7 @@ use valid_string::ValidString;
 use wasm_bindgen::prelude::*;
 
 #[cfg(feature = "app")]
-use crate::db::models::nucleic_acid::common::gems_to_assay;
+use crate::db::models::nucleic_acid::gems_to_assay;
 #[cfg(not(target_arch = "wasm32"))]
 use crate::result::DatasetMetricsFileParseError;
 use crate::{

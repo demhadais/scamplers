@@ -15,7 +15,7 @@ use valid_string::ValidString;
 
 use crate::{
     db::models::{
-        DefaultVec, Links, Pagination, nucleic_acid::common::ElectrophoreticMeasurementData,
+        DefaultVec, Links, Pagination, nucleic_acid::common::MeasurementData,
         tenx_assay::chromium::LibraryType,
     },
     define_ordering_enum, uuid_newtype,
@@ -35,7 +35,7 @@ pub struct NewCdnaMeasurement {
     pub measured_by: Uuid,
     #[serde(flatten)]
     #[garde(dive)]
-    pub data: ElectrophoreticMeasurementData,
+    pub data: MeasurementData,
 }
 
 #[cfg(feature = "python")]
@@ -44,7 +44,7 @@ pub struct NewCdnaMeasurement {
 impl NewCdnaMeasurement {
     #[new]
     #[pyo3(signature = (*, measured_by, data, cdna_id=Uuid::default()))]
-    fn new(measured_by: Uuid, data: ElectrophoreticMeasurementData, cdna_id: Uuid) -> Self {
+    fn new(measured_by: Uuid, data: MeasurementData, cdna_id: Uuid) -> Self {
         Self {
             cdna_id,
             measured_by,
@@ -184,7 +184,8 @@ pub struct CdnaMeasurement {
     pub cdna_id: Uuid,
     pub measured_by: Uuid,
     #[serde(flatten)]
-    pub data: ElectrophoreticMeasurementData,
+    #[cfg_attr(target_arch = "wasm32", wasm_bindgen(skip))]
+    pub data: MeasurementData,
 }
 
 #[base_model]

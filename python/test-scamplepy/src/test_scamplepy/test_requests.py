@@ -14,12 +14,11 @@ from uuid import UUID
 from scamplepy.common import (
     BiologicalMaterial,
     CellCountingMethod,
-    ElectrophoreticMeasurementData,
     LengthUnit,
-    LibraryMeasurementData,
     LibraryType,
     MassUnit,
     NucleicAcidConcentration,
+    NucleicAcidMeasurementData,
     SuspensionMeasurementFields,
     VolumeUnit,
 )
@@ -411,14 +410,26 @@ def new_ocm_chromium_run(
     )
 
 
-def _electrophoretic_measurement_data() -> ElectrophoreticMeasurementData:
-    return ElectrophoreticMeasurementData(
+def _electrophoretic_measurement_data() -> NucleicAcidMeasurementData:
+    return NucleicAcidMeasurementData.Electrophoretic(
         measured_at=TIME,
         instrument_name="mayonnaise",
         mean_size_bp=0,
         sizing_range=(0, 0),
-        concentration_value=0,
-        concentration_unit=(MassUnit.Nanogram, VolumeUnit.Microliter),
+        concentration=NucleicAcidConcentration(
+            value=0, unit=(MassUnit.Nanogram, VolumeUnit.Microliter)
+        ),
+    )
+
+
+def _fluormetric_measurement_data() -> NucleicAcidMeasurementData:
+    return NucleicAcidMeasurementData.Fluorometric(
+        measured_at=TIME,
+        instrument_name="mayonnaise",
+        concentration=NucleicAcidConcentration(
+            value=0,
+            unit=(MassUnit.Picogram, VolumeUnit.Microliter),
+        ),
     )
 
 
@@ -445,21 +456,6 @@ def new_cdna_group() -> NewCdnaGroup:
     return NewCdnaGroup.Single(_new_cdna())
 
 
-def _library_electrophoretic_measurement() -> LibraryMeasurementData:
-    return LibraryMeasurementData.Electrophoretic(_electrophoretic_measurement_data())
-
-
-def _library_fluormetric_measurement() -> LibraryMeasurementData:
-    return LibraryMeasurementData.Fluorometric(
-        measured_at=TIME,
-        instrument_name="mayonnaise",
-        concentration=NucleicAcidConcentration(
-            value=0,
-            unit=(MassUnit.Picogram, VolumeUnit.Microliter),
-        ),
-    )
-
-
 @pytest.fixture
 def new_library(cdna_id: UUID = ID, person_id: UUID = ID) -> NewLibrary:
     return NewLibrary(
@@ -473,8 +469,8 @@ def new_library(cdna_id: UUID = ID, person_id: UUID = ID) -> NewLibrary:
         measurements=[
             NewLibraryMeasurement(measured_by=person_id, data=m)
             for m in [
-                _library_electrophoretic_measurement(),
-                _library_fluormetric_measurement(),
+                _electrophoretic_measurement_data(),
+                _fluormetric_measurement_data(),
             ]
         ],
     )

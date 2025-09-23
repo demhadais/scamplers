@@ -36,10 +36,9 @@ use crate::{
             lab::{Lab, NewLab},
             multiplexing_tag::MultiplexingTag,
             nucleic_acid::{
-                self,
+                Concentration, MeasurementData,
                 cdna::{Cdna, NewCdna, NewCdnaGroup, NewCdnaMeasurement},
-                common::{Concentration, ElectrophoreticMeasurementData},
-                library::{self, Library, NewLibrary, NewLibraryMeasurement},
+                library::{Library, NewLibrary, NewLibraryMeasurement},
             },
             person::{NewPerson, Person, PersonQuery},
             sequencing_run::{NewSequencingRun, NewSequencingSubmission, SequencingRun},
@@ -508,18 +507,17 @@ impl TestState {
         for chromium_run in self.chromium_runs.clone() {
             for gems in &chromium_run.gems {
                 let new_cdna_measurements = [NewCdnaMeasurement::builder()
-                    .data(
-                        ElectrophoreticMeasurementData::builder()
-                            .measured_at(self.random_time())
-                            .concentration(nucleic_acid::common::Concentration {
-                                value: 5000.0,
-                                unit: (MassUnit::Picogram, VolumeUnit::Microliter),
-                            })
-                            .instrument_name("trumpet")
-                            .sizing_range((50, 1000))
-                            .build(),
-                    )
                     .measured_by(self.random_person_id())
+                    .data(MeasurementData::Electrophoretic {
+                        measured_at: self.random_time(),
+                        instrument_name: "trumpet".into(),
+                        mean_size_bp: None,
+                        sizing_range: (50, 1000),
+                        concentration: Concentration {
+                            value: 5000.0,
+                            unit: (MassUnit::Picogram, VolumeUnit::Microliter),
+                        },
+                    })
                     .build()];
 
                 let gems_id = gems.id;
@@ -572,7 +570,7 @@ impl TestState {
             for (i, (cdna, lib_vol, index_set)) in cdna_group.into_iter().enumerate() {
                 let new_library_measurement = [NewLibraryMeasurement::builder()
                     .measured_by(self.random_person_id())
-                    .data(library::MeasurementData::Fluorometric {
+                    .data(MeasurementData::Fluorometric {
                         measured_at: self.random_time(),
                         instrument_name: "hubble".into(),
                         concentration: Concentration {
