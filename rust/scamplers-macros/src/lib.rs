@@ -224,6 +224,7 @@ pub fn db_update(_attr: TokenStream, input: TokenStream) -> TokenStream {
             diesel(check_for_backend(::diesel::pg::Pg))
         )]
         #[derive(Default, ::scamplers_macros::Jsonify, ::scamplers_macros::PyJsonify, ::bon::Builder)]
+        #[serde(default)]
         #[builder(on(_, into), derive(Clone, Debug, Into))]
         #struct_item
     };

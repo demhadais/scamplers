@@ -35,6 +35,7 @@ pub struct NewLab {
     pub pi_id: Uuid,
     #[garde(dive)]
     pub delivery_dir: ValidString,
+    #[serde(default)]
     #[cfg_attr(feature = "app", diesel(skip_insertion))]
     #[builder(default)]
     pub member_ids: Vec<Uuid>,
