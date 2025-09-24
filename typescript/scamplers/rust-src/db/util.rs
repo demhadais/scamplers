@@ -140,6 +140,7 @@ macro_rules! define_ordering_enum {
         pub enum $name {
             $(
                 $variant {
+                    #[serde(default)]
                     descending: bool
                 },
             )*
