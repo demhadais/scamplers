@@ -3689,6 +3689,7 @@ dependencies = [
  "garde",
  "pyo3",
  "pyo3-stub-gen",
+ "rstest",
  "serde",
  "thiserror 2.0.16",
  "valuable",
