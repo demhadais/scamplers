@@ -269,16 +269,16 @@ function passArrayJsValueToWasm0(array, malloc) {
     WASM_VECTOR_LEN = array.length;
     return ptr;
 }
-function __wbg_adapter_12(arg0, arg1) {
+function __wbg_adapter_6(arg0, arg1, arg2) {
+    wasm.closure454_externref_shim(arg0, arg1, arg2);
+}
+
+function __wbg_adapter_25(arg0, arg1) {
     wasm.wasm_bindgen__convert__closures_____invoke__h409457712a738dfa(arg0, arg1);
 }
 
-function __wbg_adapter_15(arg0, arg1, arg2) {
-    wasm.closure456_externref_shim(arg0, arg1, arg2);
-}
-
-function __wbg_adapter_1106(arg0, arg1, arg2, arg3) {
-    wasm.closure484_externref_shim(arg0, arg1, arg2, arg3);
+function __wbg_adapter_1108(arg0, arg1, arg2, arg3) {
+    wasm.closure482_externref_shim(arg0, arg1, arg2, arg3);
 }
 
 /**
@@ -8413,6 +8413,23 @@ export class SpecimenSummary {
         wasm.__wbg_set_specimensummary_cryopreserved(this.__wbg_ptr, arg0);
     }
     /**
+     * @returns {string}
+     */
+    get tissue() {
+        const ret = wasm.__wbg_get_specimensummary_tissue(this.__wbg_ptr);
+        var v1 = getCachedStringFromWasm0(ret[0], ret[1]);
+        if (ret[0] !== 0) { wasm.__wbindgen_free(ret[0], ret[1], 1); }
+        return v1;
+    }
+    /**
+     * @param {string} arg0
+     */
+    set tissue(arg0) {
+        const ptr0 = passStringToWasm0(arg0, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+        const len0 = WASM_VECTOR_LEN;
+        wasm.__wbg_set_specimensummary_tissue(this.__wbg_ptr, ptr0, len0);
+    }
+    /**
      * @returns {any | undefined}
      */
     get additional_data() {
@@ -10516,7 +10533,7 @@ export function __wbg_new_d5e3800b120e37e1(arg0, arg1) {
             const a = state0.a;
             state0.a = 0;
             try {
-                return __wbg_adapter_1106(a, state0.b, arg0, arg1);
+                return __wbg_adapter_1108(a, state0.b, arg0, arg1);
             } finally {
                 state0.a = a;
             }
@@ -10875,6 +10892,12 @@ export function __wbindgen_cast_45c41c2f89ce6d9f(arg0, arg1) {
     return ret;
 };
 
+export function __wbindgen_cast_5d0fc9a6baaadfc1(arg0, arg1) {
+    // Cast intrinsic for `Closure(Closure { dtor_idx: 453, function: Function { arguments: [Externref], shim_idx: 454, ret: Unit, inner_ret: Some(Unit) }, mutable: true }) -> Externref`.
+    const ret = makeMutClosure(arg0, arg1, 453, __wbg_adapter_6);
+    return ret;
+};
+
 export function __wbindgen_cast_7e9c58eeb11b0a6f(arg0, arg1) {
     var v0 = getCachedStringFromWasm0(arg0, arg1);
     // Cast intrinsic for `Ref(CachedString) -> Externref`.
@@ -10898,6 +10921,12 @@ export function __wbindgen_cast_b13b63fe807b76b9(arg0, arg1) {
     return ret;
 };
 
+export function __wbindgen_cast_b3455cb938a8ae7a(arg0, arg1) {
+    // Cast intrinsic for `Closure(Closure { dtor_idx: 428, function: Function { arguments: [], shim_idx: 429, ret: Unit, inner_ret: Some(Unit) }, mutable: true }) -> Externref`.
+    const ret = makeMutClosure(arg0, arg1, 428, __wbg_adapter_25);
+    return ret;
+};
+
 export function __wbindgen_cast_c15a5e554ce1a329(arg0, arg1) {
     var v0 = getArrayJsValueFromWasm0(arg0, arg1).slice();
     wasm.__wbindgen_free(arg0, arg1 * 4, 4);
@@ -10909,12 +10938,6 @@ export function __wbindgen_cast_c15a5e554ce1a329(arg0, arg1) {
 export function __wbindgen_cast_d6cd19b81560fd6e(arg0) {
     // Cast intrinsic for `F64 -> Externref`.
     const ret = arg0;
-    return ret;
-};
-
-export function __wbindgen_cast_db6982b28b57bd7e(arg0, arg1) {
-    // Cast intrinsic for `Closure(Closure { dtor_idx: 455, function: Function { arguments: [Externref], shim_idx: 456, ret: Unit, inner_ret: Some(Unit) }, mutable: true }) -> Externref`.
-    const ret = makeMutClosure(arg0, arg1, 455, __wbg_adapter_15);
     return ret;
 };
 
@@ -10931,12 +10954,6 @@ export function __wbindgen_cast_e90871800fe8ca73(arg0, arg1) {
     wasm.__wbindgen_free(arg0, arg1 * 4, 4);
     // Cast intrinsic for `Vector(NamedExternref("Person")) -> Externref`.
     const ret = v0;
-    return ret;
-};
-
-export function __wbindgen_cast_e99b681cdf735cc3(arg0, arg1) {
-    // Cast intrinsic for `Closure(Closure { dtor_idx: 430, function: Function { arguments: [], shim_idx: 431, ret: Unit, inner_ret: Some(Unit) }, mutable: true }) -> Externref`.
-    const ret = makeMutClosure(arg0, arg1, 430, __wbg_adapter_12);
     return ret;
 };
 

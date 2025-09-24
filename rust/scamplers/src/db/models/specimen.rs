@@ -129,6 +129,7 @@ pub struct SpecimenSummary {
     pub fixative: Option<String>,
     pub frozen: bool,
     pub cryopreserved: bool,
+    pub tissue: String,
     pub additional_data: Option<AnyValue>,
 }
 
