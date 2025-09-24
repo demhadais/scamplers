@@ -4,7 +4,7 @@ use uuid::Uuid;
 
 use crate::db::{
     DbOperation,
-    models::lab::{Lab, LabUpdate, LabUpdateFields, NewLab},
+    models::lab::{Lab, LabUpdate, NewLab},
 };
 
 impl DbOperation<Lab> for NewLab {
@@ -17,18 +17,12 @@ impl DbOperation<Lab> for NewLab {
             .returning(lab::id)
             .get_result(db_conn)?;
 
-        let update_core = LabUpdateFields {
-            id,
-            ..Default::default()
-        };
-
         self.member_ids.push(self.pi_id);
-        let update = LabUpdate {
-            fields: update_core,
-            add_members: self.member_ids,
-            ..Default::default()
-        };
 
-        update.execute(db_conn)
+        LabUpdate::builder()
+            .id(id)
+            .add_members(self.member_ids)
+            .build()
+            .execute(db_conn)
     }
 }

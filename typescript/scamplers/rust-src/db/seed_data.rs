@@ -13,7 +13,7 @@ use crate::{
             tenx_assay::NewTenxAssay,
         },
         seed_data::index_set::download_and_insert_index_sets,
-        tenx_url_validator::is_10x_genomics_url,
+        validators::is_10x_genomics_url,
     },
     result::{ScamplersError, ScamplersResult, ServerError},
 };

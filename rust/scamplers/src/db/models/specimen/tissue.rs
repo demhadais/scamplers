@@ -69,7 +69,7 @@ impl AsGenericNewSpecimen for NewCryopreservedTissue {
 #[pymethods]
 impl NewCryopreservedTissue {
     #[new]
-    #[pyo3(signature = (*, readable_id, name, submitted_by, lab_id, received_at, species, measurements=Vec::new(), committee_approvals=Vec::new(), returned_at=None, returned_by=None, additional_data=None))]
+    #[pyo3(signature = (*, readable_id, name, submitted_by, lab_id, received_at, species, tissue, measurements=Vec::new(), committee_approvals=Vec::new(), returned_at=None, returned_by=None, additional_data=None))]
     fn new(
         readable_id: ValidString,
         name: ValidString,
@@ -77,6 +77,7 @@ impl NewCryopreservedTissue {
         lab_id: Uuid,
         received_at: OffsetDateTime,
         species: Vec<Species>,
+        tissue: ValidString,
         measurements: Vec<NewSpecimenMeasurement>,
         committee_approvals: Vec<NewCommitteeApproval>,
         returned_at: Option<OffsetDateTime>,
@@ -91,6 +92,7 @@ impl NewCryopreservedTissue {
                 lab_id,
                 received_at,
                 species,
+                tissue,
                 committee_approvals,
                 returned_at,
                 returned_by,
@@ -152,7 +154,7 @@ impl AsGenericNewSpecimen for NewFixedTissue {
 #[pymethods]
 impl NewFixedTissue {
     #[new]
-    #[pyo3(signature = (*, readable_id, name, submitted_by, lab_id, received_at, species, fixative, measurements=Vec::new(), committee_approvals=Vec::new(), returned_at=None, returned_by=None, additional_data=None))]
+    #[pyo3(signature = (*, readable_id, name, submitted_by, lab_id, received_at, species, fixative, tissue, measurements=Vec::new(), committee_approvals=Vec::new(), returned_at=None, returned_by=None, additional_data=None))]
     fn new(
         readable_id: ValidString,
         name: ValidString,
@@ -161,6 +163,7 @@ impl NewFixedTissue {
         received_at: OffsetDateTime,
         species: Vec<Species>,
         fixative: TissueFixative,
+        tissue: ValidString,
         measurements: Vec<NewSpecimenMeasurement>,
         committee_approvals: Vec<NewCommitteeApproval>,
         returned_at: Option<OffsetDateTime>,
@@ -175,6 +178,7 @@ impl NewFixedTissue {
                 lab_id,
                 received_at,
                 species,
+                tissue,
                 committee_approvals,
                 returned_at,
                 returned_by,
@@ -230,7 +234,7 @@ impl AsGenericNewSpecimen for NewFrozenTissue {
 #[pymethods]
 impl NewFrozenTissue {
     #[new]
-    #[pyo3(signature = (*, readable_id, name, submitted_by, lab_id, received_at, species, measurements=Vec::new(), committee_approvals=Vec::new(), returned_at=None, returned_by=None, additional_data=None))]
+    #[pyo3(signature = (*, readable_id, name, submitted_by, lab_id, received_at, species, tissue, measurements=Vec::new(), committee_approvals=Vec::new(), returned_at=None, returned_by=None, additional_data=None))]
     fn new(
         readable_id: ValidString,
         name: ValidString,
@@ -238,6 +242,7 @@ impl NewFrozenTissue {
         lab_id: Uuid,
         received_at: OffsetDateTime,
         species: Vec<Species>,
+        tissue: ValidString,
         measurements: Vec<NewSpecimenMeasurement>,
         committee_approvals: Vec<NewCommitteeApproval>,
         returned_at: Option<OffsetDateTime>,
@@ -252,6 +257,7 @@ impl NewFrozenTissue {
                 lab_id,
                 received_at,
                 species,
+                tissue,
                 committee_approvals,
                 returned_at,
                 returned_by,

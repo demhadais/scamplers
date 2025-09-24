@@ -69,7 +69,7 @@ impl AsGenericNewSpecimen for NewCryopreservedSuspension {
 #[pymethods]
 impl NewCryopreservedSuspension {
     #[new]
-    #[pyo3(signature = (*, readable_id, name, submitted_by, lab_id, received_at, species, measurements=Vec::new(), committee_approvals=Vec::new(), returned_at=None, returned_by=None, additional_data=None))]
+    #[pyo3(signature = (*, readable_id, name, submitted_by, lab_id, received_at, species, tissue, measurements=Vec::new(), committee_approvals=Vec::new(), returned_at=None, returned_by=None, additional_data=None))]
     fn new(
         readable_id: ValidString,
         name: ValidString,
@@ -77,6 +77,7 @@ impl NewCryopreservedSuspension {
         lab_id: Uuid,
         received_at: OffsetDateTime,
         species: Vec<Species>,
+        tissue: ValidString,
         measurements: Vec<NewSpecimenMeasurement>,
         committee_approvals: Vec<NewCommitteeApproval>,
         returned_at: Option<OffsetDateTime>,
@@ -91,6 +92,7 @@ impl NewCryopreservedSuspension {
                 lab_id,
                 received_at,
                 species,
+                tissue,
                 committee_approvals,
                 returned_at,
                 returned_by,
@@ -153,7 +155,7 @@ impl AsGenericNewSpecimen for NewFixedOrFreshSuspension {
 #[pymethods]
 impl NewFixedOrFreshSuspension {
     #[new]
-    #[pyo3(signature = (*, readable_id, name, submitted_by, lab_id, received_at, species, fixative=None, measurements=Vec::new(), committee_approvals=Vec::new(), returned_at=None, returned_by=None, additional_data=None))]
+    #[pyo3(signature = (*, readable_id, name, submitted_by, lab_id, received_at, species, tissue, fixative=None, measurements=Vec::new(), committee_approvals=Vec::new(), returned_at=None, returned_by=None, additional_data=None))]
     fn new(
         readable_id: ValidString,
         name: ValidString,
@@ -161,6 +163,7 @@ impl NewFixedOrFreshSuspension {
         lab_id: Uuid,
         received_at: OffsetDateTime,
         species: Vec<Species>,
+        tissue: ValidString,
         fixative: Option<SuspensionFixative>,
         measurements: Vec<NewSpecimenMeasurement>,
         committee_approvals: Vec<NewCommitteeApproval>,
@@ -176,6 +179,7 @@ impl NewFixedOrFreshSuspension {
                 lab_id,
                 received_at,
                 species,
+                tissue,
                 committee_approvals,
                 returned_at,
                 returned_by,
@@ -231,7 +235,7 @@ impl AsGenericNewSpecimen for NewFrozenSuspension {
 #[pymethods]
 impl NewFrozenSuspension {
     #[new]
-    #[pyo3(signature = (*, readable_id, name, submitted_by, lab_id, received_at, species, measurements=Vec::new(), committee_approvals=Vec::new(), returned_at=None, returned_by=None, additional_data=None))]
+    #[pyo3(signature = (*, readable_id, name, submitted_by, lab_id, received_at, species, tissue, measurements=Vec::new(), committee_approvals=Vec::new(), returned_at=None, returned_by=None, additional_data=None))]
     fn new(
         readable_id: ValidString,
         name: ValidString,
@@ -239,6 +243,7 @@ impl NewFrozenSuspension {
         lab_id: Uuid,
         received_at: OffsetDateTime,
         species: Vec<Species>,
+        tissue: ValidString,
         measurements: Vec<NewSpecimenMeasurement>,
         committee_approvals: Vec<NewCommitteeApproval>,
         returned_at: Option<OffsetDateTime>,
@@ -253,6 +258,7 @@ impl NewFrozenSuspension {
                 lab_id,
                 received_at,
                 species,
+                tissue,
                 committee_approvals,
                 returned_at,
                 returned_by,

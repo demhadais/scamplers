@@ -93,7 +93,7 @@ mod tests {
                 institution::InstitutionQuery,
                 person::{
                     CreatedUser, NewPerson, Person, PersonOrderBy, PersonQuery, PersonUpdate,
-                    PersonUpdateFields, UserRole,
+                    UserRole,
                 },
             },
             test_util::{db_conn, people, test_query},
@@ -148,19 +148,13 @@ mod tests {
             let new_name = "Thomas Anderson";
             let new_email = "neo@example.com";
 
-            let updated_person = PersonUpdateFields::builder()
+            let updated_person = PersonUpdate::builder()
                 .id(id)
                 .name(new_name)
                 .email(new_email)
-                .build();
-            assert!(updated_person.is_update());
-
-            let updated_person = PersonUpdate {
-                fields: updated_person,
-                ..Default::default()
-            }
-            .execute(tx)
-            .unwrap();
+                .build()
+                .execute(tx)
+                .unwrap();
 
             assert_eq!(new_name, updated_person.info.summary.name);
             assert_eq!(new_email, updated_person.info.summary.email.unwrap());
@@ -204,26 +198,21 @@ mod tests {
                 );
                 assert_eq!(recreated_user.person.roles, &[]);
 
-                let fields = PersonUpdateFields::builder()
+                let person_with_granted_roles = PersonUpdate::builder()
                     .id(created_user.person.info.id_)
-                    .build();
-                let person_with_granted_roles = PersonUpdate {
-                    fields: fields.clone(),
-                    grant_roles: vec![UserRole::AppAdmin],
-                    ..Default::default()
-                }
-                .execute(tx)
-                .unwrap();
+                    .grant_roles([UserRole::AppAdmin])
+                    .build()
+                    .execute(tx)
+                    .unwrap();
 
                 assert_eq!(person_with_granted_roles.roles, &[UserRole::AppAdmin]);
 
-                let person_with_revoked_roles = PersonUpdate {
-                    fields,
-                    revoke_roles: vec![UserRole::AppAdmin],
-                    ..Default::default()
-                }
-                .execute(tx)
-                .unwrap();
+                let person_with_revoked_roles = PersonUpdate::builder()
+                    .id(created_user.person.info.id_)
+                    .revoke_roles([UserRole::AppAdmin])
+                    .build()
+                    .execute(tx)
+                    .unwrap();
 
                 assert_eq!(person_with_revoked_roles.roles, &[]);
 

@@ -1,7 +1,7 @@
 use scamplers_macros::db_insertion;
 use valid_string::ValidString;
 
-use crate::db::tenx_url_validator::is_10x_genomics_url;
+use crate::db::validators::is_10x_genomics_url;
 
 #[db_insertion]
 #[cfg_attr(feature = "app", diesel(table_name = scamplers_schema::tenx_assay))]

@@ -5,7 +5,7 @@ use diesel::prelude::*;
 use pyo3::prelude::*;
 #[cfg(feature = "python")]
 use pyo3_stub_gen::derive::{gen_stub_pyclass_complex_enum, gen_stub_pymethods};
-use scamplers_macros::{db_insertion, db_json, db_selection, db_simple_enum};
+use scamplers_macros::{db_insertion, db_json, db_selection, db_simple_enum, db_update};
 #[cfg(feature = "app")]
 use scamplers_schema::{committee_approval, institution};
 use time::OffsetDateTime;
@@ -16,7 +16,10 @@ use wasm_bindgen::prelude::*;
 
 #[cfg(feature = "app")]
 use crate::db::models::specimen::{BlockEmbeddingMatrix, Fixative, SpecimenType};
-use crate::db::models::{institution::Institution, specimen::Species};
+use crate::db::{
+    models::{institution::Institution, specimen::Species},
+    validators::children_parent_ids_matches_parent_id,
+};
 
 #[db_simple_enum]
 #[cfg_attr(feature = "python", pyo3(module = "scamplepy.create"))]
@@ -136,6 +139,8 @@ pub struct NewSpecimenCommon {
     pub received_at: OffsetDateTime,
     #[garde(length(min = 1))]
     pub species: Vec<Species>,
+    #[garde(dive)]
+    pub tissue: ValidString,
     #[serde(default)]
     #[builder(default)]
     #[garde(dive)]
@@ -183,4 +188,31 @@ pub trait AsGenericNewSpecimen {
     fn as_generic(&self) -> GenericNewSpecimen<'_> {
         (self.inner(), self.variable_fields())
     }
+}
+
+// The weird type-hints are necessitated by rust being weird
+#[db_update]
+#[cfg_attr(feature = "app", diesel(table_name = scamplers_schema::specimen))]
+pub struct SpecimenUpdateCommon {
+    pub id: Uuid,
+    #[garde(dive)]
+    pub readable_id: Option<ValidString>,
+    #[garde(dive)]
+    pub name: Option<ValidString>,
+    pub submitted_by: Option<Uuid>,
+    pub lab_id: Option<Uuid>,
+    pub received_at: Option<OffsetDateTime>,
+    #[garde(length(min = 1))]
+    pub species: Option<Vec<Species>>,
+    #[garde(dive)]
+    pub tissue: Option<ValidString>,
+    #[garde(dive, custom(|approvals: &[NewCommitteeApproval], (): &()| children_parent_ids_matches_parent_id(self.id, approvals, |a| &a.specimen_id)))]
+    #[cfg_attr(feature = "app", diesel(skip_update))]
+    pub committee_approvals: Vec<NewCommitteeApproval>,
+    pub returned_at: Option<OffsetDateTime>,
+    pub returned_by: Option<Uuid>,
+    #[garde(dive, custom(|measurements: &[NewSpecimenMeasurement], (): &()| children_parent_ids_matches_parent_id(self.id, measurements, |m| &m.specimen_id)))]
+    #[cfg_attr(feature = "app", diesel(skip_update))]
+    pub measurements: Vec<NewSpecimenMeasurement>,
+    pub additional_data: Option<AnyValue>,
 }
