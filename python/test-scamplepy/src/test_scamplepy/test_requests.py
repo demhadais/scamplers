@@ -65,6 +65,7 @@ from scamplepy.create import (
 
 ID = UUID(int=0)
 TIME = datetime(year=1999, month=1, day=1, tzinfo=UTC)
+TISSUE = "napkin hehe"
 
 SINGLE_ROW_CSV = SingleRowCsvMetricsFile(
     filename="summary.csv",
@@ -143,6 +144,7 @@ def new_fixed_block(person_id: UUID = ID, lab_id: UUID = ID) -> NewFixedBlock:
         committee_approvals=[_new_committee_approval()],
         embedded_in=FixedBlockEmbeddingMatrix.Paraffin,
         fixative=BlockFixative.FormaldehydeDerivative,
+        tissue=TISSUE
     )
 
 
@@ -156,6 +158,7 @@ def new_frozen_block(person_id: UUID = ID, lab_id: UUID = ID) -> NewFrozenBlock:
         received_at=TIME,
         species=[Species.MusMusculus],
         embedded_in=FrozenBlockEmbeddingMatrix.CarboxymethylCellulose,
+        tissue=TISSUE
     )
 
 
@@ -171,6 +174,7 @@ def new_cryopreserved_tissue(
         lab_id=lab_id,
         received_at=TIME,
         species=[Species.RattusNorvegicus],
+        tissue=TISSUE
     )
     tissue.cryopreserved = True
 
@@ -192,6 +196,7 @@ def new_fixed_tissue(person_id: UUID = ID, lab_id: UUID = ID) -> NewFixedTissue:
         received_at=TIME,
         species=[Species.HomoSapiens],
         fixative=TissueFixative.DithiobisSuccinimidylpropionate,
+        tissue=TISSUE
     )
 
 
@@ -204,6 +209,7 @@ def new_frozen_tissue(person_id: UUID = ID, lab_id: UUID = ID) -> NewFrozenTissu
         lab_id=lab_id,
         received_at=TIME,
         species=[Species.CallithrixJacchus],
+        tissue=TISSUE
     )
 
 
@@ -219,6 +225,7 @@ def new_fixed_suspension_specimen(
         received_at=TIME,
         species=[Species.DrosophilaMelanogaster],
         fixative=SuspensionFixative.FormaldehydeDerivative,
+        tissue=TISSUE
     )
 
 
