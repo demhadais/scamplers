@@ -216,3 +216,43 @@ pub struct SpecimenUpdateCommon {
     pub measurements: Vec<NewSpecimenMeasurement>,
     pub additional_data: Option<AnyValue>,
 }
+
+#[cfg(feature = "python")]
+#[gen_stub_pymethods]
+#[pymethods]
+impl SpecimenUpdateCommon {
+    #[new]
+    #[pyo3(signature = (*, id, readable_id=None, name=None, submitted_by=None, lab_id=None, received_at = None, species = None, tissue=None, committee_approvals = Vec::new(), returned_at=None, returned_by=None, measurements=Vec::new(), additional_data = None))]
+    #[must_use]
+    pub fn new(
+        id: Uuid,
+        readable_id: Option<ValidString>,
+        name: Option<ValidString>,
+        submitted_by: Option<Uuid>,
+        lab_id: Option<Uuid>,
+        received_at: Option<OffsetDateTime>,
+        species: Option<Vec<Species>>,
+        tissue: Option<ValidString>,
+        committee_approvals: Vec<NewCommitteeApproval>,
+        returned_at: Option<OffsetDateTime>,
+        returned_by: Option<Uuid>,
+        measurements: Vec<NewSpecimenMeasurement>,
+        additional_data: Option<AnyValue>,
+    ) -> Self {
+        Self {
+            id,
+            readable_id,
+            name,
+            submitted_by,
+            lab_id,
+            received_at,
+            species,
+            tissue,
+            committee_approvals,
+            returned_at,
+            returned_by,
+            measurements,
+            additional_data,
+        }
+    }
+}

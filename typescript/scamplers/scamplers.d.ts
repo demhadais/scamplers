@@ -849,6 +849,7 @@ export class SpecimenSummary {
   set fixative(value: string | null | undefined);
   frozen: boolean;
   cryopreserved: boolean;
+  tissue: string;
   get additional_data(): any | undefined;
   set additional_data(value: any | null | undefined);
   readonly species: string[];
