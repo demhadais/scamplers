@@ -81,7 +81,7 @@ impl AsGenericNewSpecimen for NewFixedBlock {
 #[pymethods]
 impl NewFixedBlock {
     #[new]
-    #[pyo3(signature = (*, readable_id, name, submitted_by, lab_id, received_at, species, embedded_in, fixative, measurements=Vec::new(), committee_approvals=Vec::new(), returned_at=None, returned_by=None, additional_data=None))]
+    #[pyo3(signature = (*, readable_id, name, submitted_by, lab_id, received_at, species, embedded_in, fixative, tissue, measurements=Vec::new(), committee_approvals=Vec::new(), returned_at=None, returned_by=None, additional_data=None))]
     fn new(
         readable_id: ValidString,
         name: ValidString,
@@ -91,6 +91,7 @@ impl NewFixedBlock {
         species: Vec<Species>,
         embedded_in: FixedBlockEmbeddingMatrix,
         fixative: BlockFixative,
+        tissue: ValidString,
         measurements: Vec<NewSpecimenMeasurement>,
         committee_approvals: Vec<NewCommitteeApproval>,
         returned_at: Option<OffsetDateTime>,
@@ -105,6 +106,7 @@ impl NewFixedBlock {
                 lab_id,
                 received_at,
                 species,
+                tissue,
                 committee_approvals,
                 returned_at,
                 returned_by,
@@ -179,7 +181,7 @@ impl AsGenericNewSpecimen for NewFrozenBlock {
 #[pymethods]
 impl NewFrozenBlock {
     #[new]
-    #[pyo3(signature = (*, readable_id, name, submitted_by, lab_id, received_at, species, embedded_in, fixative=None, measurements=Vec::new(), committee_approvals=Vec::new(), returned_at=None, returned_by=None, additional_data=None))]
+    #[pyo3(signature = (*, readable_id, name, submitted_by, lab_id, received_at, species, embedded_in, tissue, fixative=None, measurements=Vec::new(), committee_approvals=Vec::new(), returned_at=None, returned_by=None, additional_data=None))]
     fn new(
         readable_id: ValidString,
         name: ValidString,
@@ -188,6 +190,7 @@ impl NewFrozenBlock {
         received_at: OffsetDateTime,
         species: Vec<Species>,
         embedded_in: FrozenBlockEmbeddingMatrix,
+        tissue: ValidString,
         fixative: Option<BlockFixative>,
         measurements: Vec<NewSpecimenMeasurement>,
         committee_approvals: Vec<NewCommitteeApproval>,
@@ -203,6 +206,7 @@ impl NewFrozenBlock {
                 lab_id,
                 received_at,
                 species,
+                tissue,
                 committee_approvals,
                 returned_at,
                 returned_by,

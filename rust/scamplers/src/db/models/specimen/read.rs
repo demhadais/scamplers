@@ -181,7 +181,7 @@ mod tests {
             .embedded_in([BlockEmbeddingMatrix::Frozen(
                 FrozenBlockEmbeddingMatrix::CarboxymethylCellulose,
             )])
-            .additional_data(any_value!({"secret": "the krabby-patty secret formular"}))
+            .additional_data([any_value!({"secret": "the krabby-patty secret formular"})])
             .order_by(SpecimenOrderBy::Name { descending: true })
             .pagination(Pagination {
                 limit: N_SPECIMENS as i64,

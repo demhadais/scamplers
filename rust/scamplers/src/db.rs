@@ -10,10 +10,10 @@ use crate::result::ScamplersResult;
 pub mod models;
 #[cfg(feature = "app")]
 pub mod seed_data;
-mod tenx_url_validator;
 #[cfg(all(feature = "app", test))]
 pub mod test_util;
 pub mod util;
+mod validators;
 
 #[cfg(feature = "app")]
 pub trait DbOperation<Output>: Sized {

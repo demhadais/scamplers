@@ -21,7 +21,9 @@ use crate::{
             sequencing_run::{
                 NewSequencingRun, SequencingRun, SequencingRunId, SequencingRunQuery,
             },
-            specimen::{NewSpecimen, Specimen, SpecimenId, SpecimenQuery},
+            specimen::{
+                NewSpecimen, Specimen, SpecimenId, SpecimenQuery, common::SpecimenUpdateCommon,
+            },
             suspension::{
                 pool::{NewSuspensionPool, SuspensionPool, SuspensionPoolId, SuspensionPoolQuery},
                 suspension::{NewSuspension, Suspension, SuspensionId, SuspensionQuery},
@@ -131,6 +133,7 @@ pub fn router() -> Router<AppState> {
         fetch_specimen(SpecimenId) -> Specimen;
         list_specimens(SpecimenQuery) -> Vec<Specimen>;
         list_person_specimens((PersonId, SpecimenQuery)) -> Vec<Specimen>;
+        update_specimen(SpecimenUpdateCommon) -> Specimen;
         create_sequencing_run(NewSequencingRun) -> SequencingRun;
         list_sequencing_runs(SequencingRunQuery) -> Vec<SequencingRun>;
         fetch_sequencing_run(SequencingRunId) -> SequencingRun;

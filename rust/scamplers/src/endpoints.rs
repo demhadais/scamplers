@@ -19,7 +19,9 @@ use crate::{
         },
         person::{CreatedUser, NewPerson, Person, PersonId, PersonQuery, PersonUpdate},
         sequencing_run::{NewSequencingRun, SequencingRun, SequencingRunId, SequencingRunQuery},
-        specimen::{NewSpecimen, Specimen, SpecimenId, SpecimenQuery},
+        specimen::{
+            NewSpecimen, Specimen, SpecimenId, SpecimenQuery, common::SpecimenUpdateCommon,
+        },
         suspension::{
             pool::{NewSuspensionPool, SuspensionPool, SuspensionPoolId, SuspensionPoolQuery},
             suspension::{NewSuspension, Suspension, SuspensionId, SuspensionQuery},
@@ -180,6 +182,7 @@ impl_basic_endpoints!(
     creation = NewSpecimen,
     id = SpecimenId,
     query = SpecimenQuery,
+    update = SpecimenUpdateCommon,
     response = Specimen
 );
 

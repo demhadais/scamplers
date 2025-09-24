@@ -277,6 +277,7 @@ impl TestState {
                 .lab_id(self.random_lab_id())
                 .received_at(self.random_time())
                 .species([random_species])
+                .tissue("krabby patty")
                 .measurements([measurement])
                 .name(format!("specimen{i}"))
                 .build();

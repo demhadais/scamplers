@@ -105,28 +105,18 @@ pub struct Lab {
 #[db_update]
 #[cfg_attr(target_arch = "wasm32", wasm_bindgen(getter_with_clone))]
 #[cfg_attr(feature = "app", diesel(table_name = scamplers_schema::lab))]
-pub struct LabUpdateFields {
+pub struct LabUpdate {
     pub id: Uuid,
     #[garde(dive)]
     pub name: Option<ValidString>,
     pub pi_id: Option<Uuid>,
     #[garde(dive)]
     pub delivery_dir: Option<ValidString>,
-}
-
-#[cfg_attr(target_arch = "wasm32", wasm_bindgen(getter_with_clone))]
-#[cfg_attr(feature = "python", pyo3_stub_gen::derive::gen_stub_pyclass)]
-#[cfg_attr(
-    feature = "python",
-    pyclass(get_all, set_all, module = "scamplepy.update")
-)]
-#[base_model]
-#[derive(Default)]
-pub struct LabUpdate {
-    #[serde(flatten)]
-    #[garde(dive)]
-    pub fields: LabUpdateFields,
+    #[builder(default)]
+    #[cfg_attr(feature = "app", diesel(skip_update))]
     pub add_members: Vec<Uuid>,
+    #[builder(default)]
+    #[cfg_attr(feature = "app", diesel(skip_update))]
     pub remove_members: Vec<Uuid>,
 }
 

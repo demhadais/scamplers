@@ -14,13 +14,13 @@ use scamplers::{
             NewCellrangerarcCountDataset, NewCellrangeratacCountDataset, SingleRowCsvMetricsFile,
         },
         institution::{Institution, InstitutionQuery, NewInstitution},
-        lab::{Lab, LabQuery, NewLab},
+        lab::{Lab, LabQuery, LabUpdate, NewLab},
         nucleic_acid::{
             self,
             cdna::{Cdna, CdnaQuery, NewCdna, NewCdnaGroup, NewCdnaMeasurement},
             library::{Library, LibraryQuery, NewLibrary, NewLibraryMeasurement},
         },
-        person::{NewPerson, Person, PersonQuery, UserRole},
+        person::{NewPerson, Person, PersonQuery, PersonUpdate, UserRole},
         sequencing_run::{NewSequencingRun, SequencingRun, SequencingRunQuery},
         specimen::{
             self, Species, Specimen, SpecimenQuery, SpecimenType,
@@ -28,7 +28,10 @@ use scamplers::{
                 BlockFixative, FixedBlockEmbeddingMatrix, FrozenBlockEmbeddingMatrix,
                 NewFixedBlock, NewFrozenBlock,
             },
-            common::{ComplianceCommitteeType, NewCommitteeApproval, NewSpecimenMeasurement},
+            common::{
+                ComplianceCommitteeType, NewCommitteeApproval, NewSpecimenMeasurement,
+                SpecimenUpdateCommon,
+            },
             suspension::{
                 NewCryopreservedSuspension, NewFixedOrFreshSuspension, NewFrozenSuspension,
                 SuspensionFixative,
@@ -62,6 +65,7 @@ fn scamplepy(module: &Bound<'_, PyModule>) -> PyResult<()> {
         register_common_submodule(module)?,
         register_create_submodule(module)?,
         register_query_submodule(module)?,
+        register_update_submodule(module)?,
         register_responses_submodule(module)?,
     ];
 
@@ -215,6 +219,17 @@ fn register_create_submodule<'a>(parent: &'a Bound<PyModule>) -> PyResult<Module
     parent.add_submodule(&create_submodule)?;
 
     Ok((scamplers::CREATE_SUBMODULE_NAME, create_submodule))
+}
+
+fn register_update_submodule<'a>(parent: &'a Bound<PyModule>) -> PyResult<ModuleWithName<'a>> {
+    let update_module =
+        PyModule::new_scamplepy_module(parent.py(), scamplers::UPDATE_SUBMODULE_NAME)?;
+
+    add_classes!(update_module, PersonUpdate, LabUpdate, SpecimenUpdateCommon);
+
+    parent.add_submodule(&update_module)?;
+
+    Ok((scamplers::UPDATE_SUBMODULE_NAME, update_module))
 }
 
 fn register_query_submodule<'a>(parent: &'a Bound<PyModule>) -> PyResult<ModuleWithName<'a>> {

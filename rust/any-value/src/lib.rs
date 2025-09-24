@@ -245,7 +245,7 @@ mod python {
 #[cfg(target_arch = "wasm32")]
 mod wasm32 {
     use wasm_bindgen::{
-        JsValue,
+        JsCast, JsValue,
         convert::{FromWasmAbi, IntoWasmAbi, OptionFromWasmAbi, OptionIntoWasmAbi},
         describe::WasmDescribe,
     };
@@ -255,6 +255,32 @@ mod wasm32 {
     impl WasmDescribe for AnyValue {
         fn describe() {
             JsValue::describe();
+        }
+    }
+
+    impl AsRef<JsValue> for AnyValue {
+        fn as_ref(&self) -> &JsValue {
+            &self.0
+        }
+    }
+
+    impl From<AnyValue> for JsValue {
+        fn from(val: AnyValue) -> Self {
+            val.0
+        }
+    }
+
+    impl JsCast for AnyValue {
+        fn instanceof(val: &JsValue) -> bool {
+            JsValue::instanceof(val)
+        }
+
+        fn unchecked_from_js(val: JsValue) -> Self {
+            Self(JsValue::unchecked_from_js(val))
+        }
+
+        fn unchecked_from_js_ref(_val: &JsValue) -> &Self {
+            panic!("there's actually no way to do this")
         }
     }
 

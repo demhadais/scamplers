@@ -214,25 +214,6 @@ pub fn db_selection(_attr: TokenStream, input: TokenStream) -> TokenStream {
 pub fn db_update(_attr: TokenStream, input: TokenStream) -> TokenStream {
     let struct_item = parse_macro_input!(input as ItemStruct);
 
-    let mut is_update_impl = Vec::with_capacity(struct_item.fields.len());
-    for field in &struct_item.fields {
-        let field_ident = field.ident.as_ref().unwrap();
-        if field_ident == "id" {
-            continue;
-        }
-
-        is_update_impl.push(quote! { self.#field_ident.is_some() });
-    }
-
-    let name = &struct_item.ident;
-    let is_update_impl = quote! {
-        impl #name {
-            fn is_update(&self) -> bool {
-                #(#is_update_impl) || *
-            }
-        }
-    };
-
     let output = quote! {
         #[::scamplers_macros::base_model]
         #[cfg_attr(feature = "python", ::pyo3_stub_gen::derive::gen_stub_pyclass)]
@@ -245,8 +226,6 @@ pub fn db_update(_attr: TokenStream, input: TokenStream) -> TokenStream {
         #[derive(Default, ::scamplers_macros::Jsonify, ::scamplers_macros::PyJsonify, ::bon::Builder)]
         #[builder(on(_, into), derive(Clone, Debug, Into))]
         #struct_item
-
-        #is_update_impl
     };
 
     output.into()
@@ -334,7 +313,7 @@ pub fn db_json(_attr: TokenStream, input: TokenStream) -> TokenStream {
                     return Err("Unsupported JSONB encoding version".into());
                 }
 
-                ::serde_json::from_slice(&bytes[1..]).map_err(|_| "Invalid Json".into())
+                Ok(::serde_json::from_slice(&bytes[1..])?)
             }
         }
 

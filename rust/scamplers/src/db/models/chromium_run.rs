@@ -97,10 +97,11 @@ pub struct ChromiumRunQuery {
     pub run_after: Option<OffsetDateTime>,
     pub succeeded: Option<bool>,
     #[builder(default)]
+    pub additional_data: Vec<AnyValue>,
+    #[builder(default)]
     pub order_by: DefaultVec<ChromiumRunOrderBy>,
     #[builder(default)]
     pub pagination: Pagination,
-    pub additional_data: Option<AnyValue>,
 }
 
 #[cfg(feature = "python")]
@@ -108,7 +109,7 @@ pub struct ChromiumRunQuery {
 #[pymethods]
 impl ChromiumRunQuery {
     #[new]
-    #[pyo3(signature = (*, ids=Vec::default(), readable_ids=Vec::default(), assay=None, run_before=None, run_after=None, succeeded=None, additional_data=None, order_by=DefaultVec::default(), limit=Pagination::default().limit, offset=Pagination::default_offset()))]
+    #[pyo3(signature = (*, ids=Vec::default(), readable_ids=Vec::default(), assay=None, run_before=None, run_after=None, succeeded=None, additional_data=Vec::new(), order_by=DefaultVec::default(), limit=Pagination::default().limit, offset=Pagination::default_offset()))]
     fn new(
         ids: Vec<Uuid>,
         readable_ids: Vec<String>,
@@ -116,7 +117,7 @@ impl ChromiumRunQuery {
         run_before: Option<OffsetDateTime>,
         run_after: Option<OffsetDateTime>,
         succeeded: Option<bool>,
-        additional_data: Option<AnyValue>,
+        additional_data: Vec<AnyValue>,
         order_by: DefaultVec<ChromiumRunOrderBy>,
         limit: i64,
         offset: i64,

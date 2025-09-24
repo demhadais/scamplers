@@ -22,7 +22,7 @@ use crate::db::models::{
     nucleic_acid::{cdna::NewCdnaGroup, library::NewLibrary},
     person::PersonUpdate,
     sequencing_run::NewSequencingRun,
-    specimen::NewSpecimen,
+    specimen::{NewSpecimen, common::SpecimenUpdateCommon},
     suspension::{pool::NewSuspensionPool, suspension::NewSuspension},
 };
 #[cfg(any(target_arch = "wasm32", feature = "python"))]
@@ -359,6 +359,7 @@ python_client_methods! {
     create_specimen(NewSpecimen) -> Specimen;
     fetch_specimen(SpecimenId) -> Specimen;
     list_specimens(SpecimenQuery) -> Vec<Specimen>;
+    update_specimen(SpecimenUpdateCommon) -> Specimen;
     create_sequencing_run(NewSequencingRun) -> SequencingRun;
     fetch_sequencing_run(SequencingRunId) -> SequencingRun;
     list_sequencing_runs(SequencingRunQuery) -> Vec<SequencingRun>;

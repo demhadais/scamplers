@@ -205,10 +205,9 @@ export class ChromiumRunQuery {
   set run_after(value: Date | null | undefined);
   get succeeded(): boolean | undefined;
   set succeeded(value: boolean | null | undefined);
+  additional_data: any[];
   order_by: OrderBy[];
   pagination: Pagination;
-  get additional_data(): any | undefined;
-  set additional_data(value: any | null | undefined);
 }
 export class ChromiumRunSummaryWithParents {
   private constructor();
@@ -439,13 +438,6 @@ export class LabSummaryWithParents {
 export class LabUpdate {
   private constructor();
   free(): void;
-  fields: LabUpdateFields;
-  add_members: string[];
-  remove_members: string[];
-}
-export class LabUpdateFields {
-  private constructor();
-  free(): void;
   id: string;
   get name(): string;
   set name(value: string | null | undefined);
@@ -453,6 +445,8 @@ export class LabUpdateFields {
   set pi_id(value: string | null | undefined);
   get delivery_dir(): string;
   set delivery_dir(value: string | null | undefined);
+  add_members: string[];
+  remove_members: string[];
 }
 export class Library {
   private constructor();
@@ -827,8 +821,8 @@ export class SpecimenQuery {
   set frozen(value: boolean | null | undefined);
   get cryopreserved(): boolean | undefined;
   set cryopreserved(value: boolean | null | undefined);
-  get additional_data(): any | undefined;
-  set additional_data(value: any | null | undefined);
+  tissues: string[];
+  additional_data: any[];
   order_by: OrderBy[];
   pagination: Pagination;
 }

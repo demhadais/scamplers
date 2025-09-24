@@ -43,6 +43,8 @@ mod create;
 pub mod read;
 pub mod suspension;
 pub mod tissue;
+#[cfg(feature = "app")]
+pub mod update;
 
 #[base_model]
 #[serde(tag = "type", rename_all = "snake_case")]
@@ -272,7 +274,10 @@ pub struct SpecimenQuery {
     pub fixatives: Vec<Fixative>,
     pub frozen: Option<bool>,
     pub cryopreserved: Option<bool>,
-    pub additional_data: Option<AnyValue>,
+    #[builder(default)]
+    pub tissues: Vec<String>,
+    #[builder(default)]
+    pub additional_data: Vec<AnyValue>,
     #[builder(default)]
     pub order_by: DefaultVec<SpecimenOrderBy>,
     #[builder(default)]
@@ -284,7 +289,7 @@ pub struct SpecimenQuery {
 #[pymethods]
 impl SpecimenQuery {
     #[new]
-    #[pyo3(signature = (*,ids = Vec::new(), names = Vec::new(), submitters = Vec::new(), labs = Vec::new(), received_before = None, received_after = None, species = Vec::new(), types = Vec::new(), embedded_in = Vec::new(), fixatives = Vec::new(), frozen = None, cryopreserved = None, additional_data = None, order_by = DefaultVec::default(), limit = Pagination::default().limit, offset = Pagination::default_offset()))]
+    #[pyo3(signature = (*,ids = Vec::new(), names = Vec::new(), submitters = Vec::new(), labs = Vec::new(), received_before = None, received_after = None, species = Vec::new(), types = Vec::new(), embedded_in = Vec::new(), fixatives = Vec::new(), frozen = None, cryopreserved = None, tissues = Vec::new(), additional_data = Vec::new(), order_by = DefaultVec::default(), limit = Pagination::default().limit, offset = Pagination::default_offset()))]
     #[must_use]
     pub fn new(
         ids: Vec<Uuid>,
@@ -299,7 +304,8 @@ impl SpecimenQuery {
         fixatives: Vec<Fixative>,
         frozen: Option<bool>,
         cryopreserved: Option<bool>,
-        additional_data: Option<AnyValue>,
+        tissues: Vec<String>,
+        additional_data: Vec<AnyValue>,
         order_by: DefaultVec<SpecimenOrderBy>,
         limit: i64,
         offset: i64,
@@ -317,6 +323,7 @@ impl SpecimenQuery {
             fixatives,
             frozen,
             cryopreserved,
+            tissues,
             additional_data,
             order_by,
             pagination: Pagination { limit, offset },
@@ -346,6 +353,7 @@ mod tests {
           "readable_id": "id",
           "lab_id": uuid,
           "name": "krabby_patty",
+          "tissue": "secret",
           "submitted_by": uuid,
           "received_at": received_at,
           "species": ["homo_sapiens"],

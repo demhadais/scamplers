@@ -112,8 +112,18 @@ macro_rules! apply_ilike_filters {
 macro_rules! apply_jsonb_contains_filters {
     ($stmt:expr, filters = {$($col:expr => $value:expr),*}) => {{
         $(
-            if let Some(value) = $value {
-                $stmt = $stmt.filter($col.contains(value));
+            let mut jsonb_condition: Option<Box<dyn diesel::BoxableExpression<_, diesel::pg::Pg, SqlType = diesel::sql_types::Nullable<diesel::sql_types::Bool>>>> = None;
+
+            for jsonb in $value {
+                if let Some(condition) = jsonb_condition {
+                    jsonb_condition = Some(Box::new(condition.or($col.contains(jsonb))));
+                } else {
+                    jsonb_condition = Some(Box::new($col.contains(jsonb)));
+                }
+            }
+
+            if let Some(condition) = jsonb_condition {
+                $stmt = $stmt.filter(condition);
             }
         )*
 

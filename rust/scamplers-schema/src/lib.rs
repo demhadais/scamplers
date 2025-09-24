@@ -255,6 +255,7 @@ diesel::table! {
         frozen -> Bool,
         cryopreserved -> Bool,
         additional_data -> Nullable<Jsonb>,
+        tissue -> Text,
     }
 }
 

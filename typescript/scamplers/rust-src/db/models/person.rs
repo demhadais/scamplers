@@ -146,7 +146,7 @@ pub struct CreatedUser {
 
 #[db_update]
 #[cfg_attr(feature = "app", diesel(table_name = person))]
-pub struct PersonUpdateFields {
+pub struct PersonUpdate {
     pub id: Uuid,
     #[garde(dive)]
     pub name: Option<ValidString>,
@@ -156,21 +156,12 @@ pub struct PersonUpdateFields {
     #[garde(dive)]
     pub orcid: Option<ValidString>,
     pub institution_id: Option<Uuid>,
-}
-
-#[cfg_attr(feature = "python", pyo3_stub_gen::derive::gen_stub_pyclass)]
-#[cfg_attr(
-    feature = "python",
-    pyclass(get_all, set_all, module = "scamplepy.update")
-)]
-#[base_model]
-#[derive(Default)]
-pub struct PersonUpdate {
+    #[builder(default)]
+    #[cfg_attr(feature = "app", diesel(skip_update))]
     pub grant_roles: Vec<UserRole>,
+    #[builder(default)]
+    #[cfg_attr(feature = "app", diesel(skip_update))]
     pub revoke_roles: Vec<UserRole>,
-    #[serde(flatten)]
-    #[garde(dive)]
-    pub fields: PersonUpdateFields,
 }
 
 define_ordering_enum! { PersonOrderBy { Name, Email }, default = Name }
