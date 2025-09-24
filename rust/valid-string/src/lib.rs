@@ -27,7 +27,7 @@ use serde::{Deserialize, Serialize};
 #[cfg_attr(feature = "python", pyo3(transparent))]
 #[cfg_attr(feature = "app", derive(FromSqlRow, AsExpression))]
 #[cfg_attr(feature = "app", diesel(sql_type = sql_types::Text))]
-pub struct ValidString(#[garde(length(min = 1))] String);
+pub struct ValidString(#[garde(length(min = 1), custom(Self::validate_whitespace))] String);
 
 impl Display for ValidString {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
@@ -50,6 +50,15 @@ impl ValidString {
     #[must_use]
     pub fn new() -> Self {
         Self::default()
+    }
+
+    #[allow(clippy::trivially_copy_pass_by_ref)]
+    fn validate_whitespace(s: &str, (): &()) -> garde::Result {
+        if s != s.trim() {
+            return Err(garde::Error::new("string should not be whitespace-padded"));
+        }
+
+        Ok(())
     }
 }
 
@@ -237,5 +246,19 @@ mod app {
             let Self(inner) = self;
             <String as ToSql<sql_types::Text, Pg>>::to_sql(inner, out)
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use garde::Validate;
+    use rstest::rstest;
+
+    use crate::ValidString;
+
+    #[rstest]
+    fn whitespace() {
+        let s = " foo ";
+        ValidString::from(s).validate().unwrap_err();
     }
 }
