@@ -46,7 +46,7 @@ jobs:
     runs-on: ubuntu-latest
     needs:
       - install-diesel_cli
-      - install-clippy
+      - install-linux-clippy
 
     steps:
       - name: Check out repository code
@@ -67,7 +67,7 @@ jobs:
   lint-scamplepy:
     runs-on: ubuntu-latest
     needs:
-      - install-clippy
+      - install-linux-clippy
 
     steps:
       - name: Check out repository code
