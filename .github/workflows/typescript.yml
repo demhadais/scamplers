@@ -5,7 +5,7 @@ on:
       - typescript/**
 
 jobs:
-  check-typescript:
+  lint:
     runs-on: ubuntu-latest
 
     steps:
@@ -20,9 +20,28 @@ jobs:
         working-directory: typescript/scamplers-frontend
         run: npm run lint
 
+  svelte-check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        working-directory: typescript/scamplers-frontend
+        run: npm install
+
       - name: Svelte check
         working-directory: typescript/scamplers-frontend
         run: npm run check
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        working-directory: typescript/scamplers-frontend
+        run: npm install
 
       - name: Unit test
         working-directory: typescript/scamplers-frontend
