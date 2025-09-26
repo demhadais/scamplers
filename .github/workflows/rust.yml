@@ -5,49 +5,8 @@ on:
       - rust/**
 
 jobs:
-  # Because the `scamplers-schema` build script requires the diesel CLI (meaning both lints and tests require it), install it once for use in other jobs. Note that the caching action does this automatically, but if the cache misses and we perform a fresh install here, we don't have to actually install it in other jobs
-  install-diesel_cli:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Cache cargo files
-        uses: Swatinem/rust-cache@v2
-        with:
-          workspaces: "rust -> target"
-
-      - name: Install diesel
-        run: cargo install diesel_cli --no-default-features --features postgres
-
-      - name: Upload diesel_cli
-        uses: actions/upload-artifact@v4
-        with:
-          name: diesel
-          path: ~/.cargo/bin/diesel
-
-  # Same with clippy
-  install-clippy:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Cache cargo files
-        uses: Swatinem/rust-cache@v2
-        with:
-          workspaces: "rust -> target"
-
-      - name: Install clippy
-        run: |
-          rustup component add --toolchain stable-x86_64-unknown-linux-gnu clippy
-
-      - name: Upload ~/.cargo/bin
-        uses: actions/upload-artifact@v4
-        with:
-          name: clippy
-          path: ~/.cargo/bin/*
-
   lint-app:
     runs-on: ubuntu-latest
-    needs:
-      - install-diesel_cli
-      - install-clippy
-
     steps:
       - name: Check out repository code
         uses: actions/checkout@v4
@@ -57,27 +16,9 @@ jobs:
         with:
           workspaces: "rust -> target"
 
-      - name: Download diesel_cli
-        uses: actions/download-artifact@v5
-        with:
-          name: diesel
-          path: ~/.cargo/bin
+      - name: Install diesel
+        run: cargo install diesel_cli --no-default-features --features postgres
 
-      - name: Download clippy
-        uses: actions/download-artifact@v5
-        with:
-          name: clippy
-          path: ~/.cargo/bin
-
-      # - name: Extract diesel_cli and clippy
-      #   run: |
-      #     cd ~/.cargo/bin
-      #     mkdir tmp
-      #     mv diesel/diesel clippy/* tmp
-      #     rmdir diesel clippy
-      #     mv tmp/* .
-
-      # I'm not entirely sure why this step is necessary, considering we downloaded clippy in the previous step. My guess is that cargo needs to be told where things are, even if they're already downloaded
       - name: Install clippy
         run: |
           rustup component add --toolchain stable-x86_64-unknown-linux-gnu clippy
@@ -88,9 +29,6 @@ jobs:
 
   lint-scamplepy:
     runs-on: ubuntu-latest
-    needs:
-      - install-clippy
-
     steps:
       - name: Check out repository code
         uses: actions/checkout@v4
@@ -100,13 +38,6 @@ jobs:
         with:
           workspaces: "rust -> target"
 
-      - name: Download clippy
-        uses: actions/download-artifact@v5
-        with:
-          name: clippy
-          path: ~/.cargo/bin
-
-      # Same rationale for this as the equivalent step in `lint-app`
       - name: Install clippy
         run: |
           rustup component add --toolchain stable-x86_64-unknown-linux-gnu clippy
@@ -126,13 +57,15 @@ jobs:
         with:
           workspaces: "rust -> target"
 
-      - name: Lint Wasm
-        working-directory: rust
+      - name: Install Wasm target and clippy
         run: |
           rustup target add wasm32-unknown-unknown
           rustup toolchain install stable-x86_64-unknown-linux-gnu
           rustup component add --toolchain stable-x86_64-unknown-linux-gnu clippy
-          cargo clippy --workspace --exclude scamplepy --exclude scamplers-schema --target wasm32-unknown-unknown
+
+      - name: Lint Wasm
+        working-directory: rust
+        run: cargo clippy --workspace --exclude scamplepy --exclude scamplers-schema --target wasm32-unknown-unknown
 
   format:
     runs-on: ubuntu-latest
@@ -166,11 +99,8 @@ jobs:
         with:
           workspaces: "rust -> target"
 
-      - name: Download diesel_cli
-        uses: actions/download-artifact@v5
-        with:
-          name: diesel
-          path: ~/.cargo/bin
+      - name: Install diesel
+        run: cargo install diesel_cli --no-default-features --features postgres
 
       - name: Test
         working-directory: rust
