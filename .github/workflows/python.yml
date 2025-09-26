@@ -13,6 +13,12 @@ jobs:
       - name: Check out repository code
         uses: actions/checkout@v4
 
+      # We benefit from caching because scamplepy is written in rust and probably already compiled in a different workflow
+      - name: Cache cargo files
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: "rust -> target"
+
       - name: Install the latest version of uv
         uses: astral-sh/setup-uv@v6
 
