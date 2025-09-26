@@ -36,11 +36,11 @@ jobs:
         run: |
           rustup component add --toolchain stable-x86_64-unknown-linux-gnu clippy
 
-      - name: Upload clippy
+      - name: Upload ~/.cargo/bin
         uses: actions/upload-artifact@v4
         with:
           name: clippy
-          path: ~/.cargo/bin/clippy-driver
+          path: ~/.cargo/bin/*
 
   lint-app:
     runs-on: ubuntu-latest
@@ -84,6 +84,7 @@ jobs:
         uses: actions/download-artifact@v5
         with:
           name: clippy
+          path: ~/.cargo/bin
 
       - name: Lint scamplepy
         working-directory: rust
