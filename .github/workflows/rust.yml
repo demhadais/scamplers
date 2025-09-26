@@ -68,7 +68,7 @@ jobs:
           rustup component add --toolchain stable-x86_64-unknown-linux-gnu clippy
 
       - name: Change permissions
-        run: chmod +rwx ~.cargo/
+        run: chmod +rwx ~/.cargo/
 
       - name: Lint app
         working-directory: rust
