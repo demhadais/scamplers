@@ -67,11 +67,8 @@ jobs:
         run: |
           rustup component add --toolchain stable-x86_64-unknown-linux-gnu clippy
 
-      # Not sure why this is necessary either. `scamplers-schema/build.rs` throws a "Permission Denied" error without this
       - name: Change permissions
-        run: |
-          chmod +rwx ~/.cargo/bin
-          chmod +rwx ~/.cargo/bin/*
+        run: chmod +rwx ~.cargo/
 
       - name: Lint app
         working-directory: rust
