@@ -1,4 +1,5 @@
 #![allow(uncommon_codepoints)]
+// A comment to trigger CI
 
 #[cfg(feature = "app")]
 mod auth;
