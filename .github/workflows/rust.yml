@@ -62,13 +62,15 @@ jobs:
         with:
           path: ~/.cargo/bin
 
+      - name: Debug
+        run: |
+          ls ~/.cargo/bin/**
+          exit 1
+
       # I'm not entirely sure why this step is necessary, considering we downloaded clippy in the previous step. My guess is that cargo needs to be told where things are, even if they're already downloaded
       - name: Install clippy
         run: |
           rustup component add --toolchain stable-x86_64-unknown-linux-gnu clippy
-
-      - name: Change permissions
-        run: chmod +rwx ~/.cargo/
 
       - name: Lint app
         working-directory: rust
