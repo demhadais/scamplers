@@ -62,14 +62,13 @@ jobs:
         with:
           path: ~/.cargo/bin
 
-      # I'm not sure why this is necessary only in this job
-      - name: Change permissions
-        run: chmod u+x ~/.cargo/bin*
-
-      # I'm not entirely sure why this is necessary, considering we downloaded it in the previous step. My guess is that cargo doesn't know it's there until you tell it via `rustup component add`. In any case, this step is quick which means it's using the artifact downloaded in the last step
+      # I'm not entirely sure why these two steps are necessary, considering we downloaded these dependencies in the previous step. My guess is something like "cargo doesn't know what's there until you tell it"
       - name: Install clippy
         run: |
           rustup component add --toolchain stable-x86_64-unknown-linux-gnu clippy
+
+      - name: Install diesel
+        run: cargo install diesel_cli --no-default-features --features postgres
 
       - name: Lint app
         working-directory: rust
@@ -119,6 +118,8 @@ jobs:
         working-directory: rust
         run: |
           rustup target add wasm32-unknown-unknown
+          rustup toolchain install stable-x86_64-unknown-linux-gnu
+          rustup component add --toolchain stable-x86_64-unknown-linux-gnu clippy
           cargo clippy --workspace --exclude scamplepy --exclude scamplers-schema --target wasm32-unknown-unknown
 
   format:
