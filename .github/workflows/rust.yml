@@ -103,7 +103,7 @@ jobs:
       - name: Lint Wasm
         working-directory: rust
         run: |
-          rustup toolchain install wasm32-unknown-unknown
+          rustup toolchain install --target wasm32-unknown-unknown
           rustup component add --toolchain wasm32-unknown-unknown clippy
           cargo clippy --workspace --exclude scamplepy --exclude scamplers-schema --target wasm32-unknown-unknown
 
