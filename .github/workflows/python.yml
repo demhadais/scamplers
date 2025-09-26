@@ -48,6 +48,9 @@ jobs:
   lint-and-format:
     runs-on: ubuntu-latest
     steps:
+      - name: Check out repository code
+        uses: actions/checkout@v4
+
       - name: Lint and format
         uses: astral-sh/ruff-action@v3
         with:
