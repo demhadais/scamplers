@@ -57,15 +57,25 @@ jobs:
         with:
           workspaces: "rust -> target"
 
-      - name: Download diesel_cli and clippy
+      - name: Download diesel_cli
         uses: actions/download-artifact@v5
         with:
+          name: diesel
           path: ~/.cargo/bin
 
-      - name: Debug
-        run: |
-          ls ~/.cargo/bin/**
-          exit 1
+      - name: Download clippy
+        uses: actions/download-artifact@v5
+        with:
+          name: clippy
+          path: ~/.cargo/bin
+
+      # - name: Extract diesel_cli and clippy
+      #   run: |
+      #     cd ~/.cargo/bin
+      #     mkdir tmp
+      #     mv diesel/diesel clippy/* tmp
+      #     rmdir diesel clippy
+      #     mv tmp/* .
 
       # I'm not entirely sure why this step is necessary, considering we downloaded clippy in the previous step. My guess is that cargo needs to be told where things are, even if they're already downloaded
       - name: Install clippy
