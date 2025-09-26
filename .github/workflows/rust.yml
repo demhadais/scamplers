@@ -62,6 +62,10 @@ jobs:
         with:
           path: ~/.cargo/bin
 
+      # I'm not sure why this is necessary only in this job
+      - name: Change permissions
+        run: chmod u+x ~/.cargo/bin*
+
       # I'm not entirely sure why this is necessary, considering we downloaded it in the previous step. My guess is that cargo doesn't know it's there until you tell it via `rustup component add`. In any case, this step is quick which means it's using the artifact downloaded in the last step
       - name: Install clippy
         run: |
@@ -114,8 +118,7 @@ jobs:
       - name: Lint Wasm
         working-directory: rust
         run: |
-          rustup toolchain install --target wasm32-unknown-unknown
-          rustup component add --target wasm32-unknown-unknown clippy
+          rustup target add wasm32-unknown-unknown
           cargo clippy --workspace --exclude scamplepy --exclude scamplers-schema --target wasm32-unknown-unknown
 
   format:
