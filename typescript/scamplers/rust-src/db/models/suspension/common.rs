@@ -31,7 +31,7 @@ pub enum SuspensionMeasurementFields {
         measured_at: OffsetDateTime,
         #[garde(dive)]
         instrument_name: Option<ValidString>,
-        counting_method: CellCountingMethod,
+        counting_method: Option<CellCountingMethod>,
         #[garde(range(min = 0.0))]
         value: f32,
         unit: (BiologicalMaterial, VolumeUnit),
