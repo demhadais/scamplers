@@ -62,13 +62,16 @@ jobs:
         with:
           path: ~/.cargo/bin
 
-      # I'm not entirely sure why these two steps are necessary, considering we downloaded these dependencies in the previous step. My guess is something like "cargo doesn't know what's there until you tell it"
+      # I'm not entirely sure why this step is necessary, considering we downloaded clippy in the previous step. My guess is that cargo needs to be told where things are, even if they're already downloaded
       - name: Install clippy
         run: |
           rustup component add --toolchain stable-x86_64-unknown-linux-gnu clippy
 
-      - name: Install diesel
-        run: cargo install diesel_cli --no-default-features --features postgres
+      # Not sure why this is necessary either. `scamplers-schema/build.rs` throws a "Permission Denied" error without this
+      - name: Change permissions
+        run: |
+          chmod u+rx ~/.cargo/bin
+          chmod u+rx ~/.cargo/bin/*
 
       - name: Lint app
         working-directory: rust
