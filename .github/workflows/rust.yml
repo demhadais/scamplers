@@ -62,6 +62,11 @@ jobs:
         with:
           path: ~/.cargo/bin
 
+      # I'm not entirely sure why this is necessary, considering we downloaded it in the previous step. My guess is that cargo doesn't know it's there until you tell it via `rustup component add`. In any case, this step is quick which means it's using the artifact downloaded in the last step
+      - name: Install clippy
+        run: |
+          rustup component add --toolchain stable-x86_64-unknown-linux-gnu clippy
+
       - name: Lint app
         working-directory: rust
         run: cargo clippy --workspace --exclude scamplers-schema --exclude scamplepy --features app
@@ -86,6 +91,11 @@ jobs:
           name: clippy
           path: ~/.cargo/bin
 
+      # Same rationale for this as the equivalent step in `lint-app`
+      - name: Install clippy
+        run: |
+          rustup component add --toolchain stable-x86_64-unknown-linux-gnu clippy
+
       - name: Lint scamplepy
         working-directory: rust
         run: cargo clippy --workspace --exclude scamplers-schema --features python
@@ -105,7 +115,7 @@ jobs:
         working-directory: rust
         run: |
           rustup toolchain install --target wasm32-unknown-unknown
-          rustup component add --toolchain wasm32-unknown-unknown clippy
+          rustup component add --target wasm32-unknown-unknown clippy
           cargo clippy --workspace --exclude scamplepy --exclude scamplers-schema --target wasm32-unknown-unknown
 
   format:
