@@ -5,8 +5,49 @@ on:
       - rust/**
 
 jobs:
-  lint:
+  # Because the `scamplers-schema` build script requires the diesel CLI (meaning both lints and tests require it), install it once for use in other jobs. Note that the caching action does this automatically, but if the cache misses and we perform a fresh install here, we don't have to actually install it in other jobs
+  install-diesel_cli:
     runs-on: ubuntu-latest
+    steps:
+      - name: Cache cargo files
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: "rust -> target"
+
+      - name: Install diesel
+        run: cargo install diesel_cli --no-default-features --features postgres
+
+      - name: Upload diesel_cli
+        uses: actions/upload-artifact@v4
+        with:
+          name: diesel
+          path: ~/.cargo/bin/diesel
+
+  # Same with clippy
+  install-linux-clippy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Cache cargo files
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: "rust -> target"
+
+      - name: Install clippy
+        run: |
+          rustup component add --toolchain stable-x86_64-unknown-linux-gnu clippy
+
+      - name: Upload clippy
+        uses: actions/upload-artifact@v4
+        with:
+          name: cargo
+          path: ~/.cargo/bin/cargo
+
+  lint-app:
+    runs-on: ubuntu-latest
+    needs:
+      - install-diesel_cli
+      - install-clippy
+
     steps:
       - name: Check out repository code
         uses: actions/checkout@v4
@@ -16,15 +57,42 @@ jobs:
         with:
           workspaces: "rust -> target"
 
-      - name: Install clippy
-        run: rustup component add --toolchain stable-x86_64-unknown-linux-gnu clippy
+      - name: Download diesel_cli and clippy
+        uses: actions/download-artifact@v5
 
       - name: Lint app
         working-directory: rust
         run: cargo clippy --workspace --exclude scamplers-schema --exclude scamplepy --features app
 
+  lint-scamplepy:
+    runs-on: ubuntu-latest
+    needs:
+      - install-clippy
+
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v4
+
+      - name: Cache cargo files
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: "rust -> target"
+
+      - name: Download clippy
+        uses: actions/download-artifact@v5
+        with:
+          name: cargo
+
       - name: Lint scamplepy
         run: cargo clippy --workspace --exclude scamplers-schema --features python
+
+  lint-wasm:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Cache cargo files
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: "rust -> target"
 
       - name: Lint Wasm
         run: |
@@ -43,11 +111,11 @@ jobs:
           workspaces: "rust -> target"
 
       - name: Install nightly toolchain
-        run: rustup toolchain install nightly && rustup component add --toolchain nightly rustfmt
+        run: rustup component add --toolchain nightly-2025-09-26 rustfmt
 
       - name: Format
         working-directory: rust
-        run: cargo +nightly fmt -- --check
+        run: cargo +nightly-2025-09-26 fmt -- --check
 
   test:
     runs-on: ubuntu-latest
@@ -63,8 +131,10 @@ jobs:
         with:
           workspaces: "rust -> target"
 
-      - name: Install diesel
-        run: cargo install diesel_cli --no-default-features --features postgres
+      - name: Download diesel_cli
+        uses: actions/download-artifact@v5
+        with:
+          name: install-diesel
 
       - name: Test
         working-directory: rust
@@ -84,6 +154,11 @@ jobs:
     steps:
       - name: Check out repository code
         uses: actions/checkout@v4
+
+      - name: Cache cargo files
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: "rust -> target"
 
       - name: Regenerate Python typestubs and compare to committed typestubs
         working-directory: rust/scamplepy
