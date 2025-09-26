@@ -59,6 +59,8 @@ jobs:
 
       - name: Download diesel_cli and clippy
         uses: actions/download-artifact@v5
+        with:
+          path: ~/.cargo/bin
 
       - name: Lint app
         working-directory: rust
@@ -84,6 +86,7 @@ jobs:
           name: cargo
 
       - name: Lint scamplepy
+        working-directory: rust
         run: cargo clippy --workspace --exclude scamplers-schema --features python
 
   lint-wasm:
@@ -95,7 +98,9 @@ jobs:
           workspaces: "rust -> target"
 
       - name: Lint Wasm
+        working-directory: rust
         run: |
+          rustup toolchain install wasm32-unknown-unknown
           rustup component add --toolchain wasm32-unknown-unknown clippy
           cargo clippy --workspace --exclude scamplepy --exclude scamplers-schema --target wasm32-unknown-unknown
 
@@ -134,7 +139,8 @@ jobs:
       - name: Download diesel_cli
         uses: actions/download-artifact@v5
         with:
-          name: install-diesel
+          name: diesel
+          path: ~/.cargo/bin
 
       - name: Test
         working-directory: rust
