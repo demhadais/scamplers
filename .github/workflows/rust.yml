@@ -57,15 +57,14 @@ jobs:
         with:
           workspaces: "rust -> target"
 
-      - name: Install Wasm target and clippy
+      # For some reason, the installation of the target, toolchain, and clippy need to happen in the same step as the actual linting :)
+      - name: Lint Wasm
+        working-directory: rust
         run: |
           rustup target add wasm32-unknown-unknown
           rustup toolchain install stable-x86_64-unknown-linux-gnu
           rustup component add --toolchain stable-x86_64-unknown-linux-gnu clippy
-
-      - name: Lint Wasm
-        working-directory: rust
-        run: cargo clippy --workspace --exclude scamplepy --exclude scamplers-schema --target wasm32-unknown-unknown
+          cargo clippy --workspace --exclude scamplepy --exclude scamplers-schema --target wasm32-unknown-unknown
 
   format:
     runs-on: ubuntu-latest
