@@ -69,7 +69,7 @@ jobs:
   lint-scamplepy:
     runs-on: ubuntu-latest
     needs:
-      - install-linux-clippy
+      - install-clippy
 
     steps:
       - name: Check out repository code
