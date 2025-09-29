@@ -130,7 +130,15 @@ def _new_committee_approval() -> NewCommitteeApproval:
 
 @pytest.fixture
 def new_fixed_block(person_id: UUID = ID, lab_id: UUID = ID) -> NewFixedBlock:
-    return NewFixedBlock(
+    additional_data = {
+        "boolean": True,
+        "list": [1, 2, 3],
+        "string": "foo",
+        "float": 1.3,
+        "int": 10,
+        "dict": {"foo": "bar"},
+    }
+    block = NewFixedBlock(
         readable_id="fixedblock",
         name="f",
         submitted_by=person_id,
@@ -144,8 +152,15 @@ def new_fixed_block(person_id: UUID = ID, lab_id: UUID = ID) -> NewFixedBlock:
         committee_approvals=[_new_committee_approval()],
         embedded_in=FixedBlockEmbeddingMatrix.Paraffin,
         fixative=BlockFixative.FormaldehydeDerivative,
-        tissue=TISSUE
+        tissue=TISSUE,
+        additional_data=additional_data,
     )
+
+    assert block.inner.additional_data == additional_data
+    if reloaded_additional_data := block.inner.additional_data:
+        assert type(reloaded_additional_data["boolean"]) is bool
+
+    return block
 
 
 @pytest.fixture
@@ -158,7 +173,7 @@ def new_frozen_block(person_id: UUID = ID, lab_id: UUID = ID) -> NewFrozenBlock:
         received_at=TIME,
         species=[Species.MusMusculus],
         embedded_in=FrozenBlockEmbeddingMatrix.CarboxymethylCellulose,
-        tissue=TISSUE
+        tissue=TISSUE,
     )
 
 
@@ -174,7 +189,7 @@ def new_cryopreserved_tissue(
         lab_id=lab_id,
         received_at=TIME,
         species=[Species.RattusNorvegicus],
-        tissue=TISSUE
+        tissue=TISSUE,
     )
     tissue.cryopreserved = True
 
@@ -196,7 +211,7 @@ def new_fixed_tissue(person_id: UUID = ID, lab_id: UUID = ID) -> NewFixedTissue:
         received_at=TIME,
         species=[Species.HomoSapiens],
         fixative=TissueFixative.DithiobisSuccinimidylpropionate,
-        tissue=TISSUE
+        tissue=TISSUE,
     )
 
 
@@ -209,7 +224,7 @@ def new_frozen_tissue(person_id: UUID = ID, lab_id: UUID = ID) -> NewFrozenTissu
         lab_id=lab_id,
         received_at=TIME,
         species=[Species.CallithrixJacchus],
-        tissue=TISSUE
+        tissue=TISSUE,
     )
 
 
@@ -225,7 +240,7 @@ def new_fixed_suspension_specimen(
         received_at=TIME,
         species=[Species.DrosophilaMelanogaster],
         fixative=SuspensionFixative.FormaldehydeDerivative,
-        tissue=TISSUE
+        tissue=TISSUE,
     )
 
 

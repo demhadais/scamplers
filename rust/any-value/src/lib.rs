@@ -147,7 +147,7 @@ mod python {
     impl FromPyObject<'_> for AnyValue {
         fn extract_bound(ob: &Bound<'_, PyAny>) -> PyResult<Self> {
             if ob.is_instance_of::<PyList>() {
-                let py_list = ob.downcast::<PyList>()?;
+                let py_list = ob.downcast_exact::<PyList>()?;
                 let rust_list: Vec<Self> = py_list
                     .iter()
                     .map(|item| Self::extract_bound(&item))
@@ -159,7 +159,7 @@ mod python {
             }
 
             if ob.is_instance_of::<PyDict>() {
-                let py_dict = ob.downcast::<PyDict>()?;
+                let py_dict = ob.downcast_exact::<PyDict>()?;
                 let mut rust_map = serde_json::Map::with_capacity(py_dict.len());
 
                 for (k, v) in py_dict {
@@ -168,6 +168,14 @@ mod python {
                 }
 
                 return Ok(Self(serde_json::Value::Object(rust_map)));
+            }
+
+            // Check if bool first because python considers a bool to be a subtype of int,
+            // which is stupid
+            if ob.is_instance_of::<PyBool>() {
+                let rust_bool: bool = ob.extract()?;
+
+                return Ok(Self(serde_json::Value::Bool(rust_bool)));
             }
 
             if ob.is_instance_of::<PyInt>() {
