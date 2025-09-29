@@ -149,7 +149,7 @@ pub struct SuspensionSummary {
 }
 
 #[db_selection]
-#[cfg_attr(feature = "app", diesel(table_name = suspension, base_query = suspension::table.inner_join(specimen::table).inner_join(multiplexing_tag::table)))]
+#[cfg_attr(feature = "app", diesel(table_name = suspension, base_query = suspension::table.inner_join(specimen::table).left_join(multiplexing_tag::table)))]
 pub struct SuspensionSummaryWithParents {
     #[cfg_attr(feature = "app", diesel(column_name = id))]
     pub id_: Uuid,
