@@ -157,7 +157,8 @@ def new_fixed_block(person_id: UUID = ID, lab_id: UUID = ID) -> NewFixedBlock:
     )
 
     assert block.inner.additional_data == additional_data
-    assert type(block.inner.additional_data["boolean"]) is bool
+    if reloaded_additional_data := block.inner.additional_data:
+        assert type(reloaded_additional_data["boolean"]) is bool
 
     return block
 
