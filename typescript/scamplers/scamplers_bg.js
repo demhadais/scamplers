@@ -247,12 +247,6 @@ function makeMutClosure(arg0, arg1, dtor, f) {
     return real;
 }
 
-function _assertClass(instance, klass) {
-    if (!(instance instanceof klass)) {
-        throw new Error(`expected instance of ${klass.name}`);
-    }
-}
-
 function passArray8ToWasm0(arg, malloc) {
     const ptr = malloc(arg.length * 1, 1) >>> 0;
     getUint8ArrayMemory0().set(arg, ptr / 1);
@@ -269,16 +263,22 @@ function passArrayJsValueToWasm0(array, malloc) {
     WASM_VECTOR_LEN = array.length;
     return ptr;
 }
-function __wbg_adapter_14(arg0, arg1, arg2) {
-    wasm.closure454_externref_shim(arg0, arg1, arg2);
-}
 
-function __wbg_adapter_27(arg0, arg1) {
+function _assertClass(instance, klass) {
+    if (!(instance instanceof klass)) {
+        throw new Error(`expected instance of ${klass.name}`);
+    }
+}
+function __wbg_adapter_14(arg0, arg1) {
     wasm.wasm_bindgen__convert__closures_____invoke__hac4eafd1426a249e(arg0, arg1);
 }
 
+function __wbg_adapter_17(arg0, arg1, arg2) {
+    wasm.closure457_externref_shim(arg0, arg1, arg2);
+}
+
 function __wbg_adapter_1108(arg0, arg1, arg2, arg3) {
-    wasm.closure482_externref_shim(arg0, arg1, arg2, arg3);
+    wasm.closure485_externref_shim(arg0, arg1, arg2, arg3);
 }
 
 /**
@@ -4811,7 +4811,7 @@ export class LibraryQuery {
     set ids(arg0) {
         const ptr0 = passArrayJsValueToWasm0(arg0, wasm.__wbindgen_malloc);
         const len0 = WASM_VECTOR_LEN;
-        wasm.__wbg_set_libraryquery_ids(this.__wbg_ptr, ptr0, len0);
+        wasm.__wbg_set_institutionquery_ids(this.__wbg_ptr, ptr0, len0);
     }
     /**
      * @returns {any[]}
@@ -4834,7 +4834,7 @@ export class LibraryQuery {
      * @returns {Pagination}
      */
     get pagination() {
-        const ret = wasm.__wbg_get_libraryquery_pagination(this.__wbg_ptr);
+        const ret = wasm.__wbg_get_institutionquery_pagination(this.__wbg_ptr);
         return Pagination.__wrap(ret);
     }
     /**
@@ -4843,7 +4843,7 @@ export class LibraryQuery {
     set pagination(arg0) {
         _assertClass(arg0, Pagination);
         var ptr0 = arg0.__destroy_into_raw();
-        wasm.__wbg_set_libraryquery_pagination(this.__wbg_ptr, ptr0);
+        wasm.__wbg_set_institutionquery_pagination(this.__wbg_ptr, ptr0);
     }
     /**
      * @returns {OrderBy[]}
@@ -5818,7 +5818,7 @@ export class OrderBy {
     set field(arg0) {
         const ptr0 = passStringToWasm0(arg0, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
         const len0 = WASM_VECTOR_LEN;
-        wasm.__wbg_set_multiplexingtag_tag_id(this.__wbg_ptr, ptr0, len0);
+        wasm.__wbg_set_orderby_field(this.__wbg_ptr, ptr0, len0);
     }
     /**
      * @returns {boolean}
@@ -9149,7 +9149,7 @@ export class SuspensionPoolQuery {
     set ids(arg0) {
         const ptr0 = passArrayJsValueToWasm0(arg0, wasm.__wbindgen_malloc);
         const len0 = WASM_VECTOR_LEN;
-        wasm.__wbg_set_sequencingrunquery_ids(this.__wbg_ptr, ptr0, len0);
+        wasm.__wbg_set_suspensionpoolquery_ids(this.__wbg_ptr, ptr0, len0);
     }
     /**
      * @returns {OrderBy[]}
@@ -9172,7 +9172,7 @@ export class SuspensionPoolQuery {
      * @returns {Pagination}
      */
     get pagination() {
-        const ret = wasm.__wbg_get_sequencingrunquery_pagination(this.__wbg_ptr);
+        const ret = wasm.__wbg_get_suspensionpoolquery_pagination(this.__wbg_ptr);
         return Pagination.__wrap(ret);
     }
     /**
@@ -9181,7 +9181,7 @@ export class SuspensionPoolQuery {
     set pagination(arg0) {
         _assertClass(arg0, Pagination);
         var ptr0 = arg0.__destroy_into_raw();
-        wasm.__wbg_set_sequencingrunquery_pagination(this.__wbg_ptr, ptr0);
+        wasm.__wbg_set_suspensionpoolquery_pagination(this.__wbg_ptr, ptr0);
     }
     /**
      * @returns {Uint8Array}
@@ -9355,7 +9355,7 @@ export class SuspensionPoolSummary {
      * @param {any | null} [arg0]
      */
     set additional_data(arg0) {
-        wasm.__wbg_set_sequencingrunsummary_additional_data(this.__wbg_ptr, isLikeNone(arg0) ? 0 : addToExternrefTable0(arg0));
+        wasm.__wbg_set_suspensionpoolsummary_additional_data(this.__wbg_ptr, isLikeNone(arg0) ? 0 : addToExternrefTable0(arg0));
     }
     /**
      * @returns {Uint8Array}
@@ -9497,7 +9497,7 @@ export class SuspensionQuery {
      * @returns {Pagination}
      */
     get pagination() {
-        const ret = wasm.__wbg_get_institutionquery_pagination(this.__wbg_ptr);
+        const ret = wasm.__wbg_get_sequencingrunquery_pagination(this.__wbg_ptr);
         return Pagination.__wrap(ret);
     }
     /**
@@ -9506,7 +9506,7 @@ export class SuspensionQuery {
     set pagination(arg0) {
         _assertClass(arg0, Pagination);
         var ptr0 = arg0.__destroy_into_raw();
-        wasm.__wbg_set_institutionquery_pagination(this.__wbg_ptr, ptr0);
+        wasm.__wbg_set_sequencingrunquery_pagination(this.__wbg_ptr, ptr0);
     }
     /**
      * @returns {Uint8Array}
@@ -10892,9 +10892,9 @@ export function __wbindgen_cast_45c41c2f89ce6d9f(arg0, arg1) {
     return ret;
 };
 
-export function __wbindgen_cast_5d0fc9a6baaadfc1(arg0, arg1) {
-    // Cast intrinsic for `Closure(Closure { dtor_idx: 453, function: Function { arguments: [Externref], shim_idx: 454, ret: Unit, inner_ret: Some(Unit) }, mutable: true }) -> Externref`.
-    const ret = makeMutClosure(arg0, arg1, 453, __wbg_adapter_14);
+export function __wbindgen_cast_6657c79b204f42d0(arg0, arg1) {
+    // Cast intrinsic for `Closure(Closure { dtor_idx: 431, function: Function { arguments: [], shim_idx: 432, ret: Unit, inner_ret: Some(Unit) }, mutable: true }) -> Externref`.
+    const ret = makeMutClosure(arg0, arg1, 431, __wbg_adapter_14);
     return ret;
 };
 
@@ -10921,12 +10921,6 @@ export function __wbindgen_cast_b13b63fe807b76b9(arg0, arg1) {
     return ret;
 };
 
-export function __wbindgen_cast_b3455cb938a8ae7a(arg0, arg1) {
-    // Cast intrinsic for `Closure(Closure { dtor_idx: 428, function: Function { arguments: [], shim_idx: 429, ret: Unit, inner_ret: Some(Unit) }, mutable: true }) -> Externref`.
-    const ret = makeMutClosure(arg0, arg1, 428, __wbg_adapter_27);
-    return ret;
-};
-
 export function __wbindgen_cast_c15a5e554ce1a329(arg0, arg1) {
     var v0 = getArrayJsValueFromWasm0(arg0, arg1).slice();
     wasm.__wbindgen_free(arg0, arg1 * 4, 4);
@@ -10938,6 +10932,12 @@ export function __wbindgen_cast_c15a5e554ce1a329(arg0, arg1) {
 export function __wbindgen_cast_d6cd19b81560fd6e(arg0) {
     // Cast intrinsic for `F64 -> Externref`.
     const ret = arg0;
+    return ret;
+};
+
+export function __wbindgen_cast_d9a2dd683ea9c96a(arg0, arg1) {
+    // Cast intrinsic for `Closure(Closure { dtor_idx: 456, function: Function { arguments: [Externref], shim_idx: 457, ret: Unit, inner_ret: Some(Unit) }, mutable: true }) -> Externref`.
+    const ret = makeMutClosure(arg0, arg1, 456, __wbg_adapter_17);
     return ret;
 };
 

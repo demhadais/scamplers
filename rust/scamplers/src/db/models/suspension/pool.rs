@@ -1,4 +1,4 @@
-use std::{collections::HashSet, hash::RandomState};
+use std::collections::HashSet;
 
 use any_value::AnyValue;
 #[cfg(feature = "app")]
@@ -88,7 +88,7 @@ pub struct NewSuspensionPool {
     #[garde(
         dive,
         length(min = 1),
-        custom(validate_suspension_biological_materials)
+        custom(|suspensions, (): &()| validate_suspension_biological_materials(suspensions, &self.measurements))
     )]
     #[cfg_attr(feature = "app", diesel(skip_insertion))]
     pub suspensions: Vec<NewSuspension>,
@@ -104,14 +104,43 @@ pub struct NewSuspensionPool {
 
 fn validate_suspension_biological_materials(
     suspensions: &[NewSuspension],
-    _: &(),
+    measurements: &[NewSuspensionPoolMeasurement],
 ) -> garde::Result {
-    let biological_materials: HashSet<_, RandomState> =
-        HashSet::from_iter(suspensions.iter().map(|s| s.biological_material));
+    let biological_materials: HashSet<_, _> =
+        suspensions.iter().map(|s| s.biological_material).collect();
 
     if biological_materials.len() != 1 {
         return Err(garde::Error::new(
             "suspensions pooled together must have the same biological material",
+        ));
+    }
+
+    let mut measurement_biological_materials = HashSet::with_capacity(measurements.len());
+
+    for NewSuspensionPoolMeasurement {
+        data: SuspensionPoolMeasurementData { fields, .. },
+        ..
+    } in measurements
+    {
+        match fields {
+            SuspensionMeasurementFields::Concentration {
+                unit: (biological_material, ..),
+                ..
+            }
+            | SuspensionMeasurementFields::MeanDiameter {
+                unit: (biological_material, ..),
+                ..
+            } => {
+                measurement_biological_materials.insert(*biological_material);
+            }
+            _ => {}
+        }
+    }
+
+    if measurement_biological_materials != biological_materials {
+        return Err(garde::Error::new(
+            "all suspension pool measurements must have the same biological material as the \
+             constituent suspensions",
         ));
     }
 
