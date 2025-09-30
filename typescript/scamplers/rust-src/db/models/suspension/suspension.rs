@@ -1,3 +1,5 @@
+use std::collections::HashSet;
+
 use any_value::AnyValue;
 #[cfg(feature = "app")]
 use diesel::{Associations, prelude::*};
@@ -86,7 +88,7 @@ pub struct NewSuspension {
     pub target_cell_recovery: f32,
     #[cfg_attr(feature = "app", diesel(skip_insertion))]
     pub preparer_ids: Vec<Uuid>,
-    #[garde(dive)]
+    #[garde(dive, custom(|measurements, (): &()| validate_suspension_measurement_biological_materials(measurements, self.biological_material)))]
     #[serde(default)]
     #[cfg_attr(feature = "app", diesel(skip_insertion))]
     pub measurements: Vec<NewSuspensionMeasurement>,
@@ -96,6 +98,42 @@ pub struct NewSuspension {
     #[garde(range(min = 0.0))]
     pub lysis_duration_minutes: Option<f32>,
     pub additional_data: Option<AnyValue>,
+}
+
+fn validate_suspension_measurement_biological_materials(
+    measurements: &[NewSuspensionMeasurement],
+    self_biological_material: BiologicalMaterial,
+) -> garde::Result {
+    let mut measurement_biological_materials = HashSet::with_capacity(measurements.len());
+
+    for NewSuspensionMeasurement {
+        data: SuspensionMeasurementData { fields, .. },
+        ..
+    } in measurements
+    {
+        match fields {
+            SuspensionMeasurementFields::Concentration {
+                unit: (biological_material, ..),
+                ..
+            }
+            | SuspensionMeasurementFields::MeanDiameter {
+                unit: (biological_material, ..),
+                ..
+            } => {
+                measurement_biological_materials.insert(*biological_material);
+            }
+            _ => {}
+        }
+    }
+
+    if measurement_biological_materials != HashSet::from_iter([self_biological_material]) {
+        return Err(garde::Error::new(
+            "all suspension measurements must have the same biological material as the suspension \
+             itself",
+        ));
+    }
+
+    Ok(())
 }
 
 #[cfg(feature = "python")]
