@@ -1,3 +1,5 @@
+use std::{collections::HashSet, hash::RandomState};
+
 use any_value::AnyValue;
 #[cfg(feature = "app")]
 use diesel::prelude::*;
@@ -83,9 +85,14 @@ pub struct NewSuspensionPool {
     #[garde(dive)]
     pub name: ValidString,
     pub pooled_at: OffsetDateTime,
-    #[garde(dive)]
+    #[garde(
+        dive,
+        length(min = 1),
+        custom(validate_suspension_biological_materials)
+    )]
     #[cfg_attr(feature = "app", diesel(skip_insertion))]
     pub suspensions: Vec<NewSuspension>,
+    #[garde(length(min = 1))]
     #[cfg_attr(feature = "app", diesel(skip_insertion))]
     pub preparer_ids: Vec<Uuid>,
     #[garde(dive)]
@@ -93,6 +100,22 @@ pub struct NewSuspensionPool {
     #[cfg_attr(feature = "app", diesel(skip_insertion))]
     pub measurements: Vec<NewSuspensionPoolMeasurement>,
     pub additional_data: Option<AnyValue>,
+}
+
+fn validate_suspension_biological_materials(
+    suspensions: &[NewSuspension],
+    _: &(),
+) -> garde::Result {
+    let biological_materials: HashSet<_, RandomState> =
+        HashSet::from_iter(suspensions.iter().map(|s| s.biological_material));
+
+    if biological_materials.len() != 1 {
+        return Err(garde::Error::new(
+            "suspensions pooled together must have the same biological material",
+        ));
+    }
+
+    Ok(())
 }
 
 #[cfg(feature = "python")]
