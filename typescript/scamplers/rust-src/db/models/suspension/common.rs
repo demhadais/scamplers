@@ -13,6 +13,7 @@ pub enum CellCountingMethod {
 }
 
 #[db_simple_enum]
+#[derive(Hash, Eq)]
 #[cfg_attr(feature = "python", pyo3(module = "scamplepy.common"))]
 pub enum BiologicalMaterial {
     Cells,
