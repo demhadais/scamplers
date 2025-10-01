@@ -122,9 +122,14 @@ fn validate_suspensions_in_pool(
         ));
     }
 
-    if !suspensions.iter().all(|s| s.multiplexing_tag_id.is_some()) {
+    let multiplexing_tag_presences: HashSet<_> = suspensions
+        .iter()
+        .map(|s| s.multiplexing_tag_id.is_some())
+        .collect();
+
+    if multiplexing_tag_presences.len() != 1 {
         return Err(garde::Error::new(
-            "suspensions in a suspension pool must have multiplexing tag ID",
+            "either all suspensions in a suspension-pool have a multiplexing tag, or none do",
         ));
     }
 
