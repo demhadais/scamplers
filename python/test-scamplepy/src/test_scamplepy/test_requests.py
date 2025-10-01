@@ -295,7 +295,7 @@ def _new_suspension_measurements(
         NewSuspensionMeasurement(
             measured_by=measured_by,
             data=m,
-            is_post_hybridization=True,
+            is_post_probe_hybridization=True,
         )
         for m in _all_suspension_measurement_data_common()
     ]
@@ -331,7 +331,6 @@ def _new_suspension_pool_measurements(
         NewSuspensionPoolMeasurement(
             measured_by=measured_by,
             data=m,
-            is_post_storage=True,
         )
         for m in _all_suspension_measurement_data_common()
     ]
