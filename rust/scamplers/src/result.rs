@@ -6,7 +6,7 @@ use axum::{
 #[cfg(feature = "python")]
 use pyo3::{exceptions::PyException, prelude::*};
 #[cfg(feature = "python")]
-use pyo3_stub_gen::derive::gen_stub_pyclass;
+use pyo3_stub_gen::{derive::gen_stub_pyclass, impl_stub_type};
 use scamplers_macros::scamplers_error;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
@@ -135,8 +135,27 @@ pub enum ScamplersError {
     LibraryIndexSet(#[from] LibraryIndexSetError),
 }
 
-#[cfg_attr(feature = "python", pyclass(get_all, str, extends = PyException, module = "scamplepy.errors"))]
+#[cfg(feature = "python")]
+impl_stub_type!(
+    ScamplersError = ClientError
+        | DuplicateResourceError
+        | InvalidReferenceError
+        | ResourceNotFoundError
+        | InvalidDataError
+        | ServerError
+        | MalformedRequestError
+        | PermissionDeniedError
+        | ChromiumDatasetError
+        | DatasetNMetricsFilesError
+        | DatasetMetricsFileParseError
+        | CdnaLibraryTypeError
+        | CdnaGemsError
+        | InvalidMeasurementError
+        | LibraryIndexSetError
+);
+
 #[cfg_attr(feature = "python", gen_stub_pyclass)]
+#[cfg_attr(feature = "python", pyclass(get_all, str, extends = PyException, module = "scamplepy.errors"))]
 #[::scamplers_macros::base_model]
 #[cfg_attr(
     target_arch = "wasm32",
