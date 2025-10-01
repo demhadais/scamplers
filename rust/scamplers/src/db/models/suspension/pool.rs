@@ -70,7 +70,7 @@ pub struct NewSuspensionPool {
     #[garde(
         dive,
         length(min = 1),
-        custom(|suspensions, (): &()| validate_suspension_biological_materials(suspensions, &self.measurements))
+        custom(|suspensions, (): &()| validate_suspensions_in_pool(suspensions, &self.measurements))
     )]
     #[cfg_attr(feature = "app", diesel(skip_insertion))]
     pub suspensions: Vec<NewSuspension>,
@@ -84,7 +84,7 @@ pub struct NewSuspensionPool {
     pub additional_data: Option<AnyValue>,
 }
 
-fn validate_suspension_biological_materials(
+fn validate_suspensions_in_pool(
     suspensions: &[NewSuspension],
     measurements: &[NewSuspensionPoolMeasurement],
 ) -> garde::Result {
@@ -119,6 +119,17 @@ fn validate_suspension_biological_materials(
         return Err(garde::Error::new(
             "all suspension pool measurements must have the same biological material as the \
              constituent suspensions",
+        ));
+    }
+
+    let multiplexing_tag_presences: HashSet<_> = suspensions
+        .iter()
+        .map(|s| s.multiplexing_tag_id.is_some())
+        .collect();
+
+    if multiplexing_tag_presences.len() != 1 {
+        return Err(garde::Error::new(
+            "either all suspensions in a suspension-pool have a multiplexing tag, or none do",
         ));
     }
 
