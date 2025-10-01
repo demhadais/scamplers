@@ -23,7 +23,7 @@ heck = { version = "0.5.0" }
 js-sys = { version = "0.3.77" }
 clap = { version = "4.5.48", features = ["derive", "env"] }
 anyhow = "1.0.100"
-axum = { version = "0.8.5", default-features = false, features = [
+axum = { version = "0.8.6", default-features = false, features = [
     "http2",
     "json",
     "macros",
@@ -35,7 +35,7 @@ tokio = { version = "1.47.1", features = [
     "signal",
 ] }
 regex = "1.11.3"
-axum-extra = { version = "0.10.2", features = ["typed-header", "query"] }
+axum-extra = { version = "0.10.3", features = ["typed-header", "query"] }
 camino = { version = "1.2.1", features = ["serde1"] }
 thiserror = "2.0.17"
 _uuid = { package = "uuid", version = "1.18.1", features = ["serde", "v7"] }
