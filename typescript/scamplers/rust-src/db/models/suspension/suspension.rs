@@ -40,7 +40,7 @@ pub struct SuspensionMeasurementData {
     #[serde(flatten)]
     #[garde(dive)]
     pub fields: SuspensionMeasurementFields,
-    pub is_post_hybridization: bool,
+    pub is_post_probe_hybridization: bool,
 }
 
 #[db_insertion]
@@ -60,11 +60,11 @@ pub struct NewSuspensionMeasurement {
 #[pymethods]
 impl NewSuspensionMeasurement {
     #[new]
-    #[pyo3(signature = (*, measured_by, data, is_post_hybridization, suspension_id=Uuid::default()))]
+    #[pyo3(signature = (*, measured_by, data, is_post_probe_hybridization, suspension_id=Uuid::default()))]
     fn new(
         measured_by: Uuid,
         data: SuspensionMeasurementFields,
-        is_post_hybridization: bool,
+        is_post_probe_hybridization: bool,
         suspension_id: Uuid,
     ) -> Self {
         Self {
@@ -72,7 +72,7 @@ impl NewSuspensionMeasurement {
             measured_by,
             data: SuspensionMeasurementData {
                 fields: data,
-                is_post_hybridization,
+                is_post_probe_hybridization,
             },
         }
     }

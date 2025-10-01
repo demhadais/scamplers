@@ -56,10 +56,7 @@ use crate::{
             suspension::{
                 self,
                 common::BiologicalMaterial,
-                pool::{
-                    NewSuspensionPool, NewSuspensionPoolMeasurement, SuspensionPool,
-                    SuspensionPoolMeasurementData,
-                },
+                pool::{NewSuspensionPool, NewSuspensionPoolMeasurement, SuspensionPool},
                 suspension::{NewSuspension, NewSuspensionMeasurement, SuspensionMeasurementData},
             },
             tenx_assay::{
@@ -371,7 +368,7 @@ impl TestState {
                         .measured_by(self.random_person_id())
                         .data(SuspensionMeasurementData {
                             fields: self.suspension_volume(),
-                            is_post_hybridization: for_pool,
+                            is_post_probe_hybridization: for_pool,
                         })
                         .build()
                 })
@@ -412,10 +409,7 @@ impl TestState {
         for i in 0..N_SUSPENSION_POOLS {
             let new_suspension_pool_measurement = NewSuspensionPoolMeasurement::builder()
                 .measured_by(self.random_person_id())
-                .data(SuspensionPoolMeasurementData {
-                    fields: self.suspension_volume(),
-                    is_post_storage: false,
-                })
+                .data(self.suspension_volume())
                 .build();
 
             let new_suspension_pool = NewSuspensionPool::builder()
