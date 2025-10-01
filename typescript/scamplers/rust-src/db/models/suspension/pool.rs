@@ -7,7 +7,7 @@ use diesel::prelude::*;
 use pyo3::prelude::*;
 #[cfg(feature = "python")]
 use pyo3_stub_gen::derive::gen_stub_pymethods;
-use scamplers_macros::{base_model, db_insertion, db_json, db_query, db_selection};
+use scamplers_macros::{base_model, db_insertion, db_query, db_selection};
 #[cfg(feature = "app")]
 use scamplers_schema::suspension_pool_preparers;
 use time::OffsetDateTime;
@@ -32,16 +32,6 @@ mod create;
 #[cfg(feature = "app")]
 mod read;
 
-#[cfg_attr(feature = "python", pyo3_stub_gen::derive::gen_stub_pyclass)]
-#[db_json]
-#[cfg_attr(feature = "python", pyo3(module = "scamplepy.common", set_all))]
-pub struct SuspensionPoolMeasurementData {
-    #[serde(flatten)]
-    #[garde(dive)]
-    pub fields: SuspensionMeasurementFields,
-    pub is_post_storage: bool,
-}
-
 #[db_insertion]
 #[cfg_attr(feature = "app", diesel(table_name = scamplers_schema::suspension_pool_measurement))]
 pub struct NewSuspensionPoolMeasurement {
@@ -51,7 +41,7 @@ pub struct NewSuspensionPoolMeasurement {
     pub measured_by: Uuid,
     #[serde(flatten)]
     #[garde(dive)]
-    pub data: SuspensionPoolMeasurementData,
+    pub data: SuspensionMeasurementFields,
 }
 
 #[cfg(feature = "python")]
@@ -59,20 +49,12 @@ pub struct NewSuspensionPoolMeasurement {
 #[pymethods]
 impl NewSuspensionPoolMeasurement {
     #[new]
-    #[pyo3(signature = (*, measured_by, data, is_post_storage, pool_id=Uuid::default()))]
-    fn new(
-        measured_by: Uuid,
-        data: SuspensionMeasurementFields,
-        is_post_storage: bool,
-        pool_id: Uuid,
-    ) -> Self {
+    #[pyo3(signature = (*, measured_by, data, pool_id=Uuid::default()))]
+    fn new(measured_by: Uuid, data: SuspensionMeasurementFields, pool_id: Uuid) -> Self {
         Self {
             pool_id,
             measured_by,
-            data: SuspensionPoolMeasurementData {
-                fields: data,
-                is_post_storage,
-            },
+            data,
         }
     }
 }
@@ -117,12 +99,8 @@ fn validate_suspension_biological_materials(
 
     let mut measurement_biological_materials = HashSet::with_capacity(measurements.len());
 
-    for NewSuspensionPoolMeasurement {
-        data: SuspensionPoolMeasurementData { fields, .. },
-        ..
-    } in measurements
-    {
-        match fields {
+    for NewSuspensionPoolMeasurement { data, .. } in measurements {
+        match data {
             SuspensionMeasurementFields::Concentration {
                 unit: (biological_material, ..),
                 ..
@@ -203,7 +181,7 @@ pub struct SuspensionPoolMeasurement {
     pub measured_by: Uuid,
     #[serde(flatten)]
     #[cfg_attr(target_arch = "wasm32", wasm_bindgen(skip))]
-    pub data: SuspensionPoolMeasurementData,
+    pub data: SuspensionMeasurementFields,
 }
 
 #[cfg_attr(target_arch = "wasm32", wasm_bindgen(getter_with_clone))]
