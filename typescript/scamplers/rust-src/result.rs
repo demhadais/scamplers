@@ -113,7 +113,7 @@ pub struct LibraryIndexSetError {
     pub message: String,
 }
 
-#[cfg_attr(feature = "python", pyclass(get_all, str))]
+#[cfg_attr(feature = "python", derive(FromPyObject, IntoPyObject))]
 #[derive(Debug, Clone, PartialEq, Deserialize, Serialize, thiserror::Error, Valuable)]
 #[serde(tag = "type", rename_all = "snake_case")]
 #[error(transparent)]
@@ -230,7 +230,9 @@ impl
             Box<dyn diesel::result::DatabaseErrorInformation + Send + Sync>,
         ),
     ) -> Self {
-        use diesel::result::DatabaseErrorKind::{ForeignKeyViolation, UniqueViolation};
+        use diesel::result::DatabaseErrorKind::{
+            CheckViolation, ForeignKeyViolation, UniqueViolation,
+        };
         use regex::Regex;
 
         let entity = info.table_name().unwrap_or_default();
@@ -259,6 +261,7 @@ impl
         let values = into_split_vecs(&field_value, 2);
 
         match kind {
+            CheckViolation => InvalidDataError::builder().message(details).build().into(),
             UniqueViolation => DuplicateResourceError {
                 entity: entity.to_string(),
                 fields,
