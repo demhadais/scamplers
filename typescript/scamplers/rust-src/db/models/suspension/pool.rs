@@ -115,7 +115,9 @@ fn validate_suspensions_in_pool(
         }
     }
 
-    if measurement_biological_materials != biological_materials {
+    if !measurement_biological_materials.is_empty()
+        && measurement_biological_materials != biological_materials
+    {
         return Err(garde::Error::new(
             "all suspension pool measurements must have the same biological material as the \
              constituent suspensions",
