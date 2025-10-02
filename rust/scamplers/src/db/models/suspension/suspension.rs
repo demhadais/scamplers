@@ -126,6 +126,10 @@ fn validate_suspension_measurement_biological_materials(
         }
     }
 
+    if measurement_biological_materials.is_empty() {
+        return Ok(());
+    }
+
     if measurement_biological_materials != HashSet::from_iter([self_biological_material]) {
         return Err(garde::Error::new(
             "all suspension measurements must have the same biological material as the suspension \
