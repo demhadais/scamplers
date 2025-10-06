@@ -89,7 +89,7 @@ pyo3 = { version = "0.26.0", features = [
     "anyhow",
 ] }
 pyo3-stub-gen = { version = "0.13.1", default-features = false }
-bon = { version = "3.7.2" }
+bon = { version = "3.8.0" }
 derive_more = { version = "2.0.1", features = ["try_into", "from"] }
 getrandom = { version = "0.3.3" }
 
