@@ -15,7 +15,6 @@ diesel::table! {
         prepared_at -> Timestamptz,
         gems_id -> Nullable<Uuid>,
         n_amplification_cycles -> Int4,
-        storage_location -> Nullable<Text>,
         additional_data -> Nullable<Jsonb>,
     }
 }
