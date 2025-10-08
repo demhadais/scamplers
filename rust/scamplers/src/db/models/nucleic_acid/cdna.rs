@@ -71,8 +71,6 @@ pub struct NewCdna {
     #[garde(dive)]
     #[cfg_attr(feature = "app", diesel(skip_insertion))]
     pub measurements: Vec<NewCdnaMeasurement>,
-    #[garde(dive)]
-    pub storage_location: Option<ValidString>,
     pub additional_data: Option<AnyValue>,
 }
 
@@ -81,7 +79,7 @@ pub struct NewCdna {
 #[pymethods]
 impl NewCdna {
     #[new]
-    #[pyo3(signature = (*, library_type, readable_id, prepared_at, gems_id, n_amplification_cycles, volume_mcl, preparer_ids, measurements=Vec::new(), storage_location=None, additional_data=None))]
+    #[pyo3(signature = (*, library_type, readable_id, prepared_at, gems_id, n_amplification_cycles, volume_mcl, preparer_ids, measurements=Vec::new(), additional_data=None))]
     fn new(
         library_type: LibraryType,
         readable_id: ValidString,
@@ -91,7 +89,6 @@ impl NewCdna {
         volume_mcl: f32, // name change due to python
         preparer_ids: Vec<Uuid>,
         measurements: Vec<NewCdnaMeasurement>,
-        storage_location: Option<ValidString>,
         additional_data: Option<AnyValue>,
     ) -> Self {
         Self {
@@ -103,7 +100,6 @@ impl NewCdna {
             volume_µl: volume_mcl,
             preparer_ids,
             measurements,
-            storage_location,
             additional_data,
         }
     }
@@ -164,7 +160,6 @@ pub struct CdnaSummary {
     pub readable_id: String,
     pub prepared_at: OffsetDateTime,
     pub n_amplification_cycles: i32,
-    pub storage_location: Option<String>,
     pub additional_data: Option<AnyValue>,
 }
 

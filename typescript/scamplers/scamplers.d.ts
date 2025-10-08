@@ -117,8 +117,6 @@ export class CdnaSummary {
   readable_id: string;
   prepared_at: Date;
   n_amplification_cycles: number;
-  get storage_location(): string;
-  set storage_location(value: string | null | undefined);
   get additional_data(): any | undefined;
   set additional_data(value: any | null | undefined);
 }
