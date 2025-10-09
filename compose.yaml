@@ -117,6 +117,9 @@ services:
     depends_on:
       scamplers-frontend:
         condition: service_healthy
+    secrets:
+      - tls_certificate
+      - tls_key_file
 volumes:
   db-data:
   logs:
@@ -143,3 +146,7 @@ secrets:
     environment: SCAMPLERS_FRONTEND_TOKEN
   seed_data:
     file: ${SCAMPLERS_SEED_DATA}
+  tls_certificate:
+    file: ${SCAMPLERS_TLS_CERTIFICATE_PATH}
+  tls_key:
+    file: ${SCAMPLERS_TLS_KEY_PATH}

@@ -269,12 +269,12 @@ function _assertClass(instance, klass) {
         throw new Error(`expected instance of ${klass.name}`);
     }
 }
-function __wbg_adapter_6(arg0, arg1, arg2) {
-    wasm.closure456_externref_shim(arg0, arg1, arg2);
+function __wbg_adapter_22(arg0, arg1) {
+    wasm.wasm_bindgen__convert__closures_____invoke__hac4eafd1426a249e(arg0, arg1);
 }
 
-function __wbg_adapter_9(arg0, arg1) {
-    wasm.wasm_bindgen__convert__closures_____invoke__hac4eafd1426a249e(arg0, arg1);
+function __wbg_adapter_27(arg0, arg1, arg2) {
+    wasm.closure456_externref_shim(arg0, arg1, arg2);
 }
 
 function __wbg_adapter_1106(arg0, arg1, arg2, arg3) {
@@ -10914,7 +10914,7 @@ export function __wbindgen_cast_d6cd19b81560fd6e(arg0) {
 
 export function __wbindgen_cast_db6982b28b57bd7e(arg0, arg1) {
     // Cast intrinsic for `Closure(Closure { dtor_idx: 455, function: Function { arguments: [Externref], shim_idx: 456, ret: Unit, inner_ret: Some(Unit) }, mutable: true }) -> Externref`.
-    const ret = makeMutClosure(arg0, arg1, 455, __wbg_adapter_6);
+    const ret = makeMutClosure(arg0, arg1, 455, __wbg_adapter_27);
     return ret;
 };
 
@@ -10936,7 +10936,7 @@ export function __wbindgen_cast_e90871800fe8ca73(arg0, arg1) {
 
 export function __wbindgen_cast_e99b681cdf735cc3(arg0, arg1) {
     // Cast intrinsic for `Closure(Closure { dtor_idx: 430, function: Function { arguments: [], shim_idx: 431, ret: Unit, inner_ret: Some(Unit) }, mutable: true }) -> Externref`.
-    const ret = makeMutClosure(arg0, arg1, 430, __wbg_adapter_9);
+    const ret = makeMutClosure(arg0, arg1, 430, __wbg_adapter_22);
     return ret;
 };
 
