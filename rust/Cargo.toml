@@ -34,7 +34,7 @@ tokio = { version = "1.47.1", features = [
     "rt-multi-thread",
     "signal",
 ] }
-regex = "1.11.3"
+regex = "1.12.1"
 axum-extra = { version = "0.10.3", features = ["typed-header", "query"] }
 camino = { version = "1.2.1", features = ["serde1"] }
 thiserror = "2.0.17"
@@ -89,7 +89,7 @@ pyo3 = { version = "0.26.0", features = [
     "anyhow",
 ] }
 pyo3-stub-gen = { version = "0.13.1", default-features = false }
-bon = { version = "3.7.2" }
+bon = { version = "3.8.1" }
 derive_more = { version = "2.0.1", features = ["try_into", "from"] }
 getrandom = { version = "0.3.3" }
 
