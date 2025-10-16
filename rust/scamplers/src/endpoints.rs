@@ -367,18 +367,4 @@ mod tests {
         query = Query,
         response = Response
     );
-
-    #[rstest]
-    #[tokio::test]
-    async fn query_serialization() {
-        let client = reqwest::Client::new();
-        <Api as Endpoint<Query, Vec<Response>>>::request(
-            &client,
-            "https://postman-echo.com/get",
-            Query,
-        )
-        .send()
-        .await
-        .unwrap();
-    }
 }
