@@ -502,6 +502,7 @@ pub struct ChromiumDatasetSummary {
     pub tenx_assay: TenxAssay,
     #[cfg_attr(target_arch = "wasm32", wasm_bindgen(skip))]
     pub metrics: ParsedMetrics,
+    #[cfg_attr(target_arch = "wasm32", wasm_bindgen(skip))]
     pub web_summaries: Vec<Option<String>>,
 }
 
