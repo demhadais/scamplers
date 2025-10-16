@@ -320,7 +320,7 @@ pub struct NewChromiumDatasetCommon {
     #[cfg_attr(feature = "app", diesel(skip_insertion))]
     pub library_ids: Vec<Uuid>,
     #[garde(custom(validate_html))]
-    pub web_summary: String,
+    pub web_summaries: Vec<String>,
 }
 
 #[cfg(feature = "python")]
@@ -330,14 +330,14 @@ macro_rules! impl_dataset_constructor {
         #[pymethods]
         impl $dataset_struct {
             #[new]
-            #[pyo3(signature = (*, name, lab_id, data_path, delivered_at, library_ids, web_summary, metrics))]
+            #[pyo3(signature = (*, name, lab_id, data_path, delivered_at, library_ids, web_summaries, metrics))]
             fn new(
                 name: ValidString,
                 lab_id: Uuid,
                 data_path: ValidString,
                 delivered_at: OffsetDateTime,
                 library_ids: Vec<Uuid>,
-                web_summary: String,
+                web_summaries: Vec<String>,
                 metrics: $metrics_struct,
             ) -> Self {
                 Self {
@@ -347,7 +347,7 @@ macro_rules! impl_dataset_constructor {
                         data_path,
                         delivered_at,
                         library_ids,
-                        web_summary,
+                        web_summaries,
                     },
                     metrics: metrics.into(),
                 }
@@ -465,9 +465,13 @@ pub enum NewChromiumDataset {
 }
 
 #[allow(clippy::trivially_copy_pass_by_ref)]
-fn validate_html(document: &str, _: &()) -> garde::Result {
-    let result = scraper::Html::parse_document(document);
-    if !result.errors.is_empty() {
+fn validate_html(documents: &[String], _: &()) -> garde::Result {
+    let results: Vec<_> = documents
+        .iter()
+        .map(|d| scraper::Html::parse_document(d.as_str()))
+        .collect();
+
+    if results.iter().any(|r| !r.errors.is_empty()) {
         return Err(garde::Error::new("invalid HTML"));
     }
 
@@ -498,7 +502,7 @@ pub struct ChromiumDatasetSummary {
     pub tenx_assay: TenxAssay,
     #[cfg_attr(target_arch = "wasm32", wasm_bindgen(skip))]
     pub metrics: ParsedMetrics,
-    pub web_summary: String,
+    pub web_summaries: Vec<Option<String>>,
 }
 
 #[cfg(feature = "app")]

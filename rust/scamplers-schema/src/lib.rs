@@ -56,7 +56,7 @@ diesel::table! {
         data_path -> Text,
         delivered_at -> Timestamptz,
         metrics -> Jsonb,
-        web_summary -> Text,
+        web_summaries -> Array<Nullable<Text>>,
     }
 }
 
