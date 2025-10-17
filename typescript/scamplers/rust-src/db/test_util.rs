@@ -642,7 +642,7 @@ impl TestState {
                 .data_path("path")
                 .delivered_at(self.random_time())
                 .library_ids(library_ids)
-                .web_summary("")
+                .web_summaries([String::new()])
                 .build();
 
             let library_types: Vec<_> = library_group

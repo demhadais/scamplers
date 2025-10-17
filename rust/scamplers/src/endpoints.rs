@@ -339,7 +339,6 @@ mod tests {
         extract::Path,
         http::{Method, StatusCode},
     };
-    use rstest::rstest;
     use scamplers_macros::Jsonify;
 
     use super::{Api, Endpoint};
