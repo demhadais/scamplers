@@ -103,8 +103,9 @@ fn parse_tenx_record(csv: HashMap<String, AnyValue>) -> HashMap<String, AnyValue
     let number_regex = Regex::new(r"^(\d+)\s\(\d{1,3}\.\d+\)$").unwrap();
     let mut new_map = HashMap::with_capacity(csv.len());
 
-    for (key, mut value) in csv {
-        let key = key.to_snek_case();
+    for (mut key, mut value) in csv {
+        key = key.replace("UMIs", "umis"); // Without this, "UMIs" is converted to "um_is"
+        key = key.to_snek_case();
 
         // if we were able to parse it as a non-string, return that
         if !value.is_string() {
