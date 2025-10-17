@@ -538,7 +538,7 @@ def new_cellranger_count_dataset(
         library_ids=[ID],
         data_path="data",
         delivered_at=TIME,
-        web_summary="",
+        web_summaries=[""],
         metrics=SINGLE_ROW_CSV,
     )
     assert ds.metrics.contents["estimated_number_of_cells"] == 65_558  # type: ignore

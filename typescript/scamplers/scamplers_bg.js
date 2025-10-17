@@ -254,6 +254,12 @@ function passArray8ToWasm0(arg, malloc) {
     return ptr;
 }
 
+function _assertClass(instance, klass) {
+    if (!(instance instanceof klass)) {
+        throw new Error(`expected instance of ${klass.name}`);
+    }
+}
+
 function passArrayJsValueToWasm0(array, malloc) {
     const ptr = malloc(array.length * 4, 4) >>> 0;
     for (let i = 0; i < array.length; i++) {
@@ -263,22 +269,16 @@ function passArrayJsValueToWasm0(array, malloc) {
     WASM_VECTOR_LEN = array.length;
     return ptr;
 }
-
-function _assertClass(instance, klass) {
-    if (!(instance instanceof klass)) {
-        throw new Error(`expected instance of ${klass.name}`);
-    }
+function __wbg_adapter_28(arg0, arg1, arg2) {
+    wasm.closure457_externref_shim(arg0, arg1, arg2);
 }
-function __wbg_adapter_22(arg0, arg1) {
+
+function __wbg_adapter_35(arg0, arg1) {
     wasm.wasm_bindgen__convert__closures_____invoke__hac4eafd1426a249e(arg0, arg1);
 }
 
-function __wbg_adapter_27(arg0, arg1, arg2) {
-    wasm.closure456_externref_shim(arg0, arg1, arg2);
-}
-
-function __wbg_adapter_1106(arg0, arg1, arg2, arg3) {
-    wasm.closure484_externref_shim(arg0, arg1, arg2, arg3);
+function __wbg_adapter_1104(arg0, arg1, arg2, arg3) {
+    wasm.closure485_externref_shim(arg0, arg1, arg2, arg3);
 }
 
 /**
@@ -1657,23 +1657,6 @@ export class ChromiumDatasetSummary {
         _assertClass(arg0, TenxAssay);
         var ptr0 = arg0.__destroy_into_raw();
         wasm.__wbg_set_chromiumdatasetsummary_tenx_assay(this.__wbg_ptr, ptr0);
-    }
-    /**
-     * @returns {string}
-     */
-    get web_summary() {
-        const ret = wasm.__wbg_get_chromiumdatasetsummary_web_summary(this.__wbg_ptr);
-        var v1 = getCachedStringFromWasm0(ret[0], ret[1]);
-        if (ret[0] !== 0) { wasm.__wbindgen_free(ret[0], ret[1], 1); }
-        return v1;
-    }
-    /**
-     * @param {string} arg0
-     */
-    set web_summary(arg0) {
-        const ptr0 = passStringToWasm0(arg0, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
-        const len0 = WASM_VECTOR_LEN;
-        wasm.__wbg_set_chromiumdatasetsummary_web_summary(this.__wbg_ptr, ptr0, len0);
     }
     /**
      * @returns {Uint8Array}
@@ -10516,7 +10499,7 @@ export function __wbg_new_d5e3800b120e37e1(arg0, arg1) {
             const a = state0.a;
             state0.a = 0;
             try {
-                return __wbg_adapter_1106(a, state0.b, arg0, arg1);
+                return __wbg_adapter_1104(a, state0.b, arg0, arg1);
             } finally {
                 state0.a = a;
             }
@@ -10875,6 +10858,12 @@ export function __wbindgen_cast_45c41c2f89ce6d9f(arg0, arg1) {
     return ret;
 };
 
+export function __wbindgen_cast_6657c79b204f42d0(arg0, arg1) {
+    // Cast intrinsic for `Closure(Closure { dtor_idx: 431, function: Function { arguments: [], shim_idx: 432, ret: Unit, inner_ret: Some(Unit) }, mutable: true }) -> Externref`.
+    const ret = makeMutClosure(arg0, arg1, 431, __wbg_adapter_35);
+    return ret;
+};
+
 export function __wbindgen_cast_7e9c58eeb11b0a6f(arg0, arg1) {
     var v0 = getCachedStringFromWasm0(arg0, arg1);
     // Cast intrinsic for `Ref(CachedString) -> Externref`.
@@ -10912,9 +10901,9 @@ export function __wbindgen_cast_d6cd19b81560fd6e(arg0) {
     return ret;
 };
 
-export function __wbindgen_cast_db6982b28b57bd7e(arg0, arg1) {
-    // Cast intrinsic for `Closure(Closure { dtor_idx: 455, function: Function { arguments: [Externref], shim_idx: 456, ret: Unit, inner_ret: Some(Unit) }, mutable: true }) -> Externref`.
-    const ret = makeMutClosure(arg0, arg1, 455, __wbg_adapter_27);
+export function __wbindgen_cast_d9a2dd683ea9c96a(arg0, arg1) {
+    // Cast intrinsic for `Closure(Closure { dtor_idx: 456, function: Function { arguments: [Externref], shim_idx: 457, ret: Unit, inner_ret: Some(Unit) }, mutable: true }) -> Externref`.
+    const ret = makeMutClosure(arg0, arg1, 456, __wbg_adapter_28);
     return ret;
 };
 
@@ -10931,12 +10920,6 @@ export function __wbindgen_cast_e90871800fe8ca73(arg0, arg1) {
     wasm.__wbindgen_free(arg0, arg1 * 4, 4);
     // Cast intrinsic for `Vector(NamedExternref("Person")) -> Externref`.
     const ret = v0;
-    return ret;
-};
-
-export function __wbindgen_cast_e99b681cdf735cc3(arg0, arg1) {
-    // Cast intrinsic for `Closure(Closure { dtor_idx: 430, function: Function { arguments: [], shim_idx: 431, ret: Unit, inner_ret: Some(Unit) }, mutable: true }) -> Externref`.
-    const ret = makeMutClosure(arg0, arg1, 430, __wbg_adapter_22);
     return ret;
 };
 

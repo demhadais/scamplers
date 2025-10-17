@@ -176,7 +176,6 @@ export class ChromiumDatasetSummary {
   data_path: string;
   delivered_at: Date;
   tenx_assay: TenxAssay;
-  web_summary: string;
 }
 export class ChromiumRun {
   private constructor();
