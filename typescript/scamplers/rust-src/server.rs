@@ -80,7 +80,9 @@ fn app(app_state: AppState) -> Router {
         .route("/health", get(async || ()))
         .with_state(app_state);
 
-    Router::new().nest(&path, api_router)
+    Router::new()
+        .nest(&path, api_router)
+        .layer(axum::extract::DefaultBodyLimit::disable())
 }
 
 async fn shutdown_signal(app_state: AppState) {
