@@ -153,19 +153,6 @@ mod wasm32 {
     }
 }
 
-#[cfg(feature = "python")]
-mod python {
-    use pyo3_stub_gen::{PyStubType, TypeInfo};
-
-    use super::Uuid;
-
-    impl PyStubType for Uuid {
-        fn type_output() -> TypeInfo {
-            TypeInfo::with_module("uuid.UUID", "uuid".into())
-        }
-    }
-}
-
 #[cfg(feature = "app")]
 mod app {
     use diesel::{

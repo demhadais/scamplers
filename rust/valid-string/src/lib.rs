@@ -211,18 +211,6 @@ mod wasm32 {
 }
 
 #[cfg(feature = "python")]
-mod python {
-    use pyo3_stub_gen::PyStubType;
-
-    use super::ValidString;
-
-    impl PyStubType for ValidString {
-        fn type_output() -> pyo3_stub_gen::TypeInfo {
-            String::type_output()
-        }
-    }
-}
-
 #[cfg(feature = "app")]
 mod app {
     use diesel::{

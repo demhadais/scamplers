@@ -9,11 +9,6 @@ use diesel::prelude::*;
 use heck::ToSnekCase;
 #[cfg(feature = "python")]
 use pyo3::prelude::*;
-#[cfg(feature = "python")]
-use pyo3_stub_gen::{
-    derive::{gen_stub_pyclass_complex_enum, gen_stub_pymethods},
-    impl_stub_type,
-};
 #[cfg(not(target_arch = "wasm32"))]
 use regex::Regex;
 use scamplers_macros::{
@@ -51,7 +46,6 @@ mod read;
 #[cfg(feature = "python")]
 macro_rules! impl_metrics_methods {
     ($metrics_struct:ident) => {
-        #[pyo3_stub_gen::derive::gen_stub_pymethods]
         #[pymethods]
         impl $metrics_struct {
             #[new]
@@ -143,7 +137,6 @@ fn parse_tenx_record(csv: HashMap<String, AnyValue>) -> HashMap<String, AnyValue
     new_map
 }
 
-#[cfg_attr(feature = "python", pyo3_stub_gen::derive::gen_stub_pyclass)]
 #[db_json]
 #[cfg_attr(feature = "python", pyo3(module = "scamplepy.common"))]
 pub struct SingleRowCsvMetricsFile {
@@ -174,7 +167,6 @@ impl SingleRowCsvMetricsFile {
 #[cfg(feature = "python")]
 impl_metrics_methods!(SingleRowCsvMetricsFile);
 
-#[cfg_attr(feature = "python", pyo3_stub_gen::derive::gen_stub_pyclass)]
 #[db_json]
 #[cfg_attr(feature = "python", pyo3(module = "scamplepy.common"))]
 pub struct MultiRowCsvMetricsFile {
@@ -199,7 +191,6 @@ impl MultiRowCsvMetricsFile {
 #[cfg(feature = "python")]
 impl_metrics_methods!(MultiRowCsvMetricsFile);
 
-#[cfg_attr(feature = "python", pyo3_stub_gen::derive::gen_stub_pyclass)]
 #[db_json]
 #[garde(transparent)]
 #[cfg_attr(
@@ -233,7 +224,6 @@ impl From<Vec<MultiRowCsvMetricsFile>> for MultiRowCsvMetricsFileGroup {
     }
 }
 
-#[cfg_attr(feature = "python", pyo3_stub_gen::derive::gen_stub_pyclass)]
 #[db_json]
 #[cfg_attr(feature = "python", pyo3(module = "scamplepy.common"))]
 pub struct JsonMetricsFile {
@@ -256,8 +246,6 @@ impl JsonMetricsFile {
         Ok(())
     }
 }
-
-#[cfg_attr(feature = "python", gen_stub_pyclass_complex_enum)]
 #[db_json]
 #[serde(tag = "format")]
 #[cfg_attr(feature = "python", pyo3(module = "scamplepy.responses"))]
@@ -327,7 +315,6 @@ pub struct NewChromiumDatasetCommon {
 #[cfg(feature = "python")]
 macro_rules! impl_dataset_constructor {
     ($dataset_struct:path, $metrics_struct:path) => {
-        #[pyo3_stub_gen::derive::gen_stub_pymethods]
         #[pymethods]
         impl $dataset_struct {
             #[new]
@@ -358,7 +345,6 @@ macro_rules! impl_dataset_constructor {
 }
 
 #[base_model]
-#[cfg_attr(feature = "python", pyo3_stub_gen::derive::gen_stub_pyclass)]
 #[cfg_attr(
     feature = "python",
     pyclass(get_all, set_all, eq, module = "scamplepy.create")
@@ -374,7 +360,6 @@ pub struct NewCellrangerarcCountDataset {
 impl_dataset_constructor!(NewCellrangerarcCountDataset, SingleRowCsvMetricsFile);
 
 #[base_model]
-#[cfg_attr(feature = "python", pyo3_stub_gen::derive::gen_stub_pyclass)]
 #[cfg_attr(
     feature = "python",
     pyclass(get_all, set_all, eq, module = "scamplepy.create")
@@ -391,7 +376,6 @@ pub struct NewCellrangeratacCountDataset {
 impl_dataset_constructor!(NewCellrangeratacCountDataset, JsonMetricsFile);
 
 #[base_model]
-#[cfg_attr(feature = "python", pyo3_stub_gen::derive::gen_stub_pyclass)]
 #[cfg_attr(
     feature = "python",
     pyclass(get_all, set_all, eq, module = "scamplepy.create")
@@ -407,7 +391,6 @@ pub struct NewCellrangerCountDataset {
 impl_dataset_constructor!(NewCellrangerCountDataset, SingleRowCsvMetricsFile);
 
 #[base_model]
-#[cfg_attr(feature = "python", pyo3_stub_gen::derive::gen_stub_pyclass)]
 #[cfg_attr(
     feature = "python",
     pyclass(get_all, set_all, eq, module = "scamplepy.create")
@@ -424,7 +407,6 @@ pub struct NewCellrangerMultiDataset {
 impl_dataset_constructor!(NewCellrangerMultiDataset, Vec<MultiRowCsvMetricsFile>);
 
 #[base_model]
-#[cfg_attr(feature = "python", pyo3_stub_gen::derive::gen_stub_pyclass)]
 #[cfg_attr(
     feature = "python",
     pyclass(get_all, set_all, eq, module = "scamplepy.create")
@@ -479,15 +461,6 @@ fn validate_html(documents: &[String], _: &()) -> garde::Result {
     Ok(())
 }
 
-#[cfg(feature = "python")]
-impl_stub_type!(
-    NewChromiumDataset = NewCellrangerarcCountDataset
-        | NewCellrangeratacCountDataset
-        | NewCellrangerCountDataset
-        | NewCellrangerMultiDataset
-        | NewCellrangerVdjDataset
-);
-
 #[db_selection]
 #[cfg_attr(feature = "app", diesel(table_name = chromium_dataset, base_query = chromium_dataset::table.inner_join(lab::table).inner_join(chromium_dataset_libraries::table.inner_join(library::table.inner_join(cdna::table.inner_join(gems_to_assay().inner_join(chip_loading::table)))))))]
 pub struct ChromiumDatasetSummary {
@@ -516,7 +489,6 @@ struct ChromiumDatasetLibrary {
 }
 
 #[cfg_attr(target_arch = "wasm32", wasm_bindgen(getter_with_clone))]
-#[cfg_attr(feature = "python", pyo3_stub_gen::derive::gen_stub_pyclass)]
 #[cfg_attr(
     feature = "python",
     pyclass(eq, get_all, module = "scamplepy.responses")
@@ -549,7 +521,6 @@ pub struct ChromiumDatasetQuery {
 }
 
 #[cfg(feature = "python")]
-#[gen_stub_pymethods]
 #[pymethods]
 impl ChromiumDatasetQuery {
     #[new]

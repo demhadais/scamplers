@@ -3,8 +3,6 @@ use any_value::AnyValue;
 use diesel::prelude::*;
 #[cfg(feature = "python")]
 use pyo3::prelude::*;
-#[cfg(feature = "python")]
-use pyo3_stub_gen::derive::{gen_stub_pyclass_complex_enum, gen_stub_pymethods};
 use scamplers_macros::{db_insertion, db_json, db_selection, db_simple_enum, db_update};
 #[cfg(feature = "app")]
 use scamplers_schema::{committee_approval, institution};
@@ -41,7 +39,6 @@ pub struct NewCommitteeApproval {
 }
 
 #[cfg(feature = "python")]
-#[gen_stub_pymethods]
 #[pymethods]
 impl NewCommitteeApproval {
     #[new]
@@ -73,7 +70,6 @@ pub struct CommitteeApproval {
     pub compliance_identifier: String,
 }
 
-#[cfg_attr(feature = "python", gen_stub_pyclass_complex_enum)]
 #[db_json]
 #[serde(tag = "type")]
 #[cfg_attr(
@@ -112,7 +108,6 @@ pub struct NewSpecimenMeasurement {
 }
 
 #[cfg(feature = "python")]
-#[gen_stub_pymethods]
 #[pymethods]
 impl NewSpecimenMeasurement {
     #[new]
@@ -218,7 +213,6 @@ pub struct SpecimenUpdateCommon {
 }
 
 #[cfg(feature = "python")]
-#[gen_stub_pymethods]
 #[pymethods]
 impl SpecimenUpdateCommon {
     #[new]

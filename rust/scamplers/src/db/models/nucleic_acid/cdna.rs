@@ -3,8 +3,6 @@ use any_value::AnyValue;
 use diesel::prelude::*;
 #[cfg(feature = "python")]
 use pyo3::prelude::*;
-#[cfg(feature = "python")]
-use pyo3_stub_gen::derive::{gen_stub_pyclass_complex_enum, gen_stub_pymethods};
 use scamplers_macros::{
     Jsonify, PyJsonify, WasmJsonify, base_model, db_insertion, db_query, db_selection,
 };
@@ -40,7 +38,6 @@ pub struct NewCdnaMeasurement {
 }
 
 #[cfg(feature = "python")]
-#[gen_stub_pymethods]
 #[pymethods]
 impl NewCdnaMeasurement {
     #[new]
@@ -75,7 +72,6 @@ pub struct NewCdna {
 }
 
 #[cfg(feature = "python")]
-#[gen_stub_pymethods]
 #[pymethods]
 impl NewCdna {
     #[new]
@@ -114,7 +110,6 @@ impl NewCdna {
 
 #[base_model]
 #[serde(tag = "group_type", rename_all = "snake_case")]
-#[cfg_attr(feature = "python", gen_stub_pyclass_complex_enum)]
 #[cfg_attr(
     feature = "python",
     pyclass(eq, get_all, set_all, module = "scamplepy.create")
@@ -188,7 +183,6 @@ pub struct CdnaMeasurement {
     target_arch = "wasm32",
     ::wasm_bindgen::prelude::wasm_bindgen(getter_with_clone)
 )]
-#[cfg_attr(feature = "python", pyo3_stub_gen::derive::gen_stub_pyclass)]
 #[cfg_attr(
     feature = "python",
     pyclass(eq, get_all, module = "scamplepy.responses")
@@ -213,7 +207,6 @@ pub struct CdnaQuery {
 }
 
 #[cfg(feature = "python")]
-#[gen_stub_pymethods]
 #[pymethods]
 impl CdnaQuery {
     #[new]

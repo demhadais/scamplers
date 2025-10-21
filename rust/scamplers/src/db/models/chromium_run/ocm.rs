@@ -31,7 +31,6 @@ pub struct NewOcmGems {
 }
 
 #[cfg(feature = "python")]
-#[pyo3_stub_gen::derive::gen_stub_pymethods]
 #[pymethods]
 impl NewOcmGems {
     #[new]
@@ -60,7 +59,6 @@ pub struct NewOcmChromiumRun {
 }
 
 #[cfg(feature = "python")]
-#[pyo3_stub_gen::derive::gen_stub_pymethods]
 #[pymethods]
 impl NewOcmChromiumRun {
     #[new]

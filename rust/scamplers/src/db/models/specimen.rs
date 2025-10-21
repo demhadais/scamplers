@@ -3,8 +3,6 @@ use any_value::AnyValue;
 use diesel::{expression::AsExpression, prelude::*};
 #[cfg(feature = "python")]
 use pyo3::prelude::*;
-#[cfg(feature = "python")]
-use pyo3_stub_gen::{derive::gen_stub_pymethods, impl_stub_type};
 use scamplers_macros::{
     Jsonify, PyJsonify, WasmJsonify, base_model, db_query, db_selection, db_simple_enum,
 };
@@ -59,18 +57,6 @@ pub enum NewSpecimen {
     FixedOrFreshSuspension(#[garde(dive)] NewFixedOrFreshSuspension),
     FrozenSuspension(#[garde(dive)] NewFrozenSuspension),
 }
-
-#[cfg(feature = "python")]
-impl_stub_type!(
-    NewSpecimen = NewCryopreservedTissue
-        | NewFixedTissue
-        | NewFrozenTissue
-        | NewFixedBlock
-        | NewFrozenBlock
-        | NewCryopreservedSuspension
-        | NewFixedOrFreshSuspension
-        | NewFrozenSuspension
-);
 
 #[db_simple_enum]
 #[cfg_attr(feature = "python", pyo3(module = "scamplepy.common"))]
@@ -177,7 +163,6 @@ pub struct SpecimenMeasurement {
     target_arch = "wasm32",
     ::wasm_bindgen::prelude::wasm_bindgen(getter_with_clone)
 )]
-#[cfg_attr(feature = "python", pyo3_stub_gen::derive::gen_stub_pyclass)]
 #[cfg_attr(
     feature = "python",
     pyclass(eq, get_all, module = "scamplepy.responses")
@@ -215,9 +200,6 @@ impl diesel::serialize::ToSql<::diesel::sql_types::Text, diesel::pg::Pg> for Blo
     }
 }
 
-#[cfg(feature = "python")]
-impl_stub_type!(BlockEmbeddingMatrix = FixedBlockEmbeddingMatrix | FrozenBlockEmbeddingMatrix);
-
 #[base_model]
 #[derive(strum::IntoStaticStr)]
 #[cfg_attr(feature = "app", derive(AsExpression))]
@@ -245,9 +227,6 @@ impl diesel::serialize::ToSql<::diesel::sql_types::Text, diesel::pg::Pg> for Fix
         ToSql::<sql_types::Text, Pg>::to_sql(as_str, &mut out.reborrow())
     }
 }
-
-#[cfg(feature = "python")]
-impl_stub_type!(Fixative = BlockFixative | SuspensionFixative | TissueFixative);
 
 define_ordering_enum! { SpecimenOrderBy { Name, ReadableId, ReceivedAt }, default = ReceivedAt }
 
@@ -286,7 +265,6 @@ pub struct SpecimenQuery {
 }
 
 #[cfg(feature = "python")]
-#[gen_stub_pymethods]
 #[pymethods]
 impl SpecimenQuery {
     #[new]

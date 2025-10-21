@@ -1,7 +1,5 @@
 #[cfg(feature = "python")]
 use pyo3::prelude::*;
-#[cfg(feature = "python")]
-use pyo3_stub_gen::derive::gen_stub_pymethods;
 use scamplers_macros::{db_insertion, db_query, db_selection};
 use uuid::Uuid;
 use valid_string::ValidString;
@@ -27,7 +25,6 @@ pub struct NewInstitution {
 }
 
 #[cfg(feature = "python")]
-#[pyo3_stub_gen::derive::gen_stub_pymethods]
 #[pymethods]
 impl NewInstitution {
     #[new]
@@ -63,7 +60,6 @@ pub struct InstitutionQuery {
 }
 
 #[cfg(feature = "python")]
-#[gen_stub_pymethods]
 #[pymethods]
 impl InstitutionQuery {
     #[new]

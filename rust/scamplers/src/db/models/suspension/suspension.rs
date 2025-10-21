@@ -5,8 +5,6 @@ use any_value::AnyValue;
 use diesel::{Associations, prelude::*};
 #[cfg(feature = "python")]
 use pyo3::prelude::*;
-#[cfg(feature = "python")]
-use pyo3_stub_gen::derive::gen_stub_pymethods;
 use scamplers_macros::{base_model, db_insertion, db_json, db_query, db_selection};
 #[cfg(feature = "app")]
 use scamplers_schema::{multiplexing_tag, specimen, suspension, suspension_preparers};
@@ -33,7 +31,6 @@ mod create;
 #[cfg(feature = "app")]
 mod read;
 
-#[cfg_attr(feature = "python", pyo3_stub_gen::derive::gen_stub_pyclass)]
 #[db_json]
 #[cfg_attr(feature = "python", pyo3(module = "scamplepy.common", set_all))]
 pub struct SuspensionMeasurementData {
@@ -56,7 +53,6 @@ pub struct NewSuspensionMeasurement {
 }
 
 #[cfg(feature = "python")]
-#[pyo3_stub_gen::derive::gen_stub_pymethods]
 #[pymethods]
 impl NewSuspensionMeasurement {
     #[new]
@@ -141,7 +137,6 @@ fn validate_suspension_measurement_biological_materials(
 }
 
 #[cfg(feature = "python")]
-#[pyo3_stub_gen::derive::gen_stub_pymethods]
 #[pymethods]
 impl NewSuspension {
     #[new]
@@ -225,7 +220,6 @@ pub struct SuspensionMeasurement {
 }
 
 #[cfg_attr(target_arch = "wasm32", wasm_bindgen(getter_with_clone))]
-#[cfg_attr(feature = "python", pyo3_stub_gen::derive::gen_stub_pyclass)]
 #[cfg_attr(
     feature = "python",
     pyclass(eq, get_all, module = "scamplepy.responses")
@@ -253,7 +247,6 @@ pub struct SuspensionQuery {
 }
 
 #[cfg(feature = "python")]
-#[gen_stub_pymethods]
 #[pymethods]
 impl SuspensionQuery {
     #[new]
