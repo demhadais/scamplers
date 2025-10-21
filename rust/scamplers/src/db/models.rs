@@ -221,7 +221,6 @@ where
 }
 
 #[cfg(feature = "python")]
-#[cfg(feature = "python")]
 impl<O> FromPyObject<'_> for DefaultVec<O>
 where
     O: From<WasmPythonOrderBy>,

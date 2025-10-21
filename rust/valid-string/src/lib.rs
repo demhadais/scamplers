@@ -210,7 +210,6 @@ mod wasm32 {
     }
 }
 
-#[cfg(feature = "python")]
 #[cfg(feature = "app")]
 mod app {
     use diesel::{
