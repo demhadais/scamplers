@@ -27,25 +27,6 @@ jobs:
         working-directory: rust
         run: cargo clippy --workspace --exclude scamplers-schema --exclude scamplepy --features app
 
-  lint-scamplepy:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Check out repository code
-        uses: actions/checkout@v4
-
-      - name: Cache cargo files
-        uses: Swatinem/rust-cache@v2
-        with:
-          workspaces: "rust -> target"
-
-      - name: Install clippy
-        run: |
-          rustup component add --toolchain stable-x86_64-unknown-linux-gnu clippy
-
-      - name: Lint scamplepy
-        working-directory: rust
-        run: cargo clippy --workspace --exclude scamplers-schema --features python
-
   lint-wasm:
     runs-on: ubuntu-latest
     steps:
@@ -113,21 +94,3 @@ jobs:
 
       - name: Compare typescript/scamplers/rust-src to rust/scamplers/src
         run: diff --recursive typescript/scamplers/rust-src rust/scamplers/src
-
-  check-python-typestubs:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Check out repository code
-        uses: actions/checkout@v4
-
-      - name: Cache cargo files
-        uses: Swatinem/rust-cache@v2
-        with:
-          workspaces: "rust -> target"
-
-      - name: Regenerate Python typestubs and compare to committed typestubs
-        working-directory: rust/scamplepy
-        run: |
-          mkdir committed-typestubs && cp -r scamplepy/* committed-typestubs
-          cargo run
-          diff --recursive committed-typestubs scamplepy

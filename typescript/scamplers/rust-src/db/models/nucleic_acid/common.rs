@@ -2,8 +2,6 @@
 use diesel::prelude::*;
 #[cfg(feature = "python")]
 use pyo3::prelude::*;
-#[cfg(feature = "python")]
-use pyo3_stub_gen::derive::{gen_stub_pyclass, gen_stub_pyclass_complex_enum, gen_stub_pymethods};
 use scamplers_macros::db_json;
 #[cfg(feature = "app")]
 use scamplers_schema::{chromium_run, gems, tenx_assay};
@@ -15,7 +13,6 @@ use wasm_bindgen::prelude::*;
 use crate::db::models::units::{MassUnit, VolumeUnit};
 
 #[cfg_attr(target_arch = "wasm32", wasm_bindgen(getter_with_clone))]
-#[cfg_attr(feature = "python", gen_stub_pyclass)]
 #[db_json]
 #[cfg_attr(
     feature = "python",
@@ -48,7 +45,6 @@ impl Concentration {
 }
 
 #[cfg(feature = "python")]
-#[gen_stub_pymethods]
 #[pymethods]
 impl Concentration {
     #[new]
@@ -70,7 +66,6 @@ fn electrophoretic_sizing_range((min, max): &(u16, u16), _: &()) -> garde::Resul
     Ok(())
 }
 
-#[cfg_attr(feature = "python", gen_stub_pyclass_complex_enum)]
 #[db_json]
 #[serde(tag = "type")]
 #[cfg_attr(

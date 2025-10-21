@@ -26,7 +26,6 @@ pub struct NewPoolMultiplexChipLoading {
 }
 
 #[cfg(feature = "python")]
-#[pyo3_stub_gen::derive::gen_stub_pymethods]
 #[pymethods]
 impl NewPoolMultiplexChipLoading {
     #[new]
@@ -62,7 +61,6 @@ pub struct NewPoolMultiplexGems {
 }
 
 #[cfg(feature = "python")]
-#[pyo3_stub_gen::derive::gen_stub_pymethods]
 #[pymethods]
 impl NewPoolMultiplexGems {
     #[new]
@@ -105,7 +103,6 @@ pub struct NewPoolMultiplexChromiumRun {
 }
 
 #[cfg(feature = "python")]
-#[pyo3_stub_gen::derive::gen_stub_pymethods]
 #[pymethods]
 impl NewPoolMultiplexChromiumRun {
     #[new]

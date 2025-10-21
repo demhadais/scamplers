@@ -9,8 +9,6 @@ use diesel::{
 };
 #[cfg(feature = "python")]
 use pyo3::prelude::*;
-#[cfg(feature = "python")]
-use pyo3_stub_gen::PyStubType;
 use scamplers_macros::base_model;
 use serde::{Deserialize, Serialize, de::DeserializeOwned};
 use valuable::Valuable;
@@ -35,7 +33,6 @@ pub mod units;
     target_arch = "wasm32",
     wasm_bindgen(getter_with_clone, js_name = OrderBy)
 )]
-#[cfg_attr(feature = "python", pyo3_stub_gen::derive::gen_stub_pyclass)]
 #[cfg_attr(
     feature = "python",
     pyclass(name = "OrderBy", get_all, set_all, module = "scamplepy.query")
@@ -54,7 +51,6 @@ impl WasmPythonOrderBy {
 }
 
 #[cfg(feature = "python")]
-#[pyo3_stub_gen::derive::gen_stub_pymethods]
 #[pymethods]
 impl WasmPythonOrderBy {
     #[new]
@@ -74,7 +70,6 @@ impl WasmPythonOrderBy {
 }
 
 #[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
-#[cfg_attr(feature = "python", pyo3_stub_gen::derive::gen_stub_pyclass)]
 #[cfg_attr(
     feature = "python",
     pyclass(get_all, set_all, module = "scamplepy.query")
@@ -226,16 +221,6 @@ where
 }
 
 #[cfg(feature = "python")]
-impl<O> PyStubType for DefaultVec<O>
-where
-    O: Valuable,
-{
-    fn type_output() -> pyo3_stub_gen::TypeInfo {
-        <Vec<WasmPythonOrderBy> as PyStubType>::type_output()
-    }
-}
-
-#[cfg(feature = "python")]
 impl<O> FromPyObject<'_> for DefaultVec<O>
 where
     O: From<WasmPythonOrderBy>,
@@ -306,13 +291,6 @@ impl wasm_bindgen::convert::IntoWasmAbi for Links {
         }
 
         map.into_abi()
-    }
-}
-
-#[cfg(feature = "python")]
-impl PyStubType for Links {
-    fn type_output() -> pyo3_stub_gen::TypeInfo {
-        HashMap::<String, String>::type_output()
     }
 }
 

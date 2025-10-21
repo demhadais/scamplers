@@ -28,27 +28,6 @@ jobs:
         working-directory: python/test-scamplepy
         run: uv run --module pytest
 
-  analyze-types:
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Check out repository code
-        uses: actions/checkout@v4
-
-      - name: Cache cargo files
-        uses: Swatinem/rust-cache@v2
-        with:
-          workspaces: "rust -> target"
-
-      - name: Install the latest version of uv
-        uses: astral-sh/setup-uv@v6
-        with:
-          enable-cache: true
-
-      - name: Analyze types
-        working-directory: python/test-scamplepy
-        run: uv run --module pyright
-
   lint-and-format:
     runs-on: ubuntu-latest
     steps:
