@@ -269,12 +269,12 @@ function passArrayJsValueToWasm0(array, malloc) {
     WASM_VECTOR_LEN = array.length;
     return ptr;
 }
-function __wbg_adapter_12(arg0, arg1) {
-    wasm.wasm_bindgen__convert__closures_____invoke__hec3ceabd8a069f19(arg0, arg1);
+function __wbg_adapter_10(arg0, arg1, arg2) {
+    wasm.closure457_externref_shim(arg0, arg1, arg2);
 }
 
-function __wbg_adapter_29(arg0, arg1, arg2) {
-    wasm.closure457_externref_shim(arg0, arg1, arg2);
+function __wbg_adapter_33(arg0, arg1) {
+    wasm.wasm_bindgen__convert__closures_____invoke__hec3ceabd8a069f19(arg0, arg1);
 }
 
 function __wbg_adapter_1104(arg0, arg1, arg2, arg3) {
@@ -10860,7 +10860,7 @@ export function __wbindgen_cast_45c41c2f89ce6d9f(arg0, arg1) {
 
 export function __wbindgen_cast_6657c79b204f42d0(arg0, arg1) {
     // Cast intrinsic for `Closure(Closure { dtor_idx: 431, function: Function { arguments: [], shim_idx: 432, ret: Unit, inner_ret: Some(Unit) }, mutable: true }) -> Externref`.
-    const ret = makeMutClosure(arg0, arg1, 431, __wbg_adapter_12);
+    const ret = makeMutClosure(arg0, arg1, 431, __wbg_adapter_33);
     return ret;
 };
 
@@ -10903,7 +10903,7 @@ export function __wbindgen_cast_d6cd19b81560fd6e(arg0) {
 
 export function __wbindgen_cast_d9a2dd683ea9c96a(arg0, arg1) {
     // Cast intrinsic for `Closure(Closure { dtor_idx: 456, function: Function { arguments: [Externref], shim_idx: 457, ret: Unit, inner_ret: Some(Unit) }, mutable: true }) -> Externref`.
-    const ret = makeMutClosure(arg0, arg1, 456, __wbg_adapter_29);
+    const ret = makeMutClosure(arg0, arg1, 456, __wbg_adapter_10);
     return ret;
 };
 

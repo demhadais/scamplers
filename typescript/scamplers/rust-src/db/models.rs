@@ -221,13 +221,15 @@ where
 }
 
 #[cfg(feature = "python")]
-impl<O> FromPyObject<'_> for DefaultVec<O>
+impl<O> FromPyObject<'_, '_> for DefaultVec<O>
 where
     O: From<WasmPythonOrderBy>,
     O: Valuable,
 {
-    fn extract_bound(ob: &Bound<'_, PyAny>) -> PyResult<Self> {
-        Ok(<Vec<WasmPythonOrderBy> as FromPyObject>::extract_bound(ob)?.into())
+    type Error = PyErr;
+
+    fn extract(ob: Borrowed<'_, '_, PyAny>) -> PyResult<Self> {
+        Ok(<Vec<WasmPythonOrderBy> as FromPyObject>::extract(ob)?.into())
     }
 }
 
