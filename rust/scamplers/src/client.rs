@@ -50,7 +50,6 @@ use crate::{
 
 #[allow(dead_code)]
 #[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
-#[cfg_attr(feature = "python", pyo3_stub_gen::derive::gen_stub_pyclass)]
 #[cfg_attr(feature = "python", pyclass)]
 #[derive(Clone)]
 pub struct ScamplersClient {
@@ -109,7 +108,6 @@ impl ScamplersClient {
 }
 
 #[cfg(feature = "python")]
-#[pyo3_stub_gen::derive::gen_stub_pymethods]
 #[pymethods]
 impl ScamplersClient {
     #[new]
@@ -268,7 +266,6 @@ macro_rules! wasm_list_relatives_methods {
 macro_rules! python_client_methods {
     {$($method_name:ident($request_type:ty) -> $response_type:path);*} => {
         $(
-            #[pyo3_stub_gen::derive::gen_stub_pymethods]
             #[pyo3::pymethods]
             impl ScamplersClient {
                 async fn $method_name(
@@ -287,7 +284,6 @@ macro_rules! python_client_methods {
 macro_rules! python_client_list_relatives_methods {
     {$($method_name:ident($id_type:ty, $query_type:ty) -> $response_type:path;)*} => {
         $(
-            #[pyo3_stub_gen::derive::gen_stub_pymethods]
             #[pyo3::pymethods]
             impl ScamplersClient {
                 #[pyo3(signature = (id, query = $query_type::default()))]
@@ -384,7 +380,6 @@ python_client_methods! {
 }
 
 #[cfg(feature = "python")]
-#[pyo3_stub_gen::derive::gen_stub_pymethods]
 #[pyo3::pymethods]
 impl ScamplersClient {
     async fn list_multiplexing_tags(&self) -> Result<Vec<MultiplexingTag>, ScamplersErrorResponse> {

@@ -1,5 +1,4 @@
 use pyo3::prelude::*;
-use pyo3_stub_gen::define_stub_info_gatherer;
 use scamplers::{
     db::models::{
         WasmPythonOrderBy,
@@ -21,7 +20,9 @@ use scamplers::{
             library::{Library, LibraryQuery, NewLibrary, NewLibraryMeasurement},
         },
         person::{NewPerson, Person, PersonQuery, PersonUpdate, UserRole},
-        sequencing_run::{NewSequencingRun, SequencingRun, SequencingRunQuery},
+        sequencing_run::{
+            NewSequencingRun, NewSequencingSubmission, SequencingRun, SequencingRunQuery,
+        },
         specimen::{
             self, Species, Specimen, SpecimenQuery, SpecimenType,
             block::{
@@ -187,6 +188,7 @@ fn register_create_submodule<'a>(parent: &'a Bound<PyModule>) -> PyResult<Module
         Species,
         specimen::common::MeasurementData,
         NewSequencingRun,
+        NewSequencingSubmission,
         NewSpecimenMeasurement,
         NewCommitteeApproval,
         ComplianceCommitteeType,
@@ -278,5 +280,3 @@ fn register_responses_submodule<'a>(parent: &'a Bound<PyModule>) -> PyResult<Mod
 
     Ok((scamplers::RESPONSES_SUBMODULE_NAME, responses_submodule))
 }
-
-define_stub_info_gatherer!(stub_info);

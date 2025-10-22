@@ -2,8 +2,6 @@
 use diesel::prelude::*;
 #[cfg(feature = "python")]
 use pyo3::prelude::*;
-#[cfg(feature = "python")]
-use pyo3_stub_gen::derive::gen_stub_pymethods;
 use scamplers_macros::{
     Jsonify, PyJsonify, WasmJsonify, base_model, db_insertion, db_query, db_selection,
     db_simple_enum, db_update,
@@ -57,7 +55,6 @@ pub struct NewPerson {
 }
 
 #[cfg(feature = "python")]
-#[pyo3_stub_gen::derive::gen_stub_pymethods]
 #[pymethods]
 impl NewPerson {
     #[new]
@@ -123,7 +120,6 @@ pub struct PersonSummaryWithParents {
 uuid_newtype!(PersonId);
 
 #[cfg_attr(target_arch = "wasm32", wasm_bindgen(getter_with_clone))]
-#[cfg_attr(feature = "python", pyo3_stub_gen::derive::gen_stub_pyclass)]
 #[cfg_attr(
     feature = "python",
     pyclass(eq, get_all, module = "scamplepy.responses")
@@ -185,7 +181,6 @@ pub struct PersonQuery {
 }
 
 #[cfg(feature = "python")]
-#[gen_stub_pymethods]
 #[pymethods]
 impl PersonQuery {
     #[new]

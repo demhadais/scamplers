@@ -13,7 +13,6 @@ diesel = { workspace = true, optional = true }
 valuable = { workspace = true }
 pyo3 = { workspace = true, optional = true }
 heck = { workspace = true }
-pyo3-stub-gen = { workspace = true, optional = true }
 
 [lints]
 workspace = true
@@ -28,4 +27,4 @@ serde-wasm-bindgen = { workspace = true }
 
 [features]
 app = ["diesel"]
-python = ["pyo3", "pyo3-stub-gen"]
+python = ["pyo3"]

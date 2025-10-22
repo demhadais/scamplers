@@ -65,7 +65,6 @@ impl AsGenericNewSpecimen for NewCryopreservedSuspension {
 }
 
 #[cfg(feature = "python")]
-#[pyo3_stub_gen::derive::gen_stub_pymethods]
 #[pymethods]
 impl NewCryopreservedSuspension {
     #[new]
@@ -151,7 +150,6 @@ impl AsGenericNewSpecimen for NewFixedOrFreshSuspension {
 }
 
 #[cfg(feature = "python")]
-#[pyo3_stub_gen::derive::gen_stub_pymethods]
 #[pymethods]
 impl NewFixedOrFreshSuspension {
     #[new]
@@ -231,7 +229,6 @@ impl AsGenericNewSpecimen for NewFrozenSuspension {
 }
 
 #[cfg(feature = "python")]
-#[pyo3_stub_gen::derive::gen_stub_pymethods]
 #[pymethods]
 impl NewFrozenSuspension {
     #[new]

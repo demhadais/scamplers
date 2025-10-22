@@ -3,8 +3,6 @@ use any_value::AnyValue;
 use diesel::prelude::*;
 #[cfg(feature = "python")]
 use pyo3::prelude::*;
-#[cfg(feature = "python")]
-use pyo3_stub_gen::derive::gen_stub_pymethods;
 use scamplers_macros::{
     Jsonify, PyJsonify, WasmJsonify, base_model, db_insertion, db_query, db_selection,
 };
@@ -41,7 +39,6 @@ pub struct NewLibraryMeasurement {
 }
 
 #[cfg(feature = "python")]
-#[gen_stub_pymethods]
 #[pymethods]
 impl NewLibraryMeasurement {
     #[new]
@@ -81,7 +78,6 @@ pub struct NewLibrary {
 }
 
 #[cfg(feature = "python")]
-#[gen_stub_pymethods]
 #[pymethods]
 impl NewLibrary {
     #[new]
@@ -167,7 +163,6 @@ pub struct LibraryMeasurement {
     target_arch = "wasm32",
     ::wasm_bindgen::prelude::wasm_bindgen(getter_with_clone)
 )]
-#[cfg_attr(feature = "python", pyo3_stub_gen::derive::gen_stub_pyclass)]
 #[cfg_attr(
     feature = "python",
     pyclass(eq, get_all, module = "scamplepy.responses")
@@ -194,7 +189,6 @@ pub struct LibraryQuery {
 }
 
 #[cfg(feature = "python")]
-#[gen_stub_pymethods]
 #[pymethods]
 impl LibraryQuery {
     #[new]

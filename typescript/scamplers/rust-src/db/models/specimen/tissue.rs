@@ -65,7 +65,6 @@ impl AsGenericNewSpecimen for NewCryopreservedTissue {
 }
 
 #[cfg(feature = "python")]
-#[pyo3_stub_gen::derive::gen_stub_pymethods]
 #[pymethods]
 impl NewCryopreservedTissue {
     #[new]
@@ -150,7 +149,6 @@ impl AsGenericNewSpecimen for NewFixedTissue {
 }
 
 #[cfg(feature = "python")]
-#[pyo3_stub_gen::derive::gen_stub_pymethods]
 #[pymethods]
 impl NewFixedTissue {
     #[new]
@@ -230,7 +228,6 @@ impl AsGenericNewSpecimen for NewFrozenTissue {
 }
 
 #[cfg(feature = "python")]
-#[pyo3_stub_gen::derive::gen_stub_pymethods]
 #[pymethods]
 impl NewFrozenTissue {
     #[new]

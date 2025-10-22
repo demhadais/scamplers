@@ -1,9 +1,11 @@
 name: Check SQL Code
 
 on:
-  push:
+  pull_request:
     paths:
       - db/**
+    branches:
+      - main
 
 jobs:
   lint_sql:

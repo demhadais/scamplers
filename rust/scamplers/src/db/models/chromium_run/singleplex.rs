@@ -26,7 +26,6 @@ pub struct NewSingleplexChipLoading {
 }
 
 #[cfg(feature = "python")]
-#[pyo3_stub_gen::derive::gen_stub_pymethods]
 #[pymethods]
 impl NewSingleplexChipLoading {
     #[new]
@@ -62,7 +61,6 @@ pub struct NewSingleplexGems {
 }
 
 #[cfg(feature = "python")]
-#[pyo3_stub_gen::derive::gen_stub_pymethods]
 #[pymethods]
 impl NewSingleplexGems {
     #[new]
@@ -105,7 +103,6 @@ pub struct NewSingleplexChromiumRun {
 }
 
 #[cfg(feature = "python")]
-#[pyo3_stub_gen::derive::gen_stub_pymethods]
 #[pymethods]
 impl NewSingleplexChromiumRun {
     #[new]

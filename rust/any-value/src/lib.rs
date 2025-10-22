@@ -144,13 +144,15 @@ mod python {
 
     use super::AnyValue;
 
-    impl FromPyObject<'_> for AnyValue {
-        fn extract_bound(ob: &Bound<'_, PyAny>) -> PyResult<Self> {
+    impl FromPyObject<'_, '_> for AnyValue {
+        type Error = PyErr;
+
+        fn extract(ob: Borrowed<'_, '_, PyAny>) -> PyResult<Self> {
             if ob.is_instance_of::<PyList>() {
-                let py_list = ob.downcast_exact::<PyList>()?;
+                let py_list = ob.cast_exact::<PyList>()?;
                 let rust_list: Vec<Self> = py_list
                     .iter()
-                    .map(|item| Self::extract_bound(&item))
+                    .map(|item| Self::extract(item.as_borrowed()))
                     .collect::<Result<Vec<_>, _>>()?;
 
                 return Ok(Self(serde_json::Value::Array(
@@ -159,12 +161,12 @@ mod python {
             }
 
             if ob.is_instance_of::<PyDict>() {
-                let py_dict = ob.downcast_exact::<PyDict>()?;
+                let py_dict = ob.cast_exact::<PyDict>()?;
                 let mut rust_map = serde_json::Map::with_capacity(py_dict.len());
 
-                for (k, v) in py_dict {
+                for (k, v) in py_dict.iter() {
                     let k: String = k.extract()?;
-                    rust_map.insert(k, AnyValue::extract_bound(&v)?.0);
+                    rust_map.insert(k, AnyValue::extract(v.as_borrowed())?.0);
                 }
 
                 return Ok(Self(serde_json::Value::Object(rust_map)));
@@ -240,12 +242,6 @@ mod python {
             };
 
             Ok(ret)
-        }
-    }
-
-    impl pyo3_stub_gen::PyStubType for AnyValue {
-        fn type_output() -> pyo3_stub_gen::TypeInfo {
-            pyo3_stub_gen::TypeInfo::with_module("typing", "Any".into())
         }
     }
 }

@@ -19,12 +19,6 @@ repos:
         language: script
         pass_filenames: false
 
-      - id: generate-scamplepy-typestubs
-        name: Generate scamplepy typestubs
-        entry: ./pre-commit_scripts/generate-scamplepy-typestubs.sh
-        language: script
-        pass_filenames: false
-
   - repo: https://github.com/sqlfluff/sqlfluff
     rev: 3.4.2
     hooks:

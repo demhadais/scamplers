@@ -5,8 +5,6 @@ use any_value::AnyValue;
 use diesel::prelude::*;
 #[cfg(feature = "python")]
 use pyo3::prelude::*;
-#[cfg(feature = "python")]
-use pyo3_stub_gen::derive::gen_stub_pymethods;
 use scamplers_macros::{base_model, db_insertion, db_query, db_selection};
 #[cfg(feature = "app")]
 use scamplers_schema::suspension_pool_preparers;
@@ -45,7 +43,6 @@ pub struct NewSuspensionPoolMeasurement {
 }
 
 #[cfg(feature = "python")]
-#[pyo3_stub_gen::derive::gen_stub_pymethods]
 #[pymethods]
 impl NewSuspensionPoolMeasurement {
     #[new]
@@ -139,7 +136,6 @@ fn validate_suspensions_in_pool(
 }
 
 #[cfg(feature = "python")]
-#[pyo3_stub_gen::derive::gen_stub_pymethods]
 #[pymethods]
 impl NewSuspensionPool {
     #[new]
@@ -198,7 +194,6 @@ pub struct SuspensionPoolMeasurement {
 }
 
 #[cfg_attr(target_arch = "wasm32", wasm_bindgen(getter_with_clone))]
-#[cfg_attr(feature = "python", pyo3_stub_gen::derive::gen_stub_pyclass)]
 #[cfg_attr(
     feature = "python",
     pyclass(eq, get_all, module = "scamplepy.responses")
@@ -225,7 +220,6 @@ pub struct SuspensionPoolQuery {
 }
 
 #[cfg(feature = "python")]
-#[gen_stub_pymethods]
 #[pymethods]
 impl SuspensionPoolQuery {
     #[new]

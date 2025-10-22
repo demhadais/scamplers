@@ -80,7 +80,7 @@ serde-wasm-bindgen = { version = "0.6.5" }
 wasm-bindgen-futures = { version = "0.4.50" }
 pretty_assertions = { version = "1.4.1" }
 rstest = { version = "0.25.0", default-features = false }
-pyo3 = { version = "0.26.0", features = [
+pyo3 = { version = "0.27.1", features = [
     "uuid",
     "time",
     "experimental-async",
@@ -88,7 +88,6 @@ pyo3 = { version = "0.26.0", features = [
     "serde",
     "anyhow",
 ] }
-pyo3-stub-gen = { version = "0.15.1", default-features = false }
 bon = { version = "3.7.2" }
 derive_more = { version = "2.0.1", features = ["try_into", "from"] }
 getrandom = { version = "0.3.3" }
@@ -103,4 +102,3 @@ missing_errors_doc = "allow"
 
 [workspace.lints.rust]
 async_fn_in_trait = "allow"
-deprecated = "allow" # pyo3_stub_gen uses deprecated functions from pyo3

@@ -257,13 +257,6 @@ macro_rules! uuid_newtype {
                 self.0.fmt(f)
             }
         }
-
-        #[cfg(feature = "python")]
-        impl pyo3_stub_gen::PyStubType for $name {
-            fn type_output() -> pyo3_stub_gen::TypeInfo {
-                pyo3_stub_gen::TypeInfo::with_module("uuid.UUID", "uuid".into())
-            }
-        }
     };
 }
 
@@ -337,7 +330,6 @@ macro_rules! attach_children_to_parents {
 macro_rules! impl_constrained_py_setter {
     {$struct_name:ident::$setter_name:ident($field_type:ty) = $valid_value:expr} => {
         #[cfg(feature = "python")]
-        #[pyo3_stub_gen::derive::gen_stub_pymethods]
         #[pymethods]
         impl $struct_name {
             #[setter]
