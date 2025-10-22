@@ -1,8 +1,8 @@
-# **[scamplers](https://ctscmongo01lp.jax.org)**
-[scamplers](https://ctscmongo01lp.jax.org) is a web application and RESTful API that aggregates, displays, and allows comprehensive querying of single-cell biological data.
+# **[scamplers](https://scbldata.jax.org)**
+[scamplers](https://scbldata.jax.org) is a web application and RESTful API that aggregates, displays, and allows comprehensive querying of single-cell biological data.
 ### **Using the API**
 First, obtain an API key:
-1. visit https://ctscmongo01lp.jax.org
+1. visit [https://scbldata.jax.org](https://scbldata.jax.org)
 2. sign in if prompted to do so
 3. click "profile"
 4. click "show API key"
