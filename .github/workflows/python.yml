@@ -1,9 +1,11 @@
 name: Check scamplepy
 on:
-  push:
+  pull_request:
     paths:
       - rust/**
       - python/**
+    branches:
+      - main
 
 jobs:
   test:
