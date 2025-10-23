@@ -5,8 +5,8 @@
 	import * as NavigationMenu from '$lib/components/ui/navigation-menu/index.js';
 
 	let { data, children } = $props();
-	// const { session, person } = data;
-	// const { user } = session!;
+	const { session, person } = data;
+	const { user } = session!;
 </script>
 
 <NavigationMenu.Root>

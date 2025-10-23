@@ -1,8 +1,12 @@
 use anyhow::Context;
-use axum::{Router, routing::get};
+use axum::{
+    Router,
+    http::header::{ACCESS_CONTROL_ALLOW_ORIGIN, HeaderValue},
+    routing::get,
+};
 use camino::Utf8PathBuf;
 use tokio::{net::TcpListener, signal};
-use tower_http::trace::TraceLayer;
+use tower_http::{set_header::SetResponseHeaderLayer, trace::TraceLayer};
 
 use crate::{config::Config, state::AppState};
 mod api;
@@ -83,6 +87,10 @@ fn app(app_state: AppState) -> Router {
     Router::new()
         .nest(&path, api_router)
         .layer(axum::extract::DefaultBodyLimit::disable())
+        .layer(SetResponseHeaderLayer::appending(
+            ACCESS_CONTROL_ALLOW_ORIGIN,
+            HeaderValue::from_static("*"),
+        ))
 }
 
 async fn shutdown_signal(app_state: AppState) {
