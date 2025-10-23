@@ -1,0 +1,15 @@
+[package]
+edition.workspace = true
+name = "default-vec"
+version = "0.1.0"
+
+[dependencies]
+schemars = { workspace = true, optional = true }
+serde = { workspace = true, optional = true }
+
+[lints]
+workspace = true
+
+[features]
+schema = ["schemars"]
+serde = ["dep:serde"]

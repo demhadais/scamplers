@@ -1,0 +1,22 @@
+[package]
+edition.workspace = true
+name = "non-empty-string"
+version = "0.1.0"
+
+[dependencies]
+diesel = { workspace = true, optional = true }
+schemars = { workspace = true, optional = true }
+serde = { workspace = true, optional = true }
+thiserror.workspace = true
+
+[lints]
+workspace = true
+
+[features]
+diesel = ["diesel/postgres"]
+schema = ["dep:schemars"]
+serde = ["dep:serde"]
+
+[dev-dependencies]
+diesel = { workspace = true, features = ["sqlite"] }
+pretty_assertions.workspace = true

@@ -7,12 +7,6 @@ repos:
         language: script
         pass_filenames: false
 
-      - id: build-scamplers-js
-        name: Build scamplers-js
-        entry: ./pre-commit_scripts/build-scamplers-js.sh
-        language: script
-        pass_filenames: false
-
       - id: fix-typescript
         name: Fix TypeScript Code
         entry: ./pre-commit_scripts/fix-typescript.sh
@@ -33,3 +27,9 @@ repos:
       - id: ruff-check
         args: [--fix]
       - id: ruff-format
+
+  - repo: https://github.com/ComPWA/taplo-pre-commit
+    rev: v0.9.3
+    hooks:
+      - id: taplo-format
+      - id: taplo-lint

@@ -1,0 +1,37 @@
+[package]
+edition.workspace = true
+name = "scamplers-models"
+version = "0.1.0"
+
+[[bin]]
+name = "scamplers-models"
+required-features = ["schema"]
+
+[dependencies]
+bon.workspace = true
+clap = { workspace = true, optional = true }
+default-vec = { path = "../default-vec", features = ["serde"] }
+diesel = { workspace = true, optional = true, features = [
+    "32-column-tables",
+    "postgres",
+    "serde_json",
+    "uuid",
+    "without-deprecated",
+] }
+jiff.workspace = true
+jiff-diesel = { workspace = true, optional = true }
+macro-attributes = { path = "macro-attributes" }
+macros = { path = "macros" }
+non-empty-string = { path = "../non-empty-string", features = ["serde"] }
+scamplers-schema = { path = "../scamplers-schema", optional = true }
+schemars = { workspace = true, optional = true }
+serde.workspace = true
+serde_json.workspace = true
+uuid.workspace = true
+
+[lints]
+workspace = true
+
+[features]
+app = ["diesel", "jiff-diesel", "non-empty-string/diesel", "scamplers-schema"]
+schema = ["clap", "default-vec/schema", "non-empty-string/schema", "schemars"]
