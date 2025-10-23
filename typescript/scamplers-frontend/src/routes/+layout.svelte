@@ -2,27 +2,22 @@
 	import { resolve } from '$app/paths';
 	import '../app.css';
 	import { signOut } from '@auth/sveltekit/client';
+	import * as NavigationMenu from '$lib/components/ui/navigation-menu/index.js';
 
 	let { data, children } = $props();
-	const { session } = data;
+	// const { session, person } = data;
+	// const { user } = session!;
 </script>
 
-<div>
-	{#if session}
-		<div>Signed in as {session.user.name}</div>
-		<button
-			onclick={() => {
-				signOut();
-			}}>Sign Out</button
-		>
-	{/if}
-	<nav>
-		<ul>
-			<li>
-				<a href={resolve('/profile')}>Profile</a>
-			</li>
-		</ul>
-	</nav>
-</div>
+<NavigationMenu.Root>
+	<NavigationMenu.List>
+		<NavigationMenu.Item>
+			<NavigationMenu.Trigger>Item One</NavigationMenu.Trigger>
+			<NavigationMenu.Content>
+				<NavigationMenu.Link>Link</NavigationMenu.Link>
+			</NavigationMenu.Content>
+		</NavigationMenu.Item>
+	</NavigationMenu.List>
+</NavigationMenu.Root>
 
 {@render children()}

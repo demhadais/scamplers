@@ -1,5 +1,5 @@
 import { SvelteKitAuth, type DefaultSession } from '@auth/sveltekit';
-import { Institution, NewPerson } from 'scamplers';
+import { NewPerson } from 'scamplers';
 import {
 	AUTH_SECRET,
 	MICROSOFT_ENTRA_ID_ID,
@@ -14,8 +14,7 @@ declare module '@auth/sveltekit' {
 	interface Session {
 		user: {
 			id: string;
-			apiKey: string | undefined;
-			institution: Institution;
+			apiKey: string;
 		} & DefaultSession['user'];
 	}
 }
