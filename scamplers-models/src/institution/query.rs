@@ -1,19 +1,21 @@
-use default_vec::DefaultVec;
-use macro_attributes::query;
+use macro_attributes::{query, query_newtype};
 use macros::define_ordering_enum;
 #[cfg(feature = "app")]
-use scamplers_schema::institution::name;
+use scamplers_schema::institution::{id, name};
 use uuid::Uuid;
 
-define_ordering_enum!(InstitutionOrderBy { name }, default = name);
+use crate::generic_query::GenericQuery;
 
 #[query]
 #[derive(bon::Builder)]
-pub struct Query {
+pub struct Filter {
     #[builder(default)]
-    ids: Vec<Uuid>,
+    pub ids: Vec<Uuid>,
     #[builder(default)]
-    names: Vec<String>,
-    #[builder(default)]
-    order_by: DefaultVec<InstitutionOrderBy>,
+    pub names: Vec<String>,
 }
+
+define_ordering_enum!(OrderBy { Id(id), Name(name) }, default = Name(name));
+
+#[query_newtype("InstitutionQuery")]
+pub struct Query(pub GenericQuery<Filter, OrderBy>);

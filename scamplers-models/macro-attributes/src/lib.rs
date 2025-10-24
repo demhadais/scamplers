@@ -96,6 +96,21 @@ pub fn query(_attr: TokenStream, input: TokenStream) -> TokenStream {
 }
 
 #[proc_macro_attribute]
+pub fn query_newtype(attr: TokenStream, input: TokenStream) -> TokenStream {
+    let base_derives = base_derives(true);
+
+    let input: proc_macro2::TokenStream = input.into();
+    let attr: proc_macro2::TokenStream = attr.into();
+
+    quote! {
+        #base_derives
+        #[cfg_attr(feature = "schema", schemars(title = #attr, inline))]
+        #input
+    }
+    .into()
+}
+
+#[proc_macro_attribute]
 pub fn select(_attr: TokenStream, input: TokenStream) -> TokenStream {
     let base_derives = base_derives(false);
     let has_query = diesel_has_query();

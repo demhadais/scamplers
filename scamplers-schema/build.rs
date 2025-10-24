@@ -3,17 +3,32 @@ use std::process::Command;
 fn main() {
     println!("cargo::rerun-if-changed=migrations");
 
-    // Run migrations and generate lib.rs
-    generate_schema();
+    for cmd in [reset_db(), generate_schema()] {
+        run_command(cmd);
+    }
 }
 
-fn generate_schema() {
-    let mut diesel_cmd = Command::new("diesel");
+fn diesel_cmd(args: &[&str]) -> Command {
+    let mut cmd = Command::new("diesel");
+    cmd.args(args);
 
-    let args = ["migration", "run", "--migration-dir", "migrations"];
-    diesel_cmd.args(args);
+    cmd
+}
 
-    let output = diesel_cmd.output().unwrap();
+fn reset_db() -> Command {
+    let cmd = diesel_cmd(&["database", "reset"]);
+
+    cmd
+}
+
+fn generate_schema() -> Command {
+    let cmd = diesel_cmd(&["migration", "run"]);
+
+    cmd
+}
+
+fn run_command(mut cmd: Command) {
+    let output = cmd.output().unwrap();
 
     assert!(
         output.stderr.is_empty(),

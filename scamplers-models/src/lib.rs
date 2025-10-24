@@ -2,13 +2,16 @@
 // mod dataset;
 // mod index_set;
 pub mod institution;
-// mod lab;
+pub mod lab;
 // mod multiplexing_tag;
 // mod nucleic_acid;
 pub mod person;
 // mod sequencing_run;
-// mod specimen;
+pub mod specimen;
 // mod suspension;
 // mod tenx_assay;
 // mod units;
+mod generic_query;
+mod links;
+#[cfg(feature = "app")]
 mod utils;

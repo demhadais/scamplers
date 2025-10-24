@@ -726,6 +726,7 @@ dependencies = [
  "clap",
  "default-vec",
  "diesel",
+ "heck",
  "jiff",
  "jiff-diesel",
  "macro-attributes",

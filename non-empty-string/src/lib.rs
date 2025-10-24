@@ -7,6 +7,7 @@ use std::{fmt::Display, str::FromStr};
     derive(diesel::deserialize::FromSqlRow, diesel::expression::AsExpression)
 )]
 #[cfg_attr(feature = "diesel", diesel(sql_type = ::diesel::sql_types::Text))]
+#[cfg_attr(feature = "schema", schemars(with = "String"))]
 pub struct NonEmptyString(String);
 
 #[derive(Debug, thiserror::Error)]
@@ -23,6 +24,7 @@ impl NonEmptyString {
         Ok(Self(s))
     }
 
+    #[must_use]
     pub fn into_inner(self) -> String {
         self.0
     }
@@ -30,6 +32,7 @@ impl NonEmptyString {
 
 impl FromStr for NonEmptyString {
     type Err = EmptyStringError;
+
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         Self::new(s.to_string())
     }
@@ -58,11 +61,12 @@ impl AsRef<str> for NonEmptyString {
 mod serde_impls {
     use std::fmt;
 
-    use super::NonEmptyString;
     use serde::{
         Serialize,
         de::{self, Deserialize, Deserializer, Unexpected, Visitor},
     };
+
+    use super::NonEmptyString;
 
     impl Serialize for NonEmptyString {
         fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
@@ -84,7 +88,7 @@ mod serde_impls {
         }
     }
 
-    impl<'de> Visitor<'de> for NonEmptyStringVisitor {
+    impl Visitor<'_> for NonEmptyStringVisitor {
         type Value = NonEmptyString;
 
         fn expecting(&self, formatter: &mut fmt::Formatter) -> std::fmt::Result {
@@ -148,8 +152,7 @@ mod test {
     fn diesel_compatible() {
         use std::str::FromStr;
 
-        use diesel::RunQueryDsl;
-        use diesel::prelude::*;
+        use diesel::{RunQueryDsl, prelude::*};
 
         diesel::table! {
             table_with_strings(id) {

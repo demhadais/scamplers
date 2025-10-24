@@ -1,6 +1,6 @@
 create table tenx_assay (
     id uuid primary key default uuidv7(),
-    links jsonb not null,
+    links jsonb generated always as (construct_links('10x-assays', id)) stored not null,
     name text not null,
     library_types text [],
     sample_multiplexing text,

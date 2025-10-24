@@ -7,7 +7,7 @@ use crate::person::common::Fields;
 
 #[insert]
 #[cfg_attr(feature = "app", diesel(table_name = scamplers_schema::person))]
-pub struct PersonCreation {
+pub struct Creation {
     #[serde(flatten)]
     #[cfg_attr(feature = "app", diesel(embed))]
     inner: Fields,
@@ -15,7 +15,7 @@ pub struct PersonCreation {
 }
 
 #[bon]
-impl PersonCreation {
+impl Creation {
     #[builder]
     pub fn new(
         name: NonEmptyString,

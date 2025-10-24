@@ -1,15 +1,33 @@
 repos:
   - repo: local
     hooks:
-      - id: fix-rust
-        name: Fix Rust Code
-        entry: ./pre-commit_scripts/fix-rust.sh
+      - id: lint_default-vec
+        name: Lint default-vec
+        entry: ./pre-commit_scripts/lint_default-vec.sh
         language: script
         pass_filenames: false
 
-      - id: fix-typescript
-        name: Fix TypeScript Code
-        entry: ./pre-commit_scripts/fix-typescript.sh
+      - id: lint_non-empty-string
+        name: Lint non-empty-string
+        entry: ./pre-commit_scripts/lint_non-empty-string.sh
+        language: script
+        pass_filenames: false
+
+      - id: lint_scamplers-frontend
+        name: Lint scamplers-frontend
+        entry: ./pre-commit_scripts/lint_scamplers-frontend.sh
+        language: script
+        pass_filenames: false
+
+      - id: lint_scamplers-models_app
+        name: Lint scamplers-models_app
+        entry: ./pre-commit_scripts/lint_scamplers-models_app.sh
+        language: script
+        pass_filenames: false
+
+      - id: lint_scamplers-models_schema
+        name: Lint scamplers-models_schema
+        entry: ./pre-commit_scripts/lint_scamplers-models_schema.sh
         language: script
         pass_filenames: false
 
@@ -20,13 +38,6 @@ repos:
         exclude: ^db/migrations/00000000000000_diesel_initial_setup/down\.sql|migrations/0009_library-type-specification/up\.sql$
       - id: sqlfluff-fix
         exclude: ^db/migrations/00000000000000_diesel_initial_setup/down\.sql|migrations/0009_library-type-specification/up\.sql$
-
-  - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.13.0
-    hooks:
-      - id: ruff-check
-        args: [--fix]
-      - id: ruff-format
 
   - repo: https://github.com/ComPWA/taplo-pre-commit
     rev: v0.9.3

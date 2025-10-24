@@ -12,12 +12,13 @@ bon.workspace = true
 clap = { workspace = true, optional = true }
 default-vec = { path = "../default-vec", features = ["serde"] }
 diesel = { workspace = true, optional = true, features = [
-    "32-column-tables",
-    "postgres",
-    "serde_json",
-    "uuid",
-    "without-deprecated",
+  "32-column-tables",
+  "postgres",
+  "serde_json",
+  "uuid",
+  "without-deprecated",
 ] }
+heck = { workspace = true, optional = true }
 jiff.workspace = true
 jiff-diesel = { workspace = true, optional = true }
 macro-attributes = { path = "macro-attributes" }
@@ -34,4 +35,10 @@ workspace = true
 
 [features]
 app = ["diesel", "jiff-diesel", "non-empty-string/diesel", "scamplers-schema"]
-schema = ["clap", "default-vec/schema", "non-empty-string/schema", "schemars"]
+schema = [
+  "clap",
+  "default-vec/schema",
+  "heck",
+  "non-empty-string/schema",
+  "schemars",
+]

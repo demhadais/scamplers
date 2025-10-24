@@ -7,6 +7,7 @@ use crate::institution::common::Fields;
 
 #[insert]
 #[cfg_attr(feature = "app", diesel(table_name = scamplers_schema::institution))]
+#[cfg_attr(feature = "schema", schemars(title = "InstitutionCreation"))]
 pub struct Creation {
     #[serde(flatten)]
     #[cfg_attr(feature = "app", diesel(embed))]
@@ -22,10 +23,12 @@ impl Creation {
         }
     }
 
+    #[must_use]
     pub fn id(&self) -> &Uuid {
         &self.inner.id
     }
 
+    #[must_use]
     pub fn name(&self) -> &str {
         self.inner.name.as_ref()
     }

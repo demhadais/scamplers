@@ -1,6 +1,8 @@
 create table suspension_pool (
     id uuid primary key default uuidv7(),
-    links jsonb not null,
+    links jsonb generated always as (
+        construct_links('suspension-pools', id, '{"measurements", "suspensions"}')
+    ) stored not null,
     readable_id text unique not null,
     name text not null,
     pooled_at timestamptz not null,

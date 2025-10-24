@@ -27,6 +27,7 @@ deadpool-diesel = { version = "0.6.1", features = ["postgres"] }
 diesel = { version = "2.3.2", default-features = false }
 diesel_migrations = { version = "2.2.0", features = ["postgres"] }
 dotenvy = { version = "0.15.7" }
+heck = { version = "0.5.0" }
 jiff = { version = "0.2.15", features = ["serde"] }
 jiff-diesel = { version = "0.1.3", features = ["postgres"] }
 pretty_assertions = { version = "1.4.1" }

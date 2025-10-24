@@ -7,7 +7,7 @@ create table multiplexing_tag (
 
 create table suspension (
     id uuid primary key default uuidv7(),
-    links jsonb not null,
+    links jsonb generated always as (construct_links('suspensions', id, '{"measurements"}')) stored not null,
     readable_id text unique not null,
     parent_specimen_id uuid references specimen on delete restrict on update restrict not null,
     biological_material text not null,

@@ -1,6 +1,8 @@
 create table lab (
     id uuid primary key default uuidv7(),
-    links jsonb not null,
+    links jsonb generated always as (
+        construct_links('labs', id, '{"members", "specimens", "chromium-datasets"}')
+    ) stored not null,
     name text unique not null,
     pi_id uuid references person on delete restrict on update restrict not null,
     delivery_dir text unique not null
