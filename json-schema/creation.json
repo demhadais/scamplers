@@ -1,0 +1,1 @@
+{"$schema":"https://json-schema.org/draft/2020-12/schema","title":"Creation","type":"object","properties":{"email":{"type":"string"},"institution_id":{"type":"string","format":"uuid"},"ms_user_id":{"type":["string","null"],"format":"uuid"},"name":{"type":"string"},"orcid":{"type":["string","null"]}},"required":["name","institution_id","email"]}

@@ -2,4 +2,4 @@
 
 set -euo pipefail
 
-cargo run --package scamplers-models
+cargo run --package scamplers-models --features schema
