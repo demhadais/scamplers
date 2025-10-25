@@ -1,7 +1,4 @@
-use macro_attributes::{query, query_newtype};
-use macros::define_ordering_enum;
-#[cfg(feature = "app")]
-use scamplers_schema::person::columns::{email, id, name};
+use macro_attributes::{base_model_default, query, query_newtype};
 use uuid::Uuid;
 
 use crate::generic_query::GenericQuery;
@@ -21,7 +18,13 @@ pub struct Filter {
     pub ms_user_ids: Vec<Uuid>,
 }
 
-define_ordering_enum! { OrderBy { Id(id), Name(name), Email(email) }, default = Name(name) }
+#[base_model_default]
+pub enum OrdinalColumns {
+    Id,
+    Email,
+    #[default]
+    Name,
+}
 
 #[query_newtype("PersonQuery")]
-pub struct Query(pub GenericQuery<Filter, OrderBy>);
+pub struct Query(pub GenericQuery<Filter, OrdinalColumns>);

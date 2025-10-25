@@ -1,45 +1,4 @@
 #[macro_export]
-macro_rules! define_ordering_enum {
-    {$name:ident { $($variant_name:ident($field:path)),* }, default = $default_variant:ident($default_field:path)} => {
-        #[derive(Clone, Debug, PartialEq, ::serde::Serialize, ::serde::Deserialize)]
-        #[cfg_attr(feature = "schema", derive(::schemars::JsonSchema))]
-        #[serde(tag = "field", rename_all = "snake_case")]
-        #[cfg_attr(feature = "schema", schemars(inline))]
-        pub enum $name {
-            $(
-                #[cfg(feature = "app")]
-                $variant_name {
-                    #[serde(skip)]
-                    field: $field,
-                    descending: bool
-                },
-                #[cfg(not(feature = "app"))]
-                $variant_name { descending: bool },
-            )*
-        }
-
-        impl Default for $name {
-            fn default() -> Self {
-                #[cfg(feature = "app")]
-                {
-                    return Self::$default_variant {
-                        field: $default_field,
-                        descending: false
-                    };
-                }
-
-                #[cfg(not(feature = "app"))]
-                {
-                    return Self::$default_variant {
-                        descending: false
-                    };
-                }
-            }
-        }
-    };
-}
-
-#[macro_export]
 macro_rules! impl_json_from_sql {
     ($name:ident) => {
         #[cfg(feature = "app")]

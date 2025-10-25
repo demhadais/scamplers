@@ -2,7 +2,7 @@ use std::{fs, path::PathBuf};
 
 use clap::Parser;
 use heck::ToSnekCase;
-use scamplers_models::institution;
+use scamplers_models::{institution, person};
 use schemars::schema_for;
 
 #[derive(clap::Parser)]
@@ -19,6 +19,10 @@ fn main() {
         schema_for!(institution::Creation),
         schema_for!(institution::Query),
         schema_for!(institution::Institution),
+        schema_for!(person::Creation),
+        schema_for!(person::Query),
+        schema_for!(person::PersonSummary),
+        schema_for!(person::Person),
     ];
 
     let output_dir = PathBuf::from(output_dir);
