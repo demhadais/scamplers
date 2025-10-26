@@ -1,14 +1,15 @@
 #[cfg(feature = "app")]
 use diesel::prelude::*;
-use macro_attributes::select;
+use macro_attributes::{base_model, select};
+use macros::uuid_newtype;
 #[cfg(feature = "app")]
-use scamplers_schema::{institution, person};
+use scamplers_schema::{institutions, people};
 use uuid::Uuid;
 
 use crate::{institution::Institution, links::Links, person::common::Fields};
 
 #[select]
-#[cfg_attr(feature = "app", diesel(table_name = person))]
+#[cfg_attr(feature = "app", diesel(table_name = people))]
 pub struct PersonSummary {
     id: Uuid,
     #[serde(flatten)]
@@ -19,7 +20,7 @@ pub struct PersonSummary {
 }
 
 #[select]
-#[cfg_attr(feature = "app", diesel(table_name = person, base_query = person::table.inner_join(institution::table)))]
+#[cfg_attr(feature = "app", diesel(table_name = people, base_query = people::table.inner_join(institutions::table)))]
 pub struct Person {
     #[serde(flatten)]
     #[cfg_attr(feature = "app", diesel(embed))]
@@ -27,3 +28,12 @@ pub struct Person {
     #[cfg_attr(feature = "app", diesel(embed))]
     institution: Institution,
 }
+
+#[base_model]
+pub struct CreatedUser {
+    #[serde(flatten)]
+    pub inner: PersonSummary,
+    pub api_key: String,
+}
+
+uuid_newtype!(PersonId);

@@ -1,16 +1,16 @@
-create table specimen (
+create table specimens (
     id uuid primary key default uuidv7(),
     readable_id text unique not null,
     links jsonb generated always as (
         construct_links('specimens', id, '{"measurements", "suspensions", "chromium-datasets"}')
     ) stored not null,
     name text not null,
-    submitted_by uuid references person on delete restrict on update restrict not null,
-    lab_id uuid references lab on delete restrict on update restrict not null,
+    submitted_by uuid references people on delete restrict on update restrict not null,
+    lab_id uuid references labs on delete restrict on update restrict not null,
     received_at timestamptz not null,
     species text [] not null,
     returned_at timestamptz,
-    returned_by uuid references person on delete restrict on update restrict,
+    returned_by uuid references people on delete restrict on update restrict,
     type text not null,
     embedded_in text,
     fixative text,
@@ -23,16 +23,16 @@ create table specimen (
 );
 
 create table committee_approval (
-    institution_id uuid references institution on delete restrict on update restrict not null,
-    specimen_id uuid references specimen on delete restrict on update restrict not null,
+    institution_id uuid references institutions on delete restrict on update restrict not null,
+    specimen_id uuid references specimens on delete restrict on update restrict not null,
     committee_type text not null,
     compliance_identifier text not null,
     primary key (institution_id, committee_type, specimen_id)
 );
 
-create table specimen_measurement (
+create table specimen_measurements (
     id uuid primary key default uuidv7(),
-    specimen_id uuid not null references specimen on delete restrict on update restrict,
-    measured_by uuid not null references person on delete restrict on update restrict,
+    specimen_id uuid not null references specimens on delete restrict on update restrict,
+    measured_by uuid not null references people on delete restrict on update restrict,
     data jsonb not null
 );

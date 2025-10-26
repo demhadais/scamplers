@@ -1,0 +1,6 @@
+{
+  "imports": {
+    "scamplers-models/": "./scamplers-models/"
+  },
+  "lint": { "rules": { "exclude": ["no-sloppy-imports"] } }
+}

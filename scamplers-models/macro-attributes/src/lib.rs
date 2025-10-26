@@ -112,20 +112,7 @@ pub fn insert(_attr: TokenStream, input: TokenStream) -> TokenStream {
 }
 
 #[proc_macro_attribute]
-pub fn query(_attr: TokenStream, input: TokenStream) -> TokenStream {
-    let base_derives = base_derives(true, input.clone().is_enum());
-
-    let input: proc_macro2::TokenStream = input.into();
-
-    quote! {
-        #base_derives
-        #input
-    }
-    .into()
-}
-
-#[proc_macro_attribute]
-pub fn query_newtype(attr: TokenStream, input: TokenStream) -> TokenStream {
+pub fn query(attr: TokenStream, input: TokenStream) -> TokenStream {
     let base_derives = base_derives(true, input.clone().is_enum());
 
     let input: proc_macro2::TokenStream = input.into();
@@ -133,6 +120,8 @@ pub fn query_newtype(attr: TokenStream, input: TokenStream) -> TokenStream {
 
     quote! {
         #base_derives
+        #[derive(bon::Builder)]
+        #[builder(on(_, into))]
         #[cfg_attr(feature = "schema", schemars(title = #attr, inline))]
         #input
     }

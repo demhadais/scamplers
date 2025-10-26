@@ -1,16 +1,8 @@
-use macro_attributes::{base_model_default, query, query_newtype};
+use default_vec::DefaultVec;
+use macro_attributes::{base_model_default, query};
 use uuid::Uuid;
 
-use crate::generic_query::GenericQuery;
-
-#[query]
-#[derive(bon::Builder)]
-pub struct Filter {
-    #[builder(default)]
-    pub ids: Vec<Uuid>,
-    #[builder(default)]
-    pub names: Vec<String>,
-}
+use crate::generic_order_by::OrderBy;
 
 #[base_model_default]
 pub enum OrdinalColumns {
@@ -19,5 +11,16 @@ pub enum OrdinalColumns {
     Name,
 }
 
-#[query_newtype("InstitutionQuery")]
-pub struct Query(pub GenericQuery<Filter, OrdinalColumns>);
+#[query("InstitutionQuery")]
+pub struct Query {
+    #[builder(default)]
+    pub ids: Vec<Uuid>,
+    #[builder(default)]
+    pub names: Vec<String>,
+    #[builder(default)]
+    pub limit: i64,
+    #[builder(default)]
+    pub offset: i64,
+    #[builder(default)]
+    pub order_by: DefaultVec<OrderBy<OrdinalColumns>>,
+}

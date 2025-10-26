@@ -180,8 +180,8 @@ impl InitialAppState {
         Ok(())
     }
 
-    /// # Panics
-    /// # Errors
+
+
     async fn run_migrations(&self) -> anyhow::Result<()> {
         const MIGRATIONS: EmbeddedMigrations = embed_migrations!("../../db/migrations");
 

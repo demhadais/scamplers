@@ -31,12 +31,6 @@ repos:
         language: script
         pass_filenames: false
 
-      - id: generate_json-schema
-        name: Generate JSON schema
-        entry: ./pre-commit_scripts/generate_json-schema.sh
-        language: script
-        pass_filenames: false
-
   - repo: https://github.com/sqlfluff/sqlfluff
     rev: 3.4.2
     hooks:

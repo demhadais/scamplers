@@ -1,0 +1,40 @@
+[package]
+edition.workspace = true
+name = "scamplers-api"
+version = "0.1.0"
+
+[dependencies]
+anyhow.workspace = true
+argon2.workspace = true
+axum.workspace = true
+axum-extra.workspace = true
+camino.workspace = true
+clap.workspace = true
+deadpool-diesel.workspace = true
+diesel = { workspace = true, features = ["postgres", "serde_json", "uuid"] }
+diesel_migrations.workspace = true
+dotenvy.workspace = true
+jiff-diesel.workspace = true
+rand.workspace = true
+regex.workspace = true
+reqwest.workspace = true
+rstest.workspace = true
+scamplers-models = { version = "0.1.0", path = "../scamplers-models", features = [
+  "app",
+] }
+scamplers-schema = { version = "0.1.0", path = "../scamplers-schema" }
+serde.workspace = true
+serde_json.workspace = true
+thiserror.workspace = true
+tokio.workspace = true
+tracing.workspace = true
+tracing-appender.workspace = true
+tracing-subscriber.workspace = true
+url.workspace = true
+uuid.workspace = true
+
+[lints]
+workspace = true
+
+[dev-dependencies]
+pretty_assertions.workspace = true

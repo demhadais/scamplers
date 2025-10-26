@@ -102,6 +102,13 @@ mod serde_impls {
             NonEmptyString::new(value)
                 .map_err(|e| de::Error::invalid_value(Unexpected::Str(&e.0), &self))
         }
+
+        fn visit_str<E>(self, value: &str) -> Result<Self::Value, E>
+        where
+            E: de::Error,
+        {
+            self.visit_string(value.to_owned())
+        }
     }
 }
 

@@ -1,17 +1,19 @@
 use bon::bon;
 use macro_attributes::insert;
 use non_empty_string::NonEmptyString;
+#[cfg(feature = "app")]
+use scamplers_schema::labs;
 use uuid::Uuid;
 
 use crate::lab::common::Fields;
 
 #[insert]
-#[cfg_attr(feature = "app", diesel(table_name = scamplers_schema::lab))]
+#[cfg_attr(feature = "app", diesel(table_name = labs))]
 #[cfg_attr(feature = "schema", schemars(title = "LabCreation"))]
 pub struct Creation {
     #[serde(flatten)]
     #[cfg_attr(feature = "app", diesel(embed))]
-    inner: Fields,
+    pub inner: Fields,
 }
 
 #[bon]

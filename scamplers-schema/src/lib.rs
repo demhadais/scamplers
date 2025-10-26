@@ -15,11 +15,11 @@ macro_rules! impl_partial_eq {
 }
 
 impl_partial_eq!(
-    institution::id,
-    institution::name,
-    person::id,
-    person::name,
-    person::email,
-    lab::id,
-    lab::name
+    institutions::id,
+    institutions::name,
+    people::id,
+    people::name,
+    people::email,
+    labs::id,
+    labs::name
 );

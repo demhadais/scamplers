@@ -2,13 +2,13 @@
 use diesel::prelude::*;
 use macro_attributes::select;
 #[cfg(feature = "app")]
-use scamplers_schema::{lab, person};
+use scamplers_schema::{labs, people};
 use uuid::Uuid;
 
 use crate::{lab::common::Fields, links::Links, person::PersonSummary};
 
 #[select]
-#[cfg_attr(feature = "app", diesel(table_name = lab))]
+#[cfg_attr(feature = "app", diesel(table_name = labs))]
 pub struct LabSummary {
     id: Uuid,
     #[serde(flatten)]
@@ -18,11 +18,11 @@ pub struct LabSummary {
 }
 
 #[select]
-#[cfg_attr(feature = "app", diesel(table_name = lab, base_query = lab::table.inner_join(person::table)))]
+#[cfg_attr(feature = "app", diesel(table_name = labs, base_query = labs::table.inner_join(people::table)))]
 pub struct Lab {
     #[serde(flatten)]
     #[cfg_attr(feature = "app", diesel(embed))]
-    summary: PersonSummary,
+    summary: LabSummary,
     #[cfg_attr(feature = "app", diesel(embed))]
     pi: PersonSummary,
 }

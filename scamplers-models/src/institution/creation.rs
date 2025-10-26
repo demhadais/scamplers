@@ -1,17 +1,19 @@
 use bon::bon;
 use macro_attributes::insert;
 use non_empty_string::NonEmptyString;
+#[cfg(feature = "app")]
+use scamplers_schema::institutions;
 use uuid::Uuid;
 
 use crate::institution::common::Fields;
 
 #[insert]
-#[cfg_attr(feature = "app", diesel(table_name = scamplers_schema::institution))]
+#[cfg_attr(feature = "app", diesel(table_name = institutions))]
 #[cfg_attr(feature = "schema", schemars(title = "InstitutionCreation"))]
 pub struct Creation {
     #[serde(flatten)]
     #[cfg_attr(feature = "app", diesel(embed))]
-    inner: Fields,
+    pub inner: Fields,
 }
 
 #[bon]
@@ -21,15 +23,5 @@ impl Creation {
         Self {
             inner: Fields { id, name },
         }
-    }
-
-    #[must_use]
-    pub fn id(&self) -> &Uuid {
-        &self.inner.id
-    }
-
-    #[must_use]
-    pub fn name(&self) -> &str {
-        self.inner.name.as_ref()
     }
 }

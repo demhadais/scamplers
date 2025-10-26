@@ -9,15 +9,15 @@ create table cdna (
     additional_data jsonb
 );
 
-create table cdna_measurement (
+create table cdna_measurements (
     id uuid primary key default uuidv7(),
     cdna_id uuid references cdna on delete restrict on update restrict not null,
-    measured_by uuid references person on delete restrict on update restrict not null,
+    measured_by uuid references people on delete restrict on update restrict not null,
     data jsonb not null
 );
 
 create table cdna_preparers (
     cdna_id uuid references cdna on delete restrict on update restrict not null,
-    prepared_by uuid references person on delete restrict on update restrict not null,
+    prepared_by uuid references people on delete restrict on update restrict not null,
     primary key (cdna_id, prepared_by)
 );

@@ -1,17 +1,23 @@
 use bon::bon;
 use macro_attributes::insert;
 use non_empty_string::NonEmptyString;
+#[cfg(feature = "app")]
+use scamplers_schema::people;
 use uuid::Uuid;
 
-use crate::person::common::Fields;
+use crate::person::common::{Fields, UserRole};
 
 #[insert]
-#[cfg_attr(feature = "app", diesel(table_name = scamplers_schema::person))]
+#[cfg_attr(feature = "app", diesel(table_name = people))]
+#[cfg_attr(feature = "schema", schemars(title = "PersonCreation"))]
 pub struct Creation {
     #[serde(flatten)]
     #[cfg_attr(feature = "app", diesel(embed))]
-    inner: Fields,
-    email: NonEmptyString,
+    pub inner: Fields,
+    pub email: NonEmptyString,
+    #[serde(default)]
+    #[cfg_attr(feature = "app", diesel(skip_insertion))]
+    pub roles: Vec<UserRole>,
 }
 
 #[bon]
@@ -23,6 +29,7 @@ impl Creation {
         orcid: Option<NonEmptyString>,
         institution_id: Uuid,
         ms_user_id: Option<Uuid>,
+        roles: Vec<UserRole>,
     ) -> Self {
         Self {
             inner: Fields {
@@ -31,6 +38,7 @@ impl Creation {
                 institution_id,
                 ms_user_id,
             },
+            roles,
             email,
         }
     }
