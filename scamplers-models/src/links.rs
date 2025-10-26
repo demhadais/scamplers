@@ -3,12 +3,12 @@ use std::collections::HashMap;
 use macro_attributes::base_model;
 
 #[base_model]
+#[serde(transparent)]
 #[cfg_attr(
     feature = "app",
     derive(diesel::deserialize::FromSqlRow, diesel::expression::AsExpression)
 )]
 #[cfg_attr(feature = "app", diesel(sql_type = diesel::sql_types::Jsonb))]
-#[cfg_attr(feature = "schema", schemars(inline))]
 pub struct Links(HashMap<String, String>);
 
 #[cfg(feature = "app")]

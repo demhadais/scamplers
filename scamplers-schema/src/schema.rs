@@ -1,9 +1,11 @@
 // @generated automatically by Diesel CLI.
 
-pub mod sql_types {
-    #[derive(std::fmt::Debug, diesel::sql_types::SqlType)]
-    #[diesel(postgres_type(name = "hashed_key"))]
-    pub struct HashedKey;
+diesel::table! {
+    api_keys (prefix, hash) {
+        prefix -> Text,
+        hash -> Text,
+        user_id -> Uuid,
+    }
 }
 
 diesel::table! {
@@ -199,9 +201,6 @@ diesel::table! {
 }
 
 diesel::table! {
-    use diesel::sql_types::*;
-    use super::sql_types::HashedKey;
-
     people (id) {
         id -> Uuid,
         links -> Jsonb,
@@ -210,7 +209,6 @@ diesel::table! {
         institution_id -> Uuid,
         orcid -> Nullable<Text>,
         ms_user_id -> Nullable<Uuid>,
-        hashed_api_key -> Nullable<HashedKey>,
     }
 }
 
@@ -347,6 +345,7 @@ diesel::table! {
     }
 }
 
+diesel::joinable!(api_keys -> people (user_id));
 diesel::joinable!(cdna -> gems (gems_id));
 diesel::joinable!(cdna_measurements -> cdna (cdna_id));
 diesel::joinable!(cdna_measurements -> people (measured_by));
@@ -397,6 +396,7 @@ diesel::joinable!(suspensions -> specimens (parent_specimen_id));
 diesel::joinable!(suspensions -> suspension_pools (pooled_into));
 
 diesel::allow_tables_to_appear_in_same_query!(
+    api_keys,
     cdna,
     cdna_measurements,
     cdna_preparers,

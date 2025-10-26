@@ -1,10 +1,7 @@
-use std::ops::Deref;
-
 use default_vec::DefaultVec;
 use macro_attributes::{base_model, base_model_default};
 
 #[base_model_default]
-#[cfg_attr(feature = "schema", schemars(inline))]
 pub struct OrderBy<O>
 where
     O: Default,
@@ -16,7 +13,6 @@ where
 #[base_model]
 #[derive(bon::Builder)]
 #[serde(default)]
-#[cfg_attr(feature = "schema", schemars(inline))]
 pub struct Query<F, O>
 where
     F: Default,

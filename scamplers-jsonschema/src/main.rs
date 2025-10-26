@@ -20,9 +20,9 @@ fn main() {
         schema_for!(institution::InstitutionQuery),
         schema_for!(institution::Institution),
         schema_for!(person::Creation),
-        schema_for!(person::Query),
-        schema_for!(person::PersonSummary),
         schema_for!(person::PersonQuery),
+        schema_for!(person::PersonSummary),
+        schema_for!(person::Person),
         schema_for!(person::CreatedUser),
     ];
 
@@ -45,7 +45,7 @@ fn main() {
             .to_snek_case();
         let path = output_dir.join(filename).with_extension("json");
 
-        fs::write(&path, serde_json::to_string(&def).unwrap()).unwrap_or_else(|_| {
+        fs::write(&path, serde_json::to_string_pretty(&def).unwrap()).unwrap_or_else(|_| {
             panic!(
                 "JSON schema should be writable to {}",
                 path.to_str().unwrap()

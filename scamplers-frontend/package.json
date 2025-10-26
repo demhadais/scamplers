@@ -4,7 +4,7 @@
   "version": "0.0.1",
   "type": "module",
   "scripts": {
-    "typedefs": "deno run --allow-all npm:json-schema-to-typescript --input ../json-schema/ --output scamplers-models/",
+    "typedefs": "cargo run --package scamplers-jsonschema -- --output-dir ../json-schema && deno run --allow-all npm:json-schema-to-typescript --input ../json-schema/ --output scamplers-models/",
     "dev": "deno task typedefs && vite dev",
     "build": "deno task typedefs && vite build",
     "preview": "vite preview",

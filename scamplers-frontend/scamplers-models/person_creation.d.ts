@@ -5,14 +5,12 @@
  * and run json-schema-to-typescript to regenerate this file.
  */
 
-export type UserRole = "app_admin" | "biology_staff" | "computational_staff";
-
 export interface PersonCreation {
   email: string;
   institution_id: string;
   ms_user_id?: string | null;
   name: string;
   orcid?: string | null;
-  roles?: UserRole[];
+  roles?: ("app_admin" | "biology_staff" | "computational_staff")[];
   [k: string]: unknown;
 }

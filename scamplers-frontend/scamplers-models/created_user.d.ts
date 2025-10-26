@@ -5,13 +5,18 @@
  * and run json-schema-to-typescript to regenerate this file.
  */
 
-export type UserRole = "app_admin" | "biology_staff" | "computational_staff";
-
 export interface CreatedUser {
   api_key: string;
   email?: string | null;
   id: string;
-  institution: Institution;
+  institution: {
+    id: string;
+    links: {
+      [k: string]: string;
+    };
+    name: string;
+    [k: string]: unknown;
+  };
   institution_id: string;
   links: {
     [k: string]: string;
@@ -19,14 +24,6 @@ export interface CreatedUser {
   ms_user_id?: string | null;
   name: string;
   orcid?: string | null;
-  roles: UserRole[];
-  [k: string]: unknown;
-}
-export interface Institution {
-  id: string;
-  links: {
-    [k: string]: string;
-  };
-  name: string;
+  roles: ("app_admin" | "biology_staff" | "computational_staff")[];
   [k: string]: unknown;
 }

@@ -131,8 +131,3 @@ grant app_admin, biology_staff, computational_staff to login_user with admin tru
 select create_role_if_not_exists('user_creator');
 alter role user_creator with createrole;
 grant user_creator to login_user with inherit false;
-
-create type hashed_key as (
-    prefix text,
-    hash text
-);

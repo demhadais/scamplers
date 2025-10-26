@@ -1,11 +1,21 @@
 <script lang="ts">
-	import favicon from "$lib/assets/favicon.svg";
+    import { signOut } from "@auth/sveltekit/client";
 
-	let { children } = $props();
+    let { data, children } = $props();
+    const { session } = data;
 </script>
 
-<svelte:head>
-	<link rel="icon" href={favicon} />
-</svelte:head>
+<svelte:head></svelte:head>
+
+<div>
+    {#if session}
+        <button
+            onclick={() => {
+                signOut();
+            }}>Sign Out</button
+        >
+        {session.user?.name}
+    {/if}
+</div>
 
 {@render children?.()}

@@ -7,6 +7,12 @@ create table people (
     email text unique,
     institution_id uuid references institutions on delete restrict on update restrict not null,
     orcid text unique,
-    ms_user_id uuid unique,
-    hashed_api_key hashed_key unique
+    ms_user_id uuid unique
+);
+
+create table api_keys (
+    prefix text unique not null,
+    hash text unique not null,
+    user_id uuid references people on delete cascade on update cascade not null,
+    primary key (prefix, hash)
 );

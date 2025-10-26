@@ -3,28 +3,70 @@
   "title": "PersonQuery",
   "type": "object",
   "properties": {
-    "emails": { "type": "array", "default": [], "items": { "type": "string" } },
+    "emails": {
+      "type": "array",
+      "default": [],
+      "items": {
+        "type": "string"
+      }
+    },
     "ids": {
       "type": "array",
       "default": [],
-      "items": { "type": "string", "format": "uuid" }
+      "items": {
+        "type": "string",
+        "format": "uuid"
+      }
     },
-    "limit": { "type": "integer", "format": "int64", "default": 500 },
+    "limit": {
+      "type": "integer",
+      "format": "int64",
+      "default": 500
+    },
     "ms_user_ids": {
       "type": "array",
       "default": [],
-      "items": { "type": "string", "format": "uuid" }
+      "items": {
+        "type": "string",
+        "format": "uuid"
+      }
     },
-    "names": { "type": "array", "default": [], "items": { "type": "string" } },
-    "offset": { "type": "integer", "format": "int64", "default": 0 },
-    "orcids": { "type": "array", "default": [], "items": { "type": "string" } },
+    "names": {
+      "type": "array",
+      "default": [],
+      "items": {
+        "type": "string"
+      }
+    },
+    "offset": {
+      "type": "integer",
+      "format": "int64",
+      "default": 0
+    },
+    "orcids": {
+      "type": "array",
+      "default": [],
+      "items": {
+        "type": "string"
+      }
+    },
     "order_by": {
       "type": "array",
       "items": {
         "type": "object",
         "properties": {
-          "descending": { "type": "boolean", "default": false },
-          "field": { "type": "string", "enum": ["id", "email", "name"] }
+          "descending": {
+            "type": "boolean",
+            "default": false
+          },
+          "field": {
+            "type": "string",
+            "enum": [
+              "id",
+              "email",
+              "name"
+            ]
+          }
         }
       }
     }

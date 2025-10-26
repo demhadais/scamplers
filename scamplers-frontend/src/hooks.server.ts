@@ -1,4 +1,4 @@
-import { handle as authenticationHandle } from "./auth.ts";
+import { handle as authenticationHandle } from "./auth";
 import { type Handle, redirect } from "@sveltejs/kit";
 import { sequence } from "@sveltejs/kit/hooks";
 

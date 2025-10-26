@@ -5,7 +5,6 @@ use tokio::net::TcpListener;
 
 use crate::{config::Config, state::AppState};
 
-mod auth;
 mod error;
 mod extract;
 mod routes;

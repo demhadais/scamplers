@@ -8,20 +8,21 @@
 export interface Person {
   email?: string | null;
   id: string;
-  institution: Institution;
+  institution: {
+    id: string;
+    links: {
+      [k: string]: string;
+    };
+    name: string;
+    [k: string]: unknown;
+  };
   institution_id: string;
-  links: Links;
+  links: {
+    [k: string]: string;
+  };
   ms_user_id?: string | null;
   name: string;
   orcid?: string | null;
+  roles: ("app_admin" | "biology_staff" | "computational_staff")[];
   [k: string]: unknown;
-}
-export interface Institution {
-  id: string;
-  links: Links;
-  name: string;
-  [k: string]: unknown;
-}
-export interface Links {
-  [k: string]: string;
 }

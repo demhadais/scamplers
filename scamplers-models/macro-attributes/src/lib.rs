@@ -13,12 +13,14 @@ fn base_derives(with_default: bool, is_enum: bool) -> proc_macro2::TokenStream {
         quote! {
             #[derive(Clone, Debug, Default, PartialEq, ::serde::Deserialize, ::serde::Serialize)]
             #[cfg_attr(feature = "schema", derive(::schemars::JsonSchema))]
+            #[cfg_attr(feature = "schema", schemars(inline))]
             #serde_default
         }
     } else {
         quote! {
             #[derive(Clone, Debug, PartialEq, ::serde::Deserialize, ::serde::Serialize)]
             #[cfg_attr(feature = "schema", derive(::schemars::JsonSchema))]
+            #[cfg_attr(feature = "schema", schemars(inline))]
         }
     }
 }
@@ -135,7 +137,6 @@ pub fn schema_query(_attr: TokenStream, input: TokenStream) -> TokenStream {
     quote! {
         #[cfg(feature = "schema")]
         #base_derives
-        #[schemars(inline)]
         #input
     }
     .into()
@@ -184,7 +185,6 @@ pub fn ordinal_columns(_attr: TokenStream, input: TokenStream) -> TokenStream {
         #base_derives
         #[derive(Copy)]
         #[serde(rename_all = "snake_case")]
-        #[cfg_attr(feature = "schema", schemars(inline))]
         #input
     }
     .into()

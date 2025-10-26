@@ -7,10 +7,7 @@ use scamplers_models::person::{self, CreatedUser, Person, PersonId};
 use scamplers_schema::{institutions, people};
 use uuid::Uuid;
 
-use crate::{
-    api::auth::{ApiKey, HashedApiKey},
-    db,
-};
+use crate::{api::extract::auth::User, db};
 
 define_sql_function! {fn create_user_if_not_exists(user_id: Text, roles: Array<Text>)}
 
@@ -39,7 +36,6 @@ impl db::Operation<person::CreatedUser> for person::Creation {
             ms_user_id: Option<&'a Uuid>,
             name: &'a str,
             email: &'a str,
-            hashed_api_key: &'a HashedApiKey,
             institution_id: &'a Uuid,
         }
 
@@ -62,15 +58,10 @@ impl db::Operation<person::CreatedUser> for person::Creation {
             .set(p::email.eq(None::<String>))
             .execute(db_conn)?;
 
-        // TODO: We shouldn't overwrite the user's API key on every single login
-        let api_key = ApiKey::new();
-        let hashed_api_key = api_key.hash();
-
         let upsert = Upsert {
             ms_user_id: ms_user_id.as_ref(),
             name: name.as_ref(),
             email: email.as_ref(),
-            hashed_api_key: &hashed_api_key,
             institution_id,
         };
 
@@ -87,6 +78,8 @@ impl db::Operation<person::CreatedUser> for person::Creation {
         let empty_roles: Vec<String> = Vec::with_capacity(0);
         diesel::select(create_user_if_not_exists(id.to_id_string(), empty_roles))
             .execute(db_conn)?;
+
+        let api_key = User(id.into()).execute(db_conn)?;
 
         Ok(CreatedUser::builder()
             .inner(id.execute(db_conn)?)

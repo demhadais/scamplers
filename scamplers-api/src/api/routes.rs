@@ -8,9 +8,11 @@ use serde_qs::axum::QsQuery;
 
 use crate::{
     api::{
-        auth::{Frontend, User},
         error::ErrorResponse,
-        extract::ValidJson,
+        extract::{
+            ValidJson,
+            auth::{ApiKey, Frontend, User},
+        },
     },
     db::{self, Operation},
     state::AppState,
@@ -40,20 +42,6 @@ where
 }
 
 type ApiResponse<T> = Result<(StatusCode, Json<T>), super::error::ErrorResponse>;
-
-async fn new_ms_login(
-    _: Frontend,
-    State(state): State<AppState>,
-    ValidJson(login): ValidJson<scamplers_models::person::Creation>,
-) -> ApiResponse<CreatedUser> {
-    tracing::info!(deserialized_request = serde_json::to_string(&login).unwrap());
-
-    let db_conn = state.db_conn().await?;
-
-    let created_user = db_conn.interact(|db_conn| login.execute(db_conn)).await??;
-
-    Ok((StatusCode::CREATED, Json(created_user)))
-}
 
 #[derive(TypedPath)]
 #[typed_path("/institutions")]
@@ -121,6 +109,57 @@ async fn list_people(
     Ok((StatusCode::OK, people))
 }
 
+#[derive(TypedPath)]
+#[typed_path("/api-keys")]
+struct ApiKeysEndpoint;
+
+async fn create_api_key(
+    _: ApiKeysEndpoint,
+    state: State<AppState>,
+    user: User,
+) -> ApiResponse<serde_json::Value> {
+    // Extract the API key and put it inside a JSON object
+    let Json(api_key) = inner_handler(state, user, user).await?;
+    Ok((
+        StatusCode::CREATED,
+        Json(serde_json::json!({"api_key": api_key})),
+    ))
+}
+
+#[derive(serde::Deserialize, serde::Serialize, TypedPath)]
+#[typed_path("/api-keys/{prefix}")]
+struct ApiKeyPrefix(String);
+
+async fn delete_api_key(
+    ApiKeyPrefix(prefix): ApiKeyPrefix,
+    state: State<AppState>,
+    user: User,
+) -> ApiResponse<()> {
+    let resp = inner_handler(state, user, (prefix, user)).await?;
+    Ok((StatusCode::OK, resp))
+}
+
+#[derive(TypedPath)]
+#[typed_path("/signin/microsoft")]
+struct MicrosoftSigninEndpoint;
+
+async fn microsoft_signin(
+    _: MicrosoftSigninEndpoint,
+    _: Frontend,
+    State(state): State<AppState>,
+    ValidJson(signin): ValidJson<scamplers_models::person::Creation>,
+) -> ApiResponse<CreatedUser> {
+    tracing::info!(deserialized_request = serde_json::to_string(&signin).unwrap());
+
+    let db_conn = state.db_conn().await?;
+
+    let created_user = db_conn
+        .interact(|db_conn| signin.execute(db_conn))
+        .await??;
+
+    Ok((StatusCode::CREATED, Json(created_user)))
+}
+
 pub(super) fn router() -> Router<AppState> {
     Router::new()
         .typed_post(create_institution)
@@ -129,5 +168,7 @@ pub(super) fn router() -> Router<AppState> {
         .typed_post(create_person)
         .typed_get(fetch_person)
         .typed_get(list_people)
-        .route("/login", post(new_ms_login))
+        .typed_post(create_api_key)
+        .typed_delete(delete_api_key)
+        .typed_post(microsoft_signin)
 }
