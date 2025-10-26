@@ -11,7 +11,7 @@ pub mod specimen;
 // mod suspension;
 // mod tenx_assay;
 // mod units;
-pub mod generic_order_by;
+pub mod generic_query;
 mod links;
 #[cfg(feature = "app")]
 mod utils;

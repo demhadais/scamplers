@@ -1,26 +1,28 @@
-use default_vec::DefaultVec;
-use macro_attributes::{base_model_default, query};
+use macro_attributes::{base_model_default, query, schema_query};
+use macros::uuid_newtype;
 use uuid::Uuid;
 
-use crate::generic_order_by::OrderBy;
+use crate::generic_query::{self};
 
 #[base_model_default]
+#[derive(Copy)]
 pub enum OrdinalColumns {
     Id,
     #[default]
     Name,
 }
 
-#[query("InstitutionQuery")]
-pub struct Query {
+#[query]
+pub struct Filter {
     #[builder(default)]
     pub ids: Vec<Uuid>,
     #[builder(default)]
     pub names: Vec<String>,
-    #[builder(default)]
-    pub limit: i64,
-    #[builder(default)]
-    pub offset: i64,
-    #[builder(default)]
-    pub order_by: DefaultVec<OrderBy<OrdinalColumns>>,
 }
+
+pub type Query = generic_query::Query<Filter, OrdinalColumns>;
+
+#[schema_query]
+pub struct InstitutionQuery(Query);
+
+uuid_newtype!(InstitutionId, "/institutions/{id}");

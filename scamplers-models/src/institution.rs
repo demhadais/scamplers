@@ -5,5 +5,7 @@ mod read;
 mod update;
 
 pub use creation::Creation;
-pub use query::Query;
+#[cfg(feature = "schema")]
+pub use query::InstitutionQuery;
+pub use query::{Filter, InstitutionId, OrdinalColumns, Query};
 pub use read::Institution;

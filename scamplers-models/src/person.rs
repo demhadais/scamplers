@@ -6,5 +6,7 @@ mod update;
 
 pub use common::{Fields, UserRole};
 pub use creation::Creation;
-pub use query::{OrdinalColumns, Query};
-pub use read::{CreatedUser, Person, PersonId, PersonSummary};
+#[cfg(feature = "schema")]
+pub use query::PersonQuery;
+pub use query::{Filter, OrdinalColumns, PersonId, Query};
+pub use read::{CreatedUser, Person, PersonSummary, PersonSummaryWithParents};

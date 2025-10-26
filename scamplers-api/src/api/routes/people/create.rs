@@ -4,7 +4,7 @@ use diesel::{
     sql_types::{Array, Text},
 };
 use scamplers_models::person::{self, CreatedUser, Person, PersonId};
-use scamplers_schema::people;
+use scamplers_schema::{institutions, people};
 use uuid::Uuid;
 
 use crate::{
@@ -16,14 +16,16 @@ define_sql_function! {fn create_user_if_not_exists(user_id: Text, roles: Array<T
 
 impl db::Operation<Person> for person::Creation {
     fn execute(self, db_conn: &mut diesel::PgConnection) -> Result<Person, db::Error> {
-        let id: Uuid = diesel::insert_into(people::table)
+        // Get the ID of the inserted person first, then return the full `Person` struct
+        let id: PersonId = diesel::insert_into(people::table)
             .values(&self)
             .returning(people::id)
             .get_result(db_conn)?;
 
-        diesel::select(create_user_if_not_exists(id.to_string(), &self.roles)).execute(db_conn)?;
+        diesel::select(create_user_if_not_exists(id.to_id_string(), &self.roles))
+            .execute(db_conn)?;
 
-        PersonId(id).execute(db_conn)
+        id.execute(db_conn)
     }
 }
 
@@ -50,7 +52,7 @@ impl db::Operation<person::CreatedUser> for person::Creation {
                     ms_user_id,
                     ..
                 },
-            roles,
+            ..
         } = &self;
 
         // We know that whoever just logged in is the actual owner of this email
@@ -72,7 +74,7 @@ impl db::Operation<person::CreatedUser> for person::Creation {
             institution_id,
         };
 
-        let id: Uuid = diesel::insert_into(p::table)
+        let id: PersonId = diesel::insert_into(p::table)
             .values(upsert)
             .on_conflict(p::ms_user_id)
             .do_update()
@@ -80,18 +82,15 @@ impl db::Operation<person::CreatedUser> for person::Creation {
             .returning(p::id)
             .get_result(db_conn)?;
 
-        // Create the user, but give them no roles
+        // Create the user, but give them no roles. Note that we use the inner `Uuid`'s
+        // `Display` implementation
         let empty_roles: Vec<String> = Vec::with_capacity(0);
-        diesel::select(create_user_if_not_exists(id.to_string(), empty_roles)).execute(db_conn)?;
-
-        let mut summaries = person::Query::builder()
-            .ids([id])
-            .build()
+        diesel::select(create_user_if_not_exists(id.to_id_string(), empty_roles))
             .execute(db_conn)?;
 
-        Ok(CreatedUser {
-            inner: summaries.remove(0),
-            api_key: api_key.into(),
-        })
+        Ok(CreatedUser::builder()
+            .inner(id.execute(db_conn)?)
+            .api_key(api_key)
+            .build())
     }
 }

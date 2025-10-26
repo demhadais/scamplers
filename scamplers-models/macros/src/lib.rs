@@ -48,7 +48,7 @@ macro_rules! impl_json_to_sql {
                 &'b self,
                 out: &mut diesel::serialize::Output<'b, '_, ::diesel::pg::Pg>,
             ) -> ::diesel::serialize::Result {
-                Self::to_sql_inner(bytes)
+                self.to_sql_inner(out)
             }
         }
     };
@@ -56,32 +56,65 @@ macro_rules! impl_json_to_sql {
 
 #[macro_export]
 macro_rules! uuid_newtype {
-    ($name:ident) => {
-        #[derive(Debug, Clone, Copy, serde::Deserialize, serde::Serialize)]
+    ($name:ident, $endpoint:literal) => {
+        #[derive(Debug, Clone, Copy, ::serde::Deserialize, ::serde::Serialize)]
+        #[cfg_attr(feature = "app", derive(::diesel::deserialize::FromSqlRow, ::diesel::expression::AsExpression, ::axum_extra::routing::TypedPath))]
         #[serde(transparent)]
-        pub struct $name(pub uuid::Uuid);
+        #[cfg_attr(feature = "app", diesel(sql_type = ::diesel::sql_types::Uuid), typed_path($endpoint))]
+        pub struct $name(uuid::Uuid);
 
-        impl AsRef<uuid::Uuid> for $name {
-            fn as_ref(&self) -> &uuid::Uuid {
+        impl $name {
+            pub fn to_id_string(&self) -> String {
+                self.0.to_string()
+            }
+        }
+
+        impl AsRef<::uuid::Uuid> for $name {
+            fn as_ref(&self) -> &::uuid::Uuid {
                 &self.0
             }
         }
 
-        impl From<$name> for uuid::Uuid {
-            fn from(val: $name) -> uuid::Uuid {
+        impl From<::uuid::Uuid> for $name {
+            fn from(value: ::uuid::Uuid) -> Self {
+                Self(value)
+            }
+        }
+
+        impl From<$name> for ::uuid::Uuid {
+            fn from(val: $name) -> ::uuid::Uuid {
                 val.0
             }
         }
 
-        impl From<$name> for Vec<uuid::Uuid> {
-            fn from(val: $name) -> Vec<uuid::Uuid> {
+        impl From<$name> for Vec<::uuid::Uuid> {
+            fn from(val: $name) -> Vec<::uuid::Uuid> {
                 vec![val.0]
             }
         }
 
-        impl std::fmt::Display for $name {
-            fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-                self.0.fmt(f)
+        #[cfg(feature = "app")]
+        mod diesel_impls {
+            use crate::utils::{UuidNewtypeFromSql, UuidNewtypeToSql};
+            use super::$name;
+
+            impl UuidNewtypeFromSql for $name {}
+
+            impl UuidNewtypeToSql for $name {}
+
+            impl ::diesel::deserialize::FromSql<::diesel::sql_types::Uuid, ::diesel::pg::Pg> for $name {
+                fn from_sql(bytes: ::diesel::pg::PgValue<'_>) -> ::diesel::deserialize::Result<Self> {
+                    Self::from_sql_inner(bytes)
+                }
+            }
+
+            impl ::diesel::serialize::ToSql<::diesel::sql_types::Uuid, ::diesel::pg::Pg> for $name {
+                fn to_sql<'b>(
+                    &'b self,
+                    out: &mut diesel::serialize::Output<'b, '_, ::diesel::pg::Pg>,
+                ) -> ::diesel::serialize::Result {
+                    self.to_sql_inner(out)
+                }
             }
         }
     };

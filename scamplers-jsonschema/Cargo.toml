@@ -1,0 +1,16 @@
+[package]
+edition.workspace = true
+name = "scamplers-jsonschema"
+version = "0.1.0"
+
+[dependencies]
+clap.workspace = true
+heck.workspace = true
+scamplers-models = { version = "0.1.0", path = "../scamplers-models", features = [
+  "schema",
+] }
+schemars.workspace = true
+serde_json.workspace = true
+
+[lints]
+workspace = true

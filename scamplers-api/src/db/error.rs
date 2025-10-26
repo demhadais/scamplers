@@ -4,32 +4,24 @@ use uuid::Uuid;
 
 #[derive(Debug, thiserror::Error, serde::Serialize)]
 pub enum Error {
-    ResourceNotFound {
-        resource: String,
-        resource_id: Uuid,
-    },
-    Data {
-        message: String,
-    },
+    #[error("failed to find {resource} with ID {resource_id}")]
+    ResourceNotFound { resource: String, resource_id: Uuid },
+    #[error("{message}")]
+    Data { message: String },
+    #[error("duplicate {resource} with fields {fields:?} and values {values:?}")]
     DuplicateResource {
         resource: String,
         fields: Vec<String>,
         values: Vec<String>,
     },
+    #[error("invalid reference from {resource} to {referenced_resource} with value: {}", value.clone().unwrap_or_default())]
     InvalidReference {
         resource: String,
         referenced_resource: String,
         value: Option<String>,
     },
-    Other {
-        message: String,
-    },
-}
-
-impl Display for Error {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        serde_json::to_string(self).unwrap().fmt(f)
-    }
+    #[error("{message}")]
+    Other { message: String },
 }
 
 impl From<diesel::result::Error> for Error {

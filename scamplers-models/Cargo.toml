@@ -3,11 +3,9 @@ edition.workspace = true
 name = "scamplers-models"
 version = "0.1.0"
 
-[[bin]]
-name = "scamplers-models"
-required-features = ["schema"]
-
 [dependencies]
+axum = { workspace = true, optional = true }
+axum-extra = { workspace = true, optional = true }
 bon.workspace = true
 clap = { workspace = true, optional = true }
 default-vec = { path = "../default-vec", features = ["serde"] }
@@ -35,7 +33,14 @@ uuid.workspace = true
 workspace = true
 
 [features]
-app = ["diesel", "jiff-diesel", "non-empty-string/diesel", "scamplers-schema"]
+app = [
+  "axum",
+  "axum-extra",
+  "diesel",
+  "jiff-diesel",
+  "non-empty-string/diesel",
+  "scamplers-schema",
+]
 schema = [
   "clap",
   "default-vec/schema",

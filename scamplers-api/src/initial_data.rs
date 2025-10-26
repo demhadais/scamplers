@@ -2,7 +2,7 @@ use anyhow::{anyhow, ensure};
 use diesel::PgConnection;
 use scamplers_models::{
     institution,
-    person::{self, CreatedUser, UserRole},
+    person::{self, Person, UserRole},
 };
 use url::Url;
 
@@ -51,7 +51,7 @@ pub async fn insert_initial_data(
     } = initial_data;
 
     let simple_operations = |db_conn: &mut PgConnection| -> Result<(), anyhow::Error> {
-        // duplicate_resource_ok(institution.execute(db_conn))?;
+        duplicate_resource_ok(institution.execute(db_conn))?;
         //
         ensure!(
             app_admin.inner.ms_user_id.is_some(),
@@ -59,7 +59,7 @@ pub async fn insert_initial_data(
         );
 
         app_admin.roles.push(UserRole::AppAdmin);
-        let result: Result<CreatedUser, db::Error> = app_admin.execute(db_conn);
+        let result: Result<Person, db::Error> = app_admin.execute(db_conn);
         duplicate_resource_ok(result)?;
 
         // // This is a loop of like 25 max

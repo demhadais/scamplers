@@ -1,5 +1,10 @@
 use axum::{Json, Router, debug_handler, extract::State, http::StatusCode, routing::post};
-use scamplers_models::person::{CreatedUser, Person};
+use axum_extra::routing::{RouterExt, TypedPath};
+use scamplers_models::{
+    institution::{self, Institution, InstitutionId},
+    person::{self, CreatedUser, Person, PersonId, PersonSummary},
+};
+use serde_qs::axum::QsQuery;
 
 use crate::{
     api::{
@@ -11,8 +16,8 @@ use crate::{
     state::AppState,
 };
 
-pub mod institution;
-pub mod person;
+mod institutions;
+mod people;
 
 async fn inner_handler<Request, Response>(
     State(state): State<AppState>,
@@ -50,19 +55,79 @@ async fn new_ms_login(
     Ok((StatusCode::CREATED, Json(created_user)))
 }
 
-#[debug_handler]
-async fn create_person(
+#[derive(TypedPath)]
+#[typed_path("/institutions")]
+struct InstitutionsEndpoint;
+
+async fn create_institution(
+    _: InstitutionsEndpoint,
     state: State<AppState>,
     user: User,
-    ValidJson(request): ValidJson<scamplers_models::person::Creation>,
+    ValidJson(request): ValidJson<institution::Creation>,
+) -> ApiResponse<Institution> {
+    let item = inner_handler(state, user, request).await?;
+    Ok((StatusCode::CREATED, item))
+}
+
+async fn fetch_institution(
+    request: InstitutionId,
+    state: State<AppState>,
+    user: User,
+) -> ApiResponse<Institution> {
+    let item = inner_handler(state, user, request).await?;
+    Ok((StatusCode::FOUND, item))
+}
+
+async fn list_institutions(
+    _: InstitutionsEndpoint,
+    state: State<AppState>,
+    user: User,
+    QsQuery(request): QsQuery<institution::Query>,
+) -> ApiResponse<Vec<Institution>> {
+    let items = inner_handler(state, user, request).await?;
+    Ok((StatusCode::OK, items))
+}
+
+#[derive(TypedPath)]
+#[typed_path("/people")]
+struct PeopleEndpoint;
+
+async fn create_person(
+    _: PeopleEndpoint,
+    state: State<AppState>,
+    user: User,
+    ValidJson(request): ValidJson<person::Creation>,
 ) -> ApiResponse<Person> {
     let person = inner_handler(state, user, request).await?;
     Ok((StatusCode::CREATED, person))
 }
 
+async fn fetch_person(
+    request: PersonId,
+    state: State<AppState>,
+    user: User,
+) -> ApiResponse<Person> {
+    let person = inner_handler(state, user, request).await?;
+    Ok((StatusCode::FOUND, person))
+}
+
+async fn list_people(
+    _: PeopleEndpoint,
+    state: State<AppState>,
+    user: User,
+    QsQuery(request): QsQuery<person::Query>,
+) -> ApiResponse<Vec<PersonSummary>> {
+    let people = inner_handler(state, user, request).await?;
+    Ok((StatusCode::OK, people))
+}
+
 pub(super) fn router() -> Router<AppState> {
     Router::new()
-        .route("/people", post(create_person))
+        .typed_post(create_institution)
+        .typed_get(fetch_institution)
+        .typed_get(list_institutions)
+        .typed_post(create_person)
+        .typed_get(fetch_person)
+        .typed_get(list_people)
         .route("/login", post(new_ms_login))
-    // .typed_post(create_institution)
 }

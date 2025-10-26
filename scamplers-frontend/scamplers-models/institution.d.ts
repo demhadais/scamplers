@@ -7,10 +7,9 @@
 
 export interface Institution {
   id: string;
-  links: Links;
+  links: {
+    [k: string]: string;
+  };
   name: string;
   [k: string]: unknown;
-}
-export interface Links {
-  [k: string]: string;
 }

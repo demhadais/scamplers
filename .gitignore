@@ -13,9 +13,9 @@ target
 .env*
 !.env.sample
 
-# Seed data also useful for development
-seed_data.*.json
-!seed_data.sample.json
+# Initial data also useful for development
+initial-data.*.json
+!initial-data.sample.json
 
 # Generated TypesScript code
 pkg
@@ -31,4 +31,3 @@ venv
 
 # Zed
 .zed
-

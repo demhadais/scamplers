@@ -50,14 +50,14 @@ macro_rules! init_stmt {
 
 #[macro_export]
 macro_rules! apply_eq_any_filters {
-    ($stmt:expr, filters = {$($col:expr => $values:expr),*}) => {{
+    ($filter:expr, filters = {$($col:expr => $values:expr),*}) => {{
         $(
             if !$values.is_empty() {
-                $stmt = $stmt.filter($col.eq_any($values));
+                $filter = $filter.and_filter($col.assume_not_null().eq_any($values));
             }
         )*
 
-        $stmt
+        $filter
     }};
 }
 
@@ -93,16 +93,16 @@ macro_rules! apply_time_filters {
 
 #[macro_export]
 macro_rules! apply_ilike_filters {
-    ($stmt:expr, filters = {$($col:expr => $strings:expr),*}) => {{
+    ($filter:expr, filters = {$($col:expr => $strings:expr),*}) => {{
         use $crate::db::utils::AsIlike;
 
         $(
             if !$strings.is_empty() {
-                $stmt = $stmt.filter($col.ilike($strings.as_ilike()))
+                $filter = $filter.and_filter($col.assume_not_null().ilike($strings.as_ilike()))
             }
         )*
 
-        $stmt
+        $filter
     }};
 }
 

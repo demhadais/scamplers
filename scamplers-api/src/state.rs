@@ -68,18 +68,12 @@ impl AppState {
         set_login_user_password(&config.db_login_user_password(), &mut root_db_conn)?;
         tracing::info!("set password for db login user");
 
-        let db_url = if config.dev() {
-            config.db_root_url()
-        } else {
-            config.db_login_url()
-        };
-
-        let db_pool = create_db_pool(&db_url)?;
-
+        // Get a connection pool as the root user so as to insert the initial data
+        let root_db_pool = create_db_pool(&config.db_root_url())?;
         let initial_data = config
             .initial_data()
             .context("failed to read initial data")?;
-        insert_initial_data(initial_data, reqwest::Client::new(), db_pool.clone())
+        insert_initial_data(initial_data, reqwest::Client::new(), root_db_pool)
             .await
             .context("failed to insert initial data")?;
         tracing::info!("inserted initial data");

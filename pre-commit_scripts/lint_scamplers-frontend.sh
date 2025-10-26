@@ -2,7 +2,7 @@
 
 set -euo pipefail
 
-cargo run --package scamplers-models --features schema
+cargo run --package scamplers-jsonschema
 cd scamplers-frontend
 deno task check
 deno fmt

@@ -17,12 +17,12 @@ fn main() {
     // These are sorted hierarchically
     let defs = vec![
         schema_for!(institution::Creation),
-        schema_for!(institution::Query),
+        schema_for!(institution::InstitutionQuery),
         schema_for!(institution::Institution),
         schema_for!(person::Creation),
         schema_for!(person::Query),
         schema_for!(person::PersonSummary),
-        schema_for!(person::Person),
+        schema_for!(person::PersonQuery),
         schema_for!(person::CreatedUser),
     ];
 

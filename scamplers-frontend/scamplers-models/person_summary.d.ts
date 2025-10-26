@@ -9,12 +9,11 @@ export interface PersonSummary {
   email?: string | null;
   id: string;
   institution_id: string;
-  links: Links;
+  links: {
+    [k: string]: string;
+  };
   ms_user_id?: string | null;
   name: string;
   orcid?: string | null;
   [k: string]: unknown;
-}
-export interface Links {
-  [k: string]: string;
 }
