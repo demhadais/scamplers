@@ -5,8 +5,6 @@
  * and run json-schema-to-typescript to regenerate this file.
  */
 
-export type OrdinalColumns = "Id" | "Email" | "Name";
-
 export interface PersonQuery {
   emails?: string[];
   ids?: string[];
@@ -17,7 +15,7 @@ export interface PersonQuery {
   orcids?: string[];
   order_by?: {
     descending?: boolean;
-    field?: OrdinalColumns;
+    field?: "id" | "email" | "name";
     [k: string]: unknown;
   }[];
   [k: string]: unknown;

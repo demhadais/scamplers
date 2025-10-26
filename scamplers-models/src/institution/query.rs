@@ -1,11 +1,10 @@
-use macro_attributes::{base_model_default, query, schema_query};
+use macro_attributes::{ordinal_columns, query, schema_query};
 use macros::uuid_newtype;
 use uuid::Uuid;
 
 use crate::generic_query::{self};
 
-#[base_model_default]
-#[derive(Copy)]
+#[ordinal_columns]
 pub enum OrdinalColumns {
     Id,
     #[default]

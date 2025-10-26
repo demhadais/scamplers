@@ -175,6 +175,22 @@ pub fn update(_attr: TokenStream, input: TokenStream) -> TokenStream {
 }
 
 #[proc_macro_attribute]
+pub fn ordinal_columns(_attr: TokenStream, input: TokenStream) -> TokenStream {
+    let base_derives = base_derives(true, input.clone().is_enum());
+
+    let input: proc_macro2::TokenStream = input.into();
+
+    quote! {
+        #base_derives
+        #[derive(Copy)]
+        #[serde(rename_all = "snake_case")]
+        #[cfg_attr(feature = "schema", schemars(inline))]
+        #input
+    }
+    .into()
+}
+
+#[proc_macro_attribute]
 pub fn simple_enum(_attr: TokenStream, input: TokenStream) -> TokenStream {
     let base_derives = base_derives(false, input.clone().is_enum());
 

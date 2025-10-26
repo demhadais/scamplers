@@ -5,8 +5,6 @@
  * and run json-schema-to-typescript to regenerate this file.
  */
 
-export type OrdinalColumns = "Id" | "Name";
-
 export interface InstitutionQuery {
   ids?: string[];
   limit?: number;
@@ -14,7 +12,7 @@ export interface InstitutionQuery {
   offset?: number;
   order_by?: {
     descending?: boolean;
-    field?: OrdinalColumns;
+    field?: "id" | "name";
     [k: string]: unknown;
   }[];
   [k: string]: unknown;
