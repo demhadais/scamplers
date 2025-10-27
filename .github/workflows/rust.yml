@@ -26,8 +26,7 @@ jobs:
         run: |
           rustup component add --toolchain stable-x86_64-unknown-linux-gnu clippy
 
-      - name: Lint app
-        working-directory: rust
+      - name: Lint
         run: cargo clippy --workspace
 
   format:
@@ -45,7 +44,6 @@ jobs:
         run: rustup component add --toolchain nightly-2025-09-26 rustfmt
 
       - name: Format
-        working-directory: rust
         run: cargo +nightly-2025-09-26 fmt -- --check
 
   test:
