@@ -3,6 +3,7 @@ use axum::{Json, response::IntoResponse};
 use crate::db;
 
 #[derive(Debug, thiserror::Error, serde::Serialize)]
+#[serde(rename_all = "snake_case", tag = "type", content = "cause")]
 #[error(transparent)]
 pub enum Error {
     #[error("{message}")]
@@ -13,15 +14,27 @@ pub enum Error {
 }
 
 impl Error {
+    pub fn no_api_key() -> Self {
+        Self::Unauthorized {
+            message: "no API key".to_string(),
+        }
+    }
+
     pub fn invalid_api_key() -> Self {
         Self::Unauthorized {
             message: "invalid API key".to_string(),
         }
     }
 
-    pub fn invalid_frontend_token() -> Self {
+    pub fn no_ui_auth_token() -> Self {
         Self::Unauthorized {
-            message: "invalid frontend token".to_string(),
+            message: "no UI authentication token".to_string(),
+        }
+    }
+
+    pub fn invalid_ui_auth_token() -> Self {
+        Self::Unauthorized {
+            message: "invalid UI authentication token".to_string(),
         }
     }
 }
@@ -35,21 +48,5 @@ impl From<deadpool_diesel::InteractError> for Error {
 impl From<diesel::result::Error> for Error {
     fn from(err: diesel::result::Error) -> Self {
         Self::Database(err.into())
-    }
-}
-
-impl IntoResponse for Error {
-    fn into_response(self) -> axum::response::Response {
-        match &self {
-            Self::Unauthorized { .. } => {
-                (axum::http::StatusCode::UNAUTHORIZED, Json(self)).into_response()
-            }
-            Self::Database(..) => (
-                axum::http::StatusCode::INTERNAL_SERVER_ERROR,
-                Json(
-                    serde_json::json!({"status": 500, "error": {"message": "something went wrong"}}),
-                ),
-                ).into_response(),
-        }
     }
 }

@@ -5,20 +5,17 @@ use axum::{
     response::IntoResponse,
 };
 
-use crate::{db, validate};
+use crate::{api::extract::auth, db, validate};
 
 #[derive(Debug, thiserror::Error, serde::Serialize)]
-#[serde(rename_all = "snake_case", tag = "type")]
+#[serde(rename_all = "snake_case", tag = "type", content = "cause")]
 #[error(transparent)]
 pub enum Error {
-    ValidateData(#[from] validate::Error),
+    Auth(#[from] auth::Error),
+    Data(#[from] validate::Error),
     Database(#[from] db::Error),
     #[error("{message}")]
     MalformedRequest {
-        message: String,
-    },
-    #[error("{message}")]
-    UnprocessableEntity {
         message: String,
     },
     #[error("something went wrong")]
@@ -32,19 +29,23 @@ impl From<deadpool_diesel::InteractError> for Error {
 }
 
 #[derive(Debug, thiserror::Error, serde::Serialize)]
-#[error("{error}")]
+#[error("{self:?}")]
 pub struct ErrorResponse {
     pub status: u16,
-    pub error: Error,
+    #[serde(rename = "error")]
+    pub public_error: Error,
+    #[serde(skip)]
+    pub internal_error: Option<Error>,
 }
 
 impl From<JsonRejection> for ErrorResponse {
     fn from(err: JsonRejection) -> Self {
         Self {
             status: err.status().as_u16(),
-            error: Error::UnprocessableEntity {
+            public_error: Error::MalformedRequest {
                 message: err.body_text(),
             },
+            internal_error: None,
         }
     }
 }
@@ -53,9 +54,10 @@ impl From<PathRejection> for ErrorResponse {
     fn from(err: PathRejection) -> Self {
         Self {
             status: err.status().as_u16(),
-            error: Error::UnprocessableEntity {
+            public_error: Error::MalformedRequest {
                 message: err.body_text(),
             },
+            internal_error: None,
         }
     }
 }
@@ -64,7 +66,26 @@ impl From<deadpool_diesel::InteractError> for ErrorResponse {
     fn from(err: deadpool_diesel::InteractError) -> Self {
         Self {
             status: StatusCode::INTERNAL_SERVER_ERROR.as_u16(),
-            error: Error::from(err),
+            public_error: Error::from(err),
+            internal_error: None,
+        }
+    }
+}
+
+impl From<auth::Error> for ErrorResponse {
+    fn from(err: auth::Error) -> Self {
+        use auth::Error::*;
+        match err {
+            Unauthorized { .. } => Self {
+                status: StatusCode::UNAUTHORIZED.as_u16(),
+                public_error: err.into(),
+                internal_error: None,
+            },
+            Database(e) => Self {
+                status: StatusCode::INTERNAL_SERVER_ERROR.as_u16(),
+                public_error: Error::Other,
+                internal_error: Some(e.into()),
+            },
         }
     }
 }
@@ -80,7 +101,8 @@ impl From<db::Error> for ErrorResponse {
                 return {
                     Self {
                         status: StatusCode::INTERNAL_SERVER_ERROR.as_u16(),
-                        error: Error::Other,
+                        public_error: Error::Other,
+                        internal_error: Some(err.into()),
                     }
                 };
             }
@@ -88,7 +110,8 @@ impl From<db::Error> for ErrorResponse {
 
         Self {
             status: status.as_u16(),
-            error: Error::Database(err),
+            public_error: Error::Database(err),
+            internal_error: None,
         }
     }
 }
@@ -97,13 +120,15 @@ impl From<validate::Error> for ErrorResponse {
     fn from(err: validate::Error) -> Self {
         Self {
             status: StatusCode::UNPROCESSABLE_ENTITY.as_u16(),
-            error: err.into(),
+            public_error: err.into(),
+            internal_error: None,
         }
     }
 }
 
 impl IntoResponse for ErrorResponse {
     fn into_response(self) -> axum::response::Response {
+        tracing::error!("{self}");
         (StatusCode::from_u16(self.status).unwrap(), Json(self)).into_response()
     }
 }

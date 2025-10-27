@@ -11,15 +11,16 @@ static EMAIL_REGEX: LazyLock<Regex> = LazyLock::new(|| {
 });
 
 #[derive(Debug, thiserror::Error, serde::Serialize)]
+#[serde(rename_all = "snake_case", tag = "type", content = "cause")]
 #[error("{email} invalid: {message}")]
 pub enum Error {
-    ValidateEmail { email: String, message: String },
+    Email { email: String, message: String },
 }
 
 impl Validate for person::Creation {
     fn validate(&self, _db_conn: &mut diesel::PgConnection) -> Result<(), super::Error> {
         if !EMAIL_REGEX.is_match(self.email.as_ref()) {
-            return Err(Error::ValidateEmail {
+            return Err(Error::Email {
                 email: self.email.to_string(),
                 message: "invalid email".to_string(),
             })?;

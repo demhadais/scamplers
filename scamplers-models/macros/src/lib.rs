@@ -61,7 +61,7 @@ macro_rules! uuid_newtype {
         #[cfg_attr(feature = "app", derive(::diesel::deserialize::FromSqlRow, ::diesel::expression::AsExpression, ::axum_extra::routing::TypedPath))]
         #[serde(transparent)]
         #[cfg_attr(feature = "app", diesel(sql_type = ::diesel::sql_types::Uuid), typed_path($endpoint))]
-        pub struct $name(uuid::Uuid);
+        pub struct $name(pub uuid::Uuid);
 
         impl $name {
             pub fn to_id_string(&self) -> String {

@@ -21,7 +21,8 @@ where
         let db_conn = state.db_conn().await?;
         let mut db_conn = db_conn.lock().map_err(|e| api::ErrorResponse {
             status: StatusCode::INTERNAL_SERVER_ERROR.as_u16(),
-            error: api::error::Error::Other,
+            public_error: api::error::Error::Other,
+            internal_error: None,
         })?;
         data.validate(&mut db_conn)?;
 

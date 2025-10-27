@@ -1,21 +1,24 @@
-use diesel::RunQueryDsl;
-use diesel::prelude::*;
+use diesel::{RunQueryDsl, prelude::*};
 use scamplers_schema::api_keys;
 use uuid::Uuid;
 
-use crate::api::extract::auth::User;
-use crate::api::routes::ApiKeyPrefix;
-use crate::{api::extract::auth::ApiKey, db};
+use crate::{
+    api::{
+        extract::auth::{ApiKey, AuthenticatedUser},
+        routes::{CreateApiKey, DeleteApiKey},
+    },
+    db,
+};
 
 #[derive(Insertable)]
-#[diesel(table_name = api_keys)]
+#[diesel(check_for_backend(diesel::pg::Pg), table_name = api_keys)]
 struct ApiKeyCreation<'a> {
     prefix: &'a str,
     hash: String,
     user_id: Uuid,
 }
 
-impl db::Operation<ApiKey> for User {
+impl db::Operation<ApiKey> for CreateApiKey {
     fn execute(self, db_conn: &mut PgConnection) -> Result<ApiKey, db::Error> {
         let api_key = ApiKey::new();
         let hash = api_key.hash();
@@ -24,7 +27,7 @@ impl db::Operation<ApiKey> for User {
             .values(ApiKeyCreation {
                 prefix: api_key.prefix(),
                 hash,
-                user_id: self.0,
+                user_id: self.user_id,
             })
             .execute(db_conn)?;
 
@@ -32,9 +35,9 @@ impl db::Operation<ApiKey> for User {
     }
 }
 
-impl db::Operation<()> for (String, User) {
+impl db::Operation<()> for DeleteApiKey {
     fn execute(self, db_conn: &mut diesel::PgConnection) -> Result<(), db::Error> {
-        let (prefix, User(user_id)) = self;
+        let Self { prefix, user_id } = self;
 
         let filter = api_keys::prefix
             .eq(prefix)

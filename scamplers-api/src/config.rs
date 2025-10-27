@@ -26,17 +26,15 @@ pub struct Config {
     db_port: u16,
     #[arg(long, env = "SCAMPLERS_DB_NAME", default_value_t = String::from("postgres"))]
     db_name: String,
-    #[arg(long, env = "SCAMPLERS_FRONTEND_TOKEN", default_value_t)]
-    frontend_token: String,
+    #[arg(long, env = "SCAMPLERS_UI_AUTH_TOKEN", default_value_t)]
+    ui_auth_token: String,
     #[arg(long, env = "SCAMPLERS_API_HOST", default_value_t = String::from("localhost"))]
     host: String,
     #[arg(long, env = "SCAMPLERS_API_PORT", default_value_t = 8000)]
     port: u16,
-    #[arg(long, env = "SCAMPLERS_API_PATH", default_value_t = String::from("/api"))]
-    api_path: String,
     #[arg(skip)]
     initial_data: Option<InitialData>,
-    #[arg(long, env = "SCAMPLERS_SEED_DATA_PATH")]
+    #[arg(long, env = "SCAMPLERS_INITIAL_DATA_PATH")]
     initial_data_path: Option<Utf8PathBuf>,
 }
 impl Config {
@@ -52,7 +50,7 @@ impl Config {
             db_root_password,
             db_login_user_password,
             db_name,
-            frontend_token,
+            ui_auth_token: frontend_token,
             initial_data,
             initial_data_path,
             ..
@@ -87,11 +85,6 @@ impl Config {
         } = self;
 
         format!("{app_host}:{app_port}")
-    }
-
-    #[must_use]
-    pub fn api_path(&self) -> &str {
-        &self.api_path
     }
 
     #[must_use]
@@ -131,8 +124,8 @@ impl Config {
     }
 
     #[must_use]
-    pub fn frontend_token(&self) -> &str {
-        &self.frontend_token
+    pub fn ui_auth_token(&self) -> &str {
+        &self.ui_auth_token
     }
 
     pub fn initial_data(&mut self) -> anyhow::Result<InitialData> {

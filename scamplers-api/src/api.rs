@@ -29,13 +29,13 @@ async fn serve_inner(mut config: Config) -> anyhow::Result<()> {
         .context("failed to initialize app state")?;
     tracing::info!("initialized app state");
 
-    let app = app(app_state.clone(), config.api_path());
+    let app = app(app_state.clone());
 
     let app_addr = config.app_address();
     let listener = TcpListener::bind(&app_addr)
         .await
         .context(format!("failed to listen on {app_addr}"))?;
-    tracing::info!("scamplers listening on {app_addr}");
+    tracing::info!("scamplers listening on {}", listener.local_addr()?);
 
     axum::serve(listener, app)
         .await
@@ -52,9 +52,7 @@ fn initialize_logging(log_dir: Option<Utf8PathBuf>) {
 
     match log_dir {
         None => {
-            let dev_test_log_filter = Targets::new()
-                .with_target("scamplers", Level::DEBUG)
-                .with_target("tower_http", Level::TRACE);
+            let dev_test_log_filter = Targets::new().with_target("scamplers", Level::DEBUG);
             let log_layer = log_layer.pretty().with_filter(dev_test_log_filter);
 
             tracing_subscriber::registry().with(log_layer).init();
@@ -72,10 +70,10 @@ fn initialize_logging(log_dir: Option<Utf8PathBuf>) {
     }
 }
 
-fn app(app_state: AppState, api_path: &str) -> Router {
+fn app(app_state: AppState) -> Router {
     let api_router = routes::router()
         .route("/health", get(async || ()))
         .with_state(app_state);
 
-    Router::new().nest(&api_path, api_router)
+    Router::new().nest("/api", api_router)
 }

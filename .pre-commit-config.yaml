@@ -3,31 +3,31 @@ repos:
     hooks:
       - id: lint_default-vec
         name: Lint default-vec
-        entry: ./pre-commit_scripts/lint_default-vec.sh
+        entry: ./scripts/pre-commit/lint_default-vec.sh
         language: script
         pass_filenames: false
 
       - id: lint_non-empty-string
         name: Lint non-empty-string
-        entry: ./pre-commit_scripts/lint_non-empty-string.sh
+        entry: ./scripts/pre-commit/lint_non-empty-string.sh
         language: script
         pass_filenames: false
 
-      - id: lint_scamplers-frontend
-        name: Lint scamplers-frontend
-        entry: ./pre-commit_scripts/lint_scamplers-frontend.sh
+      - id: lint_scamplers-ui
+        name: Lint scamplers-ui
+        entry: ./scripts/pre-commit/lint_scamplers-ui.sh
         language: script
         pass_filenames: false
 
       - id: lint_scamplers-models_app
         name: Lint scamplers-models_app
-        entry: ./pre-commit_scripts/lint_scamplers-models_app.sh
+        entry: ./scripts/pre-commit/lint_scamplers-models_app.sh
         language: script
         pass_filenames: false
 
       - id: lint_scamplers-models_schema
         name: Lint scamplers-models_schema
-        entry: ./pre-commit_scripts/lint_scamplers-models_schema.sh
+        entry: ./scripts/pre-commit/lint_scamplers-models_schema.sh
         language: script
         pass_filenames: false
 

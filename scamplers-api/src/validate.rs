@@ -5,9 +5,10 @@ mod institutions;
 mod people;
 
 #[derive(Debug, thiserror::Error, serde::Serialize)]
+#[serde(rename_all = "snake_case", tag = "type", content = "cause")]
 #[error(transparent)]
 pub enum Error {
-    CreatePerson(#[from] people::Error),
+    PersonCreation(#[from] people::Error),
 }
 
 pub trait Validate {

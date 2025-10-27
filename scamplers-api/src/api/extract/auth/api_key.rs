@@ -16,12 +16,6 @@ const KEY_LENGTH: usize = 32;
 #[serde(transparent)]
 pub struct ApiKey(String);
 
-#[derive(Debug, Deserialize, Serialize)]
-pub struct HashedApiKey {
-    prefix: String,
-    hash: String,
-}
-
 impl ApiKey {
     #[must_use]
     pub fn new() -> Self {
@@ -70,13 +64,13 @@ impl ApiKey {
         inner
     }
 }
-impl FromStr for ApiKey {
-    type Err = ();
 
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        Ok(Self(s.to_string()))
+impl From<&str> for ApiKey {
+    fn from(value: &str) -> Self {
+        Self(value.to_string())
     }
 }
+
 impl Default for ApiKey {
     fn default() -> Self {
         let mut rng = StdRng::from_os_rng();

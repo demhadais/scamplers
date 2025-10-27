@@ -14,7 +14,6 @@
                 signOut();
             }}>Sign Out</button
         >
-        {session.user?.name}
     {/if}
 </div>
 

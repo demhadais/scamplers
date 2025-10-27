@@ -7,7 +7,10 @@ use scamplers_models::person::{self, CreatedUser, Person, PersonId};
 use scamplers_schema::{institutions, people};
 use uuid::Uuid;
 
-use crate::{api::extract::auth::User, db};
+use crate::{
+    api::{extract::auth::AuthenticatedUser, routes::CreateApiKey},
+    db,
+};
 
 define_sql_function! {fn create_user_if_not_exists(user_id: Text, roles: Array<Text>)}
 
@@ -65,7 +68,7 @@ impl db::Operation<person::CreatedUser> for person::Creation {
             institution_id,
         };
 
-        let id: PersonId = diesel::insert_into(p::table)
+        let id: Uuid = diesel::insert_into(p::table)
             .values(upsert)
             .on_conflict(p::ms_user_id)
             .do_update()
@@ -76,13 +79,12 @@ impl db::Operation<person::CreatedUser> for person::Creation {
         // Create the user, but give them no roles. Note that we use the inner `Uuid`'s
         // `Display` implementation
         let empty_roles: Vec<String> = Vec::with_capacity(0);
-        diesel::select(create_user_if_not_exists(id.to_id_string(), empty_roles))
-            .execute(db_conn)?;
+        diesel::select(create_user_if_not_exists(id.to_string(), empty_roles)).execute(db_conn)?;
 
-        let api_key = User(id.into()).execute(db_conn)?;
+        let api_key = CreateApiKey { user_id: id }.execute_as_user(id, db_conn)?;
 
         Ok(CreatedUser::builder()
-            .inner(id.execute(db_conn)?)
+            .inner(PersonId(id).execute(db_conn)?)
             .api_key(api_key)
             .build())
     }

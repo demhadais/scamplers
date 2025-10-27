@@ -3,6 +3,7 @@ use std::fmt::Display;
 use uuid::Uuid;
 
 #[derive(Debug, thiserror::Error, serde::Serialize)]
+#[serde(tag = "type", content = "cause")]
 pub enum Error {
     #[error("failed to find {resource} with ID {resource_id}")]
     ResourceNotFound { resource: String, resource_id: Uuid },

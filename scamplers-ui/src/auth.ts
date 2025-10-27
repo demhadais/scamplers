@@ -1,24 +1,28 @@
 import { type DefaultSession, SvelteKitAuth } from "@auth/sveltekit";
-import type { PersonCreation } from "scamplers-models/person_creation";
+import type { PersonCreation } from "$lib/scamplers-models/person_creation";
 import {
   AUTH_SECRET,
   MICROSOFT_ENTRA_ID_ID,
   MICROSOFT_ENTRA_ID_ISSUER,
   MICROSOFT_ENTRA_ID_SECRET,
 } from "$lib/server/secrets";
-import { serverApiClient } from "$lib/server/client";
+import { apiClient, isError } from "$lib/server/client";
 import { type JWT } from "@auth/core/jwt";
 import MicrosoftEntraID from "@auth/sveltekit/providers/microsoft-entra-id";
-import type { CreatedUser } from "scamplers-models/created_user";
+import type { AdapterSession } from "@auth/core/adapters";
 
 declare module "@auth/sveltekit" {
   interface Session {
-    person: CreatedUser;
+    user: {
+      apiKey: string;
+      roles: ("app_admin" | "biology_staff" | "computational_staff")[];
+    } & DefaultSession["user"];
   }
 }
 declare module "@auth/core/jwt" {
   interface JWT {
-    createdUser: CreatedUser;
+    userApiKey: string;
+    userRoles: ("app_admin" | "biology_staff" | "computational_staff")[];
   }
 }
 
@@ -49,24 +53,35 @@ export const { handle, signIn, signOut } = SvelteKitAuth({
       profile.ms_user_id = profile.oid;
       profile.institution_id = profile.tid;
 
-      const createdUser = await serverApiClient.microsoftSignin(
-        profile as PersonCreation,
-      );
-      token.createdUser = createdUser;
+      const result = await apiClient.microsoftSignIn(profile as PersonCreation);
+
+      if (isError(result)) {
+        return null;
+      }
+
+      token.userApiKey = result.api_key;
+      token.userRoles = result.roles;
 
       return token;
     },
 
     session({ session, token }) {
-      session.person = token.createdUser;
+      session.user.apiKey = token.userApiKey;
+      session.user.roles = token.userRoles;
 
       return session;
     },
   },
   trustHost: true,
   events: {
-    signOut({ token }) {
-      serverApiClient.signOut(token.createdUser.api_key);
+    async signOut(
+      message:
+        | { session: AdapterSession | null | void | undefined }
+        | { token: JWT | null },
+    ) {
+      if ("token" in message && message.token) {
+        await apiClient.deleteApiKey(message.token.userApiKey);
+      }
     },
   },
 });

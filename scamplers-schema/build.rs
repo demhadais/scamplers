@@ -3,28 +3,30 @@ use std::process::Command;
 fn main() {
     println!("cargo::rerun-if-changed=migrations");
 
-    for cmd in [reset_db(), generate_schema()] {
-        run_command(cmd);
-    }
+    // In case the db doesn't exist, run `diesel setup` to create it. However, if it
+    // does exist, then it's a no-op. Either way, we want to reset it so we have a
+    // fresh db before generating the Rust-side schema
+    setup_db();
+    reset_db();
+    generate_schema();
 }
 
-fn diesel_cmd(args: &[&str]) -> Command {
-    let mut cmd = Command::new("diesel");
-    cmd.args(args);
+fn setup_db() {
+    let cmd = diesel_cmd(&["setup"]);
 
-    cmd
+    run_command(cmd)
 }
 
-fn reset_db() -> Command {
+fn reset_db() {
     let cmd = diesel_cmd(&["database", "reset"]);
 
-    cmd
+    run_command(cmd)
 }
 
-fn generate_schema() -> Command {
+fn generate_schema() {
     let cmd = diesel_cmd(&["migration", "run"]);
 
-    cmd
+    run_command(cmd)
 }
 
 fn run_command(mut cmd: Command) {
@@ -35,4 +37,11 @@ fn run_command(mut cmd: Command) {
         "{}",
         String::from_utf8(output.stderr).unwrap()
     );
+}
+
+fn diesel_cmd(args: &[&str]) -> Command {
+    let mut cmd = Command::new("diesel");
+    cmd.args(args);
+
+    cmd
 }

@@ -17,7 +17,7 @@ pub enum AppState {
     },
     Prod {
         db_pool: Pool,
-        frontend_token: String,
+        ui_auth_token: String,
     },
 }
 
@@ -93,7 +93,7 @@ impl AppState {
         } else {
             Self::Prod {
                 db_pool,
-                frontend_token: config.frontend_token().to_string(),
+                ui_auth_token: config.ui_auth_token().to_string(),
             }
         };
 

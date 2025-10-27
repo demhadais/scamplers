@@ -2,12 +2,12 @@ import { env } from "$env/dynamic/private";
 
 async function read_secret(name: string): Promise<string> {
   if (env.IN_DOCKER) {
-    return await Deno.readTextFile(`/run/secrets/${name}`, {
-      encoding: "utf8",
-    });
+    // @ts-ignore: Deno exists
+    return await Deno.readTextFile(`/run/secrets/${name}`);
   }
 
-  const val = env[name.toUpperCase()];
+  const key = name.toUpperCase();
+  const val = env[key] || env[`SCAMPLERS_${key}`];
   if (val === undefined) {
     throw `secret ${name} not set`;
   }
@@ -25,4 +25,4 @@ export const MICROSOFT_ENTRA_ID_SECRET = await read_secret(
 export const MICROSOFT_ENTRA_ID_ISSUER = await read_secret(
   "auth_microsoft_entra_id_issuer",
 );
-export const FRONTEND_TOKEN = await read_secret("frontend_token");
+export const UI_AUTH_TOKEN = await read_secret("ui_auth_token");

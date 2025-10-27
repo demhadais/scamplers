@@ -1,10 +1,10 @@
 {
-  "name": "scamplers-frontend",
+  "name": "scamplers-ui",
   "private": true,
   "version": "0.0.1",
   "type": "module",
   "scripts": {
-    "typedefs": "cargo run --package scamplers-jsonschema -- --output-dir ../json-schema && deno run --allow-all npm:json-schema-to-typescript --input ../json-schema/ --output scamplers-models/",
+    "typedefs": "cargo run --package scamplers-jsonschema -- --output-dir ../json-schema && deno run --allow-all npm:json-schema-to-typescript --input ../json-schema/ --output src/lib/scamplers-models/",
     "dev": "deno task typedefs && vite dev",
     "build": "deno task typedefs && vite build",
     "preview": "vite preview",

@@ -4,14 +4,16 @@ use scamplers_models::{
     institution::{self, Institution, InstitutionId},
     person::{self, CreatedUser, Person, PersonId, PersonSummary},
 };
+use serde::Serialize;
 use serde_qs::axum::QsQuery;
+use uuid::Uuid;
 
 use crate::{
     api::{
         error::ErrorResponse,
         extract::{
             ValidJson,
-            auth::{ApiKey, Frontend, User},
+            auth::{ApiKey, AuthenticatedUi, AuthenticatedUser},
         },
     },
     db::{self, Operation},
@@ -23,14 +25,14 @@ mod people;
 
 async fn inner_handler<Request, Response>(
     State(state): State<AppState>,
-    User(user_id): User,
+    AuthenticatedUser(user_id): AuthenticatedUser,
     request: Request,
 ) -> Result<Json<Response>, ErrorResponse>
 where
-    Request: db::Operation<Response> + Send + serde::Serialize + 'static,
+    Request: std::fmt::Debug + db::Operation<Response> + Send + serde::Serialize + 'static,
     Response: Send + 'static,
 {
-    tracing::info!(deserialized_request = serde_json::to_string(&request).unwrap());
+    tracing::info!("{request:?}");
 
     let db_conn = state.db_conn().await?;
 
@@ -50,7 +52,7 @@ struct InstitutionsEndpoint;
 async fn create_institution(
     _: InstitutionsEndpoint,
     state: State<AppState>,
-    user: User,
+    user: AuthenticatedUser,
     ValidJson(request): ValidJson<institution::Creation>,
 ) -> ApiResponse<Institution> {
     let item = inner_handler(state, user, request).await?;
@@ -60,7 +62,7 @@ async fn create_institution(
 async fn fetch_institution(
     request: InstitutionId,
     state: State<AppState>,
-    user: User,
+    user: AuthenticatedUser,
 ) -> ApiResponse<Institution> {
     let item = inner_handler(state, user, request).await?;
     Ok((StatusCode::FOUND, item))
@@ -69,7 +71,7 @@ async fn fetch_institution(
 async fn list_institutions(
     _: InstitutionsEndpoint,
     state: State<AppState>,
-    user: User,
+    user: AuthenticatedUser,
     QsQuery(request): QsQuery<institution::Query>,
 ) -> ApiResponse<Vec<Institution>> {
     let items = inner_handler(state, user, request).await?;
@@ -83,7 +85,7 @@ struct PeopleEndpoint;
 async fn create_person(
     _: PeopleEndpoint,
     state: State<AppState>,
-    user: User,
+    user: AuthenticatedUser,
     ValidJson(request): ValidJson<person::Creation>,
 ) -> ApiResponse<Person> {
     let person = inner_handler(state, user, request).await?;
@@ -93,7 +95,7 @@ async fn create_person(
 async fn fetch_person(
     request: PersonId,
     state: State<AppState>,
-    user: User,
+    user: AuthenticatedUser,
 ) -> ApiResponse<Person> {
     let person = inner_handler(state, user, request).await?;
     Ok((StatusCode::FOUND, person))
@@ -102,7 +104,7 @@ async fn fetch_person(
 async fn list_people(
     _: PeopleEndpoint,
     state: State<AppState>,
-    user: User,
+    user: AuthenticatedUser,
     QsQuery(request): QsQuery<person::Query>,
 ) -> ApiResponse<Vec<PersonSummary>> {
     let people = inner_handler(state, user, request).await?;
@@ -110,46 +112,16 @@ async fn list_people(
 }
 
 #[derive(TypedPath)]
-#[typed_path("/api-keys")]
-struct ApiKeysEndpoint;
+#[typed_path("/sign-in/microsoft")]
+struct MicrosoftSignInEndpoint;
 
-async fn create_api_key(
-    _: ApiKeysEndpoint,
-    state: State<AppState>,
-    user: User,
-) -> ApiResponse<serde_json::Value> {
-    // Extract the API key and put it inside a JSON object
-    let Json(api_key) = inner_handler(state, user, user).await?;
-    Ok((
-        StatusCode::CREATED,
-        Json(serde_json::json!({"api_key": api_key})),
-    ))
-}
-
-#[derive(serde::Deserialize, serde::Serialize, TypedPath)]
-#[typed_path("/api-keys/{prefix}")]
-struct ApiKeyPrefix(String);
-
-async fn delete_api_key(
-    ApiKeyPrefix(prefix): ApiKeyPrefix,
-    state: State<AppState>,
-    user: User,
-) -> ApiResponse<()> {
-    let resp = inner_handler(state, user, (prefix, user)).await?;
-    Ok((StatusCode::OK, resp))
-}
-
-#[derive(TypedPath)]
-#[typed_path("/signin/microsoft")]
-struct MicrosoftSigninEndpoint;
-
-async fn microsoft_signin(
-    _: MicrosoftSigninEndpoint,
-    _: Frontend,
+async fn microsoft_sign_in(
+    _: MicrosoftSignInEndpoint,
+    _: AuthenticatedUi,
     State(state): State<AppState>,
     ValidJson(signin): ValidJson<scamplers_models::person::Creation>,
 ) -> ApiResponse<CreatedUser> {
-    tracing::info!(deserialized_request = serde_json::to_string(&signin).unwrap());
+    tracing::info!("{signin:?}");
 
     let db_conn = state.db_conn().await?;
 
@@ -158,6 +130,56 @@ async fn microsoft_signin(
         .await??;
 
     Ok((StatusCode::CREATED, Json(created_user)))
+}
+
+#[derive(TypedPath)]
+#[typed_path("/api-keys")]
+struct ApiKeysEndpoint;
+
+#[derive(Debug, serde::Serialize)]
+struct CreateApiKey {
+    user_id: Uuid,
+}
+
+async fn create_api_key(
+    _: ApiKeysEndpoint,
+    state: State<AppState>,
+    user: AuthenticatedUser,
+) -> ApiResponse<serde_json::Value> {
+    // Extract the API key and put it inside a JSON object
+    let Json(api_key) = inner_handler(state, user, CreateApiKey { user_id: user.0 }).await?;
+    Ok((
+        StatusCode::CREATED,
+        Json(serde_json::json!({"api_key": api_key})),
+    ))
+}
+
+#[derive(serde::Deserialize, TypedPath)]
+#[typed_path("/api-keys/{prefix}")]
+struct DeleteApiKeyEndpoint(String);
+
+#[derive(Debug, serde::Serialize)]
+struct DeleteApiKey {
+    prefix: String,
+    user_id: Uuid,
+}
+
+async fn delete_api_key(
+    DeleteApiKeyEndpoint(prefix): DeleteApiKeyEndpoint,
+    state: State<AppState>,
+    user: AuthenticatedUser,
+) -> ApiResponse<()> {
+    let resp = inner_handler(
+        state,
+        user,
+        DeleteApiKey {
+            prefix,
+            user_id: user.0,
+        },
+    )
+    .await?;
+
+    Ok((StatusCode::OK, resp))
 }
 
 pub(super) fn router() -> Router<AppState> {
@@ -170,5 +192,5 @@ pub(super) fn router() -> Router<AppState> {
         .typed_get(list_people)
         .typed_post(create_api_key)
         .typed_delete(delete_api_key)
-        .typed_post(microsoft_signin)
+        .typed_post(microsoft_sign_in)
 }

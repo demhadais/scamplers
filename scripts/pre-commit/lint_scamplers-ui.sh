@@ -3,6 +3,5 @@
 set -euo pipefail
 
 cargo run --package scamplers-jsonschema
-cd scamplers-frontend
-deno task check
-deno fmt
+deno task --cwd scamplers-ui check
+deno fmt scamplers-ui

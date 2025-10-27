@@ -4,33 +4,36 @@ use axum_extra::{
     headers::{self, authorization::Bearer},
 };
 
-use crate::{api::extract::auth, state::AppState};
+use crate::{
+    api::{self, extract::auth},
+    state::AppState,
+};
 
-pub struct Frontend;
+pub struct AuthenticatedUi;
 
-impl FromRequestParts<AppState> for Frontend {
-    type Rejection = auth::Error;
+impl FromRequestParts<AppState> for AuthenticatedUi {
+    type Rejection = api::ErrorResponse;
 
     async fn from_request_parts(
         parts: &mut axum::http::request::Parts,
         state: &AppState,
     ) -> Result<Self, Self::Rejection> {
-        let frontend_token = match state {
+        let ui_auth_token = match state {
             AppState::Dev { .. } => {
                 return Ok(Self);
             }
-            AppState::Prod { frontend_token, .. } => frontend_token,
+            AppState::Prod { ui_auth_token, .. } => ui_auth_token,
         };
 
-        let Ok(frontend_auth) = parts
+        let Ok(received_token) = parts
             .extract::<TypedHeader<headers::Authorization<Bearer>>>()
             .await
         else {
-            return Err(auth::Error::invalid_frontend_token())?;
+            return Err(auth::Error::no_ui_auth_token())?;
         };
 
-        if frontend_auth.token() != frontend_token {
-            return Err(auth::Error::invalid_frontend_token())?;
+        if received_token.token() != ui_auth_token {
+            return Err(auth::Error::invalid_ui_auth_token())?;
         }
 
         Ok(Self)

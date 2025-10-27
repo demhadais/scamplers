@@ -1,0 +1,4 @@
+{
+  "lint": { "rules": { "exclude": ["no-sloppy-imports"] } },
+  "nodeModulesDir": "auto"
+}
