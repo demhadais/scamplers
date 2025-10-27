@@ -37,7 +37,7 @@ class ApiClient {
     return await this.post({ endpoint: "signin/microsoft", data: user });
   }
 
-  async signOut(apiKey: String) {
+  async signOut(apiKey: string) {
     const response = await fetch(
       `${this.api_base_url}/api-keys/${apiKey.substring(0, 8)}`,
       {

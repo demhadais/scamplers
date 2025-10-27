@@ -15,4 +15,4 @@ until docker exec --user postgres scamplers-dev pg_isready >/dev/null 2>&1; do
     sleep 0.1
 done
 
-DATABASE_URL="postgres://postgres@localhost:5433/postgres" cargo run --package scamplers-api -- --initial-data-path initial-data.dev.json --db-port 5433 --dev
+DATABASE_URL="postgres://postgres@localhost:5433/postgres" cargo run --package scamplers-api -- --initial-data-path initial-data.dev.json --db-port 5433
