@@ -19,7 +19,7 @@ where
         let Json(data) = <Json<T> as FromRequest<AppState>>::from_request(req, state).await?;
 
         let db_conn = state.db_conn().await?;
-        let mut db_conn = db_conn.lock().map_err(|e| api::ErrorResponse {
+        let mut db_conn = db_conn.lock().map_err(|_| api::ErrorResponse {
             status: StatusCode::INTERNAL_SERVER_ERROR.as_u16(),
             public_error: api::error::Error::Other,
             internal_error: None,

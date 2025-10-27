@@ -1,10 +1,9 @@
-use axum::{Json, Router, debug_handler, extract::State, http::StatusCode, routing::post};
+use axum::{Json, Router, extract::State, http::StatusCode};
 use axum_extra::routing::{RouterExt, TypedPath};
 use scamplers_models::{
     institution::{self, Institution, InstitutionId},
     person::{self, CreatedUser, Person, PersonId, PersonSummary},
 };
-use serde::Serialize;
 use serde_qs::axum::QsQuery;
 use uuid::Uuid;
 
@@ -13,7 +12,7 @@ use crate::{
         error::ErrorResponse,
         extract::{
             ValidJson,
-            auth::{ApiKey, AuthenticatedUi, AuthenticatedUser},
+            auth::{AuthenticatedUi, AuthenticatedUser},
         },
     },
     db::{self, Operation},

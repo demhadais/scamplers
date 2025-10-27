@@ -4,13 +4,10 @@ use diesel::{
     sql_types::{Array, Text},
 };
 use scamplers_models::person::{self, CreatedUser, Person, PersonId};
-use scamplers_schema::{institutions, people};
+use scamplers_schema::people;
 use uuid::Uuid;
 
-use crate::{
-    api::{extract::auth::AuthenticatedUser, routes::CreateApiKey},
-    db,
-};
+use crate::{api::routes::CreateApiKey, db};
 
 define_sql_function! {fn create_user_if_not_exists(user_id: Text, roles: Array<Text>)}
 

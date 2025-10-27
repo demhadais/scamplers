@@ -74,7 +74,7 @@ impl From<deadpool_diesel::InteractError> for ErrorResponse {
 
 impl From<auth::Error> for ErrorResponse {
     fn from(err: auth::Error) -> Self {
-        use auth::Error::*;
+        use auth::Error::{Database, Unauthorized};
         match err {
             Unauthorized { .. } => Self {
                 status: StatusCode::UNAUTHORIZED.as_u16(),
@@ -92,7 +92,7 @@ impl From<auth::Error> for ErrorResponse {
 
 impl From<db::Error> for ErrorResponse {
     fn from(err: db::Error) -> Self {
-        use db::Error::*;
+        use db::Error::{Data, DuplicateResource, InvalidReference, Other, ResourceNotFound};
         let status = match err {
             DuplicateResource { .. } => StatusCode::CONFLICT,
             Data { .. } | InvalidReference { .. } => StatusCode::UNPROCESSABLE_ENTITY,

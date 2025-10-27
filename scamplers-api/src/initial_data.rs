@@ -4,11 +4,10 @@ use scamplers_models::{
     institution,
     person::{self, Person, UserRole},
 };
-use url::Url;
 
 use crate::{
     db::{self, Operation},
-    validate::{self, Validate},
+    validate::Validate,
 };
 
 #[derive(Debug, Clone, serde::Deserialize)]
@@ -22,7 +21,7 @@ pub struct InitialData {
 
 pub async fn insert_initial_data(
     initial_data: InitialData,
-    http_client: reqwest::Client,
+    _http_client: reqwest::Client,
     db_pool: deadpool_diesel::postgres::Pool,
 ) -> anyhow::Result<()> {
     fn duplicate_resource_ok<T>(result: Result<T, db::Error>) -> Result<(), db::Error> {

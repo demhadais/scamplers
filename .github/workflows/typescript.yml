@@ -2,49 +2,28 @@ name: Check TypeScript Code
 on:
   pull_request:
     paths:
-      - typescript/**
+      - scamplers-ui/**
+      - json-schema/**
     branches:
       - main
 
 jobs:
   lint:
     runs-on: ubuntu-latest
-
     steps:
       - name: Check out repository code
         uses: actions/checkout@v4
-
-      - name: Install dependencies
-        working-directory: typescript/scamplers-frontend
-        run: npm install
 
       - name: Lint
         working-directory: typescript/scamplers-frontend
-        run: npm run lint
+        run: ./scripts/pre-commit/lint_scamplers-ui.sh
 
-  svelte-check:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Check out repository code
-        uses: actions/checkout@v4
-
-      - name: Install dependencies
-        working-directory: typescript/scamplers-frontend
-        run: npm install
-
-      - name: Svelte check
-        working-directory: typescript/scamplers-frontend
-        run: npm run check
   test:
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository code
         uses: actions/checkout@v4
 
-      - name: Install dependencies
-        working-directory: typescript/scamplers-frontend
-        run: npm install
-
       - name: Unit test
         working-directory: typescript/scamplers-frontend
-        run: npm run test:unit -- --run
+        run: deno test

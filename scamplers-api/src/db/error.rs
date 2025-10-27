@@ -1,5 +1,3 @@
-use std::fmt::Display;
-
 use uuid::Uuid;
 
 #[derive(Debug, thiserror::Error, serde::Serialize)]
@@ -94,8 +92,7 @@ impl
                 resource: entity.to_string(),
                 fields,
                 values,
-            }
-            .into(),
+            },
 
             ForeignKeyViolation => {
                 let referenced_entity = details
@@ -110,7 +107,6 @@ impl
                     referenced_resource: referenced_entity.to_string(),
                     value: values.first().cloned(),
                 }
-                .into()
             }
             _ => Self::Other {
                 message: diesel::result::Error::DatabaseError(kind, info).to_string(),

@@ -65,7 +65,7 @@ impl AppState {
         run_migrations(&mut root_db_conn)?;
         tracing::info!("ran database migrations");
 
-        set_login_user_password(&config.db_login_user_password(), &mut root_db_conn)?;
+        set_login_user_password(config.db_login_user_password(), &mut root_db_conn)?;
         tracing::info!("set password for db login user");
 
         // Get a connection pool as the root user so as to insert the initial data

@@ -1,5 +1,3 @@
-use axum::{Json, response::IntoResponse};
-
 use crate::db;
 
 #[derive(Debug, thiserror::Error, serde::Serialize)]

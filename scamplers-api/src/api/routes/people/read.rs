@@ -1,23 +1,13 @@
-use diesel::{
-    dsl::AssumeNotNull,
-    expression::ValidGrouping,
-    pg::Pg,
-    prelude::*,
-    sql_types::{self, Bool, Nullable, Text},
-};
-use scamplers_models::{
-    generic_query::OrderBy,
-    person::{
-        self, OrdinalColumns, Person, PersonId, PersonSummary, PersonSummaryWithParents, Query,
-    },
+use diesel::{dsl::AssumeNotNull, prelude::*, sql_types::Text};
+use scamplers_models::person::{
+    self, OrdinalColumns, Person, PersonId, PersonSummary, PersonSummaryWithParents,
 };
 use scamplers_schema::people;
-use uuid::Uuid;
 
 use crate::{
     apply_eq_any_filters, apply_ilike_filters,
     db::{self, AsBoxedFilter, BoxedFilterExt},
-    impl_id_db_operation, init_stmt,
+    init_stmt,
 };
 
 diesel::define_sql_function! {fn get_user_roles(user_id: Text) -> Array<Text>}

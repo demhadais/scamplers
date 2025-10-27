@@ -1,4 +1,4 @@
-use axum::{Json, extract::FromRequestParts, http::HeaderValue, response::IntoResponse};
+use axum::{extract::FromRequestParts, http::HeaderValue};
 use diesel::{PgConnection, prelude::*};
 use scamplers_schema::api_keys;
 use uuid::Uuid;
@@ -8,7 +8,6 @@ use crate::{
         self,
         extract::auth::{self, api_key::ApiKey},
     },
-    db,
     state::AppState,
 };
 
@@ -28,7 +27,7 @@ impl AuthenticatedUser {
             .select((api_keys::user_id, api_keys::hash))
             .first(conn)
             .optional()?
-            .ok_or_else(|| auth::Error::invalid_api_key())?;
+            .ok_or_else(auth::Error::invalid_api_key)?;
 
         tracing::debug!(user_id = user_id.to_string());
 
@@ -40,8 +39,8 @@ impl AuthenticatedUser {
     }
 }
 
-const API_KEY_HEADER: &'static str = "X-API-Key";
-const API_KEY_HEADER_LOWER: &'static str = "x-api-key";
+const API_KEY_HEADER: &str = "X-API-Key";
+const API_KEY_HEADER_LOWER: &str = "x-api-key";
 
 impl FromRequestParts<AppState> for AuthenticatedUser {
     type Rejection = api::ErrorResponse;

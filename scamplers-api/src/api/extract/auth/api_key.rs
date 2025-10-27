@@ -1,4 +1,4 @@
-use std::{fmt::Debug, str::FromStr};
+use std::fmt::Debug;
 
 use argon2::{Argon2, PasswordHash, PasswordHasher, PasswordVerifier, password_hash::SaltString};
 use axum::response::IntoResponse;
@@ -37,12 +37,11 @@ impl ApiKey {
         let salt = SaltString::encode_b64(&salt).unwrap();
 
         let argon2 = Argon2::default();
-        let hash = argon2
+
+        argon2
             .hash_password(key.as_bytes(), &salt)
             .unwrap()
-            .to_string();
-
-        hash
+            .to_string()
     }
 
     pub fn is_same_hash(&self, other: &str) -> bool {

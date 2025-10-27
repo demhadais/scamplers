@@ -4,7 +4,7 @@ use uuid::Uuid;
 
 use crate::{
     api::{
-        extract::auth::{ApiKey, AuthenticatedUser},
+        extract::auth::ApiKey,
         routes::{CreateApiKey, DeleteApiKey},
     },
     db,
