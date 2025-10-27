@@ -16,7 +16,6 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Lint
-        working-directory: typescript/scamplers-frontend
         run: ./scripts/pre-commit/lint_scamplers-ui.sh
 
   test:
@@ -26,5 +25,4 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Unit test
-        working-directory: typescript/scamplers-frontend
-        run: deno test
+        run: deno test scamplers-ui
