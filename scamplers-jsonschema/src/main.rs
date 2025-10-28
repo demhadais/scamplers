@@ -23,7 +23,6 @@ fn main() {
         schema_for!(person::PersonQuery),
         schema_for!(person::PersonSummary),
         schema_for!(person::Person),
-        schema_for!(person::CreatedUser),
     ];
 
     let output_dir = PathBuf::from(output_dir);

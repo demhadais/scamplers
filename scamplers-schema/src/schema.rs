@@ -205,10 +205,11 @@ diesel::table! {
         id -> Uuid,
         links -> Jsonb,
         name -> Text,
-        email -> Nullable<Text>,
+        email -> Text,
+        email_verified -> Bool,
         institution_id -> Uuid,
         orcid -> Nullable<Text>,
-        ms_user_id -> Nullable<Uuid>,
+        microsoft_entra_oid -> Nullable<Uuid>,
     }
 }
 

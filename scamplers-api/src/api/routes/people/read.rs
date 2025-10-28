@@ -32,7 +32,7 @@ where
     AssumeNotNull<people::name>: SelectableExpression<QS>,
     AssumeNotNull<people::email>: SelectableExpression<QS>,
     AssumeNotNull<people::orcid>: SelectableExpression<QS>,
-    AssumeNotNull<people::ms_user_id>: SelectableExpression<QS>,
+    AssumeNotNull<people::microsoft_entra_oid>: SelectableExpression<QS>,
 {
     fn as_boxed_filter(&'a self) -> db::OptionalBoxedFilter<'a, QS> {
         let Self {
@@ -40,7 +40,7 @@ where
             names,
             emails,
             orcids,
-            ms_user_ids,
+            microsoft_entra_oids,
         } = &self;
 
         let mut filter = db::OptionalBoxedFilter::new();
@@ -50,7 +50,7 @@ where
             filters = {
                 people::id => ids,
                 people::orcid => orcids,
-                people::ms_user_id => ms_user_ids
+                people::microsoft_entra_oid => microsoft_entra_oids
             }
         );
 

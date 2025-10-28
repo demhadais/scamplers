@@ -18,7 +18,7 @@ pub struct PersonSummary {
     #[serde(flatten)]
     #[cfg_attr(feature = "app", diesel(embed))]
     inner: Fields,
-    email: Option<String>,
+    email_verified: bool,
     links: Links,
 }
 
@@ -38,13 +38,4 @@ pub struct Person {
     #[serde(flatten)]
     info: PersonSummaryWithParents,
     roles: Vec<UserRole>,
-}
-
-#[base_model]
-#[derive(bon::Builder)]
-#[builder(on(_, into))]
-pub struct CreatedUser {
-    #[serde(flatten)]
-    inner: Person,
-    api_key: String,
 }

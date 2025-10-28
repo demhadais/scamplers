@@ -2,7 +2,7 @@ use axum::{Json, Router, extract::State, http::StatusCode};
 use axum_extra::routing::{RouterExt, TypedPath};
 use scamplers_models::{
     institution::{self, Institution, InstitutionId},
-    person::{self, CreatedUser, Person, PersonId, PersonSummary},
+    person::{self, Person, PersonId, PersonSummary},
 };
 use serde_qs::axum::QsQuery;
 use uuid::Uuid;
@@ -12,7 +12,7 @@ use crate::{
         error::ErrorResponse,
         extract::{
             ValidJson,
-            auth::{AuthenticatedUi, AuthenticatedUser},
+            auth::{self, AuthenticatedUser},
         },
     },
     db::{self, Operation},
@@ -24,7 +24,7 @@ mod people;
 
 async fn inner_handler<Request, Response>(
     State(state): State<AppState>,
-    AuthenticatedUser(user_id): AuthenticatedUser,
+    user: AuthenticatedUser,
     request: Request,
 ) -> Result<Json<Response>, ErrorResponse>
 where
@@ -36,7 +36,7 @@ where
     let db_conn = state.db_conn().await?;
 
     let response = db_conn
-        .interact(move |db_conn| request.execute_as_user(user_id, db_conn))
+        .interact(move |db_conn| request.execute_as_user(user.id(), db_conn))
         .await??;
 
     Ok(Json(response))
@@ -110,73 +110,24 @@ async fn list_people(
     Ok((StatusCode::OK, people))
 }
 
-#[derive(TypedPath)]
-#[typed_path("/sign-in/microsoft")]
-struct MicrosoftSignInEndpoint;
-
-async fn microsoft_sign_in(
-    _: MicrosoftSignInEndpoint,
-    _: AuthenticatedUi,
-    State(state): State<AppState>,
-    ValidJson(signin): ValidJson<scamplers_models::person::Creation>,
-) -> ApiResponse<CreatedUser> {
-    tracing::info!("{signin:?}");
-
-    let db_conn = state.db_conn().await?;
-
-    let created_user = db_conn
-        .interact(|db_conn| signin.execute(db_conn))
-        .await??;
-
-    Ok((StatusCode::CREATED, Json(created_user)))
-}
-
-#[derive(TypedPath)]
-#[typed_path("/api-keys")]
-struct ApiKeysEndpoint;
-
-#[derive(Debug, serde::Serialize)]
-struct CreateApiKey {
+#[derive(Debug, serde::Deserialize, serde::Serialize, TypedPath)]
+#[typed_path("/people/{user_id}/api-keys/{api_key_prefix}")]
+struct DeleteApiKeyEndpoint {
     user_id: Uuid,
-}
-
-async fn create_api_key(
-    _: ApiKeysEndpoint,
-    state: State<AppState>,
-    user: AuthenticatedUser,
-) -> ApiResponse<serde_json::Value> {
-    // Extract the API key and put it inside a JSON object
-    let Json(api_key) = inner_handler(state, user, CreateApiKey { user_id: user.0 }).await?;
-    Ok((
-        StatusCode::CREATED,
-        Json(serde_json::json!({"api_key": api_key})),
-    ))
-}
-
-#[derive(serde::Deserialize, TypedPath)]
-#[typed_path("/api-keys/{prefix}")]
-struct DeleteApiKeyEndpoint(String);
-
-#[derive(Debug, serde::Serialize)]
-struct DeleteApiKey {
-    prefix: String,
-    user_id: Uuid,
+    api_key_prefix: String,
 }
 
 async fn delete_api_key(
-    DeleteApiKeyEndpoint(prefix): DeleteApiKeyEndpoint,
+    request: DeleteApiKeyEndpoint,
     state: State<AppState>,
     user: AuthenticatedUser,
 ) -> ApiResponse<()> {
-    let resp = inner_handler(
-        state,
-        user,
-        DeleteApiKey {
-            prefix,
-            user_id: user.0,
-        },
-    )
-    .await?;
+    // Check if the authenticated user is actually deleting their own API key. Technically this isn't necessary because of postgres's RLS
+    if request.user_id != user.id() {
+        return Err(super::ErrorResponse::from(auth::Error::invalid_api_key()));
+    }
+
+    let resp = inner_handler(state, user, request).await?;
 
     Ok((StatusCode::OK, resp))
 }
@@ -189,7 +140,5 @@ pub(super) fn router() -> Router<AppState> {
         .typed_post(create_person)
         .typed_get(fetch_person)
         .typed_get(list_people)
-        .typed_post(create_api_key)
         .typed_delete(delete_api_key)
-        .typed_post(microsoft_sign_in)
 }

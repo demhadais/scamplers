@@ -17,13 +17,19 @@ pub enum AppState {
     },
     Prod {
         db_pool: Pool,
-        ui_auth_token: String,
+        api_key_prefix_length: usize,
     },
 }
 
-fn create_db_pool(db_url: &str) -> anyhow::Result<Pool> {
+fn create_db_pool(db_url: &str, max_size: Option<usize>) -> anyhow::Result<Pool> {
     let manager = PoolManager::new(db_url, Runtime::Tokio1);
-    Ok(Pool::builder(manager).build()?)
+    let mut builder = Pool::builder(manager);
+
+    if let Some(max_size) = max_size {
+        builder = builder.max_size(max_size);
+    }
+
+    Ok(builder.build()?)
 }
 
 fn create_dev_superuser(db_conn: &mut PgConnection) -> anyhow::Result<Uuid> {
@@ -68,8 +74,8 @@ impl AppState {
         set_login_user_password(config.db_login_user_password(), &mut root_db_conn)?;
         tracing::info!("set password for db login user");
 
-        // Get a connection pool as the root user so as to insert the initial data
-        let root_db_pool = create_db_pool(&config.db_root_url())?;
+        // Get a connection pool as the root user so as to insert the initial data. We only need one connection here
+        let root_db_pool = create_db_pool(&config.db_root_url(), Some(1))?;
         let initial_data = config
             .initial_data()
             .context("failed to read initial data")?;
@@ -84,7 +90,7 @@ impl AppState {
             config.db_login_url()
         };
 
-        let db_pool = create_db_pool(&db_url)?;
+        let db_pool = create_db_pool(&db_url, None)?;
 
         let state = if config.dev() {
             let mut db_conn = PgConnection::establish(&config.db_root_url())?;
@@ -93,7 +99,7 @@ impl AppState {
         } else {
             Self::Prod {
                 db_pool,
-                ui_auth_token: config.ui_auth_token().to_string(),
+                api_key_prefix_length: config.api_key_prefix_length(),
             }
         };
 

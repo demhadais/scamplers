@@ -85,10 +85,8 @@ create function create_user_if_not_exists(
     roles text []
 ) returns void language plpgsql volatile strict as $$
     begin
-        set local role user_creator;
         perform create_role_if_not_exists(user_id);
-        execute format('grant %I to login_user with admin true, inherit false', user_id);
-        set local role login_user;
+        execute format('grant %I to scamplers_api with admin true, inherit false', user_id);
         execute format('alter role %I with login', user_id);
         perform grant_roles_to_user(user_id, roles);
     end;
@@ -120,14 +118,13 @@ create function construct_links(
     end;
 $$;
 
+-- Roles assigned to people
 select create_role_if_not_exists('app_admin');
 select create_role_if_not_exists('biology_staff');
 select create_role_if_not_exists('computational_staff');
 
-select create_role_if_not_exists('login_user');
-alter role login_user with createrole login;
-grant app_admin, biology_staff, computational_staff to login_user with admin true, inherit false; --noqa
+select create_role_if_not_exists('scamplers_api');
+alter role scamplers_api with login;
 
-select create_role_if_not_exists('user_creator');
-alter role user_creator with createrole;
-grant user_creator to login_user with inherit false;
+select create_role_if_not_exists('scamplers_ui');
+alter role scamplers_ui with createrole login;

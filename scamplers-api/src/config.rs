@@ -26,8 +26,8 @@ pub struct Config {
     db_port: u16,
     #[arg(long, env = "SCAMPLERS_DB_NAME", default_value_t = String::from("postgres"))]
     db_name: String,
-    #[arg(long, env = "SCAMPLERS_UI_AUTH_TOKEN", default_value_t)]
-    ui_auth_token: String,
+    #[arg(long, env = "SCAMPLERS_API_KEY_PREFIX_LENGTH", default_value_t = 8)]
+    api_key_prefix_length: usize,
     #[arg(long, env = "SCAMPLERS_API_HOST", default_value_t = String::from("localhost"))]
     host: String,
     #[arg(long, env = "SCAMPLERS_API_PORT", default_value_t = 8000)]
@@ -50,7 +50,6 @@ impl Config {
             db_root_password,
             db_login_user_password,
             db_name,
-            ui_auth_token: frontend_token,
             initial_data,
             initial_data_path,
             ..
@@ -68,7 +67,6 @@ impl Config {
         *db_root_user = read_secret("db_root_user")?;
         *db_root_password = read_secret("db_root_password")?;
         *db_login_user_password = read_secret("db_login_user_password")?;
-        *frontend_token = read_secret("frontend_token")?;
         *db_name = read_secret("db_name")?;
         *initial_data = serde_json::from_str(&read_secret("seed_data")?)?;
         *initial_data_path = None;
@@ -124,8 +122,8 @@ impl Config {
     }
 
     #[must_use]
-    pub fn ui_auth_token(&self) -> &str {
-        &self.ui_auth_token
+    pub fn api_key_prefix_length(&self) -> usize {
+        self.api_key_prefix_length
     }
 
     pub fn initial_data(&mut self) -> anyhow::Result<InitialData> {

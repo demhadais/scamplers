@@ -14,7 +14,6 @@ pub struct Creation {
     #[serde(flatten)]
     #[cfg_attr(feature = "app", diesel(embed))]
     pub inner: Fields,
-    pub email: NonEmptyString,
     #[serde(default)]
     #[cfg_attr(feature = "app", diesel(skip_insertion))]
     pub roles: Vec<UserRole>,
@@ -28,18 +27,18 @@ impl Creation {
         email: NonEmptyString,
         orcid: Option<NonEmptyString>,
         institution_id: Uuid,
-        ms_user_id: Option<Uuid>,
+        microsoft_entra_oid: Option<Uuid>,
         roles: Vec<UserRole>,
     ) -> Self {
         Self {
             inner: Fields {
                 name,
+                email,
                 orcid,
                 institution_id,
-                ms_user_id,
+                microsoft_entra_oid,
             },
             roles,
-            email,
         }
     }
 }

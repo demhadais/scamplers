@@ -4,10 +4,11 @@ create table people (
         construct_links('people', id, '{"labs", "specimens", "chromium-datasets"}')
     ) stored not null,
     name text not null,
-    email text unique,
+    email text unique not null,
+    email_verified boolean not null default false,
     institution_id uuid references institutions on delete restrict on update restrict not null,
     orcid text unique,
-    ms_user_id uuid unique
+    microsoft_entra_oid uuid unique
 );
 
 create table api_keys (

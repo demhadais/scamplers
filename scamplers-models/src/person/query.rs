@@ -23,7 +23,7 @@ pub struct Filter {
     #[builder(default)]
     pub orcids: Vec<String>,
     #[builder(default)]
-    pub ms_user_ids: Vec<Uuid>,
+    pub microsoft_entra_oids: Vec<Uuid>,
 }
 
 pub type Query = generic_query::Query<Filter, OrdinalColumns>;

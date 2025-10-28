@@ -13,17 +13,19 @@ use crate::{
 
 #[derive(Clone, Copy, serde::Deserialize, serde::Serialize)]
 #[serde(transparent)]
-pub struct AuthenticatedUser(pub Uuid);
+pub struct AuthenticatedUser(Uuid);
 
 impl AuthenticatedUser {
-    fn fetch_by_api_key(api_key: &ApiKey, conn: &mut PgConnection) -> Result<Self, auth::Error> {
-        tracing::debug!(
-            api_key_prefix = api_key.prefix(),
-            api_key_hash = api_key.hash()
-        );
+    fn fetch_by_api_key(
+        api_key: &ApiKey,
+        prefix_length: usize,
+        conn: &mut PgConnection,
+    ) -> Result<Self, auth::Error> {
+        let api_key_prefix = api_key.prefix(prefix_length);
+        tracing::debug!(api_key_prefix);
 
         let (user_id, hash): (Uuid, String) = api_keys::table
-            .filter(api_keys::prefix.eq(api_key.prefix()))
+            .filter(api_keys::prefix.eq(api_key_prefix))
             .select((api_keys::user_id, api_keys::hash))
             .first(conn)
             .optional()?
@@ -49,9 +51,15 @@ impl FromRequestParts<AppState> for AuthenticatedUser {
         parts: &mut axum::http::request::Parts,
         app_state: &AppState,
     ) -> Result<Self, api::ErrorResponse> {
-        if let AppState::Dev { user_id, .. } = app_state {
-            return Ok(Self(*user_id));
-        }
+        let api_key_prefix_length = match app_state {
+            AppState::Prod {
+                api_key_prefix_length,
+                ..
+            } => *api_key_prefix_length,
+            AppState::Dev { user_id, .. } => {
+                return Ok(Self(*user_id));
+            }
+        };
 
         let headers = &parts.headers;
 
@@ -67,7 +75,15 @@ impl FromRequestParts<AppState> for AuthenticatedUser {
         let api_key = api_key.into();
 
         Ok(db_conn
-            .interact(move |db_conn| AuthenticatedUser::fetch_by_api_key(&api_key, db_conn))
+            .interact(move |db_conn| {
+                AuthenticatedUser::fetch_by_api_key(&api_key, api_key_prefix_length, db_conn)
+            })
             .await??)
+    }
+}
+
+impl AuthenticatedUser {
+    pub fn id(&self) -> Uuid {
+        self.0
     }
 }
