@@ -27,7 +27,6 @@ impl_enum_to_sql!(UserRole);
 #[cfg_attr(feature = "app", diesel(table_name = people))]
 pub struct Fields {
     pub name: NonEmptyString,
-    pub email: NonEmptyString,
     pub orcid: Option<NonEmptyString>,
     pub institution_id: Uuid,
     pub microsoft_entra_oid: Option<Uuid>,

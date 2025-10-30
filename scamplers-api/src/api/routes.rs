@@ -15,7 +15,7 @@ use crate::{
             auth::{self, AuthenticatedUser},
         },
     },
-    db::{self, Operation},
+    db,
     state::AppState,
 };
 

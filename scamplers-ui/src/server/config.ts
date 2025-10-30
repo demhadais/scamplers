@@ -20,6 +20,7 @@ const secret_names = [
   "db_host",
   "db_port",
   "db_password",
+  "db_name",
 ];
 let SECRETS: Record<string, string> = {};
 for (const s of secret_names) {

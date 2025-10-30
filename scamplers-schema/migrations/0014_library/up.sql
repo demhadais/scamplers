@@ -3,10 +3,10 @@ create table libraries (
     links jsonb generated always as (
         construct_links('libraries', id, '{"measurements", "sequencing-runs", "chromium-datasets"}')
     ) stored not null,
-    readable_id text unique not null,
+    readable_id case_insensitive_text unique not null,
     cdna_id uuid references cdna on delete restrict on update restrict not null,
-    single_index_set_name text references single_index_sets on delete restrict on update restrict,
-    dual_index_set_name text references dual_index_sets on delete restrict on update restrict,
+    single_index_set_name case_insensitive_text references single_index_sets on delete restrict on update restrict,
+    dual_index_set_name case_insensitive_text references dual_index_sets on delete restrict on update restrict,
     number_of_sample_index_pcr_cycles integer not null,
     target_reads_per_cell integer not null,
     prepared_at timestamptz not null,

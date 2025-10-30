@@ -3,9 +3,9 @@ create table labs (
     links jsonb generated always as (
         construct_links('labs', id, '{"members", "specimens", "chromium-datasets"}')
     ) stored not null,
-    name text unique not null,
+    name case_insensitive_text unique not null,
     pi_id uuid references people on delete restrict on update restrict not null,
-    delivery_dir text unique not null
+    delivery_dir case_insensitive_text unique not null
 );
 
 create table lab_membership (

@@ -1,5 +1,11 @@
 // @generated automatically by Diesel CLI.
 
+pub mod sql_types {
+    #[derive(std::fmt::Debug, diesel::sql_types::SqlType)]
+    #[diesel(postgres_type(name = "case_insensitive_text"))]
+    pub struct CaseInsensitiveText;
+}
+
 diesel::table! {
     api_keys (prefix, hash) {
         prefix -> Text,
@@ -60,7 +66,7 @@ diesel::table! {
     chromium_dataset_web_summaries (id) {
         id -> Uuid,
         dataset_id -> Uuid,
-        web_summary -> Text,
+        content -> Bytea,
     }
 }
 
@@ -205,7 +211,7 @@ diesel::table! {
         id -> Uuid,
         links -> Jsonb,
         name -> Text,
-        email -> Text,
+        email -> Nullable<Text>,
         email_verified -> Bool,
         institution_id -> Uuid,
         orcid -> Nullable<Text>,
@@ -233,11 +239,14 @@ diesel::table! {
 }
 
 diesel::table! {
+    use diesel::sql_types::*;
+    use super::sql_types::CaseInsensitiveText;
+
     single_index_sets (name) {
         name -> Text,
         kit -> Text,
         well -> Text,
-        sequences -> Array<Nullable<Text>>,
+        sequences -> Array<Nullable<CaseInsensitiveText>>,
     }
 }
 
@@ -251,6 +260,9 @@ diesel::table! {
 }
 
 diesel::table! {
+    use diesel::sql_types::*;
+    use super::sql_types::CaseInsensitiveText;
+
     specimens (id) {
         id -> Uuid,
         readable_id -> Text,
@@ -259,7 +271,7 @@ diesel::table! {
         submitted_by -> Uuid,
         lab_id -> Uuid,
         received_at -> Timestamptz,
-        species -> Array<Nullable<Text>>,
+        species -> Array<Nullable<CaseInsensitiveText>>,
         returned_at -> Nullable<Timestamptz>,
         returned_by -> Nullable<Uuid>,
         #[sql_name = "type"]
@@ -333,16 +345,19 @@ diesel::table! {
 }
 
 diesel::table! {
+    use diesel::sql_types::*;
+    use super::sql_types::CaseInsensitiveText;
+
     tenx_assays (id) {
         id -> Uuid,
         links -> Jsonb,
         name -> Text,
-        library_types -> Nullable<Array<Nullable<Text>>>,
+        library_types -> Nullable<Array<Nullable<CaseInsensitiveText>>>,
         sample_multiplexing -> Nullable<Text>,
         chemistry_version -> Text,
         protocol_url -> Text,
         chromium_chip -> Nullable<Text>,
-        cmdlines -> Nullable<Array<Nullable<Text>>>,
+        cmdlines -> Nullable<Array<Nullable<CaseInsensitiveText>>>,
     }
 }
 

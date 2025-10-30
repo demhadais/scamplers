@@ -1,4 +1,4 @@
-use anyhow::{anyhow, ensure};
+use anyhow::ensure;
 use diesel::PgConnection;
 use scamplers_models::{
     institution,
@@ -35,21 +35,17 @@ pub async fn insert_initial_data(
         }
     }
 
-    let db_conn = db_pool.get().await?;
-    let mut db_conn = db_conn
-        .lock()
-        .map_err(|_| anyhow!("failed to lock db connection"))?;
-    initial_data.validate(&mut db_conn)?;
-
-    let InitialData {
-        institution,
-        mut app_admin,
-        // index_set_urls,
-        // tenx_assays,
-        // multiplexing_tags,
-    } = initial_data;
-
     let simple_operations = |db_conn: &mut PgConnection| -> Result<(), anyhow::Error> {
+        initial_data.validate(db_conn)?;
+
+        let InitialData {
+            institution,
+            mut app_admin,
+            // index_set_urls,
+            // tenx_assays,
+            // multiplexing_tags,
+        } = initial_data;
+
         duplicate_resource_ok(institution.execute(db_conn))?;
         //
         ensure!(

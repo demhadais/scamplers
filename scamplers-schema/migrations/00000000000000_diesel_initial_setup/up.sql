@@ -128,3 +128,6 @@ alter role scamplers_api with login;
 
 select create_role_if_not_exists('scamplers_ui');
 alter role scamplers_ui with createrole login;
+
+create collation case_insensitive (provider = icu, deterministic = false, locale = 'en-u-ks-level1');
+create domain case_insensitive_text as text collate case_insensitive;

@@ -18,8 +18,10 @@ pub struct Config {
     db_root_user: String,
     #[arg(long, env = "SCAMPLERS_DB_ROOT_PASSWORD", default_value_t)]
     db_root_password: String,
-    #[arg(long, env = "SCAMPLERS_DB_LOGIN_USER_PASSWORD", default_value_t)]
-    db_login_user_password: String,
+    #[arg(long, env = "SCAMPLERS_API_DB_PASSWORD", default_value_t)]
+    scamplers_api_db_password: String,
+    #[arg(long, env = "SCAMPLERS_UI_DB_PASSWORD", default_value_t)]
+    scamplers_ui_db_password: String,
     #[arg(long, env = "SCAMPLERS_DB_HOST", default_value_t = String::from("localhost"))]
     db_host: String,
     #[arg(long, env = "SCAMPLERS_DB_PORT", default_value_t = 5432)]
@@ -48,7 +50,7 @@ impl Config {
             secrets_dir,
             db_root_user,
             db_root_password,
-            db_login_user_password,
+            scamplers_api_db_password: db_login_user_password,
             db_name,
             initial_data,
             initial_data_path,
@@ -86,15 +88,20 @@ impl Config {
     }
 
     #[must_use]
-    pub fn db_login_user_password(&self) -> &str {
-        &self.db_login_user_password
+    pub fn scamplers_api_db_password(&self) -> &str {
+        &self.scamplers_api_db_password
+    }
+
+    #[must_use]
+    pub fn scamplers_ui_db_password(&self) -> &str {
+        &self.scamplers_ui_db_password
     }
 
     fn db_url(&self, root: bool) -> String {
         let Self {
             db_root_user,
             db_root_password,
-            db_login_user_password,
+            scamplers_api_db_password: db_login_user_password,
             db_host,
             db_port,
             db_name,

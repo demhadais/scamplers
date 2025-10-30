@@ -3,8 +3,8 @@
     const session = authClient.useSession();
 </script>
 
-<!-- If the user isn't signed in, they will just be redirected to the '/auth/sign-in' -->
 {#if $session.data}
+    {JSON.stringify($session.data.user)}
     <div>
         <button
             onclick={async () => {

@@ -2,5 +2,5 @@
 create table institutions (
     id uuid primary key,
     links jsonb generated always as (construct_links('institutions', id, '{"people"}')) stored not null,
-    name text unique not null
+    name case_insensitive_text unique not null
 );

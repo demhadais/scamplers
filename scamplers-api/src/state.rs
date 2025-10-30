@@ -52,11 +52,13 @@ fn run_migrations(db_conn: &mut PgConnection) -> anyhow::Result<()> {
     Ok(())
 }
 
-fn set_login_user_password(password: &str, db_conn: &mut PgConnection) -> anyhow::Result<()> {
-    const SCAMPLERS_API: &str = "scamplers_api";
-
+fn set_db_user_password(
+    username: &str,
+    password: &str,
+    db_conn: &mut PgConnection,
+) -> anyhow::Result<()> {
     diesel::sql_query(format!(
-        r#"alter user "{SCAMPLERS_API}" with password '{password}'"#
+        r#"alter user "{username}" with password '{password}'"#
     ))
     .execute(db_conn)?;
 
@@ -71,8 +73,14 @@ impl AppState {
         run_migrations(&mut root_db_conn)?;
         tracing::info!("ran database migrations");
 
-        set_login_user_password(config.db_login_user_password(), &mut root_db_conn)?;
-        tracing::info!("set password for db login user");
+        let db_users = [
+            ("scamplers_api", config.scamplers_api_db_password()),
+            ("scamplers_ui", config.scamplers_ui_db_password()),
+        ];
+        for (username, password) in db_users {
+            set_db_user_password(username, password, &mut root_db_conn)?;
+            tracing::info!("set password for database user '{username}'");
+        }
 
         // Get a connection pool as the root user so as to insert the initial data. We only need one connection here
         let root_db_pool = create_db_pool(&config.db_root_url(), Some(1))?;

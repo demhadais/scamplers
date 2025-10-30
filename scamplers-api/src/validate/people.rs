@@ -19,7 +19,7 @@ pub enum Error {
 
 impl Validate for person::Creation {
     fn validate(&self, _db_conn: &mut diesel::PgConnection) -> Result<(), super::Error> {
-        let email = self.inner.email.as_ref();
+        let email = self.email.as_ref();
 
         if !EMAIL_REGEX.is_match(email) {
             return Err(Error::Email {

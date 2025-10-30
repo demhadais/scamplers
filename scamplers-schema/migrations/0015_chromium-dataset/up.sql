@@ -3,9 +3,9 @@ create table chromium_datasets (
     links jsonb generated always as (
         construct_links('chromium-datasets', id, '{"specimens", "libraries", "web-summaries"}')
     ) stored not null,
-    name text not null,
+    name case_insensitive_text not null,
     lab_id uuid references labs on delete restrict on update restrict not null,
-    data_path text not null,
+    data_path case_insensitive_text not null,
     delivered_at timestamptz not null,
     metrics jsonb not null
 );
@@ -19,5 +19,5 @@ create table chromium_dataset_libraries (
 create table chromium_dataset_web_summaries (
     id uuid primary key default uuidv7(),
     dataset_id uuid references chromium_datasets on delete restrict on update restrict not null,
-    web_summary text unique not null
+    content bytea not null
 );

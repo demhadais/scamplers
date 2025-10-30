@@ -1,16 +1,16 @@
 create table multiplexing_tags (
     id uuid primary key default uuidv7(),
-    tag_id text not null,
-    type text not null, -- constrained by Rust enum
+    tag_id case_insensitive_text not null,
+    type case_insensitive_text not null,
     unique (tag_id, type)
 );
 
 create table suspensions (
     id uuid primary key default uuidv7(),
     links jsonb generated always as (construct_links('suspensions', id, '{"measurements"}')) stored not null,
-    readable_id text unique not null,
+    readable_id case_insensitive_text unique not null,
     parent_specimen_id uuid references specimens on delete restrict on update restrict not null,
-    biological_material text not null,
+    biological_material case_insensitive_text not null,
     created_at timestamptz,
     pooled_into uuid references suspension_pools on delete restrict on update restrict,
     multiplexing_tag_id uuid references multiplexing_tags on delete restrict on update restrict,

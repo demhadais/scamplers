@@ -15,7 +15,7 @@
   "app_admin": {
     "name": "Ahmed Said",
     "email": "scamplers-test@outlook.com",
-    "ms_user_id": "00000000-0000-0000-f1e7-f0086e18c6a3",
+    "microsoft_entra_oid": "00000000-0000-0000-f1e7-f0086e18c6a3",
     "institution_id": "9188040d-6c67-4c5b-b112-36a304b66dad"
   },
   "tenx_assays": [

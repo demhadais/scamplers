@@ -2,4 +2,4 @@
 
 set -euo pipefail
 
-deno task --cwd scamplers-ui dev
+bun run --bun --cwd=scamplers-ui --install=force --sql-preconnect --env-file=.env dev

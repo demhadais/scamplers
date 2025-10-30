@@ -16,12 +16,9 @@ pub enum OrdinalColumns {
 pub struct Filter {
     #[builder(default)]
     pub ids: Vec<Uuid>,
-    #[builder(default)]
-    pub names: Vec<String>,
-    #[builder(default)]
-    pub emails: Vec<String>,
-    #[builder(default)]
-    pub orcids: Vec<String>,
+    pub name: Option<String>,
+    pub email: Option<String>,
+    pub orcid: Option<String>,
     #[builder(default)]
     pub microsoft_entra_oids: Vec<Uuid>,
 }

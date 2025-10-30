@@ -18,6 +18,7 @@ pub struct PersonSummary {
     #[serde(flatten)]
     #[cfg_attr(feature = "app", diesel(embed))]
     inner: Fields,
+    email: Option<String>,
     email_verified: bool,
     links: Links,
 }
