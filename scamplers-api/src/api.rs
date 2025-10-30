@@ -72,7 +72,7 @@ fn initialize_logging(log_dir: Option<Utf8PathBuf>) {
 
 fn app(app_state: AppState) -> Router {
     let api_router = routes::router()
-        .route("/health", get(async || ()))
+        .route("/health", get(async || "OK"))
         .with_state(app_state);
 
     Router::new().nest("/api", api_router)

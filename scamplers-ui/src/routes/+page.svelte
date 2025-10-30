@@ -3,30 +3,15 @@
     const session = authClient.useSession();
 </script>
 
-<div>
-    {#if $session.data}
-        <div>
-            <p>
-                {$session.data.user.name}
-                {$session.data.user.emailVerified}
-            </p>
-            <button
-                onclick={async () => {
-                    await authClient.signOut();
-                }}
-            >
-                Sign Out
-            </button>
-        </div>
-    {:else}
+<!-- If the user isn't signed in, they will just be redirected to the '/auth/sign-in' -->
+{#if $session.data}
+    <div>
         <button
             onclick={async () => {
-                await authClient.signIn.social({
-                    provider: "microsoft",
-                });
+                await authClient.signOut();
             }}
         >
-            Sign in with Microsoft
+            Sign Out
         </button>
-    {/if}
-</div>
+    </div>
+{/if}

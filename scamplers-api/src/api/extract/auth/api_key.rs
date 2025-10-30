@@ -1,10 +1,5 @@
-use argon2::{Argon2, PasswordHash, PasswordHasher, PasswordVerifier, password_hash::SaltString};
+use argon2::{Argon2, PasswordHash, PasswordVerifier};
 use axum::response::IntoResponse;
-use rand::{
-    Rng, SeedableRng, TryRngCore,
-    distr::Alphanumeric,
-    rngs::{OsRng, StdRng},
-};
 use serde::{Deserialize, Serialize};
 
 #[derive(Deserialize, Serialize)]

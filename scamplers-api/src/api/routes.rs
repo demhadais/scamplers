@@ -97,7 +97,7 @@ async fn fetch_person(
     user: AuthenticatedUser,
 ) -> ApiResponse<Person> {
     let person = inner_handler(state, user, request).await?;
-    Ok((StatusCode::FOUND, person))
+    Ok((StatusCode::OK, person))
 }
 
 async fn list_people(

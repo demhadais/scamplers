@@ -53,10 +53,10 @@ fn run_migrations(db_conn: &mut PgConnection) -> anyhow::Result<()> {
 }
 
 fn set_login_user_password(password: &str, db_conn: &mut PgConnection) -> anyhow::Result<()> {
-    const LOGIN_USER: &str = "login_user";
+    const SCAMPLERS_API: &str = "scamplers_api";
 
     diesel::sql_query(format!(
-        r#"alter user "{LOGIN_USER}" with password '{password}'"#
+        r#"alter user "{SCAMPLERS_API}" with password '{password}'"#
     ))
     .execute(db_conn)?;
 

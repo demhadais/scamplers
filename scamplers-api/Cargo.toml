@@ -15,7 +15,6 @@ diesel = { workspace = true, features = ["postgres", "serde_json", "uuid"] }
 diesel_migrations.workspace = true
 dotenvy.workspace = true
 jiff-diesel.workspace = true
-rand.workspace = true
 regex.workspace = true
 reqwest.workspace = true
 rstest.workspace = true
