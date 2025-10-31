@@ -4,7 +4,6 @@ import { getRequestEvent } from "$app/server";
 import { createAuthMiddleware } from "better-auth/api";
 import { SECRETS, SERVER_CONFIG } from "./config";
 import { dbClient } from "./db-client";
-import { sql } from "bun";
 
 export const auth = betterAuth({
   baseURL: SERVER_CONFIG.baseUrl,
