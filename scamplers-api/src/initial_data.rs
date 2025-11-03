@@ -47,7 +47,7 @@ pub async fn insert_initial_data(
         } = initial_data;
 
         duplicate_resource_ok(institution.execute(db_conn))?;
-        //
+
         ensure!(
             app_admin.inner.microsoft_entra_oid.is_some(),
             "app admin must have `microsoft_entra_oid`"

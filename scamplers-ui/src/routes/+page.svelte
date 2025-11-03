@@ -4,7 +4,6 @@
 </script>
 
 {#if $session.data}
-    {JSON.stringify($session.data.user)}
     <div>
         <button
             onclick={async () => {

@@ -2,7 +2,6 @@ import { auth } from "./server/auth";
 import { svelteKitHandler } from "better-auth/svelte-kit";
 import { building } from "$app/environment";
 import { redirect } from "@sveltejs/kit";
-import { dbClient } from "./server/db-client";
 
 const NON_AUTH_ROUTES = ["/auth/sign-in", "/health", "/api/auth"];
 
@@ -15,12 +14,12 @@ export async function handle({ event, resolve }) {
     headers: event.request.headers,
   });
 
-  if (session) {
-    event.locals.session = session.session;
-    event.locals.user = session.user;
-  } else {
+  if (!session) {
     return redirect(307, "/auth/sign-in");
   }
+
+  event.locals.session = session.session;
+  event.locals.user = session.user;
 
   return svelteKitHandler({ event, resolve, auth, building });
 }

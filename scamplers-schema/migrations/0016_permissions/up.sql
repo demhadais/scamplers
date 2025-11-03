@@ -6,6 +6,7 @@ grant all on all tables in schema public to app_admin;
 
 -- scamplers_ui creates people and their API keys
 grant insert on people, api_keys to scamplers_ui;
+grant update on people to scamplers_ui;
 
 -- Anyone can delete an API key
 grant delete on api_keys to public;

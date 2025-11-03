@@ -82,12 +82,15 @@ $$;
 
 create function create_user_if_not_exists(
     user_id text,
+    password text,
     roles text []
 ) returns void language plpgsql volatile strict as $$
     begin
+        set local role user_creator;
         perform create_role_if_not_exists(user_id);
         execute format('grant %I to scamplers_api with admin true, inherit false', user_id);
-        execute format('alter role %I with login', user_id);
+        execute format('alter role %I with login password %L', user_id, password);
+        reset role;
         perform grant_roles_to_user(user_id, roles);
     end;
 $$;
@@ -123,11 +126,18 @@ select create_role_if_not_exists('app_admin');
 select create_role_if_not_exists('biology_staff');
 select create_role_if_not_exists('computational_staff');
 
+-- The API logs in as scamplers_api before switching  to the appropriate user for a query
 select create_role_if_not_exists('scamplers_api');
 alter role scamplers_api with login;
 
+-- The UI logs in as scamplers_ui
 select create_role_if_not_exists('scamplers_ui');
-alter role scamplers_ui with createrole login;
+alter role scamplers_ui with login;
+
+-- scamplers_ui needs to grant users to scamplers_api so that scamplers_api can switch to that user. That means scamplers_ui needs admin on the new user, but a role cannot give admin on a different role to itself, so this role simply allows us to circumvent that.
+select create_role_if_not_exists('user_creator');
+alter role user_creator with createrole;
+grant user_creator to scamplers_ui with inherit false;
 
 create collation case_insensitive (provider = icu, deterministic = false, locale = 'en-u-ks-level1');
 create domain case_insensitive_text as text collate case_insensitive;

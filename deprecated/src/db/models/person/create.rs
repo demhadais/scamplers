@@ -9,8 +9,8 @@ use valid_string::ValidString;
 use crate::{
     auth::{ApiKey, HashedApiKey},
     db::{
-        DbOperation,
         models::person::{CreatedUser, NewPerson, Person, PersonId, UserRole},
+        DbOperation,
     },
 };
 
@@ -18,12 +18,11 @@ define_sql_function! {fn create_user_if_not_exists(user_id: Text, roles: Array<T
 
 impl DbOperation<Person> for NewPerson {
     fn execute(self, db_conn: &mut diesel::PgConnection) -> crate::result::ScamplersResult<Person> {
+        // Note that we don't create a database user for the person. That will be created when they sign in for the first time.
         let id: Uuid = diesel::insert_into(person::table)
             .values(&self)
             .returning(person::id)
             .get_result(db_conn)?;
-
-        diesel::select(create_user_if_not_exists(id.to_string(), &self.roles)).execute(db_conn)?;
 
         PersonId(id).execute(db_conn)
     }

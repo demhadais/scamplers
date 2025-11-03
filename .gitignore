@@ -31,3 +31,6 @@ venv
 
 # Zed
 .zed
+
+# Secrets
+*secret*
