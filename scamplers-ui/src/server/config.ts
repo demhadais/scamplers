@@ -13,6 +13,7 @@ async function read_config_var(name: string, secret: boolean): Promise<string> {
 }
 
 const secret_names = [
+  "auth_secret",
   "db_host",
   "db_port",
   "db_password",
