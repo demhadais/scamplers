@@ -19,7 +19,7 @@ create table people (
 );
 
 create table api_keys (
-    prefix text unique not null,
+    prefix bytea unique not null,
     hash text unique not null,
     user_id uuid references people on delete cascade on update cascade not null,
     primary key (prefix, hash)

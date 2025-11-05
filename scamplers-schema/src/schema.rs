@@ -8,7 +8,7 @@ pub mod sql_types {
 
 diesel::table! {
     api_keys (prefix, hash) {
-        prefix -> Text,
+        prefix -> Bytea,
         hash -> Text,
         user_id -> Uuid,
     }

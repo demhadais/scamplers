@@ -6,8 +6,6 @@ use clap::{Args, Parser};
 
 use crate::initial_data::InitialData;
 
-pub const LOGIN_USER: &str = "login_user";
-
 #[derive(Debug, Args, serde::Deserialize, Clone)]
 pub struct Config {
     #[arg(long, default_value_t)]
@@ -50,7 +48,8 @@ impl Config {
             secrets_dir,
             db_root_user,
             db_root_password,
-            scamplers_api_db_password: db_login_user_password,
+            scamplers_api_db_password,
+            scamplers_ui_db_password,
             db_name,
             initial_data,
             initial_data_path,
@@ -68,7 +67,8 @@ impl Config {
 
         *db_root_user = read_secret("db_root_user")?;
         *db_root_password = read_secret("db_root_password")?;
-        *db_login_user_password = read_secret("db_login_user_password")?;
+        *scamplers_api_db_password = read_secret("scamplers_api_db_password")?;
+        *scamplers_ui_db_password = read_secret("scamplers_ui_db_password")?;
         *db_name = read_secret("db_name")?;
         *initial_data = serde_json::from_str(&read_secret("seed_data")?)?;
         *initial_data_path = None;
@@ -101,7 +101,7 @@ impl Config {
         let Self {
             db_root_user,
             db_root_password,
-            scamplers_api_db_password: db_login_user_password,
+            scamplers_api_db_password,
             db_host,
             db_port,
             db_name,
@@ -114,7 +114,7 @@ impl Config {
         if root {
             format!("{base}{db_root_user}:{db_root_password}@{db_spec}")
         } else {
-            format!("{base}{LOGIN_USER}:{db_login_user_password}@{db_spec}")
+            format!("{base}scamplers_api:{scamplers_api_db_password}@{db_spec}")
         }
     }
 

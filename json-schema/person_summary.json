@@ -9,6 +9,9 @@
         "null"
       ]
     },
+    "email_verified": {
+      "type": "boolean"
+    },
     "id": {
       "type": "string",
       "format": "uuid"
@@ -23,7 +26,7 @@
         "type": "string"
       }
     },
-    "ms_user_id": {
+    "microsoft_entra_oid": {
       "type": [
         "string",
         "null"
@@ -44,6 +47,7 @@
     "id",
     "name",
     "institution_id",
+    "email_verified",
     "links"
   ]
 }

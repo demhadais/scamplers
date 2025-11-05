@@ -1,10 +1,10 @@
-use diesel::{PgConnection, SelectableExpression, dsl::AssumeNotNull, prelude::*};
+use diesel::{PgConnection, SelectableExpression, prelude::*};
 use scamplers_models::institution::{self, Institution, InstitutionId, OrdinalColumns};
 use scamplers_schema::institutions;
 
 use crate::{
     db::{self, BoxedFilter, BoxedFilterExt, ToBoxedFilter},
-    query, with_eq_any, with_like,
+    query,
 };
 
 impl db::Operation<Institution> for InstitutionId {

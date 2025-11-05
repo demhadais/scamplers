@@ -4,8 +4,9 @@
   "version": "0.0.1",
   "type": "module",
   "scripts": {
-    "dev": "vite dev",
-    "build": "vite build",
+    "typedefs": "bunx json-schema-to-typescript --input ../json-schema/ --output src/lib/scamplers-models/",
+    "dev": "bun run typedefs && vite dev",
+    "build": "bun run typedefs && vite build",
     "preview": "vite preview",
     "prepare": "svelte-kit sync || echo ''",
     "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
@@ -25,6 +26,7 @@
     "vite": "^7.1.7"
   },
   "dependencies": {
-    "better-auth": "1.4.0-beta.15"
+    "better-auth": "1.4.0-beta.15",
+    "qs": "^6.14.0"
   }
 }

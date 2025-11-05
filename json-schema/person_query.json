@@ -3,12 +3,12 @@
   "title": "PersonQuery",
   "type": "object",
   "properties": {
-    "emails": {
-      "type": "array",
-      "default": [],
-      "items": {
-        "type": "string"
-      }
+    "email": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "default": null
     },
     "ids": {
       "type": "array",
@@ -23,7 +23,7 @@
       "format": "int64",
       "default": 500
     },
-    "ms_user_ids": {
+    "microsoft_entra_oids": {
       "type": "array",
       "default": [],
       "items": {
@@ -31,24 +31,24 @@
         "format": "uuid"
       }
     },
-    "names": {
-      "type": "array",
-      "default": [],
-      "items": {
-        "type": "string"
-      }
+    "name": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "default": null
     },
     "offset": {
       "type": "integer",
       "format": "int64",
       "default": 0
     },
-    "orcids": {
-      "type": "array",
-      "default": [],
-      "items": {
-        "type": "string"
-      }
+    "orcid": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "default": null
     },
     "order_by": {
       "type": "array",

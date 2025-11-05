@@ -1,4 +1,4 @@
-async function read_config_var(name: string, secret: boolean): Promise<string> {
+async function readConfigVar(name: string, secret: boolean): Promise<string> {
   if (Bun.env.inDocker && secret) {
     return await Bun.file(`/run/secrets/${name}`).text();
   }
@@ -13,7 +13,6 @@ async function read_config_var(name: string, secret: boolean): Promise<string> {
 }
 
 const secret_names = [
-  "auth_secret",
   "db_host",
   "db_port",
   "db_password",
@@ -24,13 +23,19 @@ const secret_names = [
 ];
 let SECRETS: Record<string, string> = {};
 for (const s of secret_names) {
-  SECRETS[s] = await read_config_var(s, true);
+  SECRETS[s] = await readConfigVar(s, true);
 }
 
-const serverConfigVars = ["api_key_prefix_length", "protocol", "host", "port"];
+const serverConfigVars = [
+  "api_key_prefix_length",
+  "protocol",
+  "host",
+  "port",
+  "api_base_url",
+];
 let SERVER_CONFIG: Record<string, string | number> = {};
 for (const v of serverConfigVars) {
-  SERVER_CONFIG[v] = await read_config_var(v, false);
+  SERVER_CONFIG[v] = await readConfigVar(v, false);
 }
 SERVER_CONFIG.api_key_prefix_length = parseInt(
   SERVER_CONFIG.api_key_prefix_length as string,

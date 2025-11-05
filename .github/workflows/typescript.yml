@@ -1,6 +1,5 @@
 name: Check TypeScript Code
 on:
-  push:
   pull_request:
     paths:
       - scamplers-ui/**

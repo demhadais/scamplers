@@ -16,12 +16,12 @@
       "format": "int64",
       "default": 500
     },
-    "names": {
-      "type": "array",
-      "default": [],
-      "items": {
-        "type": "string"
-      }
+    "name": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "default": null
     },
     "offset": {
       "type": "integer",

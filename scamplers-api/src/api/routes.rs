@@ -5,15 +5,11 @@ use scamplers_models::{
     person::{self, Person, PersonId, PersonSummary},
 };
 use serde_qs::axum::QsQuery;
-use uuid::Uuid;
 
 use crate::{
     api::{
         error::ErrorResponse,
-        extract::{
-            ValidJson,
-            auth::{self, AuthenticatedUser},
-        },
+        extract::{ValidJson, auth::AuthenticatedUser},
     },
     db,
     state::AppState,
@@ -71,9 +67,9 @@ async fn list_institutions(
     _: InstitutionsEndpoint,
     state: State<AppState>,
     user: AuthenticatedUser,
-    QsQuery(request): QsQuery<institution::Query>,
+    serde_qs::axum::OptionalQsQuery(request): serde_qs::axum::OptionalQsQuery<institution::Query>,
 ) -> ApiResponse<Vec<Institution>> {
-    let items = inner_handler(state, user, request).await?;
+    let items = inner_handler(state, user, request.unwrap_or_default()).await?;
     Ok((StatusCode::OK, items))
 }
 
@@ -110,28 +106,6 @@ async fn list_people(
     Ok((StatusCode::OK, people))
 }
 
-#[derive(Debug, serde::Deserialize, serde::Serialize, TypedPath)]
-#[typed_path("/people/{user_id}/api-keys/{api_key_prefix}")]
-struct DeleteApiKeyEndpoint {
-    user_id: Uuid,
-    api_key_prefix: String,
-}
-
-async fn delete_api_key(
-    request: DeleteApiKeyEndpoint,
-    state: State<AppState>,
-    user: AuthenticatedUser,
-) -> ApiResponse<()> {
-    // Check if the authenticated user is actually deleting their own API key. Technically this isn't necessary because of postgres's RLS
-    if request.user_id != user.id() {
-        return Err(super::ErrorResponse::from(auth::Error::invalid_api_key()));
-    }
-
-    let resp = inner_handler(state, user, request).await?;
-
-    Ok((StatusCode::OK, resp))
-}
-
 pub(super) fn router() -> Router<AppState> {
     Router::new()
         .typed_post(create_institution)
@@ -140,5 +114,4 @@ pub(super) fn router() -> Router<AppState> {
         .typed_post(create_person)
         .typed_get(fetch_person)
         .typed_get(list_people)
-        .typed_delete(delete_api_key)
 }

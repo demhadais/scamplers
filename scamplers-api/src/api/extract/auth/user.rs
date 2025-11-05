@@ -6,7 +6,7 @@ use uuid::Uuid;
 use crate::{
     api::{
         self,
-        extract::auth::{self, api_key::ApiKey},
+        extract::auth::{self, api_key::AsApiKey},
     },
     state::AppState,
 };
@@ -16,11 +16,18 @@ use crate::{
 pub struct AuthenticatedUser(Uuid);
 
 impl AuthenticatedUser {
-    fn fetch_by_api_key(
-        api_key: &ApiKey,
+    pub fn id(&self) -> Uuid {
+        self.0
+    }
+
+    fn fetch_by_api_key<T>(
+        api_key: T,
         prefix_length: usize,
         conn: &mut PgConnection,
-    ) -> Result<Self, auth::Error> {
+    ) -> Result<Self, auth::Error>
+    where
+        T: AsApiKey,
+    {
         let api_key_prefix = api_key.prefix(prefix_length);
         tracing::debug!(api_key_prefix);
 
@@ -42,7 +49,6 @@ impl AuthenticatedUser {
 }
 
 const API_KEY_HEADER: &str = "X-API-Key";
-const API_KEY_HEADER_LOWER: &str = "x-api-key";
 
 impl FromRequestParts<AppState> for AuthenticatedUser {
     type Rejection = api::ErrorResponse;
@@ -61,29 +67,23 @@ impl FromRequestParts<AppState> for AuthenticatedUser {
             }
         };
 
-        let headers = &parts.headers;
+        let headers = &mut parts.headers;
 
-        let Some(Ok(api_key)) = headers
-            .get(API_KEY_HEADER)
-            .or_else(|| headers.get(API_KEY_HEADER_LOWER))
-            .map(HeaderValue::to_str)
-        else {
+        let Some(api_key) = headers.get(API_KEY_HEADER) else {
             return Err(auth::Error::no_api_key())?;
         };
 
+        // This value must be hard-coded
+        let mut decoded: [u8; 32] = [0; 32];
+        base16ct::lower::decode(api_key, &mut decoded)
+            .map_err(|_| auth::Error::invalid_api_key())?;
+
         let db_conn = app_state.db_conn().await?;
-        let api_key = api_key.into();
 
         Ok(db_conn
             .interact(move |db_conn| {
-                AuthenticatedUser::fetch_by_api_key(&api_key, api_key_prefix_length, db_conn)
+                AuthenticatedUser::fetch_by_api_key(&decoded, api_key_prefix_length, db_conn)
             })
             .await??)
-    }
-}
-
-impl AuthenticatedUser {
-    pub fn id(&self) -> Uuid {
-        self.0
     }
 }

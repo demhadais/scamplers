@@ -1,15 +1,14 @@
-import { SERVER_CONFIG } from "../config";
+import { ENCRYPTION_ALGORITHM } from "./crypto";
 
-export const ENCRYPTION_ALGORITHM = {
-  name: "AES-GCM",
-  length: 256,
-};
+const API_KEY_LENGTH = 32;
+const INITIALIZATION_VECTOR_LENGTH = 12; // 96 bits (https://developer.mozilla.org/en-US/docs/Web/API/AesGcmParams#iv)
 
-export class ApiKey {
-  readonly encryptedKey: Uint8Array;
-  readonly initializationVector: Uint8Array;
+export class EncryptedApiKey {
+  private readonly encryptedKey: Uint8Array;
+  private readonly initializationVector: Uint8Array;
   readonly prefix: Uint8Array;
   readonly hash: string;
+
   private constructor({
     encryptedKey,
     initializationVector,
@@ -27,13 +26,13 @@ export class ApiKey {
     this.hash = hash;
   }
 
-  static async new(encryptionSecret: CryptoKey): Promise<ApiKey> {
-    const apiKeyLength = 32;
-    const apiKey = crypto.getRandomValues(new Uint8Array(apiKeyLength));
-
-    const initializationVectorLength = 12; // 96 bits (https://developer.mozilla.org/en-US/docs/Web/API/AesGcmParams#iv)
+  static async fromRandomValues(
+    randomValues: Uint8Array<ArrayBuffer>,
+    encryptionSecret: CryptoKey,
+    apiKeyPrefixLength: number,
+  ): Promise<EncryptedApiKey> {
     const initializationVector = crypto.getRandomValues(
-      new Uint8Array(initializationVectorLength),
+      new Uint8Array(INITIALIZATION_VECTOR_LENGTH),
     );
 
     const encryptedApiKey = await crypto.subtle.encrypt(
@@ -42,50 +41,42 @@ export class ApiKey {
         ...ENCRYPTION_ALGORITHM,
       },
       encryptionSecret,
-      apiKey,
+      randomValues,
     );
 
-    const prefix = apiKey.slice(
-      0,
-      SERVER_CONFIG.api_key_prefix_length! as number,
-    );
-    const hash = await Bun.password.hash(apiKey);
+    const prefix = randomValues.slice(0, apiKeyPrefixLength);
+    const hash = await Bun.password.hash(randomValues);
 
-    return new ApiKey({
+    return new EncryptedApiKey({
       encryptedKey: new Uint8Array(encryptedApiKey),
       initializationVector,
       prefix,
       hash,
     });
   }
-}
 
-async function encryptionSecret(filePath: string): Promise<CryptoKey> {
-  const file = Bun.file(filePath);
-  const usages: KeyUsage[] = ["decrypt", "encrypt"];
+  static async new(
+    encryptionSecret: CryptoKey,
+    apiKeyPrefixLength: number,
+  ): Promise<EncryptedApiKey> {
+    const unencrypted = EncryptedApiKey.newUnencrypted();
 
-  const fileExists = await file.exists();
-
-  // If the file has been created, import the key from there. If not, create one.
-  const secret = fileExists
-    ? await crypto.subtle.importKey(
-        "raw",
-        await file.arrayBuffer(),
-        ENCRYPTION_ALGORITHM,
-        false,
-        usages,
-      )
-    : await crypto.subtle.generateKey(ENCRYPTION_ALGORITHM, true, usages);
-
-  if (!fileExists) {
-    Bun.write(file, await crypto.subtle.exportKey("raw", secret), {
-      mode: 400,
-    });
+    return await EncryptedApiKey.fromRandomValues(
+      unencrypted,
+      encryptionSecret,
+      apiKeyPrefixLength,
+    );
   }
 
-  return secret;
-}
+  static newUnencrypted(): Uint8Array<ArrayBuffer> {
+    return crypto.getRandomValues(new Uint8Array(API_KEY_LENGTH));
+  }
 
-export const API_KEY_ENCRYPTION_SECRET = await encryptionSecret(
-  ".api-key-encryption-secret",
-);
+  hexEncode(): string {
+    return this.encryptedKey.toHex();
+  }
+
+  hexEncodedInitializationVector(): string {
+    return this.initializationVector.toHex();
+  }
+}
