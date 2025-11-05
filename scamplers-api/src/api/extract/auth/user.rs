@@ -1,4 +1,4 @@
-use axum::{extract::FromRequestParts, http::HeaderValue};
+use axum::extract::FromRequestParts;
 use diesel::{PgConnection, prelude::*};
 use scamplers_schema::api_keys;
 use uuid::Uuid;
