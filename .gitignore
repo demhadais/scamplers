@@ -12,6 +12,7 @@ target
 # Environment files useful for development
 .env*
 !.env.sample
+!.env.compose.sample
 
 # Initial data also useful for development
 initial-data.*.json

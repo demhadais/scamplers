@@ -99,7 +99,6 @@ impl Config {
 
     fn db_url(&self, root: bool) -> String {
         let Self {
-            db_root_user,
             db_root_password,
             scamplers_api_db_password,
             db_host,
@@ -112,7 +111,7 @@ impl Config {
         let db_spec = format!("{db_host}:{db_port}/{db_name}");
 
         if root {
-            format!("{base}{db_root_user}:{db_root_password}@{db_spec}")
+            format!("{base}{root}:{db_root_password}@{db_spec}")
         } else {
             format!("{base}scamplers_api:{scamplers_api_db_password}@{db_spec}")
         }

@@ -1,12 +1,11 @@
 name: Check SQL Code
-
 on:
+  push:
   pull_request:
     paths:
-      - db/**
+      - "**/*.sql"
     branches:
       - main
-
 jobs:
   lint_sql:
     runs-on: ubuntu-latest
@@ -18,11 +17,11 @@ jobs:
       - name: Install Python
         uses: actions/setup-python@v5
         with:
-          python-version: "3.13"
+          python-version: "3.14"
 
       - name: Install sqlfluff
         run: pip install sqlfluff
 
       - name: Lint code
-        working-directory: db
+        working-directory: scamplers-schema
         run: sqlfluff lint .

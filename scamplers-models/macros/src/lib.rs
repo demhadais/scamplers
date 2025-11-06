@@ -54,6 +54,7 @@ macro_rules! impl_json_to_sql {
     };
 }
 
+#[allow(clippy::crate_in_macro_def)]
 #[macro_export]
 macro_rules! uuid_newtype {
     ($name:ident, $endpoint:literal) => {

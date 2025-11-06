@@ -21,7 +21,7 @@ impl AuthenticatedUser {
     }
 
     fn fetch_by_api_key<T>(
-        api_key: T,
+        api_key: &T,
         prefix_length: usize,
         conn: &mut PgConnection,
     ) -> Result<Self, auth::Error>
@@ -73,7 +73,6 @@ impl FromRequestParts<AppState> for AuthenticatedUser {
             return Err(auth::Error::no_api_key())?;
         };
 
-        // This value must be hard-coded
         let mut decoded: [u8; 32] = [0; 32];
         base16ct::lower::decode(api_key, &mut decoded)
             .map_err(|_| auth::Error::invalid_api_key())?;

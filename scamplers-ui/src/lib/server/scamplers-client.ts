@@ -62,4 +62,4 @@ class ApiClient {
   }
 }
 
-export const apiClient = new ApiClient(SERVER_CONFIG.api_base_url as string);
+export const apiClient = new ApiClient(SERVER_CONFIG.apiUrl as string);

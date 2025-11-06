@@ -82,7 +82,8 @@ impl AppState {
             tracing::info!("set password for database user '{username}'");
         }
 
-        // Get a connection pool as the root user so as to insert the initial data. We only need one connection here
+        // Get a connection pool as the root user so as to insert the initial data. We
+        // only need one connection here
         let root_db_pool = create_db_pool(&config.db_root_url(), Some(1))?;
         let initial_data = config
             .initial_data()

@@ -30,6 +30,7 @@ trait IsEnum {
 }
 
 impl IsEnum for TokenStream {
+    #[allow(clippy::wrong_self_convention)]
     fn is_enum(self) -> bool {
         parse::<ItemEnum>(self).is_ok()
     }

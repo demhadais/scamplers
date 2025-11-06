@@ -10,6 +10,4 @@ function cleanup_docker() {
 
 trap cleanup_docker EXIT
 
-./pre-commit_scripts/build-scamplers-js.sh
-
 COMPOSE_BAKE=true docker compose up --build

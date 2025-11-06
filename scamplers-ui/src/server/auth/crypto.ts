@@ -12,12 +12,12 @@ async function getEncryptionSecret(filePath: string): Promise<CryptoKey> {
   // If the file has been created, import the key from there. If not, create one.
   const secret = fileExists
     ? await crypto.subtle.importKey(
-        "raw",
-        await file.arrayBuffer(),
-        ENCRYPTION_ALGORITHM,
-        true,
-        usages,
-      )
+      "raw",
+      await file.arrayBuffer(),
+      ENCRYPTION_ALGORITHM,
+      true,
+      usages,
+    )
     : await crypto.subtle.generateKey(ENCRYPTION_ALGORITHM, true, usages);
 
   if (!fileExists) {

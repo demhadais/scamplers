@@ -1,0 +1,11 @@
+services:
+  scamplers-api:
+    build:
+      context: .
+      dockerfile: scamplers-api.Dockerfile
+      target: final
+  scamplers-ui:
+    build:
+      context: .
+      dockerfile: scamplers-ui.Dockerfile
+      target: final

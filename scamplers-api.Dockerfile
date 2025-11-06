@@ -9,7 +9,9 @@ RUN apt update && \
     apt install make openssl --yes && \
     cargo install diesel_cli --no-default-features --features postgres-bundled
 
-RUN --mount=type=bind,source=rust/Cargo.toml,target=rust/Cargo.toml \
+
+
+RUN --mount=type=bind,source=default-vec/Cargo.toml,target=default-vec/Cargo.toml \
     --mount=type=bind,source=rust/Cargo.lock,target=rust/Cargo.lock \
     --mount=type=bind,source=rust/.cargo,target=rust/.cargo \
     --mount=type=bind,source=rust/any-value,target=rust/any-value \

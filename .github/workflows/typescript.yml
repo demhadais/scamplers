@@ -1,9 +1,9 @@
 name: Check TypeScript Code
 on:
+  push:
   pull_request:
     paths:
       - scamplers-ui/**
-      - json-schema/**
     branches:
       - main
 
@@ -15,7 +15,17 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Lint
-        run: ./scripts/pre-commit/lint_scamplers-ui.sh
+        working-directory: scamplers-ui
+        run: bun run --bun check
+
+  format:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install Deno
+        uses: denoland/setup-deno@v2
+
+      - name: Format
+        run: deno fmt --check
 
   test:
     runs-on: ubuntu-latest
@@ -23,5 +33,12 @@ jobs:
       - name: Check out repository code
         uses: actions/checkout@v4
 
-      - name: Unit test
-        run: deno test scamplers-ui
+      - name: Install bun
+        uses: oven-sh/setup-bun@v2
+
+      - name: Install dependencies
+        run: bun install
+
+      - name: Test
+        working-directory: scamplers-ui
+        run: bun test

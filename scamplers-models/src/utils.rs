@@ -55,6 +55,7 @@ pub trait JsonFromSql: Sized + DeserializeOwned {
     }
 }
 
+#[allow(dead_code)]
 pub trait JsonToSql: Serialize {
     fn to_sql_inner<'b>(&'b self, out: &mut serialize::Output<'b, '_, Pg>) -> serialize::Result {
         use std::io::prelude::*;

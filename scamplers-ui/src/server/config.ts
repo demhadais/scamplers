@@ -1,45 +1,58 @@
-async function readConfigVar(name: string, secret: boolean): Promise<string> {
-  if (Bun.env.inDocker && secret) {
-    return await Bun.file(`/run/secrets/${name}`).text();
-  }
-
+async function readEnvVar(name: string): Promise<string | undefined> {
   const key = name.toUpperCase();
-  const val = Bun.env[key] || Bun.env[`SCAMPLERS_UI_${key}`];
+  const val = Bun.env[key] || Bun.env[`SCAMPLERS_${key}`];
+
+  return val;
+}
+
+async function readRequiredEnvVar(name: string): Promise<string> {
+  const val = await readEnvVar(name);
+
   if (val === undefined) {
-    throw `environment variable ${name} not set`;
+    throw `required environment variable ${name} is unset`;
   }
 
   return val;
 }
 
-const secret_names = [
-  "db_host",
-  "db_port",
-  "db_password",
-  "db_name",
-  "microsoft_entra_client_id",
-  "microsoft_entra_client_secret",
-  "microsoft_entra_tenant",
-];
-let SECRETS: Record<string, string> = {};
-for (const s of secret_names) {
-  SECRETS[s] = await readConfigVar(s, true);
+async function readSecret(name: string): Promise<string> {
+  if (Bun.env.inDocker) {
+    return await Bun.file(`/run/secrets/${name}`).text();
+  }
+
+  return await readRequiredEnvVar(name);
 }
 
-const serverConfigVars = [
-  "api_key_prefix_length",
-  "protocol",
-  "host",
-  "port",
-  "api_base_url",
-];
-let SERVER_CONFIG: Record<string, string | number> = {};
-for (const v of serverConfigVars) {
-  SERVER_CONFIG[v] = await readConfigVar(v, false);
+const SECRETS = {
+  dbHost: await readSecret("db_host"),
+  dbPort: await readSecret("db_port"),
+  uiDbPassword: await readSecret("ui_db_password"),
+  dbName: await readSecret("db_name"),
+  microsoft_entra_client_id: await readSecret("microsoft_entra_client_id"),
+  microsoft_entra_client_secret: await readSecret(
+    "microsoft_entra_client_secret",
+  ),
+  microsoft_entra_tenant: await readSecret("microsoft_entra_tenant"),
+};
+
+const SERVER_CONFIG = {
+  apiKeyPrefixLength: parseInt(
+    await readRequiredEnvVar("api_key_prefix_length"),
+  ),
+  publicUrl: await readEnvVar("public_url"),
+  apiUrl: await readRequiredEnvVar("api_url"),
+};
+
+if (
+  SERVER_CONFIG.apiUrl === undefined &&
+  SERVER_CONFIG.publicUrl === undefined
+) {
+  throw `must have at least one of API_URL or PUBLIC_URL set`;
 }
-SERVER_CONFIG.api_key_prefix_length = parseInt(
-  SERVER_CONFIG.api_key_prefix_length as string,
-);
-SERVER_CONFIG.baseUrl = `${SERVER_CONFIG.protocol}://${SERVER_CONFIG.host}:${SERVER_CONFIG.port}`;
+
+// In production, the API URL should just default to the public URL
+if (SERVER_CONFIG.apiUrl === undefined) {
+  SERVER_CONFIG.apiUrl == `${SERVER_CONFIG.publicUrl}/api`;
+}
 
 export { SECRETS, SERVER_CONFIG };

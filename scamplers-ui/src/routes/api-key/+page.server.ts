@@ -8,7 +8,7 @@ import { dbClient } from "../../server/db-client";
 // In theory, we could just make a call to the REST API to
 export const actions = {
   default: async ({ cookies }) => {
-    const apiKeyPrefixLength = SERVER_CONFIG.api_key_prefix_length as number;
+    const apiKeyPrefixLength = SERVER_CONFIG.apiKeyPrefixLength;
 
     const newUnencryptedApiKey = EncryptedApiKey.newUnencrypted();
 

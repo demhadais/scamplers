@@ -51,7 +51,7 @@ where
         }
 
         if let Some(email) = email {
-            filter = filter.and_condition(people::email.assume_not_null().like(email))
+            filter = filter.and_condition(people::email.assume_not_null().like(email));
         }
 
         if let Some(orcid) = orcid {
@@ -63,7 +63,7 @@ where
                 people::microsoft_entra_oid
                     .assume_not_null()
                     .eq_any(microsoft_entra_oids),
-            )
+            );
         }
 
         filter

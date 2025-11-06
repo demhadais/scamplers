@@ -1,25 +1,25 @@
 import { betterAuth } from "better-auth";
 import { sveltekitCookies } from "better-auth/svelte-kit";
 import { getRequestEvent } from "$app/server";
-import { createAuthMiddleware, type AuthMiddleware } from "better-auth/api";
+import { type AuthMiddleware, createAuthMiddleware } from "better-auth/api";
 import { SECRETS, SERVER_CONFIG } from "./config";
 import { dbClient } from "./db-client";
 import {
-  ENCRYPTION_ALGORITHM,
   API_KEY_ENCRYPTION_SECRET,
   AUTH_SECRET,
+  ENCRYPTION_ALGORITHM,
 } from "./auth/crypto";
 import type { MicrosoftEntraIDProfile } from "better-auth/social-providers";
 import { CookieNames } from "./auth/cookies";
-import { insertPerson, deleteApiKey, insertApiKey } from "./auth/db";
+import { deleteApiKey, insertApiKey, insertPerson } from "./auth/db";
 import { EncryptedApiKey } from "./auth/api-key";
 
 const SECONDS_PER_MINUTE = 60;
 const MINUTES_PER_HOUR = 60;
 const HOURS_PER_DAY = 24;
 const DAYS_PER_YEAR = 365;
-const ONE_YEAR =
-  SECONDS_PER_MINUTE * MINUTES_PER_HOUR * HOURS_PER_DAY * DAYS_PER_YEAR;
+const ONE_YEAR = SECONDS_PER_MINUTE * MINUTES_PER_HOUR * HOURS_PER_DAY *
+  DAYS_PER_YEAR;
 
 const COOKIE_NAMES = [
   CookieNames.encryptedApiKey,
@@ -35,11 +35,11 @@ const COOKIE_OPTIONS = {
 let microsoftEntraProfiles: Record<string, MicrosoftEntraIDProfile> = {};
 
 export const auth = betterAuth({
-  baseURL: SERVER_CONFIG.baseUrl as string,
+  baseURL: SERVER_CONFIG.publicUrl,
   secret: AUTH_SECRET,
   socialProviders: {
     microsoft: {
-      clientId: SECRETS.microsoft_entra_client_id!,
+      clientId: SECRETS.microsoft_entra_client_id,
       clientSecret: SECRETS.microsoft_entra_client_secret,
       tenantId: SECRETS.microsoft_entra_tenant,
       // This is a bit of a hack. We need the user's Microsoft Entra OID and tenant ID, which is only available in this function.
@@ -73,8 +73,9 @@ export const auth = betterAuth({
 
       // If the user is signing out, erase cookies and delete the API key from the database. Note this check is necessarily performed before checking `newSession`
       if (ctx.path.includes("sign-out")) {
-        const [encryptedApiKey, initializationVector] =
-          COOKIE_NAMES.map(deleteCookie);
+        const [encryptedApiKey, initializationVector] = COOKIE_NAMES.map(
+          deleteCookie,
+        );
 
         // Delete the API key from the database
         await deleteApiKey(
@@ -82,7 +83,7 @@ export const auth = betterAuth({
             encryptedApiKey: encryptedApiKey!,
             initializationVector: initializationVector!,
             encryptionSecret: API_KEY_ENCRYPTION_SECRET,
-            apiKeyPrefixLength: SERVER_CONFIG.api_key_prefix_length as number,
+            apiKeyPrefixLength: SERVER_CONFIG.apiKeyPrefixLength,
           },
           dbClient,
         );
@@ -112,7 +113,7 @@ export const auth = betterAuth({
       // Generate an encrypted API key
       const encryptedApiKey = await EncryptedApiKey.new(
         API_KEY_ENCRYPTION_SECRET,
-        SERVER_CONFIG.api_key_prefix_length as number,
+        SERVER_CONFIG.apiKeyPrefixLength,
       );
 
       await insertApiKey(encryptedApiKey, personId, dbClient);

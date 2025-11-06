@@ -19,7 +19,9 @@ impl db::Operation<Person> for person::Creation {
             .returning(people::id)
             .get_result(db_conn)?;
 
-        // Create a db user corresponding to this person so we can assign them a role. Note that we set a random password so that nobody can log into the database as that user.
+        // Create a db user corresponding to this person so we can assign them a role.
+        // Note that we set a random password so that nobody can log into the database
+        // as that user.
         diesel::select(create_user_if_not_exists(
             id.to_id_string(),
             Uuid::now_v7().to_string(),
