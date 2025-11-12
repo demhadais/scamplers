@@ -21,7 +21,7 @@ async function getEncryptionSecret(filePath: string): Promise<CryptoKey> {
     : await crypto.subtle.generateKey(ENCRYPTION_ALGORITHM, true, usages);
 
   if (!fileExists) {
-    Bun.write(file, await crypto.subtle.exportKey("raw", secret), {
+    Bun.write(filePath, await crypto.subtle.exportKey("raw", secret), {
       mode: 400,
     });
   }

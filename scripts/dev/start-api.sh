@@ -10,7 +10,7 @@ trap cleanup_docker EXIT
 
 # Note that this database has port 5432 mapped to the host machine's port 5433, since we know the compilation database
 # (started in restart-compilation-db.sh) is using port 5432
-docker run --name scamplers-dev --env POSTGRES_PASSWORD=password --publish 5433:5432 --detach postgres:18-alpine
+docker run --name scamplers-dev --env POSTGRES_PASSWORD=p --publish 5433:5432 --detach postgres:18-alpine
 
 # Thanks ChatGPT
 until docker exec --user postgres scamplers-dev pg_isready >/dev/null 2>&1; do

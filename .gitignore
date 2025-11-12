@@ -15,7 +15,7 @@ target
 !.env.compose.sample
 
 # Initial data also useful for development
-initial-data.*.json
+initial-data*
 !initial-data.sample.json
 
 # Generated TypesScript code

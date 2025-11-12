@@ -1,6 +1,15 @@
 use std::process::Command;
 
 fn main() {
+    let run_diesel_cli = option_env!("RUN_DIESEL_CLI");
+
+    if let Some(run_diesel_cli) = run_diesel_cli {
+        let run_diesel_cli: bool = run_diesel_cli.parse().unwrap();
+        if !run_diesel_cli {
+            return;
+        }
+    }
+
     println!("cargo::rerun-if-changed=migrations");
 
     // In case the db doesn't exist, run `diesel setup` to create it. However, if it

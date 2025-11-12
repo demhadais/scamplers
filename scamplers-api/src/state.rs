@@ -7,7 +7,11 @@ use diesel::{PgConnection, prelude::*};
 use diesel_migrations::{EmbeddedMigrations, MigrationHarness, embed_migrations};
 use uuid::Uuid;
 
-use crate::{config::Config, db, initial_data::insert_initial_data};
+use crate::{
+    config::{self, Config},
+    db,
+    initial_data::insert_initial_data,
+};
 
 #[derive(Clone)]
 pub enum AppState {
@@ -93,23 +97,23 @@ impl AppState {
             .context("failed to insert initial data")?;
         tracing::info!("inserted initial data");
 
-        let db_url = if config.dev() {
-            config.db_root_url()
-        } else {
-            config.db_login_url()
+        let db_url = match config.mode() {
+            config::Mode::Development => config.db_root_url(),
+            config::Mode::Production => config.scamplers_api_db_url(),
         };
 
         let db_pool = create_db_pool(&db_url, None)?;
 
-        let state = if config.dev() {
-            let mut db_conn = PgConnection::establish(&config.db_root_url())?;
-            let user_id = create_dev_superuser(&mut db_conn)?;
-            Self::Dev { db_pool, user_id }
-        } else {
-            Self::Prod {
+        let state = match config.mode() {
+            config::Mode::Development => {
+                let mut db_conn = PgConnection::establish(&config.db_root_url())?;
+                let user_id = create_dev_superuser(&mut db_conn)?;
+                Self::Dev { db_pool, user_id }
+            }
+            config::Mode::Production => Self::Prod {
                 db_pool,
                 api_key_prefix_length: config.api_key_prefix_length(),
-            }
+            },
         };
 
         Ok(state)

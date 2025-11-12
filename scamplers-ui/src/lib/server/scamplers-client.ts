@@ -1,9 +1,8 @@
 import type { Institution } from "../scamplers-models/institution";
-import type { InstitutionQuery } from "../scamplers-models/institution_query";
 import type { ServerLoadEvent } from "@sveltejs/kit";
-import { hexEncodedApiKeyFromCookies } from "../../server/auth/cookies";
-import { API_KEY_ENCRYPTION_SECRET } from "../../server/auth/crypto";
-import { SERVER_CONFIG } from "../../server/config";
+import { hexEncodedApiKeyFromCookies } from "./auth/cookies";
+import { API_KEY_ENCRYPTION_SECRET } from "./auth/crypto";
+import { readConfig } from "$lib/server/config";
 
 class ApiClient {
   readonly apiBaseUrl: string;
@@ -62,4 +61,14 @@ class ApiClient {
   }
 }
 
-export const apiClient = new ApiClient(SERVER_CONFIG.apiUrl as string);
+let apiClient: ApiClient | null = null;
+
+export async function getApiClient(): Promise<ApiClient> {
+  if (apiClient !== null) {
+    return apiClient;
+  }
+
+  apiClient = new ApiClient((await readConfig()).apiUrl);
+
+  return apiClient;
+}

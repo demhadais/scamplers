@@ -1,5 +1,5 @@
 import type { Cookies } from "@sveltejs/kit";
-import { API_KEY_ENCRYPTION_SECRET, decryptApiKey } from "./crypto";
+import { decryptApiKey } from "./crypto";
 
 export class CookieNames {
   static get encryptedApiKey(): string {

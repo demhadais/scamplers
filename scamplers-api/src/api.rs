@@ -1,6 +1,6 @@
 use anyhow::Context;
 use axum::{Router, routing::get};
-use camino::Utf8PathBuf;
+use camino::Utf8Path;
 use tokio::net::TcpListener;
 
 use crate::{config::Config, state::AppState};
@@ -14,16 +14,12 @@ pub async fn serve_integration_test(config: Config) -> anyhow::Result<()> {
     serve_inner(config).await
 }
 
-pub async fn serve(config: Config, log_dir: Option<Utf8PathBuf>) -> anyhow::Result<()> {
-    initialize_logging(log_dir);
+pub async fn serve(config: Config) -> anyhow::Result<()> {
+    initialize_logging(config.log_dir());
     serve_inner(config).await
 }
 
 async fn serve_inner(mut config: Config) -> anyhow::Result<()> {
-    config
-        .read_secrets()
-        .context("failed to read secrets directory")?;
-
     let app_state = AppState::initialize(&mut config)
         .await
         .context("failed to initialize app state")?;
@@ -31,7 +27,7 @@ async fn serve_inner(mut config: Config) -> anyhow::Result<()> {
 
     let app = app(app_state.clone());
 
-    let app_addr = config.app_address();
+    let app_addr = config.address();
     let listener = TcpListener::bind(&app_addr)
         .await
         .context(format!("failed to listen on {app_addr}"))?;
@@ -44,7 +40,7 @@ async fn serve_inner(mut config: Config) -> anyhow::Result<()> {
     Ok(())
 }
 
-fn initialize_logging(log_dir: Option<Utf8PathBuf>) {
+fn initialize_logging(log_dir: Option<&Utf8Path>) {
     use tracing::Level;
     use tracing_subscriber::{filter::Targets, prelude::*};
 

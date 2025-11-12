@@ -1,14 +1,15 @@
-import { EncryptedApiKey } from "../../server/auth/api-key";
-import { apiKeyFromCookies } from "../../server/auth/cookies";
-import { API_KEY_ENCRYPTION_SECRET } from "../../server/auth/crypto";
-import { insertApiKey } from "../../server/auth/db";
-import { SERVER_CONFIG } from "../../server/config";
-import { dbClient } from "../../server/db-client";
+import { EncryptedApiKey } from "$lib/server/auth/api-key";
+import { apiKeyFromCookies } from "$lib/server/auth/cookies";
+import { API_KEY_ENCRYPTION_SECRET } from "$lib/server/auth/crypto";
+import { insertApiKey } from "$lib/server/auth/db";
+import { readConfig } from "$lib/server/config";
+import { getDbClient } from "$lib/server/db-client";
 
-// In theory, we could just make a call to the REST API to
 export const actions = {
   default: async ({ cookies }) => {
-    const apiKeyPrefixLength = SERVER_CONFIG.apiKeyPrefixLength;
+    const config = await readConfig();
+    const apiKeyPrefixLength = config.apiKeyPrefixLength;
+    const dbClient = await getDbClient();
 
     const newUnencryptedApiKey = EncryptedApiKey.newUnencrypted();
 
