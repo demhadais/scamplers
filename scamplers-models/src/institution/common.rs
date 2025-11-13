@@ -5,6 +5,7 @@ use scamplers_schema::institutions;
 use uuid::Uuid;
 
 #[insert_select]
+#[cfg_attr(feature = "app", derive(diesel::AsChangeset))]
 #[cfg_attr(feature = "app", diesel(table_name = institutions))]
 pub struct Fields {
     pub(super) id: Uuid,

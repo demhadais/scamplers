@@ -8,6 +8,7 @@ use uuid::Uuid;
 use crate::institution::common::Fields;
 
 #[insert]
+#[cfg_attr(feature = "app", derive(diesel::AsChangeset))]
 #[cfg_attr(feature = "app", diesel(table_name = institutions))]
 #[cfg_attr(feature = "schema", schemars(title = "InstitutionCreation"))]
 pub struct Creation {

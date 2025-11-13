@@ -1,14 +1,17 @@
 use anyhow::ensure;
-use diesel::PgConnection;
+use diesel::{
+    PgConnection, RunQueryDsl,
+    prelude::*,
+    sql_types::{Array, Text},
+};
 use scamplers_models::{
     institution,
-    person::{self, Person, UserRole},
+    person::{self, UserRole},
 };
+use scamplers_schema::{institutions, people};
+use uuid::Uuid;
 
-use crate::{
-    db::{self, Operation},
-    validate::Validate,
-};
+use crate::validate::Validate;
 
 #[derive(Debug, Clone, serde::Deserialize)]
 pub struct InitialData {
@@ -24,38 +27,19 @@ pub async fn insert_initial_data(
     _http_client: reqwest::Client,
     db_pool: deadpool_diesel::postgres::Pool,
 ) -> anyhow::Result<()> {
-    fn duplicate_resource_ok<T>(result: Result<T, db::Error>) -> Result<(), db::Error> {
-        let Err(err) = result else {
-            return Ok(());
-        };
-
-        match err {
-            db::Error::DuplicateResource { .. } => Ok(()),
-            _ => Err(err),
-        }
-    }
-
     let simple_operations = |db_conn: &mut PgConnection| -> Result<(), anyhow::Error> {
         initial_data.validate(db_conn)?;
 
         let InitialData {
             institution,
-            mut app_admin,
+            app_admin,
             // index_set_urls,
             // tenx_assays,
             // multiplexing_tags,
         } = initial_data;
 
-        duplicate_resource_ok(institution.execute(db_conn))?;
-
-        ensure!(
-            app_admin.inner.microsoft_entra_oid.is_some(),
-            "app admin must have `microsoft_entra_oid`"
-        );
-
-        app_admin.roles.push(UserRole::AppAdmin);
-        let result: Result<Person, db::Error> = app_admin.execute(db_conn);
-        duplicate_resource_ok(result)?;
+        institution.upsert(db_conn)?;
+        app_admin.upsert(db_conn)?;
 
         // // This is a loop of like 25 max
         // for assay in tenx_assays {
@@ -76,4 +60,59 @@ pub async fn insert_initial_data(
     db_conn.interact(simple_operations).await.unwrap()?;
 
     Ok(())
+}
+
+trait Upsert {
+    fn upsert(self, db_conn: &mut PgConnection) -> anyhow::Result<()>;
+}
+
+impl Upsert for institution::Creation {
+    fn upsert(self, db_conn: &mut PgConnection) -> anyhow::Result<()> {
+        diesel::insert_into(institutions::table)
+            .values(&self)
+            .on_conflict(institutions::id)
+            .do_update()
+            .set(&self)
+            .execute(db_conn)?;
+
+        Ok(())
+    }
+}
+
+impl Upsert for person::Creation {
+    fn upsert(mut self, db_conn: &mut PgConnection) -> anyhow::Result<()> {
+        define_sql_function! {fn create_user_if_not_exists(user_id: Text, password: Text, roles: Array<Text>)}
+
+        ensure!(
+            self.inner.microsoft_entra_oid.is_some(),
+            "app admin must have `microsoft_entra_oid`"
+        );
+
+        diesel::update(people::table)
+            .filter(people::email.eq(&self.email))
+            .set(people::email.eq(None::<String>))
+            .execute(db_conn)?;
+
+        self.roles.push(UserRole::AppAdmin);
+
+        let id: Uuid = diesel::insert_into(people::table)
+            .values(&self)
+            .on_conflict(people::microsoft_entra_oid)
+            .do_update()
+            .set(&self)
+            .returning(people::id)
+            .get_result(db_conn)?;
+
+        // Create a db user corresponding to this person so we can assign them a role.
+        // Note that we set a random password so that nobody can log into the database
+        // as that user.
+        diesel::select(create_user_if_not_exists(
+            id.to_string(),
+            Uuid::now_v7().to_string(),
+            self.roles,
+        ))
+        .execute(db_conn)?;
+
+        Ok(())
+    }
 }

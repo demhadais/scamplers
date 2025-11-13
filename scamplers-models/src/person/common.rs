@@ -24,6 +24,7 @@ impl EnumToSql for UserRole {}
 impl_enum_to_sql!(UserRole);
 
 #[insert_select]
+#[cfg_attr(feature = "app", derive(diesel::AsChangeset))]
 #[cfg_attr(feature = "app", diesel(table_name = people))]
 pub struct Fields {
     pub name: NonEmptyString,

@@ -1,9 +1,7 @@
 // This module could be improved but I hate writing TypeScript so it's not worth it
-import { env } from "$env/dynamic/private";
-
 async function readEnvVar(name: string): Promise<string | undefined> {
   const key = name.toUpperCase();
-  const val = env[key] || env[`SCAMPLERS_${key}`];
+  const val = Bun.env[key] || Bun.env[`SCAMPLERS_${key}`];
 
   return val;
 }
@@ -19,7 +17,7 @@ async function readRequiredEnvVar(name: string): Promise<string> {
 }
 
 async function readSecret(name: string): Promise<string> {
-  if (env.IN_DOCKER) {
+  if (Bun.env.IN_DOCKER) {
     return await Bun.file(`/run/secrets/${name}`).text();
   }
 
@@ -46,7 +44,7 @@ export async function readSecrets() {
   secrets = {
     dbHost: await readRequiredEnvVar("db_host"),
     dbPort: parseInt(await readRequiredEnvVar("db_port")),
-    scamplersUiDbPassword: await readSecret("ui_db_password"),
+    scamplersUiDbPassword: await readSecret("scamplers_ui_db_password"),
     dbName: await readSecret("db_name"),
     microsoft_entra_client_id: await readSecret("microsoft_entra_client_id"),
     microsoft_entra_client_secret: await readSecret(

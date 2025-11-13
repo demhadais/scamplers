@@ -89,28 +89,26 @@ impl AppState {
         // Get a connection pool as the root user so as to insert the initial data. We
         // only need one connection here
         let root_db_pool = create_db_pool(&config.db_root_url(), Some(1))?;
-        let initial_data = config
-            .initial_data()
-            .context("failed to read initial data")?;
+        let initial_data = config.initial_data();
         insert_initial_data(initial_data, reqwest::Client::new(), root_db_pool)
             .await
             .context("failed to insert initial data")?;
         tracing::info!("inserted initial data");
 
         let db_url = match config.mode() {
-            config::Mode::Development => config.db_root_url(),
-            config::Mode::Production => config.scamplers_api_db_url(),
+            config::AppMode::Development => config.db_root_url(),
+            config::AppMode::Production => config.scamplers_api_db_url(),
         };
 
         let db_pool = create_db_pool(&db_url, None)?;
 
         let state = match config.mode() {
-            config::Mode::Development => {
+            config::AppMode::Development => {
                 let mut db_conn = PgConnection::establish(&config.db_root_url())?;
                 let user_id = create_dev_superuser(&mut db_conn)?;
                 Self::Dev { db_pool, user_id }
             }
-            config::Mode::Production => Self::Prod {
+            config::AppMode::Production => Self::Prod {
                 db_pool,
                 api_key_prefix_length: config.api_key_prefix_length(),
             },

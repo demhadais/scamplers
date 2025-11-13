@@ -1,20 +1,35 @@
-use std::{fs, str::FromStr};
+use std::{path::Path, str::FromStr};
 
-use anyhow::{Context, anyhow};
+use anyhow::Context;
 use camino::{Utf8Path, Utf8PathBuf};
 use clap::Parser;
 
 use crate::initial_data::InitialData;
 
-#[derive(Clone, Copy, Debug, Default, serde::Deserialize, serde::Serialize)]
-#[serde(rename_all = "snake_case")]
-pub enum Mode {
+#[derive(Clone, Copy, Debug, Default)]
+pub enum AppMode {
     Development,
     #[default]
     Production,
 }
 
-impl std::fmt::Display for Mode {
+#[derive(Debug, thiserror::Error)]
+#[error("{0} is an invalid AppMode")]
+pub struct ParseModeError(String);
+
+impl FromStr for AppMode {
+    type Err = ParseModeError;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s {
+            "development" => Ok(Self::Development),
+            "production" => Ok(Self::Production),
+            _ => Err(ParseModeError(s.to_string())),
+        }
+    }
+}
+
+impl std::fmt::Display for AppMode {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             Self::Development => "development".fmt(f),
@@ -23,109 +38,99 @@ impl std::fmt::Display for Mode {
     }
 }
 
-#[derive(Debug, thiserror::Error)]
-#[error("{0} is an invalid mode")]
-pub struct ModeError(String);
-
-impl std::str::FromStr for Mode {
-    type Err = ModeError;
-
-    fn from_str(s: &str) -> Result<Self, ModeError> {
-        match s {
-            "development" => Ok(Self::Development),
-            "production" => Ok(Self::Production),
-            s => Err(ModeError(s.to_string())),
-        }
-    }
-}
-
-#[derive(Debug, Parser, serde::Serialize)]
+#[derive(Clone, Debug, Parser)]
 struct Cli {
-    #[arg(long, env = "SCAMPLERS_CONFIG_DIRS")]
-    config_dirs: Vec<Utf8PathBuf>,
-    #[arg(long)]
-    #[serde(skip_serializing_if = "Option::is_none")]
-    mode: Option<Mode>,
+    #[arg(long, env = "SCAMPLERS_CONFIG_DIR")]
+    config_dir: Utf8PathBuf,
+    #[arg(long, env = "SCAMPLERS_MODE")]
+    mode: Option<AppMode>,
     #[arg(long, env = "SCAMPLERS_DB_ROOT_USER")]
-    #[serde(skip_serializing_if = "Option::is_none")]
     db_root_user: Option<String>,
     #[arg(long, env = "SCAMPLERS_DB_ROOT_PASSWORD")]
-    #[serde(skip_serializing_if = "Option::is_none")]
     db_root_password: Option<String>,
     #[arg(long, env = "SCAMPLERS_API_DB_PASSWORD")]
-    #[serde(skip_serializing_if = "Option::is_none")]
     scamplers_api_db_password: Option<String>,
     #[arg(long, env = "SCAMPLERS_UI_DB_PASSWORD")]
-    #[serde(skip_serializing_if = "Option::is_none")]
     scamplers_ui_db_password: Option<String>,
     #[arg(long, env = "SCAMPLERS_DB_HOST")]
-    #[serde(skip_serializing_if = "Option::is_none")]
     db_host: Option<String>,
     #[arg(long, env = "SCAMPLERS_DB_PORT")]
-    #[serde(skip_serializing_if = "Option::is_none")]
     db_port: Option<u16>,
     #[arg(long, env = "SCAMPLERS_DB_NAME")]
-    #[serde(skip_serializing_if = "Option::is_none")]
     db_name: Option<String>,
     #[arg(long, env = "SCAMPLERS_API_KEY_PREFIX_LENGTH")]
-    #[serde(skip_serializing_if = "Option::is_none")]
     api_key_prefix_length: Option<usize>,
     #[arg(long, env = "SCAMPLERS_API_HOST")]
-    #[serde(skip_serializing_if = "Option::is_none")]
     host: Option<String>,
     #[arg(long, env = "SCAMPLERS_API_PORT")]
-    #[serde(skip_serializing_if = "Option::is_none")]
     port: Option<u16>,
-    #[arg(long, env = "SCAMPLERS_INITIAL_DATA_PATH")]
-    #[serde(skip_serializing_if = "Option::is_none")]
+    #[arg(long, env = "SCAMPLERS_LOG_DIR")]
     log_dir: Option<Utf8PathBuf>,
 }
 
-fn read_config_file<T>(config_dir: &Utf8Path, filename: &str) -> anyhow::Result<Option<T>>
-where
-    T: FromStr,
-    <T as FromStr>::Err: Send + std::error::Error + Sync + 'static,
-{
-    let file_path = config_dir.join(filename);
-    if !file_path.exists() {
-        return Ok(None);
-    }
-
-    let contents = fs::read_to_string(&file_path).context(format!(
-        "failed to read configuration {filename} at {file_path}"
-    ))?;
-
-    Ok(Some(contents.parse()?))
+#[derive(Debug, Clone)]
+pub struct Config {
+    mode: AppMode,
+    db_root_user: String,
+    db_root_password: String,
+    scamplers_api_db_password: String,
+    scamplers_ui_db_password: String,
+    db_host: String,
+    db_port: u16,
+    db_name: String,
+    api_key_prefix_length: usize,
+    host: String,
+    port: u16,
+    initial_data: InitialData,
+    log_dir: Option<Utf8PathBuf>,
 }
 
-fn read_config_file_group<T>(
-    config_dirs: &[Utf8PathBuf],
-    files: &mut [(&mut Option<T>, &str)],
-) -> anyhow::Result<()>
-where
-    T: FromStr,
-    <T as FromStr>::Err: Send + std::error::Error + Sync + 'static,
-{
-    for (value, filename) in files {
-        for dir in &*config_dirs {
-            if value.is_some() {
-                break;
-            }
-            let Some(file_contents) = read_config_file(dir, filename)? else {
-                continue;
-            };
+enum DatabaseUser {
+    Root,
+    ScamplersApi,
+}
 
-            value.get_or_insert(file_contents);
+trait OptionExt<T> {
+    fn or_load<P>(self, path: P) -> anyhow::Result<T>
+    where
+        T: FromStr,
+        T::Err: Send + Sync + std::error::Error + std::fmt::Display + 'static,
+        P: std::fmt::Display + AsRef<Path>;
+}
+
+impl<T> OptionExt<T> for Option<T> {
+    fn or_load<P>(self, path: P) -> anyhow::Result<T>
+    where
+        T: FromStr,
+        T::Err: Send + Sync + std::error::Error + 'static,
+        P: std::fmt::Display + AsRef<Path>,
+    {
+        if let Some(value) = self {
+            return Ok(value);
         }
-    }
 
-    Ok(())
+        let contents =
+            std::fs::read_to_string(&path).context(format!("failed to read contents of {path}"))?;
+
+        Ok(contents.parse().context(format!(
+            "failed to parse contents of {path} as {}",
+            std::any::type_name::<T>()
+        ))?)
+    }
 }
 
-impl Cli {
-    pub fn read_config_dirs(&mut self) -> anyhow::Result<()> {
-        let Self {
-            config_dirs,
+impl FromStr for InitialData {
+    type Err = serde_json::Error;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        serde_json::from_str(s)
+    }
+}
+
+impl Config {
+    pub fn read() -> anyhow::Result<Self> {
+        let Cli {
+            config_dir,
             mode,
             db_root_user,
             db_root_password,
@@ -138,89 +143,26 @@ impl Cli {
             host,
             port,
             log_dir,
-        } = self;
+        } = Cli::parse();
 
-        if config_dirs.is_empty() {
-            return Ok(());
-        }
-
-        read_config_file_group(config_dirs, &mut [(mode, "mode")])?;
-
-        // Each variable type needs to have its own array
-        let mut config_files = [
-            (db_root_user, "db_root_user"),
-            (db_root_password, "db_root_password"),
-            (scamplers_api_db_password, "scamplers_api_db_password"),
-            (scamplers_ui_db_password, "scamplers_ui_db_password"),
-            (db_host, "db_host"),
-            (db_name, "db_name"),
-            (host, "host"),
-        ];
-        read_config_file_group(config_dirs, &mut config_files)?;
-
-        let mut config_files = [(db_port, "db_port"), (port, "port")];
-        read_config_file_group(config_dirs, &mut config_files)?;
-
-        read_config_file_group(config_dirs, &mut [(log_dir, "log_dir")])?;
-
-        read_config_file_group(
-            config_dirs,
-            &mut [(api_key_prefix_length, "api_key_prefix_length")],
-        )?;
-
-        Ok(())
-    }
-}
-
-#[derive(Debug, Clone, serde::Deserialize)]
-pub struct Config {
-    #[serde(default)]
-    mode: Mode,
-    db_root_user: String,
-    db_root_password: String,
-    scamplers_api_db_password: String,
-    scamplers_ui_db_password: String,
-    db_host: String,
-    db_port: u16,
-    db_name: String,
-    api_key_prefix_length: usize,
-    host: String,
-    #[serde(default = "Config::default_port")]
-    port: u16,
-    initial_data: Option<InitialData>,
-    log_dir: Option<Utf8PathBuf>,
-}
-
-enum DatabaseUser {
-    Root,
-    ScamplersApi,
-}
-
-impl Config {
-    pub fn read() -> anyhow::Result<Self> {
-        let mut cli = Cli::parse();
-        cli.read_config_dirs().context(format!(
-            "failed to read configuration directories {:?}",
-            cli.config_dirs
-        ))?;
-
-        let mut initial_data = None;
-
-        for config_dir in &cli.config_dirs {
-            if initial_data.is_some() {
-                break;
-            }
-
-            let initial_data_path = config_dir.join("initial_data");
-            let err = || format!("failed to read initial data at {initial_data_path}");
-            let contents = fs::read(&initial_data_path).with_context(err)?;
-            initial_data = serde_json::from_slice(&contents).with_context(err)?;
-        }
-
-        let mut config: Self = serde_json::to_value(&cli).map(serde_json::from_value)??;
-        config.initial_data = initial_data;
-
-        Ok(config)
+        Ok(Self {
+            mode: mode.or_load(config_dir.join("mode")).unwrap_or_default(),
+            db_root_user: db_root_user.or_load(config_dir.join("db_root_user"))?,
+            db_root_password: db_root_password.or_load(config_dir.join("db_root_password"))?,
+            scamplers_api_db_password: scamplers_api_db_password
+                .or_load(config_dir.join("scamplers_api_db_password"))?,
+            scamplers_ui_db_password: scamplers_ui_db_password
+                .or_load(config_dir.join("scamplers_ui_db_password"))?,
+            db_host: db_host.or_load(config_dir.join("db_host"))?,
+            db_port: db_port.or_load(config_dir.join("db_port"))?,
+            db_name: db_name.or_load(config_dir.join("db_name"))?,
+            api_key_prefix_length: api_key_prefix_length
+                .or_load(config_dir.join("api_key_prefix_length"))?,
+            host: host.or_load(config_dir.join("host"))?,
+            port: port.or_load(config_dir.join("port"))?,
+            initial_data: None.or_load(config_dir.join("initial_data"))?,
+            log_dir: log_dir.or_load(config_dir.join("log_dir")).ok(),
+        })
     }
 
     #[must_use]
@@ -229,12 +171,8 @@ impl Config {
     }
 
     #[must_use]
-    pub fn mode(&self) -> Mode {
+    pub fn mode(&self) -> AppMode {
         self.mode
-    }
-
-    fn default_port() -> u16 {
-        8000
     }
 
     #[must_use]
@@ -293,11 +231,7 @@ impl Config {
         self.api_key_prefix_length
     }
 
-    pub fn initial_data(&mut self) -> anyhow::Result<InitialData> {
-        let Self { initial_data, .. } = self;
-
-        initial_data
-            .take()
-            .ok_or(anyhow!("initial data must be supplied"))
+    pub fn initial_data(&self) -> InitialData {
+        self.initial_data.clone()
     }
 }

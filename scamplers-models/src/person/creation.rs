@@ -8,6 +8,7 @@ use uuid::Uuid;
 use crate::person::common::{Fields, UserRole};
 
 #[insert]
+#[cfg_attr(feature = "app", derive(diesel::AsChangeset))]
 #[cfg_attr(feature = "app", diesel(table_name = people))]
 #[cfg_attr(feature = "schema", schemars(title = "PersonCreation"))]
 pub struct Creation {
@@ -16,7 +17,7 @@ pub struct Creation {
     pub inner: Fields,
     pub email: NonEmptyString,
     #[serde(default)]
-    #[cfg_attr(feature = "app", diesel(skip_insertion))]
+    #[cfg_attr(feature = "app", diesel(skip_insertion, skip_update))]
     pub roles: Vec<UserRole>,
 }
 

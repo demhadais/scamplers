@@ -58,7 +58,7 @@ services:
     environment:
       DB_HOST: *db_host
       DB_PORT: *db_port
-      PUBLIC_URL: ${SCAMPLERS_PUBLIC_URL}
+      PUBLIC_URL: ${SCAMPLERS_PUBLIC_URL:?}
       API_KEY_PREFIX_LENGTH: *api_key_prefix_length
       PORT: &ui_port 80
     depends_on:
@@ -74,6 +74,8 @@ services:
     secrets:
       - source: scamplers_ui_db_password
         uid: *uid
+      - source: db_name
+        uid: *uid
       - source: microsoft_entra_client_id
         uid: *uid
       - source: microsoft_entra_client_secret
@@ -83,7 +85,7 @@ services:
   caddy:
     image: caddy:2-alpine
     environment:
-      PUBLIC_URL: ${SCAMPLERS_PUBLIC_URL}
+      PUBLIC_URL: ${SCAMPLERS_PUBLIC_URL:?}
       API_HOST: *api_host
       API_PORT: *api_port
       UI_HOST: *ui_host
@@ -122,4 +124,4 @@ secrets:
   microsoft_entra_tenant:
     environment: SCAMPLERS_MICROSOFT_ENTRA_TENANT
   initial_data:
-    file: ${SCAMPLERS_INITIAL_DATA_PATH}
+    file: ${SCAMPLERS_INITIAL_DATA_PATH:?}
