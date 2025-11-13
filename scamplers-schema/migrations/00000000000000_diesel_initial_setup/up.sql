@@ -134,10 +134,12 @@ alter role scamplers_api with login;
 select create_role_if_not_exists('scamplers_ui');
 alter role scamplers_ui with login;
 
--- scamplers_ui needs to grant users to scamplers_api so that scamplers_api can switch to that user. That means scamplers_ui needs admin on the new user, but a role cannot give admin on a different role to itself, so this role simply allows us to circumvent that.
+-- scamplers_ui needs to grant users to scamplers_api so that scamplers_api can switch to that user. That means
+-- scamplers_ui needs admin on the new user, but a role cannot give admin on a different role to itself, so this role
+-- simply allows us to circumvent that.
 select create_role_if_not_exists('user_creator');
 alter role user_creator with createrole;
-grant user_creator to scamplers_ui with inherit false;
+grant user_creator to scamplers_ui with inherit false; -- noqa: PRS
 
 create collation case_insensitive (provider = icu, deterministic = false, locale = 'en-u-ks-level1');
 create domain case_insensitive_text as text collate case_insensitive;

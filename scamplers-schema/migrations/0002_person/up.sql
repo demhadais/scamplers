@@ -4,7 +4,8 @@
 -- John Doe leaves The Jackson Laboratory
 -- Another person named John Doe signs up. He now has the email john.doe@jax.org
 
--- In this situation, the first John Doe should have his email become `null`, with john.doe@jax.org now belonging to the new John Doe
+-- In this situation, the first John Doe should have his email become `null`, with john.doe@jax.org now belonging to
+-- the new John Doe
 create table people (
     id uuid primary key default uuidv7(),
     links jsonb generated always as (

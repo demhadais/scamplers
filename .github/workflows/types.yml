@@ -21,7 +21,7 @@ jobs:
           cache-workspace-crates: true
 
       - name: Regenerate JSON schema
-        run: cargo run --package scamplers-jsonschema --output-dir regenerated_json-schema
+        run: cargo run --package scamplers-jsonschema -- --output-dir regenerated_json-schema
 
       - name: Compare committed JSON schema to regenerated JSON schema
         run: diff --recursive json-schema regenerated_json-schema
@@ -36,7 +36,7 @@ jobs:
         uses: oven-sh/setup-bun@v2
 
       - name: Regenerate Typescript definitions
-        run: bunx json-schema-to-typescript --input ../json-schema/ --output regenerated_scamplers-models
+        run: bunx json-schema-to-typescript --input json-schema/ --output regenerated_scamplers-models
 
       - name: Compare committed Typescript definitions to regenerated Typescript definitions
         run: diff --recursive scamplers-ui/src/lib/scamplers-models regenerated_scamplers-models
