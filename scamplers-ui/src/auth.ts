@@ -2,7 +2,7 @@ import { betterAuth } from "better-auth";
 import { sveltekitCookies } from "better-auth/svelte-kit";
 import { getRequestEvent } from "$app/server";
 import { createAuthMiddleware } from "better-auth/api";
-import { readSecrets, readConfig } from "$lib/server/config";
+import { readConfig, readSecrets } from "$lib/server/config";
 import { getDbClient } from "$lib/server/db-client";
 import {
   API_KEY_ENCRYPTION_SECRET,
@@ -70,8 +70,9 @@ export const auth = betterAuth({
 
       // If the user is signing out, erase cookies and delete the API key from the database. Note this check is necessarily performed before checking `newSession`
       if (ctx.path.includes("sign-out")) {
-        const [encryptedApiKey, initializationVector] =
-          COOKIE_NAMES.map(deleteCookie);
+        const [encryptedApiKey, initializationVector] = COOKIE_NAMES.map(
+          deleteCookie,
+        );
 
         // Delete the API key from the database
         await deleteApiKey(

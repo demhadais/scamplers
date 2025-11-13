@@ -1,39 +1,15 @@
 repos:
   - repo: local
     hooks:
-      - id: lint_default-vec
-        name: Lint default-vec
-        entry: ./scripts/pre-commit/lint_default-vec.sh
-        language: script
-        pass_filenames: false
-
-      - id: lint_non-empty-string
-        name: Lint non-empty-string
-        entry: ./scripts/pre-commit/lint_non-empty-string.sh
+      - id: lint_rust
+        name: Lint Rust Code
+        entry: ./scripts/pre-commit/lint_scamplers-api.sh
         language: script
         pass_filenames: false
 
       - id: lint_scamplers-ui
         name: Lint scamplers-ui
         entry: ./scripts/pre-commit/lint_scamplers-ui.sh
-        language: script
-        pass_filenames: false
-
-      - id: lint_scamplers-models_app
-        name: Lint scamplers-models_app
-        entry: ./scripts/pre-commit/lint_scamplers-models_app.sh
-        language: script
-        pass_filenames: false
-
-      - id: lint_scamplers-models_schema
-        name: Lint scamplers-models_schema
-        entry: ./scripts/pre-commit/lint_scamplers-models_schema.sh
-        language: script
-        pass_filenames: false
-
-      - id: lint_scamplers-api
-        name: Lint scamplers-api
-        entry: ./scripts/pre-commit/lint_scamplers-api.sh
         language: script
         pass_filenames: false
 

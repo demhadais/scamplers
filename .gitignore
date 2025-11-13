@@ -15,8 +15,8 @@ target
 !.env.compose.sample
 
 # Initial data also useful for development
-initial-data*
-!initial-data.sample.json
+initial*data*
+!initial_data.sample.json
 
 # Generated TypesScript code
 pkg

@@ -85,6 +85,7 @@ pub struct Config {
     log_dir: Option<Utf8PathBuf>,
 }
 
+#[derive(Clone, Copy)]
 enum DatabaseUser {
     Root,
     ScamplersApi,
@@ -112,10 +113,10 @@ impl<T> OptionExt<T> for Option<T> {
         let contents =
             std::fs::read_to_string(&path).context(format!("failed to read contents of {path}"))?;
 
-        Ok(contents.parse().context(format!(
+        contents.parse().context(format!(
             "failed to parse contents of {path} as {}",
             std::any::type_name::<T>()
-        ))?)
+        ))
     }
 }
 
@@ -231,6 +232,7 @@ impl Config {
         self.api_key_prefix_length
     }
 
+    #[must_use]
     pub fn initial_data(&self) -> InitialData {
         self.initial_data.clone()
     }

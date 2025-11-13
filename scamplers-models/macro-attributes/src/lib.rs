@@ -26,6 +26,7 @@ fn base_derives(with_default: bool, is_enum: bool) -> proc_macro2::TokenStream {
 }
 
 trait IsEnum {
+    #[allow(clippy::wrong_self_convention)]
     fn is_enum(self) -> bool;
 }
 

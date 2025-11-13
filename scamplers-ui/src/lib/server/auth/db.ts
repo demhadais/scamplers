@@ -37,7 +37,8 @@ export async function insertPerson(
     } returning id`;
     const newPersonId = result[0].id;
 
-    // Create a db user corresponding to this person so we can assign them roles later on. Note that we set a random password and no roles so that nobody can log into the database as that user.
+    // Create a db user corresponding to this person so we can assign them roles later on. Note that we set a random
+    // password and no roles so that nobody can log into the database as that user.
     await tx`select create_user_if_not_exists(${newPersonId}, ${
       crypto
         .getRandomValues(new Uint8Array(32))
@@ -86,9 +87,7 @@ export async function deleteApiKey(
     encryptedApiKey,
   );
 
-  const prefix = new Uint8Array(
-    decrypted.slice(0, apiKeyPrefixLength),
-  ).toBase64();
+  const prefix = new Uint8Array(decrypted.slice(0, apiKeyPrefixLength));
 
   // No two users share the same prefix
   await dbClient`delete from api_keys where prefix = ${prefix}`;

@@ -16,7 +16,8 @@ jobs:
       - name: Cache cargo files
         uses: Swatinem/rust-cache@v2
         with:
-          workspaces: "rust -> target"
+          cache-all-crates: true
+          cache-workspace-crates: true
 
       - name: Regenerate JSON schema
         run: cargo run --package scamplers-jsonschema --output-dir regenerated_json-schema

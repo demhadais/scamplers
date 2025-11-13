@@ -15,10 +15,13 @@ const config: Config = {
       directives: {
         "base-uri": ["self"],
         "default-src": ["self"],
+        "style-src": [
+          "unsafe-hashes",
+          "sha256-tcbDxjMo+xKqM21aCGYbs/QAJqB7yUXC06oPWDapBgc=",
+          "sha256-S8qMpvofolR8Mpjy4kQvEm7m1q8clzU4dfDH0AmvZjo=",
+        ],
         "frame-ancestors": ["none"],
         "form-action": ["self"],
-        "trusted-types": [],
-        "require-trusted-types-for": ["script"],
       },
       mode: "auto",
     },

@@ -1,4 +1,6 @@
-# Base compose file. Merge this with one of compose.dev.yaml of compose.prod.yaml to produce a running application
+# This is the base compose file. Merge this with one of compose.dev.yaml of compose.prod.yaml to produce a running
+# application with the following command:
+# docker compose --file compose.yaml --file compose.dev.yaml
 services:
   &db_host postgres:
     image: postgres:18-alpine

@@ -1,5 +1,6 @@
 name: Check Rust Code
 on:
+  push:
   pull_request:
     paths:
       - "**/*.rs"
@@ -16,7 +17,8 @@ jobs:
       - name: Cache cargo files
         uses: Swatinem/rust-cache@v2
         with:
-          workspaces: "rust -> target"
+          cache-all-crates: true
+          cache-workspace-crates: true
 
       - name: Install diesel
         run: cargo install diesel_cli --no-default-features --features postgres
@@ -33,7 +35,8 @@ jobs:
       - name: Cache cargo files
         uses: Swatinem/rust-cache@v2
         with:
-          workspaces: "rust -> target"
+          cache-all-crates: true
+          cache-workspace-crates: true
 
       - name: Install nightly toolchain
         run: rustup component add --toolchain nightly-2025-11-05 rustfmt
@@ -53,7 +56,8 @@ jobs:
       - name: Cache cargo files
         uses: Swatinem/rust-cache@v2
         with:
-          workspaces: "rust -> target"
+          cache-all-crates: true
+          cache-workspace-crates: true
 
       - name: Install diesel
         run: cargo install diesel_cli --no-default-features --features postgres
