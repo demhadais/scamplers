@@ -84,16 +84,14 @@ impl Upsert for person::Creation {
         define_sql_function! {fn create_user_if_not_exists(user_id: Text, password: Text, roles: Array<Text>)}
 
         ensure!(
-            self.inner.microsoft_entra_oid.is_some(),
+            self.microsoft_entra_oid().is_some(),
             "app admin must have `microsoft_entra_oid`"
         );
 
         diesel::update(people::table)
-            .filter(people::email.eq(&self.email))
+            .filter(people::email.eq(self.email()))
             .set(people::email.eq(None::<String>))
             .execute(db_conn)?;
-
-        self.roles.push(UserRole::AppAdmin);
 
         let id: Uuid = diesel::insert_into(people::table)
             .values(&self)
@@ -106,10 +104,12 @@ impl Upsert for person::Creation {
         // Create a db user corresponding to this person so we can assign them a role.
         // Note that we set a random password so that nobody can log into the database
         // as that user.
+        self.roles_mut().push(UserRole::AppAdmin);
+
         diesel::select(create_user_if_not_exists(
             id.to_string(),
             Uuid::now_v7().to_string(),
-            self.roles,
+            self.roles(),
         ))
         .execute(db_conn)?;
 

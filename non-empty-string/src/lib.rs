@@ -34,7 +34,7 @@ impl FromStr for NonEmptyString {
     type Err = EmptyStringError;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        Self::new(s.to_string())
+        Self::new(s.to_owned())
     }
 }
 

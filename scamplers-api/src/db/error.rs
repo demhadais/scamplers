@@ -68,7 +68,7 @@ impl
             .and_then(|cap| {
                 cap.iter()
                     .take(3)
-                    .map(|m| m.map(|s| s.as_str().to_string()))
+                    .map(|m| m.map(|s| s.as_str().to_owned()))
                     .collect()
             })
             .unwrap_or_default();
@@ -86,10 +86,10 @@ impl
 
         match kind {
             CheckViolation => Self::Data {
-                message: details.to_string(),
+                message: details.to_owned(),
             },
             UniqueViolation => Self::DuplicateResource {
-                resource: entity.to_string(),
+                resource: entity.to_owned(),
                 fields,
                 values,
             },
@@ -103,8 +103,8 @@ impl
                 let referenced_entity = referenced_entity.strip_suffix(".").unwrap_or_default();
 
                 Self::InvalidReference {
-                    resource: entity.to_string(),
-                    referenced_resource: referenced_entity.to_string(),
+                    resource: entity.to_owned(),
+                    referenced_resource: referenced_entity.to_owned(),
                     value: values.first().cloned(),
                 }
             }

@@ -4,8 +4,11 @@
   "type": "object",
   "properties": {
     "ids": {
-      "type": "array",
-      "default": [],
+      "type": [
+        "array",
+        "null"
+      ],
+      "default": null,
       "items": {
         "type": "string",
         "format": "uuid"

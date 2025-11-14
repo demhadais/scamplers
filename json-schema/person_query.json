@@ -11,8 +11,11 @@
       "default": null
     },
     "ids": {
-      "type": "array",
-      "default": [],
+      "type": [
+        "array",
+        "null"
+      ],
+      "default": null,
       "items": {
         "type": "string",
         "format": "uuid"
@@ -24,8 +27,11 @@
       "default": 500
     },
     "microsoft_entra_oids": {
-      "type": "array",
-      "default": [],
+      "type": [
+        "array",
+        "null"
+      ],
+      "default": null,
       "items": {
         "type": "string",
         "format": "uuid"

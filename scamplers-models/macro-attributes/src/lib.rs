@@ -123,8 +123,8 @@ pub fn query(_attr: TokenStream, input: TokenStream) -> TokenStream {
 
     quote! {
         #base_derives
-        #[derive(bon::Builder)]
-        #[builder(on(_, into))]
+        #[cfg_attr(feature = "builder", derive(bon::Builder))]
+        #[cfg_attr(feature = "builder", builder(on(_, into)))]
         #input
     }
     .into()

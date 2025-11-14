@@ -25,7 +25,7 @@ impl db::Operation<Person> for person::Creation {
         diesel::select(create_user_if_not_exists(
             id.to_id_string(),
             Uuid::now_v7().to_string(),
-            self.roles,
+            self.roles(),
         ))
         .execute(db_conn)?;
 

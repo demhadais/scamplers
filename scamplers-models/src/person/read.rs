@@ -34,9 +34,15 @@ pub struct PersonSummaryWithParents {
 }
 
 #[base_model]
-#[derive(bon::Builder)]
+#[cfg_attr(feature = "builder", derive(bon::Builder))]
 pub struct Person {
     #[serde(flatten)]
     info: PersonSummaryWithParents,
     roles: Vec<UserRole>,
+}
+impl Person {
+    #[must_use]
+    pub fn new(info: PersonSummaryWithParents, roles: Vec<UserRole>) -> Self {
+        Self { info, roles }
+    }
 }

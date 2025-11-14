@@ -19,7 +19,7 @@ impl db::Operation<Person> for PersonId {
 
         let roles = diesel::select(get_user_roles(self.to_id_string())).get_result(db_conn)?;
 
-        Ok(Person::builder().info(info).roles(roles).build())
+        Ok(Person::new(info, roles))
     }
 }
 
@@ -32,33 +32,25 @@ where
     AssumeNotNull<people::microsoft_entra_oid>: SelectableExpression<QS>,
 {
     fn to_boxed_filter(&'a self) -> BoxedFilter<'a, QS> {
-        let Self {
-            ids,
-            name,
-            email,
-            orcid,
-            microsoft_entra_oids,
-        } = &self;
-
         let mut filter = BoxedFilter::new();
 
-        if !ids.is_empty() {
+        if let Some(ids) = self.ids() {
             filter = filter.and_condition(people::id.eq_any(ids));
         }
 
-        if let Some(name) = name {
+        if let Some(name) = self.name() {
             filter = filter.and_condition(people::name.like(name));
         }
 
-        if let Some(email) = email {
+        if let Some(email) = self.email() {
             filter = filter.and_condition(people::email.assume_not_null().like(email));
         }
 
-        if let Some(orcid) = orcid {
+        if let Some(orcid) = self.orcid() {
             filter = filter.and_condition(people::orcid.assume_not_null().like(orcid));
         }
 
-        if !microsoft_entra_oids.is_empty() {
+        if let Some(microsoft_entra_oids) = self.microsoft_entra_oids() {
             filter = filter.and_condition(
                 people::microsoft_entra_oid
                     .assume_not_null()

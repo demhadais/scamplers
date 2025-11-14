@@ -6,7 +6,7 @@ version = "0.1.0"
 [dependencies]
 axum = { workspace = true, optional = true }
 axum-extra = { workspace = true, optional = true }
-bon.workspace = true
+bon = { workspace = true, optional = true }
 clap = { workspace = true, optional = true }
 default-vec = { path = "../default-vec", features = ["serde"] }
 diesel = { workspace = true, optional = true, features = [
@@ -41,6 +41,7 @@ app = [
   "non-empty-string/diesel",
   "scamplers-schema",
 ]
+builder = ["bon"]
 schema = [
   "clap",
   "default-vec/schema",

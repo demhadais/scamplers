@@ -4,17 +4,15 @@ macro_rules! query {
         {
             use $crate::db::ToBoxedFilter;
 
-            let scamplers_models::generic_query::Query{filter, limit, offset, order_by} = &$query;
-
             let mut stmt = $select::query()
-            .limit(*limit)
-            .offset(*offset)
+            .limit($query.limit())
+            .offset($query.offset())
             .into_boxed();
 
-            stmt = stmt.filter(filter.to_boxed_filter());
+            stmt = stmt.filter($query.filter().to_boxed_filter());
 
-            for ordering in order_by {
-                stmt = match (ordering.field, ordering.descending) {
+            for ordering in $query.order_by() {
+                stmt = match (ordering.field(), ordering.descending()) {
                     $(
                         ($enum_variant, true) => stmt.then_order_by($db_col.desc()),
                         ($enum_variant, _) => stmt.then_order_by($db_col.asc()),

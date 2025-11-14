@@ -1,4 +1,5 @@
 use macro_attributes::{ordinal_columns, query, schema_query};
+use macros::uuid_newtype;
 use uuid::Uuid;
 
 use crate::generic_query::{self};
@@ -12,13 +13,25 @@ pub enum OrdinalColumns {
 
 #[query]
 pub struct Filter {
-    #[builder(default)]
-    pub ids: Vec<Uuid>,
-    #[builder(default)]
-    pub names: Vec<String>,
+    ids: Option<Vec<Uuid>>,
+    name: Option<String>,
+}
+
+impl Filter {
+    #[must_use]
+    pub fn ids(&self) -> Option<&[Uuid]> {
+        self.ids.as_deref()
+    }
+
+    #[must_use]
+    pub fn name(&self) -> Option<&str> {
+        self.name.as_deref()
+    }
 }
 
 pub type Query = generic_query::Query<Filter, OrdinalColumns>;
 
 #[schema_query]
 pub struct LabQuery(Query);
+
+uuid_newtype!(PersonId, "/people/{id}");

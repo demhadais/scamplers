@@ -1,8 +1,6 @@
 name: Build
 on:
-  pull_request:
-    paths:
-      - "**/*.rs"
+  push:
     branches:
       - main
 jobs:

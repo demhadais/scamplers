@@ -24,7 +24,7 @@ impl FromStr for AppMode {
         match s {
             "development" => Ok(Self::Development),
             "production" => Ok(Self::Production),
-            _ => Err(ParseModeError(s.to_string())),
+            _ => Err(ParseModeError(s.to_owned())),
         }
     }
 }

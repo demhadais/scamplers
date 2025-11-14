@@ -19,12 +19,12 @@ pub enum Error {
 
 impl Validate for person::Creation {
     fn validate(&self, _db_conn: &mut diesel::PgConnection) -> Result<(), super::Error> {
-        let email = self.email.as_ref();
+        let email = self.email();
 
         if !EMAIL_REGEX.is_match(email) {
             return Err(Error::Email {
-                email: email.to_string(),
-                message: "invalid email".to_string(),
+                email: email.to_owned(),
+                message: "invalid email".to_owned(),
             })?;
         }
 
@@ -36,7 +36,7 @@ impl Validate for person::Creation {
 mod tests {
     use rstest::rstest;
 
-    use crate::validate::people::EMAIL_REGEX;
+    use crate::validate::person::EMAIL_REGEX;
 
     #[rstest]
     fn valid_email() {

@@ -1,0 +1,26 @@
+use scamplers_models::lab;
+
+use crate::validate::Validate;
+
+#[derive(Debug, thiserror::Error, serde::Serialize)]
+#[serde(rename_all = "snake_case", tag = "type", content = "cause")]
+#[error("{delivery_dir} invalid: {message}")]
+pub enum Error {
+    DeliveryDir {
+        delivery_dir: String,
+        message: String,
+    },
+}
+
+impl Validate for lab::Creation {
+    fn validate(&self, _db_conn: &mut diesel::PgConnection) -> Result<(), super::Error> {
+        if !self.delivery_dir().is_ascii() {
+            return Err(Error::DeliveryDir {
+                delivery_dir: self.delivery_dir().to_owned(),
+                message: "'delivery_dir' must contain only ASCII characters".to_owned(),
+            })?;
+        }
+
+        Ok(())
+    }
+}

@@ -14,25 +14,25 @@ pub enum Error {
 impl Error {
     pub fn no_api_key() -> Self {
         Self::Unauthorized {
-            message: "no API key".to_string(),
+            message: "no API key".to_owned(),
         }
     }
 
     pub fn invalid_api_key() -> Self {
         Self::Unauthorized {
-            message: "invalid API key".to_string(),
+            message: "invalid API key".to_owned(),
         }
     }
 
     pub fn no_ui_auth_token() -> Self {
         Self::Unauthorized {
-            message: "no UI authentication token".to_string(),
+            message: "no UI authentication token".to_owned(),
         }
     }
 
     pub fn invalid_ui_auth_token() -> Self {
         Self::Unauthorized {
-            message: "invalid UI authentication token".to_string(),
+            message: "invalid UI authentication token".to_owned(),
         }
     }
 }

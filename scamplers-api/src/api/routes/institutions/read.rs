@@ -21,15 +21,13 @@ where
     institutions::name: SelectableExpression<QS>,
 {
     fn to_boxed_filter(&'a self) -> BoxedFilter<'a, QS> {
-        let Self { ids, name } = &self;
-
         let mut filter = BoxedFilter::new();
 
-        if !ids.is_empty() {
+        if let Some(ids) = self.ids() {
             filter = filter.and_condition(institutions::id.eq_any(ids));
         }
 
-        if let Some(name) = name {
+        if let Some(name) = self.name() {
             filter = filter.and_condition(institutions::name.like(name));
         }
 

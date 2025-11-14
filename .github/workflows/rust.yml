@@ -1,10 +1,8 @@
 name: Check Rust Code
 on:
-  pull_request:
+  push:
     paths:
       - "**/*.rs"
-    branches:
-      - main
 
 jobs:
   check_scamplers-schema:

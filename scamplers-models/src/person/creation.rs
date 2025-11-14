@@ -1,3 +1,4 @@
+#[cfg(feature = "builder")]
 use bon::bon;
 use macro_attributes::insert;
 use non_empty_string::NonEmptyString;
@@ -14,16 +15,17 @@ use crate::person::common::{Fields, UserRole};
 pub struct Creation {
     #[serde(flatten)]
     #[cfg_attr(feature = "app", diesel(embed))]
-    pub inner: Fields,
-    pub email: NonEmptyString,
+    inner: Fields,
+    email: NonEmptyString,
     #[serde(default)]
     #[cfg_attr(feature = "app", diesel(skip_insertion, skip_update))]
-    pub roles: Vec<UserRole>,
+    roles: Vec<UserRole>,
 }
 
-#[bon]
+#[cfg_attr(feature = "builder", bon)]
 impl Creation {
-    #[builder]
+    #[cfg_attr(feature = "builder", builder)]
+    #[must_use]
     pub fn new(
         name: NonEmptyString,
         email: NonEmptyString,
@@ -42,5 +44,38 @@ impl Creation {
             email,
             roles,
         }
+    }
+
+    #[must_use]
+    pub fn name(&self) -> &str {
+        self.inner.name.as_ref()
+    }
+
+    pub fn orcid(&self) -> Option<&str> {
+        self.inner.orcid.as_ref().map(NonEmptyString::as_ref)
+    }
+
+    #[must_use]
+    pub fn institution_id(&self) -> Uuid {
+        self.inner.institution_id
+    }
+
+    #[must_use]
+    pub fn microsoft_entra_oid(&self) -> Option<Uuid> {
+        self.inner.microsoft_entra_oid
+    }
+
+    #[must_use]
+    pub fn email(&self) -> &str {
+        self.email.as_ref()
+    }
+
+    #[must_use]
+    pub fn roles(&self) -> &[UserRole] {
+        &self.roles
+    }
+
+    pub fn roles_mut(&mut self) -> &mut Vec<UserRole> {
+        &mut self.roles
     }
 }

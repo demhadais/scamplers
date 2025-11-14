@@ -1,3 +1,4 @@
+#[cfg(feature = "builder")]
 use bon::bon;
 use macro_attributes::insert;
 use non_empty_string::NonEmptyString;
@@ -14,12 +15,13 @@ use crate::institution::common::Fields;
 pub struct Creation {
     #[serde(flatten)]
     #[cfg_attr(feature = "app", diesel(embed))]
-    pub inner: Fields,
+    inner: Fields,
 }
 
-#[bon]
+#[cfg_attr(feature = "builder", bon)]
 impl Creation {
-    #[builder(on(_, into))]
+    #[cfg_attr(feature = "builder", builder(on(_, into)))]
+    #[must_use]
     pub fn new(id: Uuid, name: NonEmptyString) -> Self {
         Self {
             inner: Fields { id, name },
