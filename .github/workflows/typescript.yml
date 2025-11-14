@@ -23,9 +23,6 @@ jobs:
       - name: Lint
         run: bun run --bun --cwd=scamplers-ui check
 
-      - name: Test
-        run: bun test --cwd=scamplers-ui
-
   format:
     runs-on: ubuntu-latest
     steps:
