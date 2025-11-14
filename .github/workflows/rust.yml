@@ -8,7 +8,7 @@ on:
       - main
 
 jobs:
-  check-schema:
+  check_scamplers-schema:
     runs-on: ubuntu-latest
     services:
       postgres:
@@ -31,7 +31,7 @@ jobs:
 
       - name: Check schema
         working-directory: scamplers-schema
-        run: diesel setup --locked-schema
+        run: diesel setup --database-url postgres://postgres@localhost/postgres --locked-schema
 
   lint:
     runs-on: ubuntu-latest
@@ -85,4 +85,4 @@ jobs:
         run: RUN_DIESEL_CLI=false cargo build --tests
 
       - name: Test
-        run: cargo test --workspace --all-features
+        run: RUN_DIESEL_CLI=false cargo test --workspace --all-features
