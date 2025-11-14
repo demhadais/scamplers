@@ -1,6 +1,5 @@
 name: Check Rust Code
 on:
-  push:
   pull_request:
     paths:
       - "**/*.rs"

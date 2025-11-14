@@ -1,6 +1,5 @@
 name: Check SQL Code
 on:
-  push:
   pull_request:
     paths:
       - "**/*.sql"

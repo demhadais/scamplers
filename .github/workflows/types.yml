@@ -1,6 +1,5 @@
 name: Check Types
 on:
-  push:
   pull_request:
     paths:
       - "**/*.rs"
