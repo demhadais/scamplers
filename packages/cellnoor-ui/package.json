@@ -35,7 +35,7 @@
     "@fontsource-variable/comfortaa": "^5.3.0",
     "@lucide/svelte": "^1.41.0",
     "@tailwindcss/vite": "^4.3.3",
-    "better-auth": "^1.7.2",
+    "better-auth": "^1.7.3",
     "daisyui": "^5.7.28",
     "tailwindcss": "^4.3.3",
     "valibot": "^1.4.2"
